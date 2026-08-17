@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any
@@ -18,6 +18,9 @@ from datetime import datetime, timezone
 from cryptography.fernet import Fernet
 import stripe
 import httpx
+import ipaddress
+import socket
+from urllib.parse import urlsplit, urljoin
 
 
 ROOT_DIR = Path(__file__).parent
@@ -186,10 +189,15 @@ def _get_fernet() -> Fernet:
     key = os.environ.get("WEBDOJO_SECRET_KEY")
     if not key and _KEY_PATH.exists():
         key = _KEY_PATH.read_text().strip()
+        try:
+            os.chmod(_KEY_PATH, 0o600)
+        except Exception:
+            pass
     if not key:
         key = Fernet.generate_key().decode()
         try:
             _KEY_PATH.write_text(key)
+            os.chmod(_KEY_PATH, 0o600)
         except Exception:
             pass
     return Fernet(key.encode() if isinstance(key, str) else key)
@@ -747,7 +755,9 @@ async def publish_project(project_id: str, payload: PublishRequest):
 # from any static page, so the builder generates a link server-side and drops
 # a "Buy" button that points at it. Uses the claimable sandbox key.
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY") or "sk_test_emergent"
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+if STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
 
 
 class PaymentLinkCreate(BaseModel):
@@ -781,6 +791,8 @@ async def commerce_config():
 
 @api_router.post("/commerce/payment-link")
 async def commerce_payment_link(payload: PaymentLinkCreate):
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Stripe is not configured on this server")
     if not payload.name.strip():
         raise HTTPException(status_code=400, detail="Product name is required")
     if payload.amount <= 0:
@@ -835,6 +847,8 @@ def _create_checkout_session(items, success_url, cancel_url):
 async def commerce_checkout_session(payload: CheckoutSessionCreate):
     """Cart hand-off for exported static sites: the published page POSTs its
     localStorage cart line items and gets a hosted Stripe Checkout URL back."""
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Stripe is not configured on this server")
     if not payload.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
     for it in payload.items:
@@ -861,16 +875,71 @@ class UrlImport(BaseModel):
     url: str
 
 
+def _resolve_safe_ip(hostname: str) -> str:
+    """Resolve hostname to a single public IP. Raises HTTPException if it
+    cannot be resolved to a safe (public/routable) address. ip.is_global
+    covers private/loopback/link-local/reserved/multicast/unspecified AND
+    the CGNAT range (100.64.0.0/10), which those individual checks miss."""
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    except socket.gaierror:
+        raise HTTPException(status_code=400, detail="Could not resolve host")
+    for _family, _type, _proto, _canon, sockaddr in infos:
+        try:
+            ip = ipaddress.ip_address(sockaddr[0])
+        except ValueError:
+            continue
+        if ip.is_global:
+            return str(ip)
+    raise HTTPException(status_code=400, detail="That URL points to a private or internal address")
+
+
+def _validate_import_url(url: str):
+    """Validate `url` is a safe, public http(s) URL and pin its connection
+    to the exact IP that was validated (rather than the hostname), so a
+    later independent DNS lookup by the HTTP client can't be swapped to a
+    private address between validation and connection (DNS rebinding).
+    Returns (pinned_url, original_hostname)."""
+    parts = urlsplit(url)
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        raise HTTPException(status_code=400, detail="Enter a valid http(s) URL")
+    ip = _resolve_safe_ip(parts.hostname)
+    host_part = f"[{ip}]" if ":" in ip else ip
+    netloc = f"{host_part}:{parts.port}" if parts.port else host_part
+    pinned_url = parts._replace(netloc=netloc).geturl()
+    return pinned_url, parts.hostname
+
+
 @api_router.post("/import/url")
 async def import_url(payload: UrlImport):
-    """Fetch a public page's HTML so the builder can import its sections."""
+    """Fetch a public page's HTML so the builder can import its sections.
+
+    Every hop (initial URL and each redirect) is resolved and validated by
+    _validate_import_url, and the actual connection is pinned to that
+    validated IP (Host header + SNI set to the original hostname so
+    name-based routing and TLS still work) so the HTTP client's own,
+    separate DNS resolution can never be swapped to a private address
+    between our check and the real connection. current_url always carries
+    the real hostname (never the pinned IP) so that relative redirect
+    targets resolve against the correct base on every hop."""
     url = (payload.url or "").strip()
-    if not (url.startswith("http://") or url.startswith("https://")):
-        raise HTTPException(status_code=400, detail="Enter a valid http(s) URL")
     try:
-        async with httpx.AsyncClient(follow_redirects=True, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
-            r = await client.get(url)
-        return {"html": r.text[:2_000_000], "status": r.status_code}
+        current_url = url
+        async with httpx.AsyncClient(follow_redirects=False, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
+            for _ in range(5):
+                pinned_url, host = _validate_import_url(current_url)
+                r = await client.get(
+                    pinned_url,
+                    headers={"Host": host},
+                    extensions={"sni_hostname": host},
+                )
+                if r.status_code in (301, 302, 303, 307, 308) and "location" in r.headers:
+                    current_url = urljoin(current_url, r.headers["location"])
+                    continue
+                return {"html": r.text[:2_000_000], "status": r.status_code}
+        raise HTTPException(status_code=502, detail="Too many redirects")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Could not fetch that URL ({type(e).__name__})")
 
@@ -989,13 +1058,54 @@ async def clear_submissions(form_name: Optional[str] = None):
 
 app.include_router(api_router)
 
+_cors_origins_env = os.environ.get('CORS_ORIGINS', '').strip()
+if _cors_origins_env:
+    _cors_origins = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+else:
+    # No CORS_ORIGINS configured: default to local dev origins only, never
+    # a wildcard. The frontend sends no cookies/credentials, so this app
+    # never needs allow_credentials=True.
+    _cors_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_credentials=False,
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+_PUBLIC_CORS_PATHS = {"/api/submissions", "/api/commerce/checkout-session"}
+
+
+@app.middleware("http")
+async def _public_cors_override(request: Request, call_next):
+    """A handful of endpoints are, by design, called cross-origin from
+    arbitrary published/exported-site domains (form submissions, cart
+    checkout) rather than the builder's own frontend. The strict
+    CORSMiddleware above restricts everything else to a fixed origin
+    allowlist; this override widens exactly those two paths back open for
+    POST/OPTIONS only (no credentials are ever involved for either, so a
+    wildcard origin is safe here) without touching the strict default
+    everything else gets — including GET/DELETE on /api/submissions,
+    which return/erase stored form data and must stay origin-restricted.
+    Registered after CORSMiddleware, so it wraps outermost and can run
+    before CORSMiddleware sees the request (short-circuiting OPTIONS) and
+    override its response headers afterward."""
+    if request.url.path in _PUBLIC_CORS_PATHS and request.method in ("POST", "OPTIONS"):
+        if request.method == "OPTIONS":
+            return Response(
+                status_code=200,
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST, OPTIONS",
+                    "Access-Control-Allow-Headers": "Content-Type, Accept",
+                },
+            )
+        response = await call_next(request)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
+    return await call_next(request)
 
 logging.basicConfig(
     level=logging.INFO,
