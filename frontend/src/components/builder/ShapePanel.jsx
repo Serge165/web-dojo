@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Square, Sparkles, Eraser, Wand2 } from "lucide-react";
+import { Square, Sparkles, Eraser, Wand2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
 const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
@@ -73,6 +73,10 @@ export const ShapePanel = ({ selected, onPatch }) => {
   const [shape, setShape] = useState("round");
   const [shadowOn, setShadowOn] = useState(true);
   const [sh, setSh] = useState({ x: 0, y: 8, blur: 24, spread: -4, color: "rgba(0,0,0,0.18)", inset: false });
+  const [customPresets, setCustomPresets] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("webdojo_shape_presets") || "[]"); } catch { return []; }
+  });
+  const [presetName, setPresetName] = useState("");
 
   const radiusStr = linked ? `${r}px` : `${tl}px ${tr}px ${br}px ${bl}px`;
   const borderStr = bw > 0 && bstyle !== "none" ? `${bw}px ${bstyle} ${bcolor}` : "none";
@@ -99,20 +103,49 @@ export const ShapePanel = ({ selected, onPatch }) => {
     toast.success(`Applied "${p.label}"`);
   };
 
+  const saveCurrentPreset = () => {
+    const label = presetName.trim() || `My preset ${customPresets.length + 1}`;
+    const preset = {
+      id: `custom-${Date.now()}`,
+      label,
+      custom: true,
+      bg: "linear-gradient(135deg,#334155,#0f172a)",
+      patch: { border: borderStr, "border-radius": radiusStr, "corner-shape": shape, "box-shadow": shadowStr },
+    };
+    const next = [...customPresets, preset];
+    setCustomPresets(next);
+    localStorage.setItem("webdojo_shape_presets", JSON.stringify(next));
+    setPresetName("");
+    toast.success(`Saved preset "${label}"`);
+  };
+
+  const deletePreset = (id) => {
+    const next = customPresets.filter((p) => p.id !== id);
+    setCustomPresets(next);
+    localStorage.setItem("webdojo_shape_presets", JSON.stringify(next));
+  };
+
   return (
     <div className="space-y-4" data-testid="shape-panel">
       {/* One-click presets */}
       <div className="space-y-1.5">
         <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Wand2 size={12} /> One-click presets</div>
         <div className="grid grid-cols-3 gap-1.5">
-          {PRESETS.map((p) => (
-            <button key={p.id} onClick={() => applyPreset(p)} data-testid={`shape-preset-${p.id}`} className="rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group" title={`Apply ${p.label}`}>
+          {[...PRESETS, ...customPresets].map((p) => (
+            <div key={p.id} role="button" tabIndex={0} onClick={() => applyPreset(p)} data-testid={`shape-preset-${p.id}`} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group cursor-pointer" title={`Apply ${p.label}`}>
               <div className="h-11 flex items-center justify-center" style={{ background: p.bg }}>
                 <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${cssStr({ background: "#c7d2fe", ...p.patch })}"></div>` }} />
               </div>
               <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{p.label}</div>
-            </button>
+              {p.custom && (
+                <button onClick={(e) => { e.stopPropagation(); deletePreset(p.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-gray-300 hover:text-red-400 opacity-70 hover:opacity-100" title="Delete preset" data-testid={`shape-preset-delete-${p.id}`}><X size={10} /></button>
+              )}
+            </div>
           ))}
+        </div>
+        <div className="flex gap-1.5">
+          <input value={presetName} onChange={(e) => setPresetName(e.target.value)} placeholder="Name this style…" className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="shape-preset-name" />
+          <button onClick={saveCurrentPreset} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200" data-testid="shape-save-preset"><Save size={11} /> Save current</button>
         </div>
       </div>
 

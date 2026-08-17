@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (g) — Divider auto-match color + save custom shape presets
+- **Auto-Match Color** (`DividerPanel.jsx`): a "Match selected section color" button reads the selected section's rendered background via `getComputedStyle` (walks node + descendants for the first solid color), converts rgb→hex, and sets the divider fill in one tap. Disabled until a section is selected.
+- **Save My Preset** (`ShapePanel.jsx`): a name input + "Save current" button captures the current border/radius/corner-shape/box-shadow as a named custom preset, persisted to `localStorage['webdojo_shape_presets']` and rendered alongside the 9 built-ins with a delete (X) control. Custom presets apply one-click like the built-ins and survive reload.
+- Tested: iteration_16 frontend E2E — both features + regression pass 100%, no console errors.
+
+
 ### Session Jun 2026 (f) — Divider snapping + Shape presets
 - **Divider snapping** (`DividerPanel.jsx`): a "Snap placement" control (Above / Below / Page end) inserts the SVG divider block at the correct index relative to the selected section (`onAddBlock(html, atIndex)` → `addBlock` splice). Above/Below disable until a section is selected. Blocks render edge-to-edge in export/preview so dividers sit flush.
 - **Shape presets** (`ShapePanel.jsx`): a "One-click presets" row of 9 curated combined styles (Glass card, Frosted dark, Neumorphic, Neu inset, Soft card, Elevated, Pill, Neon, Squircle glow). Clicking applies the full style patch (background/backdrop-filter/border/radius/corner-shape/box-shadow) to the selected element instantly; toasts a prompt if nothing is selected.

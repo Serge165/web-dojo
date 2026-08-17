@@ -1,0 +1,19 @@
+{
+  "summary": "Frontend-only verification of the two new right-sidebar features (Divider 'Auto-Match Color' and Shape 'Save My Preset') plus divider snap + built-in preset regression. All specified behaviours verified working end-to-end with zero console errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "Ephemeral: Large Header block added to canvas; localStorage key 'webdojo_shape_presets' written and then cleaned up.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 16 verified:\n\n1) Divider Auto-Match Color (data-testid='divider-match-color'):\n   - Button is DISABLED before any canvas selection (hasSel guard in DividerPanel).\n   - After double-clicking 'Large Header' (block-cmp-header-lrg, solid #ffffff background) and selecting the canvas element, the button becomes enabled.\n   - Clicking the button: divider-color-hex updated from default '#6366f1' -> '#ffffff' (picked up the header's real bg). Toast 'Matched divider fill to the section background' shown via sonner.\n   - matchSectionColor() correctly walks node + descendants, reads getComputedStyle(el).backgroundColor, and rgbToHex converts.\n\n2) Divider snap regression: divider-place-below + divider-insert inserts a new canvas-el (count 1 -> 2). Prior iteration_15 already covered above/end.\n\n3) Shape 'Save My Preset':\n   - Typed 'MyGlow' into shape-preset-name, clicked shape-save-preset with shape-corner-squircle + shape-radius-all=40 + shape-shadow-glow active.\n   - Toast 'Saved preset \"MyGlow\"' shown. A new chip appeared: data-testid 'shape-preset-custom-<ts>' with label 'MyGlow'.\n   - localStorage['webdojo_shape_presets'] persisted the array with id/custom/patch{border, border-radius, corner-shape, box-shadow}.\n   - Clicking the custom chip on a selected canvas element patched the first descendant's inline style with corner-shape, box-shadow, border-radius (toast 'Applied ...').\n   - Delete button 'shape-preset-delete-custom-<ts>' removes chip (visible via group-hover:opacity-100; clicked with force=True to bypass hover requirement). After delete, no custom chips remain.\n   - Persistence: saved 'PersistMe', reloaded the page, localStorage retained the entry and the chip re-rendered.\n\n4) Built-in preset regression: shape-preset-glass still applies (canvas-el innerHTML contains 'backdrop-filter').\n\nNo console errors captured across the full run.\n\nMinor UX note (report-only, non-blocking): the custom-preset delete X-button is only visible on group-hover (opacity-0 group-hover:opacity-100) — mouse users will discover it, but touch/keyboard users cannot reveal it. Consider making it always visible (or focus-visible) for a11y. This is pre-existing and does not affect the specified behaviour.",
+  "rca_of_the_issue": "N/A - all features work as specified."
+}

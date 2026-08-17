@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FlipHorizontal, FlipVertical, Plus, ArrowUpToLine, ArrowDownToLine, ChevronsDown } from "lucide-react";
+import { FlipHorizontal, FlipVertical, Plus, ArrowUpToLine, ArrowDownToLine, ChevronsDown, Pipette } from "lucide-react";
 import { toast } from "sonner";
 
 // SVG section dividers (shapedivider-style) rendered on a 0 0 1200 120 viewBox
@@ -38,6 +38,28 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
 
   const selIndex = elements.findIndex((e) => e.id === selectedId);
   const hasSel = selIndex >= 0;
+
+  const rgbToHex = (rgb) => {
+    const m = rgb.match(/\d+/g);
+    if (!m) return null;
+    const [r, g, b] = m.map(Number);
+    return "#" + [r, g, b].map((n) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, "0")).join("");
+  };
+
+  const matchSectionColor = () => {
+    if (!hasSel) return;
+    const node = document.querySelector(`[data-testid="canvas-el-${selectedId}"]`);
+    if (!node) { toast.error("Could not read that section"); return; }
+    let found = null;
+    for (const el of [node, ...node.querySelectorAll("*")]) {
+      const bg = getComputedStyle(el).backgroundColor;
+      if (bg && bg !== "transparent" && bg.replace(/\s/g, "") !== "rgba(0,0,0,0)") { found = bg; break; }
+    }
+    const hex = found && rgbToHex(found);
+    if (!hex) { toast.error("That section has no solid background to match"); return; }
+    setColor(hex);
+    toast.success("Matched divider fill to the section background");
+  };
 
   const insert = () => {
     const svg = buildSvg(shape, color, height, flipX, flipY, false);
@@ -96,6 +118,14 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
           </div>
         </div>
       </div>
+
+      <button
+        onClick={matchSectionColor}
+        disabled={!hasSel}
+        className="w-full flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
+        data-testid="divider-match-color"
+        title={hasSel ? "Match fill to the selected section's background" : "Select a section first"}
+      ><Pipette size={13} /> Match selected section color</button>
 
       <div className="flex gap-2">
         <button onClick={() => setFlipX((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipX ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-300 hover:text-white"}`} data-testid="divider-flip-x"><FlipHorizontal size={13} /> Flip X</button>
