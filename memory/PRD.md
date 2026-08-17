@@ -30,6 +30,14 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (p) — Effect Presets Pack + 12 new aesthetic themes
+- **Day-one Style Library seed** (`lib/starterStyles.js` + `TextEffectsPanel.jsx`): the Style Library now ships 24 ready-made styles pre-sorted into 5 folders — **Headings** (gradient/glow text FX), **Buttons** (gradient pill, glass, neon outline, sunset CTA, sticker), **Cards** (glass, frosted, neumorphic, soft, aurora), **Badges** (pill labels), **Fonts** (serif/mono/wide-caps/glow type styles). Seeded once on first run, guarded by `localStorage['webdojo_style_library_seeded']` (deduped by id; deleting a starter and reloading does NOT bring it back). The category filter/folder UI from session (o) now shows out of the box.
+- **12 new aesthetic themes** (`lib/themes.js`, now 21 total) — researched from 2026 color-trend sources: Dark Academia, Vaporwave, Dopamine Brights, Mocha Mousse, Digital Lavender, Neo Acid, Solar Botanical, Midnight Foxglove, Terracotta Linen, Synthwave, Peach Fuzz, Sage Matcha. Each carries a curated palette (7 CSS vars), a 4-color swatch, canvas bg and a Google font chosen to support the 300–700 weight range so `themeHeadHtml` links never 400.
+- **5 new SVG dividers** (`DividerPanel.jsx`, now 15): Peaks, Mountains (2-layer), Clouds, Steps, Drip.
+- **4 new shape presets** (`ShapePanel.jsx`, now 13): Aurora glow, Ticket (scoop + dashed), Sticker (hard shadow), Inset well.
+- Tested: iteration_28 frontend E2E — seed + folders + filter + persistence/no-re-dupe, apply seeded style, all 12 themes render+apply, 5 dividers, 4 shape presets, and iteration-27 regression all pass 100%, zero console errors.
+
+
 ### Session Jun 2026 (o) — Select All Effected + Style Library Categories
 - **Select All Effected** (`LayersPanel.jsx`): a "Check all" bar (`layers-select-bar`, shows when there are layers) with two buttons — **All · N** (`layers-select-all`, checks every layer) and **Effected · N** (`layers-select-effected`, checks only layers carrying a text/hover effect; disabled when `fxCount===0`). Both feed the existing batch bar so users can Paste-to-many in one tap. Reused the pre-existing `selectAll`/`selectEffected` helpers (they had no UI before).
 - **Style Library Categories** (`TextEffectsPanel.jsx`): saving a style now takes an optional free-typed **folder/category** (`style-lib-category`, empty → "Uncategorized"), with a `<datalist>` autocomplete of existing categories. The library renders grouped under **collapsible folder headers** (`style-lib-group-<cat>` / toggle `style-lib-group-toggle-<cat>`) and, when 2+ categories exist, a **filter dropdown** (`style-lib-filter`) narrows to one category. Categories persist in `localStorage['webdojo_style_library']` (entry shape now `{id,name,category,style,hover}`) and are preserved through export/import (dedupe key includes category).

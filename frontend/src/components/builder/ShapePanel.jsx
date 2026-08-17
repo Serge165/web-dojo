@@ -38,6 +38,18 @@ const PRESETS = [
   { id: "squircle-glow", label: "Squircle glow", bg: "linear-gradient(135deg,#6366f1,#a855f7)", patch: {
     "border-radius": "28px", "corner-shape": "squircle", "box-shadow": "0 0 36px rgba(99,102,241,0.55)",
   } },
+  { id: "aurora", label: "Aurora glow", bg: "linear-gradient(135deg,#22d3ee,#a855f7,#ec4899)", patch: {
+    "border-radius": "20px", border: "1px solid rgba(255,255,255,0.2)", "box-shadow": "0 0 40px rgba(168,85,247,0.5)",
+  } },
+  { id: "ticket", label: "Ticket", bg: "#fef3c7", patch: {
+    background: "#fef3c7", "border-radius": "16px", "corner-shape": "scoop", border: "2px dashed #d97706",
+  } },
+  { id: "sticker", label: "Sticker", bg: "#ffffff", patch: {
+    background: "#ffffff", "border-radius": "14px", border: "3px solid #111827", "box-shadow": "4px 4px 0 #111827",
+  } },
+  { id: "inset-well", label: "Inset well", bg: "#e5e7eb", patch: {
+    background: "#e5e7eb", "border-radius": "12px", "box-shadow": "inset 0 2px 8px rgba(0,0,0,0.25)",
+  } },
 ];
 
 // CSS3 corner-shape keywords (Chrome/Edge 139+). Companion to border-radius —

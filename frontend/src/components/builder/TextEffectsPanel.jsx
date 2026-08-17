@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library, Download, Upload, ChevronDown, ChevronRight, Folder, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { getFxClip, setFxClip, subscribeFxClip } from "@/lib/fxClipboard";
+import { STARTER_STYLES } from "@/lib/starterStyles";
 
 const cssStr = (obj) => Object.entries(obj).map(([k, v]) => `${k}:${v}`).join(";");
 // A visible thumbnail for a saved style: drop text-clip props (which would make
@@ -145,7 +146,19 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
   const [intensity, setIntensity] = useState(1);
   const [clip, setClip] = useState(getFxClip());
   useEffect(() => subscribeFxClip(setClip), []);
-  const [library, setLibrary] = useState(() => { try { return JSON.parse(localStorage.getItem("webdojo_style_library") || "[]"); } catch { return []; } });
+  const [library, setLibrary] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("webdojo_style_library") || "[]");
+      if (!localStorage.getItem("webdojo_style_library_seeded")) {
+        const ids = new Set(stored.map((e) => e.id));
+        const merged = [...STARTER_STYLES.filter((s) => !ids.has(s.id)), ...stored];
+        localStorage.setItem("webdojo_style_library", JSON.stringify(merged));
+        localStorage.setItem("webdojo_style_library_seeded", "1");
+        return merged;
+      }
+      return stored;
+    } catch { return []; }
+  });
   const [libName, setLibName] = useState("");
   const [libCategory, setLibCategory] = useState("");
   const [libFilter, setLibFilter] = useState("all");

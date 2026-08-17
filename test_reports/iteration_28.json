@@ -1,0 +1,22 @@
+{
+  "summary": "Frontend-only regression for iteration 28 (Effect Presets Pack). All 6 acceptance criteria PASS with zero console/page errors. (1) STYLE LIBRARY SEED: fresh session seeds 24 STARTER_STYLES into localStorage 'webdojo_style_library' (seed flag = '1'). All 5 folders render (style-lib-group-Headings/Buttons/Cards/Badges/Fonts), each with its collapse toggle. Filter dropdown appears (>1 cat), narrows to just style-lib-group-Buttons when 'Buttons' selected and restores all 5 groups on 'all'. Collapse toggle for Headings hides its 6 chips (6->0) and restores them. Deleting style-lib-delete-starter-badge-warn and reloading keeps it removed (23 entries after reload, seed flag stays '1', no re-seed). (2) APPLY: dropped 'Large Header' via double-click, selected canvas el, clicked a Headings starter chip - applied successfully, success toast. (3) THEME: theme-generator + theme-tab-presets present, 21 preset cards, all 12 new IDs present (dark-academia, vaporwave, dopamine, mocha-mousse, digital-lavender, neo-acid, solar-botanical, midnight-foxglove, terracotta-linen, synthwave, peach-fuzz, sage-matcha). Applying dark-academia and synthwave changes canvas bg + shows toast. (4) DIVIDER: 15 shapes present incl. new peaks/mountains/clouds/steps/drip; each selects+previews; Insert divider adds SVG block. (5) SHAPE: all 4 new presets present (aurora, ticket, sticker, inset-well); applying aurora on selected element shows success toast. (6) REGRESSION: layers-select-all + layers-select-effected still present; saving new style 'MyTestStyle' with new category 'MyPack' created style-lib-group-MyPack alongside seeded folders. Overall: 0 console errors, 0 page errors, 100% pass.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TextEffectsPanel.jsx L149-156: the seed useState initializer writes to localStorage as a side-effect during React render. In StrictMode dev double-render this is harmless because the seed flag guards re-seeding, but a cleaner pattern is to move the seeding write into a useEffect (still guarded by the flag). Purely a stylistic nit; behaviour is correct.",
+    "starterStyles.js: several Card starters (starter-card-glass, starter-card-aurora) use `corner-shape` / properties that aren't recognized by the copyFx COPY_PROPS whitelist, so users copying an applied Card style back into the library will not round-trip the corner-shape. Not iteration-28 scope, flag for future."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "seed_data_creation": "Cleared localStorage to force fresh seed; added block 'Large Header' + inserted 1 SVG divider block; saved 1 custom style 'MyTestStyle' under category 'MyPack'; deleted starter-badge-warn once to verify no re-seed on reload.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Right-sidebar tabs use prefix 'insp-tab-' (e.g. insp-tab-textfx, insp-tab-theme, insp-tab-divider, insp-tab-shape) - NOT 'sidebar-tab-'. Style Library seed flag key: 'webdojo_style_library_seeded' (value '1'); library key: 'webdojo_style_library' (24 entries after seed). To force re-seed: `localStorage.clear()` then reload. Blocks added via double-clicking left-Library rows (e.g. 'Large Header'). Canvas elements selectable via [data-testid^='canvas-el-'].",
+  "rca_of_the_issue": "N/A - no defects found. All 6 acceptance criteria verified end-to-end with 0 console/page errors."
+}
