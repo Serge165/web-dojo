@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (i) — Text FX polish: live-animating previews + hover cleanup
+- **FX Live Preview** (`TextEffectsPanel.jsx`): the Animated chips (shimmer/rainbow/pulse/flicker/float/wobble) now animate their little "Ag" previews live via fixed-name `@keyframes wdtfxprev_*` injected once into the panel, so the motion is visible before applying.
+- **Per-Element Hover Cleanup**: a "Remove hover from element" button (`textfx-hover-clear`, enabled only when the selected element has hover FX) strips every `wd-tfx-*` class from the element root tag and removes the matching injected `<style data-wd-tfx>` blocks from headHtml — verified it clears multiple stacked hover effects cleanly.
+- Tested: iteration_18 frontend E2E — both items + Text FX apply regression pass 100%, zero console errors.
+
+
 ### Session Jun 2026 (h) — Match Neighbor, Preset Thumbnails, Text FX tab
 - **Match Neighbor** (`DividerPanel.jsx`): the auto-match area now has two buttons — "Selected" (matches the selected section) and "Far side" (matches the section on the other side of the snap direction: below-placement → next section, above-placement → previous section). Disabled at Page-end placement or when no far-side section exists.
 - **Preset Thumbnails** (`ShapePanel.jsx`): saved custom presets now render a faithful thumbnail using their real patch values (border/radius/corner-shape/box-shadow) over a light backdrop, instead of the generic dark swatch.

@@ -49,6 +49,9 @@ const ANIM_FX = [
     keyframes: (n) => `@keyframes ${n}{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}` },
 ];
 
+// Fixed-name keyframes so the little chip previews can actually animate live.
+const ANIM_PREVIEW_CSS = ANIM_FX.map((fx) => fx.keyframes(`wdtfxprev_${fx.id}`)).join("\n");
+
 // Hover effects — need a real CSS rule, so add a scoped class + inject a style block.
 const HOVER_FX = [
   { id: "pop", label: "Color pop", hover: "color:#6366f1;-webkit-text-fill-color:#6366f1;" },
@@ -99,6 +102,20 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
     toast.success(`Hover: ${fx.label}`);
   };
 
+  const stripHover = () => {
+    if (needSel()) return;
+    const uniq = [...new Set([...selected.html.matchAll(/wd-tfx-[a-z0-9]+/g)].map((m) => m[0]))];
+    if (!uniq.length) { toast.info("This element has no hover effect to remove"); return; }
+    let html = selected.html;
+    uniq.forEach((c) => { html = html.split(c).join(""); });
+    html = html.replace(/class="\s*([^"]*?)\s*"/g, (m, inner) => (inner.trim() ? `class="${inner.replace(/\s+/g, " ").trim()}"` : ""));
+    onReplaceHtml(html);
+    let head = headHtml || "";
+    uniq.forEach((c) => { head = head.replace(new RegExp(`<style data-wd-tfx="${c}">[\\s\\S]*?<\\/style>\\n?`, "g"), ""); });
+    onHeadHtmlChange(head);
+    toast.success("Hover effect removed from element");
+  };
+
   const clearFx = () => {
     if (needSel()) return;
     onPatch({
@@ -109,8 +126,11 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
     toast.success("Text FX cleared");
   };
 
+  const hasHover = !!selected && /wd-tfx-/.test(selected.html);
+
   return (
     <div className="space-y-4" data-testid="text-fx-panel">
+      <style>{ANIM_PREVIEW_CSS}</style>
       {!selected && <div className="text-[11px] text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded p-2">Select a heading or text element on the canvas to apply effects.</div>}
 
       {/* Fill & stroke */}
@@ -130,7 +150,7 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
         <div className="grid grid-cols-3 gap-1.5">
           {ANIM_FX.map((fx) => (
             <FxChip key={fx.id} testid={`textfx-anim-${fx.id}`} onClick={() => applyAnim(fx)} label={fx.label} animated
-              previewHtml={`<span style="font-weight:800;font-size:18px;line-height:1;${cssStr(fx.patch || { color: "#e5e7eb", "-webkit-text-fill-color": "#e5e7eb" })}">Ag</span>`} />
+              previewHtml={`<span style="display:inline-block;font-weight:800;font-size:18px;line-height:1;${cssStr(fx.patch || { color: "#e5e7eb", "-webkit-text-fill-color": "#e5e7eb" })};animation:wdtfxprev_${fx.id} ${fx.dur} ${fx.timing} infinite">Ag</span>`} />
           ))}
         </div>
       </div>
@@ -144,6 +164,7 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
               previewHtml={`<span style="font-weight:800;font-size:18px;line-height:1;color:#e5e7eb">Ag</span>`} />
           ))}
         </div>
+        <button onClick={stripHover} disabled={!hasHover} className="w-full flex items-center justify-center gap-1.5 text-[11px] py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed mt-1" data-testid="textfx-hover-clear"><Eraser size={11} /> Remove hover from element</button>
         <p className="text-[10px] text-gray-500">Hover effects run on your published/previewed site. Preview them in the Preview tab.</p>
       </div>
 
