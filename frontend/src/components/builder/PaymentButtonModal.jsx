@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CreditCard, Loader2, ExternalLink, Copy } from "lucide-react";
 import { stripeButtonHtml, paypalButtonHtml, CURRENCY_SYMBOL } from "@/lib/commerce";
 
@@ -61,6 +61,7 @@ export const PaymentButtonModal = ({ open, onClose, onInsert }) => {
       <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-4xl w-[92vw] max-h-[90vh] overflow-hidden p-0" data-testid="payment-builder-modal">
         <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
           <DialogTitle className="flex items-center gap-2 text-base"><CreditCard size={16} className="text-emerald-400" /> Add a payment button</DialogTitle>
+          <DialogDescription className="sr-only">Generate a working Stripe or PayPal buy button for your site.</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-[1fr_1fr] max-h-[calc(90vh-58px)]">

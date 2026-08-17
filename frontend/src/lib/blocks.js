@@ -10,7 +10,9 @@ const g4 = "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q
 const g5 = "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=800&q=70";
 const g6 = "https://images.unsplash.com/photo-1441829266145-6d4bfbf99bd8?w=800&q=70";
 
-export const CATEGORIES = [
+import { EXTRA_CATEGORIES } from "./blocksExtra";
+
+const CORE_CATEGORIES = [
   {
     id: "components",
     label: "Components",
@@ -490,6 +492,17 @@ export const CATEGORIES = [
     ],
   },
 ];
+
+const mergeCategories = (core, extra) => {
+  const map = new Map(core.map((c) => [c.id, { ...c, blocks: [...c.blocks] }]));
+  for (const c of extra) {
+    if (map.has(c.id)) map.get(c.id).blocks.push(...c.blocks);
+    else map.set(c.id, { ...c, blocks: [...c.blocks] });
+  }
+  return Array.from(map.values());
+};
+
+export const CATEGORIES = mergeCategories(CORE_CATEGORIES, EXTRA_CATEGORIES);
 
 export const cardTemplate = (count = 3) => {
   const card = `

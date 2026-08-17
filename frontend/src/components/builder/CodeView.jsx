@@ -1,25 +1,44 @@
 import React, { useMemo, useState } from "react";
 import { CodeEditor } from "./CodeEditor";
-import { buildStandaloneHtml } from "@/lib/exportHtml";
+import { buildStandaloneHtml, buildCleanExport } from "@/lib/exportHtml";
 import { MONACO_LANGUAGES } from "@/lib/monacoLanguages";
 
-// Monaco-powered code view: read-only preview (HTML) + editable <head>
-// injection with Emmet + user-selectable syntax highlighting for popular
-// web frameworks and languages (all Monaco built-in grammars).
+// Monaco-powered code view: left panel switches between clean HTML, a clean
+// CSS3 stylesheet (auto-extracted), or the inline standalone file; right panel
+// edits <head> with Emmet + user-selectable syntax highlighting.
 export const CodeView = ({ project, headHtml, onHeadHtmlChange }) => {
-  const html = useMemo(() => buildStandaloneHtml(project), [project]);
+  const [view, setView] = useState("html"); // html | css | inline
   const [outLang, setOutLang] = useState("html");
   const [headLang, setHeadLang] = useState("html");
+
+  const clean = useMemo(() => buildCleanExport(project), [project]);
+  const inline = useMemo(() => buildStandaloneHtml(project), [project]);
+  const outContent = view === "css" ? clean.css : view === "inline" ? inline : clean.html;
+  const outLangEff = view === "css" ? "css" : outLang;
+  const filename = view === "css" ? "styles.css" : "index.html";
+
+  const ViewTab = ({ id, label }) => (
+    <button
+      onClick={() => setView(id)}
+      className={`px-2 py-0.5 rounded text-[10px] border ${view === id ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`}
+      data-testid={`codeview-${id}`}
+    >{label}</button>
+  );
 
   return (
     <div className="flex-1 bg-[#050505] overflow-hidden flex" data-testid="code-view">
       <div className="w-1/2 border-r border-[#2B2B2B] flex flex-col">
         <div className="px-3 py-2 border-b border-[#2B2B2B] text-[11px] uppercase tracking-wider text-gray-400 flex items-center justify-between gap-2">
-          <span>Output · index.html</span>
-          <LangSelector value={outLang} onChange={setOutLang} testId="output-lang" />
+          <div className="flex items-center gap-1.5">
+            <ViewTab id="html" label="HTML" />
+            <ViewTab id="css" label="CSS" />
+            <ViewTab id="inline" label="Inline" />
+            <span className="text-gray-600 normal-case tracking-normal">· {filename}</span>
+          </div>
+          {view !== "css" && <LangSelector value={outLang} onChange={setOutLang} testId="output-lang" />}
         </div>
         <div className="flex-1 min-h-0">
-          <CodeEditor value={html} language={outLang} readOnly testId="code-output-editor" />
+          <CodeEditor value={outContent} language={outLangEff} readOnly testId="code-output-editor" />
         </div>
       </div>
       <div className="w-1/2 flex flex-col">

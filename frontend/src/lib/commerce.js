@@ -58,7 +58,7 @@ export const COMMERCE_BLOCKS = [
     <div style="color:#64748b;font-size:14px;margin:2px 0 14px;">Insulated · 750ml</div>
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:20px;font-weight:800;color:#0f172a;">$38</span>
-      <a href="#" style="padding:9px 18px;background:#4f46e5;color:#fff;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;">Add to cart</a>
+      <button type="button" data-wd-add data-wd-id="p-aurora" data-wd-name="Aurora Bottle" data-wd-price="38" data-wd-cur="usd" data-wd-img="${g("https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd")}" style="padding:9px 18px;background:#4f46e5;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Add to cart</button>
     </div>
   </div>
 </div>`,

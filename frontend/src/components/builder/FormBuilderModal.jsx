@@ -79,8 +79,13 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
             <section className="space-y-2">
               <div className="text-[10px] uppercase tracking-widest text-gray-500">Form settings</div>
               <div>
+                <label className={labelCls}>Form name (inbox label)</label>
+                <input value={form.name || ""} onChange={(e) => patchForm({ name: e.target.value })} className={inputCls} placeholder="Contact form" data-testid="form-name-inbox" />
+              </div>
+              <div>
                 <label className={labelCls}>Action URL</label>
                 <input value={form.action} onChange={(e) => patchForm({ action: e.target.value })} className={inputCls} placeholder="https://formspree.io/f/…" data-testid="form-action" />
+                <p className="text-[10px] text-gray-500 mt-1 leading-relaxed">Defaults to your Web Dojo inbox — submissions appear under the Inbox icon in the toolbar. Change it to Formspree/Basin to use another backend.</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>

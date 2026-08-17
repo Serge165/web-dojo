@@ -4,6 +4,7 @@ import { GradientMixer } from "./GradientMixer";
 import { StyleInspector } from "./StyleInspector";
 import { LayersPanel } from "./LayersPanel";
 import { BackgroundMediaPanel } from "./BackgroundMediaPanel";
+import { BlendPanel } from "./BlendPanel";
 import { AnimationGenerator } from "./AnimationGenerator";
 import { ThemeGenerator } from "./ThemeGenerator";
 import { CDNPanel } from "./CDNPanel";
@@ -13,7 +14,9 @@ const TABS = [
   { id: "gradient", label: "Gradient" },
   { id: "style", label: "Style" },
   { id: "bg", label: "BG" },
+  { id: "blend", label: "Blend" },
   { id: "anim", label: "Motion" },
+  { id: "layers", label: "Layers" },
   { id: "theme", label: "Theme" },
   { id: "cdn", label: "CDN" },
   { id: "page", label: "Page" },
@@ -51,7 +54,7 @@ export const RightSidebar = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-4 border-b border-[#2B2B2B] text-[11px]">
+      <div className="grid grid-cols-5 border-b border-[#2B2B2B] text-[11px]">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -97,20 +100,23 @@ export const RightSidebar = ({
         )}
 
         {tab === "bg" && (
-          <div className="space-y-4">
-            <BackgroundMediaPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} onAddBlock={onAddBlock} />
-            <div className="pt-3 border-t border-[#2B2B2B]">
-              <LayersPanel
-                elements={elements}
-                selectedId={selectedId}
-                onSelect={onSelect}
-                onMove={onMove}
-                onDelete={onDelete}
-                onToggleVisible={onToggleVisible}
-                onSetZIndex={onSetZIndex}
-              />
-            </div>
-          </div>
+          <BackgroundMediaPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} onAddBlock={onAddBlock} />
+        )}
+
+        {tab === "blend" && (
+          <BlendPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
+        )}
+
+        {tab === "layers" && (
+          <LayersPanel
+            elements={elements}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            onMove={onMove}
+            onDelete={onDelete}
+            onToggleVisible={onToggleVisible}
+            onSetZIndex={onSetZIndex}
+          />
         )}
 
         {tab === "anim" && (

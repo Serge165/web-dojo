@@ -8,7 +8,7 @@ const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.
 const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
 
 // "Shop" tab: payment button builder, a working cart system, and store blocks.
-export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder }) => {
+export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog }) => {
   const [cur, setCur] = useState("usd");
   const [accent, setAccent] = useState("#4f46e5");
   const [paypal, setPaypal] = useState("");
@@ -35,6 +35,7 @@ export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder }) => {
           <CreditCard size={15} /> Add payment button
         </button>
         <p className="text-[11px] text-gray-500 mt-2 leading-relaxed">One-click <b className="text-gray-300">Stripe</b> or <b className="text-gray-300">PayPal</b> buy button — works on your published static site.</p>
+        <button onClick={onWireCatalog} className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#1F1F1F] border border-emerald-500/40 hover:bg-[#232323] text-emerald-300 text-xs font-medium" data-testid="wire-catalog-btn"><ShoppingCart size={14} /> Make this shop checkout-ready</button>
       </div>
 
       {/* Working cart */}

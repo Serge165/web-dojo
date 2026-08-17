@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Share2, Sun, Moon } from "lucide-react";
 import { PLATFORMS, SHAPES, STYLES, HOVERS, buildSocialHtml } from "@/lib/social";
 
@@ -55,6 +55,7 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
       <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-5xl w-[94vw] max-h-[92vh] overflow-hidden p-0" data-testid="social-builder-modal">
         <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
           <DialogTitle className="flex items-center gap-2 text-base"><Share2 size={16} className="text-sky-400" /> Social buttons</DialogTitle>
+          <DialogDescription className="sr-only">Build a share bar or profile-link bar with custom shape, style and hover animations.</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-[340px_1fr] max-h-[calc(92vh-58px)]">

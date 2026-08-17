@@ -7,7 +7,7 @@ import { RightSidebar } from "@/components/builder/RightSidebar";
 import { Canvas } from "@/components/builder/Canvas";
 import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Eye, MousePointer2, Code2 } from "lucide-react";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
 import { PagesBar } from "@/components/builder/PagesBar";
@@ -21,7 +21,11 @@ import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
 import { AddPageModal } from "@/components/builder/AddPageModal";
 import { PaymentButtonModal } from "@/components/builder/PaymentButtonModal";
 import { SocialShareModal } from "@/components/builder/SocialShareModal";
+import { ImportExportModal } from "@/components/builder/ImportExportModal";
+import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
 import { buildStandaloneHtml } from "@/lib/exportHtml";
+import { buildCartRuntimeHtml } from "@/lib/cart";
+import { scanHtml } from "@/lib/importHtml";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -73,8 +77,10 @@ export default function Builder() {
   const [addPageOpen, setAddPageOpen] = useState(false);
   const [paymentBuilderOpen, setPaymentBuilderOpen] = useState(false);
   const [socialBuilderOpen, setSocialBuilderOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
+  const [submissionsOpen, setSubmissionsOpen] = useState(false);
 
   // Undo/Redo history stack for the doc state.
   const [past, setPast] = useState([]);
@@ -132,6 +138,7 @@ export default function Builder() {
     name: projectName,
     // legacy top-level fields mirror the active page for backward compat
     elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files,
+    seo: activePage?.seo || {},
     pages, active_page_id: activePageId, template,
   };
 
@@ -300,6 +307,54 @@ export default function Builder() {
   };
   const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
 
+  // Best-effort: wire product "Add to cart / Buy" buttons on the page to the
+  // live cart, and drop in the cart runtime if it isn't there yet.
+  const wireCatalog = () => {
+    const parse = (h, re) => { const m = h.match(re); return m ? m[1] : null; };
+    setElements((els) => {
+      let converted = 0;
+      const next = els.map((el) => {
+        const price = parse(el.html, /\$\s*(\d+(?:\.\d{1,2})?)/);
+        const name = (parse(el.html, /<h[1-4][^>]*>([^<]{2,60})<\/h[1-4]>/i) || "Product").trim().replace(/"/g, "");
+        const img = parse(el.html, /<img[^>]+src="([^"]+)"/i) || "";
+        const html = el.html.replace(/<(a|button)((?:(?!data-wd-add)[^>])*)>(\s*(?:add to cart|add to bag|buy now|buy|add)[^<]*)<\/\1>/gi, (m, tag, attrs, text) => {
+          converted++;
+          return `<${tag}${attrs} data-wd-add data-wd-id="wc-${Math.random().toString(36).slice(2, 7)}" data-wd-name="${name}" data-wd-price="${price || 0}" data-wd-cur="usd" data-wd-img="${img}">${text}</${tag}>`;
+        });
+        return { ...el, html };
+      });
+      const hasCart = next.some((e) => /data-webdojo-cart/.test(e.html));
+      const out = hasCart ? next : [...next, { id: uid(), html: buildCartRuntimeHtml({ accent: "#4f46e5", currency: "usd" }) }];
+      setTimeout(() => toast.success(converted ? `Wired ${converted} button${converted === 1 ? "" : "s"} to the cart${hasCart ? "" : " + added a live cart"}` : (hasCart ? "Cart already on this page" : "Live cart added — use add-to-cart buttons to fill it")), 0);
+      return out;
+    });
+    setSelectedId(null);
+  };
+
+  const onLoadProjectData = (data) => {
+    if (!data || !data._webdojo) { toast.error("That file isn't a Web Dojo project"); return; }
+    setProjectId(null);
+    setProjectName(data.name || "Imported project");
+    const src = (data.pages && data.pages.length) ? data.pages : [{ id: uid(), name: "Home", slug: "index", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [] }];
+    const nextPages = src.map((pg) => ({ ...pg, id: uid() }));
+    setPages(nextPages);
+    setActivePageId(nextPages[0].id);
+    setElements(nextPages[0].elements || []);
+    setHeadHtml(nextPages[0].head_html || "");
+    setCanvasBg(nextPages[0].canvas_bg || "#ffffff");
+    setFonts(nextPages[0].fonts || []);
+    setFiles(data.files || []);
+    setSelectedId(null); setPast([]); setFuture([]);
+    toast.success("Project imported");
+  };
+
+  const onImportUrl = async (url) => {
+    const res = await axios.post(`${API}/import/url`, { url });
+    const { headHtml: h, sections } = scanHtml(res.data.html || "");
+    onImportSections({ headHtml: h, sections });
+    return sections.length;
+  };
+
   // Save/Load ------------------------------------------------------
   const save = async () => {
     try {
@@ -451,6 +506,7 @@ export default function Builder() {
         projectName={projectName} setProjectName={setProjectName}
         onImportSections={onImportSections}
         project={project}
+        onOpenTransfer={() => setTransferOpen(true)}
         onSave={save} onOpenLoad={openLoad} onShare={share}
         onPublish={() => setPublishOpen(true)}
         onStartTour={() => setTourForce((v) => v + 1)}
@@ -458,6 +514,7 @@ export default function Builder() {
         onAssets={() => setAssetsOpen(true)}
         onAnalytics={() => setAnalyticsOpen(true)}
         onTemplates={() => setTemplatesOpen(true)}
+        onSubmissions={() => setSubmissionsOpen(true)}
         onUndo={undo} onRedo={redo}
         canUndo={past.length > 0} canRedo={future.length > 0}
         viewport={viewport} setViewport={setViewport}
@@ -492,9 +549,20 @@ export default function Builder() {
             onOpenFormBuilder={() => setFormBuilderOpen(true)}
             onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
             onOpenSocialBuilder={() => setSocialBuilderOpen(true)}
+            onWireCatalog={wireCatalog}
+            headHtml={headHtml}
           />
         )}
 
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0" data-testid="center-pane">
+          <div className="h-9 flex-none border-b border-[#2B2B2B] bg-[#141414] flex items-center px-3" data-testid="mode-toggle">
+            <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5">
+              <button onClick={() => setMode("design")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "design" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-design"><MousePointer2 size={12} /> Design</button>
+              <button onClick={() => setMode("code")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-code"><Code2 size={12} /> Code</button>
+              <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-preview"><Eye size={12} /> Preview</button>
+            </div>
+          </div>
+          <div className="flex-1 flex overflow-hidden">
         {mode === "design" && (
           <Canvas
             elements={elements}
@@ -540,6 +608,8 @@ export default function Builder() {
             </div>
           </div>
         )}
+          </div>
+        </div>
 
         {mode !== "preview" && (
           <RightSidebar
@@ -708,6 +778,20 @@ export default function Builder() {
         open={socialBuilderOpen}
         onClose={() => setSocialBuilderOpen(false)}
         onInsert={(html) => addBlock(html)}
+      />
+
+      <ImportExportModal
+        open={transferOpen}
+        onClose={() => setTransferOpen(false)}
+        project={project}
+        onImportSections={onImportSections}
+        onLoadProjectData={onLoadProjectData}
+        onImportUrl={onImportUrl}
+      />
+
+      <SubmissionsModal
+        open={submissionsOpen}
+        onClose={() => setSubmissionsOpen(false)}
       />
 
       <OnboardingTour key={tourForce} force={tourForce > 0} />

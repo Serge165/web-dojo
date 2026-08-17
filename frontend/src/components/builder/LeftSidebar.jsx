@@ -7,6 +7,7 @@ import { LayoutBuilder } from "./LayoutBuilder";
 import { SnippetsTab } from "./SnippetsTab";
 import { FormsTab } from "./FormsTab";
 import { CommerceTab } from "./CommerceTab";
+import { cdnComponentGroups } from "@/lib/cdnComponents";
 
 export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
@@ -17,6 +18,8 @@ export const LeftSidebar = ({
   onOpenFormBuilder,
   onOpenPaymentBuilder,
   onOpenSocialBuilder,
+  onWireCatalog,
+  headHtml,
 }) => {
   const [tab, setTab] = useState("library");
   const [open, setOpen] = useState({ components: true, navbars: true, heroes: true, sections: true });
@@ -149,6 +152,25 @@ export const LeftSidebar = ({
             </div>
           </div>
 
+          {/* CDN-aware tools */}
+          {cdnComponentGroups(headHtml).length > 0 && (
+            <div className="border-b border-[#2B2B2B]">
+              <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-emerald-300/80">From your CDNs</div>
+              <div className="px-3 pb-3 space-y-3" data-testid="cdn-tools">
+                {cdnComponentGroups(headHtml).map((g) => (
+                  <div key={g.id}>
+                    <div className="text-[10px] text-gray-500 mb-1.5">{g.label}</div>
+                    <div className="space-y-1.5">
+                      {g.blocks.map((b) => (
+                        <BlockItem key={b.id} label={b.label} html={b.html} testId={`cdn-block-${b.id}`} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Social buttons */}
           <div className="border-b border-[#2B2B2B]">
             <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 flex items-center gap-1.5"><Share2 size={12} /> Social buttons</div>
@@ -213,7 +235,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "shop" && (
-        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} />
+        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} onWireCatalog={onWireCatalog} />
       )}
 
       {tab === "snippets" && (

@@ -103,7 +103,7 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     renderPaypal();
   }
   function checkoutStripe(){
-    var items = read().map(function(x){ return {name:x.name, amount:Number(x.price)||0, currency:x.currency||CFG.currency, quantity:x.qty||1}; });
+    var items = read().map(function(x){ return {name:x.name, amount:Number(x.price)||0, currency:x.currency||CFG.currency, quantity:x.qty||1}; }).filter(function(i){ return i.amount>0; });
     if(!items.length) return;
     var origin=(location.origin&&location.origin!=="null")?(location.origin+location.pathname):"";
     var btn=$("wdc-checkout"); btn.disabled=true; btn.textContent="Redirecting…";
@@ -144,6 +144,7 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     var rm=e.target.getAttribute&&e.target.getAttribute("data-rm"); if(rm){ WDCart.remove(rm); return; }
   });
   render();
+  try{ if(/[?&]wd_checkout=success/.test(location.search)){ WDCart.clear(); var _t=document.createElement("div"); _t.setAttribute("data-wd-thanks",""); _t.style.cssText="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100001;background:#0f172a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);font-family:system-ui,sans-serif;font-size:14px;"; _t.textContent="\\u2713 Thank you! Your order is confirmed."; document.body.appendChild(_t); setTimeout(function(){_t.style.transition="opacity .5s";_t.style.opacity="0";setTimeout(function(){_t.remove();},600);},6000); } }catch(e){}
 })();
 </script>
 </div>`;

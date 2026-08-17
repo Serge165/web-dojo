@@ -725,3 +725,154 @@ class TestCheckoutSession:
             "origin_url": "https://example.com",
         })
         assert r.status_code == 400, r.text
+
+
+# ---------- Iteration 12: Import URL ----------
+
+class TestImportUrl:
+    def test_import_url_success(self, client):
+        r = client.post(f"{API}/import/url", json={"url": "https://example.com"})
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d.get("status") == 200
+        assert isinstance(d.get("html"), str) and len(d["html"]) > 0
+        assert "<html" in d["html"].lower() or "example" in d["html"].lower()
+
+    def test_import_url_invalid_400(self, client):
+        r = client.post(f"{API}/import/url", json={"url": "notaurl"})
+        assert r.status_code == 400, r.text
+
+    def test_import_url_empty_400(self, client):
+        r = client.post(f"{API}/import/url", json={"url": ""})
+        assert r.status_code == 400
+
+
+# ---------- Iteration 13: Form Submissions Inbox ----------
+
+class TestSubmissions:
+    created_ids = []
+    form_name = "TEST_it13_contact"
+
+    @classmethod
+    def teardown_class(cls):
+        try:
+            requests.delete(f"{API}/submissions", params={"form_name": cls.form_name}, timeout=10)
+        except Exception:
+            pass
+
+    def test_post_json_success(self, client):
+        payload = {
+            "_wd_form": self.form_name,
+            "_wd_form_id": "f_abc",
+            "_wd_page": "/index.html",
+            "_wd_title": "Home",
+            "name": "Alice",
+            "email": "alice@example.com",
+            "message": "Hi there",
+        }
+        r = client.post(f"{API}/submissions", json=payload,
+                        headers={"Accept": "application/json"})
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d.get("ok") is True
+        assert isinstance(d.get("id"), str) and d["id"]
+        TestSubmissions.created_ids.append(d["id"])
+
+        # verify persisted via GET (newest-first)
+        lst = requests.get(f"{API}/submissions", params={"form_name": self.form_name}, timeout=10).json()
+        assert isinstance(lst, list)
+        me = next((s for s in lst if s["id"] == d["id"]), None)
+        assert me is not None
+        assert me["form_name"] == self.form_name
+        assert me["form_id"] == "f_abc"
+        assert me["page_url"] == "/index.html"
+        assert me["page_title"] == "Home"
+        assert me["data"]["name"] == "Alice"
+        assert me["data"]["email"] == "alice@example.com"
+        assert me["data"]["message"] == "Hi there"
+        # _id must not leak
+        assert "_id" not in me
+
+    def test_post_form_urlencoded_with_accept_json(self):
+        # form-encoded + Accept: application/json -> JSON response
+        r = requests.post(
+            f"{API}/submissions",
+            data={"_wd_form": self.form_name, "name": "Bob", "email": "bob@example.com"},
+            headers={"Accept": "application/json"},
+            timeout=15,
+        )
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d.get("ok") is True
+        assert isinstance(d.get("id"), str)
+        TestSubmissions.created_ids.append(d["id"])
+
+    def test_post_form_urlencoded_no_accept_returns_html(self):
+        # form-encoded, no Accept -> HTML thank-you page (still 200 and persisted)
+        # requests sets a default Accept: */*, so explicitly override to only text/html
+        r = requests.post(
+            f"{API}/submissions",
+            data={"_wd_form": self.form_name, "name": "Carol"},
+            headers={"Accept": "text/html"},
+            timeout=15,
+        )
+        assert r.status_code == 200
+        assert "text/html" in (r.headers.get("content-type", "").lower())
+        assert "Thanks" in r.text or "thank" in r.text.lower()
+
+    def test_post_empty_returns_400(self, client):
+        # only reserved keys -> no data -> 400
+        r = client.post(f"{API}/submissions", json={"_wd_form": self.form_name},
+                        headers={"Accept": "application/json"})
+        assert r.status_code == 400
+        detail = r.json().get("detail", "")
+        assert "No form fields" in detail
+
+    def test_list_newest_first_and_filter(self):
+        # ensure at least two entries in form_name (from prior tests)
+        lst = requests.get(f"{API}/submissions", params={"form_name": self.form_name}, timeout=10).json()
+        assert isinstance(lst, list)
+        assert len(lst) >= 2
+        # newest-first: created_at descending
+        times = [s["created_at"] for s in lst]
+        assert times == sorted(times, reverse=True)
+        # unrelated filter returns []
+        other = requests.get(f"{API}/submissions", params={"form_name": "NOPE_no_such_form_xyz"}, timeout=10).json()
+        assert other == []
+
+    def test_delete_one_and_verify(self):
+        # create dedicated entry to delete
+        r = requests.post(
+            f"{API}/submissions",
+            json={"_wd_form": self.form_name, "name": "ToDelete"},
+            headers={"Accept": "application/json"},
+            timeout=10,
+        )
+        sid = r.json()["id"]
+        d = requests.delete(f"{API}/submissions/{sid}", timeout=10)
+        assert d.status_code == 200
+        assert d.json().get("ok") is True
+        # verify gone
+        lst = requests.get(f"{API}/submissions", params={"form_name": self.form_name}, timeout=10).json()
+        assert not any(s["id"] == sid for s in lst)
+
+    def test_delete_unknown_404(self):
+        r = requests.delete(f"{API}/submissions/nope-xyz", timeout=10)
+        assert r.status_code == 404
+
+    def test_clear_by_form_name(self):
+        # Ensure at least one exists for form_name
+        requests.post(
+            f"{API}/submissions",
+            json={"_wd_form": self.form_name, "extra": "clearme"},
+            headers={"Accept": "application/json"},
+            timeout=10,
+        )
+        r = requests.delete(f"{API}/submissions", params={"form_name": self.form_name}, timeout=10)
+        assert r.status_code == 200
+        d = r.json()
+        assert d.get("ok") is True
+        assert isinstance(d.get("deleted"), int) and d["deleted"] >= 1
+        # verify gone
+        lst = requests.get(f"{API}/submissions", params={"form_name": self.form_name}, timeout=10).json()
+        assert lst == []

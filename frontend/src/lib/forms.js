@@ -3,6 +3,10 @@
 
 const uid = (p = "f") => `${p}-${Math.random().toString(36).slice(2, 8)}`;
 
+// Default backend inbox for forms built in Web Dojo. Deployed/previewed sites
+// POST here so submissions are captured. Users can override with Formspree/etc.
+const SUBMIT_ENDPOINT = `${process.env.REACT_APP_BACKEND_URL}/api/submissions`;
+
 const escape = (s = "") =>
   String(s)
     .replace(/&/g, "&amp;")
@@ -30,7 +34,8 @@ export const FIELD_TYPES = [
 
 export const DEFAULT_FORM = () => ({
   id: uid("form"),
-  action: "https://formspree.io/f/your-id",
+  name: "Contact form",
+  action: SUBMIT_ENDPOINT,
   method: "POST",
   submit_label: "Send message",
   success_message: "Thanks! We'll be in touch.",
@@ -143,7 +148,11 @@ export const buildFormHtml = (config) => {
     return `<div style="flex:1 1 ${isInline ? "220px" : "100%"};min-width:0;">${labelHtml}${fieldControl(f, css, config.layout)}</div>`;
   });
 
-  return `<form action="${escape(config.action)}" method="${escape(config.method || "POST")}" data-form-id="${escape(config.id)}" style="max-width:640px;margin:32px auto;padding:32px;background:${css.formBg};border:1px solid ${css.fieldBorder};border-radius:${css.radius};font-family:Inter,system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,0.06);"><div style="display:flex;flex-wrap:wrap;gap:${gap};">${rows.join("")}</div><button type="submit" style="margin-top:20px;padding:14px 24px;background:${css.btnBg};color:${css.btnFg};border:none;border-radius:${css.radius};font-size:15px;font-weight:600;cursor:pointer;letter-spacing:0.01em;">${escape(config.submit_label || "Submit")}</button><p style="margin:12px 0 0;font-size:12px;color:${css.helpFg};">${escape(config.success_message || "")}</p></form>`;
+  const successMsg = escape(config.success_message || "Thanks! Your submission was received.");
+  const formName = escape(config.name || config.submit_label || "Untitled form");
+  const meta = `<input type="hidden" name="_wd_form" value="${formName}" /><input type="hidden" name="_wd_form_id" value="${escape(config.id)}" />`;
+  const script = `<script>(function(){var fs=document.querySelectorAll('form[data-form-id="${config.id}"]');Array.prototype.forEach.call(fs,function(f){if(f.__wdBound){return;}f.__wdBound=1;f.addEventListener('submit',function(ev){ev.preventDefault();var fd=new FormData(f);fd.append('_wd_page',location.href);fd.append('_wd_title',document.title);var b=f.querySelector('[type=submit],button');if(b){b.disabled=true;}fetch(f.getAttribute('action'),{method:'POST',body:fd,headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok){throw 0;}f.innerHTML='<div style="padding:16px 0;color:#16a34a;font-weight:600;font-size:15px;font-family:Inter,system-ui,sans-serif;">'+(f.getAttribute('data-success')||'Thanks!')+'</div>';}).catch(function(){if(b){b.disabled=false;}alert('Sorry, something went wrong. Please try again.');});});});})();<\/script>`;
+  return `<form action="${escape(config.action)}" method="${escape(config.method || "POST")}" data-form-id="${escape(config.id)}" data-success="${successMsg}" style="max-width:640px;margin:32px auto;padding:32px;background:${css.formBg};border:1px solid ${css.fieldBorder};border-radius:${css.radius};font-family:Inter,system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,0.06);">${meta}<div style="display:flex;flex-wrap:wrap;gap:${gap};">${rows.join("")}</div><button type="submit" style="margin-top:20px;padding:14px 24px;background:${css.btnBg};color:${css.btnFg};border:none;border-radius:${css.radius};font-size:15px;font-weight:600;cursor:pointer;letter-spacing:0.01em;">${escape(config.submit_label || "Submit")}</button><p style="margin:12px 0 0;font-size:12px;color:${css.helpFg};">${escape(config.success_message || "")}</p></form>${script}`;
 };
 
 // Small library of ready-to-drop form presets.

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Search, X, FilePlus, Plus, Sparkles } from "lucide-react";
 import { PAGE_LAYOUTS, CATEGORY_ORDER, CATEGORY_META } from "@/lib/pageLayouts";
 import { buildStandaloneHtml } from "@/lib/exportHtml";
@@ -42,6 +42,7 @@ export const AddPageModal = ({ open, onClose, onAddBlank, onAddLayout }) => {
       <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-6xl w-[94vw] max-h-[92vh] overflow-hidden p-0" data-testid="add-page-modal">
         <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
           <DialogTitle className="flex items-center gap-2 text-base"><Sparkles size={16} className="text-indigo-400" /> Add a page</DialogTitle>
+          <DialogDescription className="sr-only">Choose a ready-made, editable page layout or start from a blank page.</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-[320px_1fr] max-h-[calc(92vh-58px)]">

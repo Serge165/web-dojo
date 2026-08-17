@@ -1,11 +1,10 @@
 import React, { useRef, useState } from "react";
-import { Code2, MousePointer2, Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Eye } from "lucide-react";
+import { Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Inbox } from "lucide-react";
 import { scanHtml } from "@/lib/importHtml";
 import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { toast } from "sonner";
 
 export const TopBar = ({
-  mode, setMode,
   projectName, setProjectName,
   onImportSections,
   project,
@@ -16,7 +15,8 @@ export const TopBar = ({
   onShare,
   onPublish,
   onStartTour,
-  onFind, onAssets, onAnalytics, onTemplates,
+  onFind, onAssets, onAnalytics, onTemplates, onSubmissions,
+  onOpenTransfer,
 }) => {
   const fileRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -84,24 +84,6 @@ export const TopBar = ({
             ><Icon size={13} /></button>
           ))}
         </div>
-
-        <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5" data-testid="mode-toggle">
-          <button
-            onClick={() => setMode("design")}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "design" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
-            data-testid="mode-design"
-          ><MousePointer2 size={12} /> Design</button>
-          <button
-            onClick={() => setMode("code")}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
-            data-testid="mode-code"
-          ><Code2 size={12} /> Code</button>
-          <button
-            onClick={() => setMode("preview")}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
-            data-testid="mode-preview"
-          ><Eye size={12} /> Preview</button>
-        </div>
       </div>
 
       <div className="flex items-center gap-2 relative">
@@ -133,6 +115,8 @@ export const TopBar = ({
           <div className="absolute right-40 top-11 w-52 bg-[#141414] border border-[#2B2B2B] rounded-md p-1 z-50 shadow-2xl" data-testid="export-menu">
             <button onClick={() => { downloadStandalone(project); setExportOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-[#1F1F1F] text-gray-200" data-testid="export-standalone">Standalone .html (inline CSS)</button>
             <button onClick={() => { downloadZip(project); setExportOpen(false); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-[#1F1F1F] text-gray-200" data-testid="export-zip">HTML + CSS (.zip)</button>
+            <div className="h-px bg-[#2B2B2B] my-1" />
+            <button onClick={() => { setExportOpen(false); onOpenTransfer && onOpenTransfer(); }} className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-[#1F1F1F] text-indigo-300" data-testid="export-more">More: JSON, Figma, Webflow, URL…</button>
           </div>
         )}
 
@@ -143,6 +127,7 @@ export const TopBar = ({
         <button onClick={onAssets} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Design tokens (colors/fonts/spacing)" data-testid="assets-btn"><Palette size={14} /></button>
         <button onClick={onAnalytics} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Analytics" data-testid="analytics-btn"><BarChart3 size={14} /></button>
         <button onClick={onTemplates} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Project templates" data-testid="templates-btn"><LayoutTemplate size={14} /></button>
+        <button onClick={onSubmissions} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Form submissions inbox" data-testid="submissions-btn"><Inbox size={14} /></button>
         <div className="h-6 w-px bg-[#2B2B2B]" />
         <button onClick={onSave} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white" data-testid="save-btn"><Save size={12} /> Save</button>
         <button onClick={onOpenLoad} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" data-testid="load-btn"><FolderOpen size={12} /> Open</button>

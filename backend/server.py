@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any
@@ -17,6 +17,7 @@ import uuid
 from datetime import datetime, timezone
 from cryptography.fernet import Fernet
 import stripe
+import httpx
 
 
 ROOT_DIR = Path(__file__).parent
@@ -854,6 +855,136 @@ async def commerce_checkout_session(payload: CheckoutSessionCreate):
     except Exception as e:
         detail = getattr(e, "user_message", None) or f"{type(e).__name__}: {e}"
         raise HTTPException(status_code=502, detail=f"Stripe checkout failed: {detail}")
+
+
+class UrlImport(BaseModel):
+    url: str
+
+
+@api_router.post("/import/url")
+async def import_url(payload: UrlImport):
+    """Fetch a public page's HTML so the builder can import its sections."""
+    url = (payload.url or "").strip()
+    if not (url.startswith("http://") or url.startswith("https://")):
+        raise HTTPException(status_code=400, detail="Enter a valid http(s) URL")
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
+            r = await client.get(url)
+        return {"html": r.text[:2_000_000], "status": r.status_code}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not fetch that URL ({type(e).__name__})")
+
+
+# ---------- Form Submissions Inbox ----------
+# Deployed/exported static sites POST their form data here so Web Dojo acts as a
+# lightweight form backend. The generated form block sends multipart FormData via
+# fetch (Accept: application/json) and shows an inline success message. Native
+# no-JS POSTs get a friendly HTML thank-you page.
+
+class Submission(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    project_id: Optional[str] = None
+    form_id: Optional[str] = None
+    form_name: str = "Untitled form"
+    page_url: str = ""
+    page_title: str = ""
+    data: dict = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+_RESERVED_SUB_KEYS = {"_wd_form", "_wd_form_id", "_wd_page", "_wd_title", "_wd_project"}
+
+
+async def _extract_submission(request: Request) -> Submission:
+    ctype = (request.headers.get("content-type") or "").lower()
+    meta: dict = {}
+    data: dict = {}
+    if "application/json" in ctype:
+        body = await request.json()
+        if not isinstance(body, dict):
+            body = {}
+        nested = body.get("data") if isinstance(body.get("data"), dict) else None
+        for k, v in body.items():
+            if k in _RESERVED_SUB_KEYS:
+                meta[k] = v
+            elif k != "data":
+                data[k] = v
+        if nested:
+            data.update(nested)
+    else:
+        form = await request.form()
+        for k in dict.fromkeys(form.keys()):
+            parsed = []
+            for v in form.getlist(k):
+                filename = getattr(v, "filename", None)
+                parsed.append(f"[file] {filename}" if filename else v)
+            val = parsed[0] if len(parsed) == 1 else parsed
+            if k in _RESERVED_SUB_KEYS:
+                meta[k] = val
+            else:
+                data[k] = val
+    return Submission(
+        project_id=(meta.get("_wd_project") or None),
+        form_id=(meta.get("_wd_form_id") or None),
+        form_name=(str(meta.get("_wd_form") or "").strip() or "Untitled form"),
+        page_url=str(meta.get("_wd_page") or ""),
+        page_title=str(meta.get("_wd_title") or ""),
+        data=data,
+    )
+
+
+_THANK_YOU_HTML = (
+    "<!doctype html><html><head><meta charset='utf-8'><title>Thank you</title>"
+    "<style>body{margin:0;font-family:system-ui,sans-serif;background:#0d0d0d;color:#f4f4f4;"
+    "display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;}"
+    ".c{max-width:440px;padding:32px;}h1{font-size:22px;margin:0 0 8px;}a{color:#4f46e5;text-decoration:none;}</style>"
+    "</head><body><div class='c'><h1>Thanks!</h1><p>Your submission was received.</p>"
+    "<p><a href='javascript:history.back()'>&larr; Go back</a></p></div></body></html>"
+)
+
+
+@api_router.post("/submissions")
+async def create_submission(request: Request):
+    try:
+        sub = await _extract_submission(request)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Could not read form data: {type(e).__name__}")
+    if not sub.data:
+        raise HTTPException(status_code=400, detail="No form fields were submitted")
+    doc = _serialize(sub.model_dump())
+    await db.submissions.insert_one(doc.copy())
+    accept = (request.headers.get("accept") or "").lower()
+    if "application/json" in accept:
+        return {"ok": True, "id": sub.id}
+    return HTMLResponse(content=_THANK_YOU_HTML)
+
+
+@api_router.get("/submissions", response_model=List[Submission])
+async def list_submissions(project_id: Optional[str] = None, form_name: Optional[str] = None):
+    query: dict = {}
+    if project_id:
+        query["project_id"] = project_id
+    if form_name:
+        query["form_name"] = form_name
+    cursor = db.submissions.find(query, {"_id": 0}).sort("created_at", -1)
+    items = await cursor.to_list(1000)
+    return [Submission(**_deserialize(it)) for it in items]
+
+
+@api_router.delete("/submissions/{submission_id}")
+async def delete_submission(submission_id: str):
+    res = await db.submissions.delete_one({"id": submission_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"ok": True}
+
+
+@api_router.delete("/submissions")
+async def clear_submissions(form_name: Optional[str] = None):
+    query = {"form_name": form_name} if form_name else {}
+    res = await db.submissions.delete_many(query)
+    return {"ok": True, "deleted": res.deleted_count}
 
 
 app.include_router(api_router)

@@ -677,6 +677,18 @@ export const PAGE_LAYOUTS = [
     heroCenter(T.modern, { eyebrow: "Live demo", title: "Add to cart, then check out for real", sub: "Items save in the cart drawer (bottom-right). Checkout hands off to Stripe or PayPal." }),
     productGrid(T.modern), cart(T.modern), footer(T.modern, "MARKET"), cartRuntime(T.modern.accent),
   ]),
+  layout("shop-thankyou", "Shop", "Thank You / Order Received", "Post-checkout confirmation page (shows a success banner).", T.modern, [
+    nav(T.modern, "MARKET", ["Shop", "New", "About", "Cart"]),
+    `<section style="font-family:${T.modern.body};background:${T.modern.bg};padding:110px 32px;text-align:center;">
+      <div style="max-width:560px;margin:0 auto;">
+        <div style="width:76px;height:76px;border-radius:999px;background:#16a34a1a;color:#16a34a;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:38px;">✓</div>
+        <h1 style="font-family:${T.modern.head};font-size:42px;letter-spacing:-.02em;color:${T.modern.fg};margin:0 0 14px;font-weight:700;">Thank you for your order!</h1>
+        <p style="font-size:17px;color:${T.modern.muted};line-height:1.6;margin:0 0 30px;">Your payment was successful and a confirmation email is on its way. Order <strong style="color:${T.modern.fg};">#WD-2026-1042</strong>.</p>
+        <a href="/" style="display:inline-block;padding:14px 30px;background:${T.modern.accent};color:${T.modern.onAccent};border-radius:${T.modern.radius};text-decoration:none;font-weight:600;">Continue shopping</a>
+      </div>
+    </section>`,
+    footer(T.modern, "MARKET"), cartRuntime(T.modern.accent),
+  ]),
 
   // ---------------- Industries ----------------
   layout("industry-esports", "Industry", "Esports Org", "Neon competitive-gaming team homepage.", T.neon, [
