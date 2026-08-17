@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { getFxClip, setFxClip, subscribeFxClip } from "@/lib/fxClipboard";
 
@@ -147,6 +147,7 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
   useEffect(() => subscribeFxClip(setClip), []);
   const [library, setLibrary] = useState(() => { try { return JSON.parse(localStorage.getItem("webdojo_style_library") || "[]"); } catch { return []; } });
   const [libName, setLibName] = useState("");
+  const fileRef = useRef(null);
 
   const needSel = () => { if (!selected) { toast.info("Select a text element (H1–H6, p, button…) first"); return true; } return false; };
   const getPatch = (fx) => (fx.patchFn ? fx.patchFn(intensity) : fx.patch);
@@ -262,6 +263,44 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
     localStorage.setItem("webdojo_style_library", JSON.stringify(next));
   };
 
+  const exportLibrary = () => {
+    if (!library.length) { toast.info("Your library is empty — save a style first"); return; }
+    const blob = new Blob([JSON.stringify(library, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "webdojo-style-library.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast.success(`Exported ${library.length} style${library.length === 1 ? "" : "s"}`);
+  };
+
+  const importLibrary = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!Array.isArray(parsed)) throw new Error("not an array");
+        const seen = new Set(library.map((x) => JSON.stringify({ n: x.name, s: x.style, h: x.hover })));
+        const incoming = parsed
+          .filter((x) => x && typeof x === "object" && x.style && typeof x.style === "object")
+          .filter((x) => !seen.has(JSON.stringify({ n: x.name, s: x.style, h: x.hover })))
+          .map((x, i) => ({ id: `lib-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`, name: String(x.name || "Imported style"), style: x.style, hover: Array.isArray(x.hover) ? x.hover : [] }));
+        if (!incoming.length) { toast.info("Nothing new to import"); return; }
+        const next = [...library, ...incoming];
+        setLibrary(next);
+        localStorage.setItem("webdojo_style_library", JSON.stringify(next));
+        toast.success(`Imported ${incoming.length} style${incoming.length === 1 ? "" : "s"}`);
+      } catch { toast.error("That file isn't a valid Style Library export"); }
+    };
+    reader.readAsText(file);
+  };
+
   const hasHover = !!selected && /wd-tfx-/.test(selected.html);
   const animPreviewCss = ANIM_FX.map((fx) => (fx.keyframesFn ? fx.keyframesFn(`wdtfxprev_${fx.id}`, intensity) : fx.keyframes(`wdtfxprev_${fx.id}`))).join("\n");
 
@@ -322,7 +361,14 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
 
       {/* Style library (persists across projects via localStorage) */}
       <div className="space-y-1.5 pt-3 border-t border-[#2B2B2B]">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Library size={12} /> Style library</div>
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Library size={12} /> Style library</div>
+          <div className="flex items-center gap-1">
+            <button onClick={exportLibrary} disabled={!library.length} className="p-1 rounded border border-[#2B2B2B] text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" title="Export library as a file" data-testid="style-lib-export"><Download size={11} /></button>
+            <button onClick={() => fileRef.current && fileRef.current.click()} className="p-1 rounded border border-[#2B2B2B] text-gray-400 hover:text-gray-200" title="Import a library file" data-testid="style-lib-import"><Upload size={11} /></button>
+            <input ref={fileRef} type="file" accept="application/json,.json" onChange={importLibrary} className="hidden" data-testid="style-lib-import-input" />
+          </div>
+        </div>
         {library.length > 0 ? (
           <div className="grid grid-cols-3 gap-1.5">
             {library.map((entry) => (

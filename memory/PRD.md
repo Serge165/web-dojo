@@ -30,6 +30,11 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (n) — Style Library export / import
+- **Export / Import Style Library** (`TextEffectsPanel.jsx`): Export (`style-lib-export`) downloads the saved library as `webdojo-style-library.json`; Import (`style-lib-import` → hidden `style-lib-import-input`) reads a JSON file, validates it's an array of `{name,style,hover}` entries, dedupes against existing (by name+style+hover), assigns fresh unique ids, and merges + persists to localStorage. Invalid files show an error toast and leave the library intact. Lets teammates share style presets as files.
+- Tested: iteration_26 frontend E2E — export download, import merge/dedupe/validate, persist-across-reload, and regression all pass, zero console errors.
+
+
 ### Session Jun 2026 (m) — Paste To Many + Style Library
 - **Paste To Many** (`LayersPanel.jsx` + `Builder.applyStyleToIds` + `lib/fxClipboard.js`): each Layers row has a checkbox; checking rows shows a batch bar with "Paste to N" that applies the copied style (text FX + shape + hover, re-injecting hover rules as needed) to all checked elements at once. Clipboard is a shared session singleton so Copy (Text FX tab) and batch Paste (Layers) share state.
 - **Style Library** (`TextEffectsPanel.jsx`): save the copied style as a named entry (persisted in `localStorage['webdojo_style_library']`) shown as clickable thumbnails; clicking applies to the selection and loads it to the clipboard (so it can then be pasted to many). Entries carry portable hover-rule templates (`__CLS__` token) so they work across projects. Delete per entry.
