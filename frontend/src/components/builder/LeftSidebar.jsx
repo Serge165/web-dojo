@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { CATEGORIES, cardTemplate, WEB_SAFE_FONTS } from "@/lib/blocks";
 import { ChevronDown, ChevronRight, Type, Plus, Trash2 } from "lucide-react";
 import { FileTree } from "./FileTree";
+import { ComponentThumbnail } from "./ComponentThumbnail";
 
 export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
@@ -145,20 +146,36 @@ export const LeftSidebar = ({
       )}
 
       {tab === "saved" && (
-        <div className="flex-1 overflow-y-auto p-2 space-y-1.5" data-testid="saved-components">
+        <div className="flex-1 overflow-y-auto p-2 space-y-2" data-testid="saved-components">
           {savedComponents.length === 0 && (
             <div className="text-[11px] text-gray-500 p-3 text-center">
               Click the save icon on any canvas element to keep it here for future projects.
             </div>
           )}
           {savedComponents.map((c) => (
-            <BlockItem
+            <div
               key={c.id}
-              label={c.name}
-              html={c.html}
-              testId={`saved-${c.id}`}
-              onDelete={() => onDeleteSavedComponent(c.id)}
-            />
+              draggable
+              onDragStart={(e) => { e.dataTransfer.setData("text/html-block", c.html); e.dataTransfer.effectAllowed = "copy"; }}
+              onDoubleClick={() => onAddBlock(c.html)}
+              className="rounded overflow-hidden border border-[#2B2B2B] bg-[#1F1F1F] hover:border-blue-500/60 cursor-grab group"
+              data-testid={`saved-${c.id}`}
+              title="Drag to canvas or double-click to insert"
+            >
+              <div className="bg-white">
+                <ComponentThumbnail html={c.html} width={232} height={120} scale={0.18} />
+              </div>
+              <div className="flex items-center gap-2 px-2 py-1.5">
+                <div className="w-1 h-3 bg-blue-500/60 rounded-full" />
+                <span className="text-xs text-gray-200 flex-1 truncate">{c.name}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDeleteSavedComponent(c.id); }}
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400"
+                  title="Delete saved component"
+                  data-testid={`saved-${c.id}-del`}
+                ><Trash2 size={11} /></button>
+              </div>
+            </div>
           ))}
         </div>
       )}

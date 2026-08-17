@@ -3,12 +3,93 @@
 
 const heroImg = "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?crop=entropy&cs=srgb&fm=jpg&w=1600&q=80";
 const avatarImg = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&w=400&q=80";
+const g1 = "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=70";
+const g2 = "https://images.unsplash.com/photo-1520975916090-3105956dac38?w=800&q=70";
+const g3 = "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=70";
+const g4 = "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=70";
+const g5 = "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=800&q=70";
+const g6 = "https://images.unsplash.com/photo-1441829266145-6d4bfbf99bd8?w=800&q=70";
 
 export const CATEGORIES = [
   {
     id: "components",
     label: "Components",
     blocks: [
+      {
+        id: "cmp-gallery-grid",
+        label: "Gallery · 3-col Grid",
+        html: `<section style="padding:64px 32px;background:#ffffff;font-family:Manrope,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0 0 24px;color:#0f172a;">Gallery</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <img src="${g1}" style="width:100%;height:220px;object-fit:cover;border-radius:12px;" alt="" />
+      <img src="${g2}" style="width:100%;height:220px;object-fit:cover;border-radius:12px;" alt="" />
+      <img src="${g3}" style="width:100%;height:220px;object-fit:cover;border-radius:12px;" alt="" />
+      <img src="${g4}" style="width:100%;height:220px;object-fit:cover;border-radius:12px;" alt="" />
+      <img src="${g5}" style="width:100%;height:220px;object-fit:cover;border-radius:12px;" alt="" />
+      <img src="${g6}" style="width:100%;height:220px;object-fit:cover;border-radius:12px;" alt="" />
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-gallery-masonry",
+        label: "Gallery · Masonry",
+        html: `<section style="padding:64px 32px;background:#0f172a;font-family:Manrope,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0 0 24px;color:#ffffff;">Curated</h2>
+    <div style="column-count:3;column-gap:12px;">
+      <img src="${g1}" style="width:100%;margin-bottom:12px;border-radius:12px;display:block;" alt="" />
+      <img src="${g3}" style="width:100%;margin-bottom:12px;border-radius:12px;display:block;" alt="" />
+      <img src="${g5}" style="width:100%;margin-bottom:12px;border-radius:12px;display:block;" alt="" />
+      <img src="${g2}" style="width:100%;margin-bottom:12px;border-radius:12px;display:block;" alt="" />
+      <img src="${g4}" style="width:100%;margin-bottom:12px;border-radius:12px;display:block;" alt="" />
+      <img src="${g6}" style="width:100%;margin-bottom:12px;border-radius:12px;display:block;" alt="" />
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-gallery-carousel",
+        label: "Gallery · Scroll Carousel",
+        html: `<section style="padding:56px 0;background:#fafafa;font-family:Manrope,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto 20px;padding:0 32px;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0;color:#0f172a;">Featured</h2>
+  </div>
+  <div style="display:flex;gap:14px;overflow-x:auto;padding:0 32px 20px;scroll-snap-type:x mandatory;">
+    ${[g1,g2,g3,g4,g5,g6].map(u=>`<img src="${u}" style="height:320px;min-width:420px;object-fit:cover;border-radius:16px;scroll-snap-align:start;" alt="" />`).join("")}
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-gallery-hover",
+        label: "Gallery · Hover Zoom",
+        html: `<section style="padding:64px 32px;background:#ffffff;font-family:Manrope,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+    ${[g1,g2,g3,g4,g5,g6,g1,g2].map(u=>`<div style="overflow:hidden;border-radius:10px;aspect-ratio:1/1;"><img src="${u}" style="width:100%;height:100%;object-fit:cover;transition:transform 400ms cubic-bezier(.22,1,.36,1);" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" alt="" /></div>`).join("")}
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-gallery-polaroid",
+        label: "Gallery · Polaroid Stack",
+        html: `<section style="padding:80px 32px;background:#f5efe6;font-family:Manrope,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;gap:28px;">
+    ${[[g1,-6],[g2,4],[g3,-3],[g4,6],[g5,-4],[g6,3]].map(([u,r])=>`<figure style="background:#fff;padding:12px 12px 28px;box-shadow:0 12px 30px rgba(0,0,0,.12);transform:rotate(${r}deg);"><img src="${u}" style="display:block;width:240px;height:200px;object-fit:cover;" alt="" /><figcaption style="text-align:center;font-family:'Courier New',monospace;font-size:12px;margin-top:8px;color:#333;">memory</figcaption></figure>`).join("")}
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-gallery-lightbox",
+        label: "Gallery · Featured + Thumbs",
+        html: `<section style="padding:64px 32px;background:#ffffff;font-family:Manrope,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr;gap:12px;grid-auto-rows:220px;">
+    <img src="${g1}" style="grid-row:span 2;width:100%;height:100%;object-fit:cover;border-radius:14px;" alt="" />
+    <img src="${g2}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" alt="" />
+    <img src="${g3}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" alt="" />
+  </div>
+</section>`,
+      },
       {
         id: "cmp-header-lrg",
         label: "Large Header",

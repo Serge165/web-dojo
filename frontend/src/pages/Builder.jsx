@@ -310,6 +310,8 @@ export default function Builder() {
           onApplyTheme={applyTheme}
           canvasBg={canvasBg}
           onCanvasBg={setCanvasBg}
+          headHtml={headHtml}
+          onHeadHtmlChange={setHeadHtml}
           elements={elements}
           selectedId={selectedId}
           onSelect={setSelectedId}

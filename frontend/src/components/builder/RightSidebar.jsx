@@ -6,6 +6,7 @@ import { LayersPanel } from "./LayersPanel";
 import { BackgroundMediaPanel } from "./BackgroundMediaPanel";
 import { AnimationGenerator } from "./AnimationGenerator";
 import { ThemeGenerator } from "./ThemeGenerator";
+import { CDNPanel } from "./CDNPanel";
 
 const TABS = [
   { id: "color", label: "Color" },
@@ -13,8 +14,8 @@ const TABS = [
   { id: "style", label: "Style" },
   { id: "bg", label: "BG" },
   { id: "anim", label: "Motion" },
-  { id: "layers", label: "Layers" },
   { id: "theme", label: "Theme" },
+  { id: "cdn", label: "CDN" },
   { id: "page", label: "Page" },
 ];
 
@@ -28,6 +29,8 @@ export const RightSidebar = ({
   onApplyTheme,
   canvasBg,
   onCanvasBg,
+  headHtml,
+  onHeadHtmlChange,
   elements,
   selectedId,
   onSelect,
@@ -93,23 +96,28 @@ export const RightSidebar = ({
         )}
 
         {tab === "bg" && (
-          <BackgroundMediaPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
+          <div className="space-y-4">
+            <BackgroundMediaPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
+            <div className="pt-3 border-t border-[#2B2B2B]">
+              <LayersPanel
+                elements={elements}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                onMove={onMove}
+                onDelete={onDelete}
+                onToggleVisible={onToggleVisible}
+                onSetZIndex={onSetZIndex}
+              />
+            </div>
+          </div>
         )}
 
         {tab === "anim" && (
           <AnimationGenerator selected={selected} onApplyAnimation={onApplyAnimation} />
         )}
 
-        {tab === "layers" && (
-          <LayersPanel
-            elements={elements}
-            selectedId={selectedId}
-            onSelect={onSelect}
-            onMove={onMove}
-            onDelete={onDelete}
-            onToggleVisible={onToggleVisible}
-            onSetZIndex={onSetZIndex}
-          />
+        {tab === "cdn" && (
+          <CDNPanel headHtml={headHtml} onHeadHtmlChange={onHeadHtmlChange} />
         )}
 
         {tab === "theme" && (
