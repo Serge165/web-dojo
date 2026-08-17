@@ -18,6 +18,8 @@ import { AssetsLibrary } from "@/components/builder/AssetsLibrary";
 import { AnalyticsModal } from "@/components/builder/AnalyticsModal";
 import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModal";
 import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
+import { AddPageModal } from "@/components/builder/AddPageModal";
+import { PaymentButtonModal } from "@/components/builder/PaymentButtonModal";
 import { buildStandaloneHtml } from "@/lib/exportHtml";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -67,6 +69,8 @@ export default function Builder() {
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [formBuilderOpen, setFormBuilderOpen] = useState(false);
+  const [addPageOpen, setAddPageOpen] = useState(false);
+  const [paymentBuilderOpen, setPaymentBuilderOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
 
@@ -155,6 +159,23 @@ export default function Builder() {
     setCanvasBg("#ffffff");
     setFonts([]);
     setSelectedId(null);
+  };
+  const addPageFromLayout = (layout) => {
+    const id = uid();
+    const els = (layout.blocks || []).map((html) => ({ id: uid(), html }));
+    const bg = layout.canvasBg || "#ffffff";
+    const fnts = layout.fonts || [];
+    setPages((ps) => {
+      const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p);
+      return [...persisted, { id, name: layout.label, slug: layout.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: bg, fonts: fnts }];
+    });
+    setActivePageId(id);
+    setElements(els);
+    setHeadHtml("");
+    setCanvasBg(bg);
+    setFonts(fnts);
+    setSelectedId(null);
+    toast.success(`Added "${layout.label}" page`);
   };
   const removePage = (id) => {
     if (pages.length <= 1) { toast.error("Keep at least one page"); return; }
@@ -444,7 +465,7 @@ export default function Builder() {
         pages={pages}
         activePageId={activePageId}
         onSwitch={switchPage}
-        onAdd={newPage}
+        onAdd={() => setAddPageOpen(true)}
         onRemove={removePage}
         onRename={renamePage}
         onSetStatus={setPageStatus}
@@ -467,6 +488,7 @@ export default function Builder() {
             hasSelection={!!selected}
             selectedHtml={selected?.html || ""}
             onOpenFormBuilder={() => setFormBuilderOpen(true)}
+            onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
           />
         )}
 
@@ -529,6 +551,7 @@ export default function Builder() {
             onCanvasBg={setCanvasBg}
             headHtml={headHtml}
             onHeadHtmlChange={setHeadHtml}
+            onAddBlock={(html) => addBlock(html)}
             elements={elements}
             selectedId={selectedId}
             onSelect={setSelectedId}
@@ -663,6 +686,19 @@ export default function Builder() {
             setSavedComponents((c) => [res.data, ...c]);
           } catch { toast.error("Failed to save form to library"); }
         }}
+      />
+
+      <AddPageModal
+        open={addPageOpen}
+        onClose={() => setAddPageOpen(false)}
+        onAddBlank={newPage}
+        onAddLayout={addPageFromLayout}
+      />
+
+      <PaymentButtonModal
+        open={paymentBuilderOpen}
+        onClose={() => setPaymentBuilderOpen(false)}
+        onInsert={(html) => addBlock(html)}
       />
 
       <OnboardingTour key={tourForce} force={tourForce > 0} />

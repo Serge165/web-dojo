@@ -634,3 +634,45 @@ class TestStarterTemplates:
         d = client.delete(f"{API}/templates/{tid}")
         assert d.status_code == 200
         assert d.json().get("ok") is True
+
+
+
+# ---------- Iteration 10: Commerce (Stripe) ----------
+
+class TestCommerce:
+    def test_commerce_config(self, client):
+        r = client.get(f"{API}/commerce/config")
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d.get("stripe_enabled") is True
+        assert isinstance(d.get("publishable_key"), str)
+        assert d.get("mode") == "test"
+        assert isinstance(d.get("currencies"), list) and "usd" in d["currencies"]
+
+    def test_payment_link_success(self, client):
+        r = client.post(f"{API}/commerce/payment-link", json={
+            "name": "TEST_it10_prod", "amount": 12.5, "currency": "usd", "quantity": 1
+        })
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert isinstance(d.get("url"), str) and d["url"].startswith("https://buy.stripe.com/")
+        assert isinstance(d.get("id"), str) and d["id"]
+        assert isinstance(d.get("price_id"), str) and d["price_id"]
+
+    def test_payment_link_empty_name_400(self, client):
+        r = client.post(f"{API}/commerce/payment-link", json={
+            "name": "", "amount": 5, "currency": "usd", "quantity": 1
+        })
+        assert r.status_code == 400, r.text
+
+    def test_payment_link_zero_amount_400(self, client):
+        r = client.post(f"{API}/commerce/payment-link", json={
+            "name": "TEST_it10_zero", "amount": 0, "currency": "usd", "quantity": 1
+        })
+        assert r.status_code == 400, r.text
+
+    def test_payment_link_negative_amount_400(self, client):
+        r = client.post(f"{API}/commerce/payment-link", json={
+            "name": "TEST_it10_neg", "amount": -3, "currency": "usd", "quantity": 1
+        })
+        assert r.status_code == 400, r.text

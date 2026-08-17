@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Music } from "lucide-react";
+import { toast } from "sonner";
 
 const SIZE_OPTIONS = [
   { label: "cover", value: "cover" },
@@ -9,19 +11,52 @@ const SIZE_OPTIONS = [
 
 const POS_OPTIONS = ["center", "top", "bottom", "left", "right", "top left", "top right", "bottom left", "bottom right"];
 
-export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml }) => {
+const CORNERS = {
+  "bottom-right": "bottom:18px;right:18px;",
+  "bottom-left": "bottom:18px;left:18px;",
+  "top-right": "top:18px;right:18px;",
+  "top-left": "top:18px;left:18px;",
+};
+
+const MIDI_CDN = "https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0";
+
+// Builds a self-contained background-music widget. Scripts execute in the live
+// preview iframe and the exported static file (not in the design canvas).
+const buildMusicHtml = ({ type, url, label, accent, corner, autoplay, loop }) => {
+  const pos = CORNERS[corner] || CORNERS["bottom-right"];
+  if (type === "midi") {
+    return `<div data-webdojo-music="midi" style="position:fixed;${pos}z-index:99999;background:#0f0f16;padding:10px 12px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35);font-family:system-ui,-apple-system,sans-serif;">
+  <script src="${MIDI_CDN}"></script>
+  <midi-player src="${url}" sound-font ${loop ? "loop " : ""}style="width:260px;display:block;"></midi-player>
+</div>`;
+  }
+  const aid = "wdm" + Math.random().toString(36).slice(2, 7);
+  return `<div data-webdojo-music="audio" style="position:fixed;${pos}z-index:99999;font-family:system-ui,-apple-system,sans-serif;">
+  <audio id="${aid}" src="${url}" ${loop ? "loop " : ""}${autoplay ? "autoplay " : ""}preload="auto"></audio>
+  <button type="button" onclick="var a=document.getElementById('${aid}');var s=this.querySelector('span');if(a.paused){a.play();s.textContent='Pause';}else{a.pause();s.textContent=${JSON.stringify(label)};}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:999px;background:${accent};color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.3);">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>${label}</span>
+  </button>
+</div>`;
+};
+
+export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBlock }) => {
   const [imgUrl, setImgUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [size, setSize] = useState("cover");
   const [position, setPosition] = useState("center");
   const [repeat, setRepeat] = useState("no-repeat");
 
-  if (!selected) {
-    return <div className="text-[11px] text-gray-500">Select an element on the canvas to apply background media.</div>;
-  }
+  // Background music (page-level)
+  const [musicType, setMusicType] = useState("mp3");
+  const [musicUrl, setMusicUrl] = useState("");
+  const [musicLabel, setMusicLabel] = useState("Play music");
+  const [musicAccent, setMusicAccent] = useState("#4f46e5");
+  const [musicCorner, setMusicCorner] = useState("bottom-right");
+  const [musicLoop, setMusicLoop] = useState(true);
+  const [musicAutoplay, setMusicAutoplay] = useState(false);
 
   const applyImage = () => {
-    if (!imgUrl.trim()) return;
+    if (!imgUrl.trim() || !selected) return;
     onPatch({
       "background-image": `url('${imgUrl.trim()}')`,
       "background-size": size,
@@ -29,16 +64,9 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml }) => {
       "background-repeat": repeat,
     });
   };
-
-  const clearBg = () => onPatch({
-    "background-image": "none",
-    background: "transparent",
-  });
-
+  const clearBg = () => selected && onPatch({ "background-image": "none", background: "transparent" });
   const applyVideo = () => {
-    if (!videoUrl.trim()) return;
-    // Wrap the current element's HTML with a positioned container that keeps a
-    // full-cover looping video behind the original content.
+    if (!videoUrl.trim() || !selected) return;
     const inner = selected.html;
     const wrapped = `<div data-forge-video-bg style="position:relative;overflow:hidden;">
   <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
@@ -49,45 +77,80 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml }) => {
     onReplaceHtml(wrapped);
   };
 
+  const addMusic = () => {
+    if (!musicUrl.trim()) { toast.error("Paste a link to your audio file first"); return; }
+    if (!onAddBlock) return;
+    onAddBlock(buildMusicHtml({
+      type: musicType, url: musicUrl.trim(), label: musicLabel || "Play music",
+      accent: musicAccent, corner: musicCorner, autoplay: musicAutoplay, loop: musicLoop,
+    }));
+    toast.success("Background music added to this page");
+  };
+
+  const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500";
+  const selCls = "bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-1 text-[11px] text-white outline-none focus:border-blue-500";
+
   return (
     <div className="space-y-4" data-testid="bg-media-panel">
+      {/* Background music — page level */}
       <div className="space-y-2">
+        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Music size={12} /> Background music</div>
+        <div className="grid grid-cols-2 gap-1.5">
+          <button onClick={() => setMusicType("mp3")} className={`py-1.5 rounded text-[11px] border ${musicType === "mp3" ? "bg-indigo-600 border-indigo-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`} data-testid="music-type-mp3">MP3 / audio</button>
+          <button onClick={() => setMusicType("midi")} className={`py-1.5 rounded text-[11px] border ${musicType === "midi" ? "bg-indigo-600 border-indigo-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`} data-testid="music-type-midi">MIDI</button>
+        </div>
+        <input value={musicUrl} onChange={(e) => setMusicUrl(e.target.value)} placeholder={musicType === "midi" ? "https://…/song.mid" : "https://…/track.mp3"} className={inputCls} data-testid="music-url" />
+        <div className="grid grid-cols-2 gap-1.5">
+          <select value={musicCorner} onChange={(e) => setMusicCorner(e.target.value)} className={selCls} data-testid="music-corner">
+            {Object.keys(CORNERS).map((c) => <option key={c} value={c}>{c.replace("-", " ")}</option>)}
+          </select>
+          {musicType === "mp3" ? (
+            <div className="flex items-center gap-1.5">
+              <input type="color" value={musicAccent} onChange={(e) => setMusicAccent(e.target.value)} className="w-8 h-7 rounded bg-transparent border border-[#2B2B2B]" data-testid="music-accent" title="Button colour" />
+              <input value={musicLabel} onChange={(e) => setMusicLabel(e.target.value)} className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="music-label" placeholder="Button text" />
+            </div>
+          ) : (
+            <div className="text-[10px] text-gray-500 flex items-center">Player has its own controls</div>
+          )}
+        </div>
+        <div className="flex items-center gap-3 text-[11px] text-gray-300">
+          <label className="flex items-center gap-1.5"><input type="checkbox" checked={musicLoop} onChange={(e) => setMusicLoop(e.target.checked)} data-testid="music-loop" /> Loop</label>
+          {musicType === "mp3" && (
+            <label className="flex items-center gap-1.5"><input type="checkbox" checked={musicAutoplay} onChange={(e) => setMusicAutoplay(e.target.checked)} data-testid="music-autoplay" /> Autoplay</label>
+          )}
+        </div>
+        <button onClick={addMusic} className="w-full text-xs py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white" data-testid="add-music-btn">Add to page</button>
+        <p className="text-[10px] text-gray-500 leading-relaxed">Adds a floating player fixed to the page corner. {musicType === "mp3" ? "Most browsers block silent autoplay, so the play button is the reliable option." : "MIDI plays via a small web player loaded from a CDN — host the .mid file somewhere that allows cross-origin (CORS) access, e.g. your own domain or a public CDN."}</p>
+      </div>
+
+      {/* Background image — element level */}
+      <div className="pt-3 border-t border-[#2B2B2B] space-y-2">
         <div className="text-[10px] uppercase tracking-wider text-gray-500">Background image</div>
-        <input
-          value={imgUrl}
-          onChange={(e) => setImgUrl(e.target.value)}
-          placeholder="https://…/photo.jpg"
-          className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500"
-          data-testid="bg-image-url"
-        />
+        {!selected && <div className="text-[11px] text-gray-500">Select an element to apply an image or video background.</div>}
+        <input value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} placeholder="https://…/photo.jpg" className={inputCls} data-testid="bg-image-url" disabled={!selected} />
         <div className="grid grid-cols-3 gap-1.5">
-          <select value={size} onChange={(e) => setSize(e.target.value)} className="bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="bg-image-size">
+          <select value={size} onChange={(e) => setSize(e.target.value)} className={selCls} data-testid="bg-image-size">
             {SIZE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-          <select value={position} onChange={(e) => setPosition(e.target.value)} className="bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="bg-image-position">
+          <select value={position} onChange={(e) => setPosition(e.target.value)} className={selCls} data-testid="bg-image-position">
             {POS_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
-          <select value={repeat} onChange={(e) => setRepeat(e.target.value)} className="bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="bg-image-repeat">
+          <select value={repeat} onChange={(e) => setRepeat(e.target.value)} className={selCls} data-testid="bg-image-repeat">
             {["no-repeat", "repeat", "repeat-x", "repeat-y"].map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <button onClick={applyImage} className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="apply-bg-image">Apply image</button>
-          <button onClick={clearBg} className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" data-testid="clear-bg">Clear</button>
+          <button onClick={applyImage} disabled={!selected} className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40" data-testid="apply-bg-image">Apply image</button>
+          <button onClick={clearBg} disabled={!selected} className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] disabled:opacity-40" data-testid="clear-bg">Clear</button>
         </div>
       </div>
 
+      {/* Background video — element level */}
       <div className="pt-3 border-t border-[#2B2B2B] space-y-2">
         <div className="text-[10px] uppercase tracking-wider text-gray-500">Background video</div>
-        <input
-          value={videoUrl}
-          onChange={(e) => setVideoUrl(e.target.value)}
-          placeholder="https://…/loop.mp4"
-          className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500"
-          data-testid="bg-video-url"
-        />
+        <input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://…/loop.mp4" className={inputCls} data-testid="bg-video-url" disabled={!selected} />
         <p className="text-[10px] text-gray-500">Wraps the selected element so the video plays behind its content.</p>
-        <button onClick={applyVideo} className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="apply-bg-video">Wrap with looping video</button>
+        <button onClick={applyVideo} disabled={!selected} className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40" data-testid="apply-bg-video">Wrap with looping video</button>
       </div>
     </div>
   );

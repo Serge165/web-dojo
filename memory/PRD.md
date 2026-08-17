@@ -28,7 +28,17 @@ gradients into CSS gradients.
 - **Data model**: `pages: [{ id, name, slug, status, seo, elements: [{ id, html }], head_html, canvas_bg, fonts }]`, plus site-wide `template`, `files`, `head_html`.
 - Blocks are portable HTML strings with inline styles so exports/publishes are standalone.
 
-## Implemented (through Feb 17, 2026)
+## Implemented (through Jun 2026)
+
+### Session Jun 2026 — Layouts, Ecommerce & Payments, Background Music
+- **Prebuilt Page Layouts (WordPress-style)** — the PagesBar "+ Page" now opens an `AddPageModal` picker (master–detail: searchable category list + live iframe preview) instead of only creating a blank page. ~34 editable layouts in `/app/frontend/src/lib/pageLayouts.js`, composed from reusable themed section builders. Categories: Home (3 variations), About (2), Services (2), Blog (2), Portfolio (3), Contact (2), FAQ (2), Pricing (2), Team, Testimonials, Coming soon (2), 404 (2), **Shop** (catalog, dark store, product detail, cart/checkout), and **Industry** (Esports, Band, Hotel, Restaurant, Gym, Photography, Agency, SaaS). Each layout carries its own `canvasBg` + Google `fonts`. "Start with a blank page" still available. Selecting a layout inserts its blocks as a new page tab (`addPageFromLayout` in Builder.jsx).
+- **Ecommerce + Payments** — new **Shop** tab (7th) in LeftSidebar (`CommerceTab.jsx`) with draggable store blocks (product card, pricing table, buy CTA strip) and a **Payment Button builder** (`PaymentButtonModal.jsx`). Two providers, both work on exported STATIC sites:
+  - **Stripe** — backend `POST /api/commerce/payment-link` creates a real Stripe **Payment Link** (`https://buy.stripe.com/…`) via the claimable **test sandbox** key; builder drops a styled anchor button pointing at it. `GET /api/commerce/config` reports enablement/currencies. Test card `4242 4242 4242 4242`.
+  - **PayPal** — client-side Smart Buttons SDK embed; user pastes their own Client ID (from developer.paypal.com) per-site.
+  - Stripe sandbox keys stored in `/app/backend/.env` (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_ACCOUNT_ID`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_MODE=test`). Amount guarded (>0, <=999999, rounded to 2dp).
+- **Background Music (MP3 + MIDI)** — right sidebar **BG** tab (`BackgroundMediaPanel.jsx`) gains a page-level music section. MP3 → floating play/pause pill widget (colour, label, corner, loop, optional autoplay). MIDI → `html-midi-player` web component via CDN (`tone` + `@magenta/music` + `html-midi-player@1.5.0`). Inserted as a self-contained fixed-position block (scripts run in Preview + export, not in the design canvas).
+
+
 
 ### Session Feb 17, 2026 (part 3)
 - **Template Preview Modal** — clicking a starter card now opens a full-screen preview (device viewport switcher desktop/tablet/mobile, sandboxed iframe rendering the template's first page). "Use this template" confirms and loads; "Close" returns to the gallery without loading.
@@ -77,6 +87,7 @@ gradients into CSS gradients.
 - CSS timelines tools + rename to "Web Dojo".
 
 ## Test Results
+- **Iteration 10 (Jun 2026)**: Backend 44/44 pass (5 new commerce tests: config, payment-link happy path returns real buy.stripe.com link, 400 on empty name / zero / negative amount). Frontend 100%: AddPageModal opens + category chips + preview iframe + confirm inserts blocks & creates new page tab (home-modern, industry-esports, blank all create tabs); Shop tab + 3 store blocks + payment builder; Stripe generate returns real link and inserts button; PayPal embed inserted with client-id; background music MP3 + MIDI blocks added; Preview mode mounts. Forms regression intact. No blocking issues.
 - **Iteration 9 (Feb 17, 2026)**: Frontend green — Preview mode hides sidebars and mounts device-framed iframe (1280/820/390), Template Preview modal opens on starter click without loading the template until "Use this template" is clicked, viewport switch resizes the modal iframe, Cancel returns to gallery without side-effects, Use confirms and loads. Backend regression: 28 starters unchanged.
 - **Iteration 8 (Feb 17, 2026)**: Backend 39/39 pass — 28 starters seeded correctly, encrypted preset passwords survive backend restart, all preset validation still works. Frontend: Forms tab renders 6 presets + Open builder button; FormBuilderModal opens with all data-testids present, add-field/select/edit/insert flow works, real `<form>` HTML lands on canvas. Templates modal search + 28 aesthetic chips filter correctly.
 - **Iteration 7 (Feb 17, 2026)**: Backend 39/39 pass — Publish preset encrypt/decrypt round-trip, 400 validation, 404 on unknown, 15 starters present with correct aesthetic + is_starter, starter DELETE returns 403, user templates still deletable, idempotent seeding survives supervisor restart.

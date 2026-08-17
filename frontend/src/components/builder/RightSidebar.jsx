@@ -31,6 +31,7 @@ export const RightSidebar = ({
   onCanvasBg,
   headHtml,
   onHeadHtmlChange,
+  onAddBlock,
   elements,
   selectedId,
   onSelect,
@@ -97,7 +98,7 @@ export const RightSidebar = ({
 
         {tab === "bg" && (
           <div className="space-y-4">
-            <BackgroundMediaPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
+            <BackgroundMediaPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} onAddBlock={onAddBlock} />
             <div className="pt-3 border-t border-[#2B2B2B]">
               <LayersPanel
                 elements={elements}

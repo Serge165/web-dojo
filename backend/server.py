@@ -16,6 +16,7 @@ from pathlib import Path
 import uuid
 from datetime import datetime, timezone
 from cryptography.fernet import Fernet
+import stripe
 
 
 ROOT_DIR = Path(__file__).parent
@@ -737,6 +738,62 @@ async def publish_project(project_id: str, payload: PublishRequest):
         "path": payload.remote_path,
         "uploaded": uploaded,
     }
+
+
+# ---------- Commerce: Stripe payment links for static/exported sites ----------
+# Web Dojo users export STATIC HTML published over FTP (no server on the
+# published site). Stripe Payment Links are hosted checkout URLs that work
+# from any static page, so the builder generates a link server-side and drops
+# a "Buy" button that points at it. Uses the claimable sandbox key.
+
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY") or "sk_test_emergent"
+
+
+class PaymentLinkCreate(BaseModel):
+    name: str
+    amount: float
+    currency: str = "usd"
+    quantity: int = 1
+
+
+def _create_payment_link(name: str, amount: float, currency: str, quantity: int) -> dict:
+    price = stripe.Price.create(
+        currency=(currency or "usd").lower(),
+        unit_amount=int(round(round(amount, 2) * 100)),
+        product_data={"name": name},
+    )
+    link = stripe.PaymentLink.create(
+        line_items=[{"price": price.id, "quantity": max(1, int(quantity or 1))}],
+    )
+    return {"url": link.url, "id": link.id, "price_id": price.id}
+
+
+@api_router.get("/commerce/config")
+async def commerce_config():
+    return {
+        "stripe_enabled": bool(os.environ.get("STRIPE_SECRET_KEY")),
+        "publishable_key": os.environ.get("STRIPE_PUBLISHABLE_KEY", ""),
+        "mode": os.environ.get("STRIPE_MODE", "test"),
+        "currencies": ["usd", "eur", "gbp", "cad", "aud", "inr", "jpy"],
+    }
+
+
+@api_router.post("/commerce/payment-link")
+async def commerce_payment_link(payload: PaymentLinkCreate):
+    if not payload.name.strip():
+        raise HTTPException(status_code=400, detail="Product name is required")
+    if payload.amount <= 0:
+        raise HTTPException(status_code=400, detail="Amount must be greater than zero")
+    if payload.amount > 999999:
+        raise HTTPException(status_code=400, detail="Amount is too large")
+    try:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None, _create_payment_link, payload.name.strip(), payload.amount, payload.currency, payload.quantity
+        )
+    except Exception as e:
+        detail = getattr(e, "user_message", None) or f"{type(e).__name__}: {e}"
+        raise HTTPException(status_code=502, detail=f"Stripe payment link failed: {detail}")
 
 
 app.include_router(api_router)
