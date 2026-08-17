@@ -676,3 +676,52 @@ class TestCommerce:
             "name": "TEST_it10_neg", "amount": -3, "currency": "usd", "quantity": 1
         })
         assert r.status_code == 400, r.text
+
+    def test_payment_link_over_max_amount_400(self, client):
+        r = client.post(f"{API}/commerce/payment-link", json={
+            "name": "TEST_it11_big", "amount": 1000000, "currency": "usd", "quantity": 1
+        })
+        assert r.status_code == 400, r.text
+
+
+# ---------- Iteration 11: Cart Checkout Session ----------
+
+class TestCheckoutSession:
+    def test_checkout_session_success(self, client):
+        r = client.post(f"{API}/commerce/checkout-session", json={
+            "items": [
+                {"name": "TEST_it11_a", "amount": 9.99, "currency": "usd", "quantity": 2},
+                {"name": "TEST_it11_b", "amount": 4.50, "currency": "usd", "quantity": 1},
+            ],
+            "origin_url": "https://example.com",
+        })
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert isinstance(d.get("url"), str) and d["url"].startswith("https://checkout.stripe.com/")
+        assert isinstance(d.get("id"), str) and d["id"]
+
+    def test_checkout_session_empty_cart_400(self, client):
+        r = client.post(f"{API}/commerce/checkout-session", json={"items": [], "origin_url": "https://example.com"})
+        assert r.status_code == 400, r.text
+        assert "Cart is empty" in r.text
+
+    def test_checkout_session_item_no_name_400(self, client):
+        r = client.post(f"{API}/commerce/checkout-session", json={
+            "items": [{"name": "  ", "amount": 5, "currency": "usd", "quantity": 1}],
+            "origin_url": "https://example.com",
+        })
+        assert r.status_code == 400, r.text
+
+    def test_checkout_session_item_zero_amount_400(self, client):
+        r = client.post(f"{API}/commerce/checkout-session", json={
+            "items": [{"name": "TEST_it11_zero", "amount": 0, "currency": "usd", "quantity": 1}],
+            "origin_url": "https://example.com",
+        })
+        assert r.status_code == 400, r.text
+
+    def test_checkout_session_item_negative_amount_400(self, client):
+        r = client.post(f"{API}/commerce/checkout-session", json={
+            "items": [{"name": "TEST_it11_neg", "amount": -2.5, "currency": "usd", "quantity": 1}],
+            "origin_url": "https://example.com",
+        })
+        assert r.status_code == 400, r.text

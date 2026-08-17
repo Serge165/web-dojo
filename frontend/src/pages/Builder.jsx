@@ -20,6 +20,7 @@ import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModa
 import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
 import { AddPageModal } from "@/components/builder/AddPageModal";
 import { PaymentButtonModal } from "@/components/builder/PaymentButtonModal";
+import { SocialShareModal } from "@/components/builder/SocialShareModal";
 import { buildStandaloneHtml } from "@/lib/exportHtml";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -71,6 +72,7 @@ export default function Builder() {
   const [formBuilderOpen, setFormBuilderOpen] = useState(false);
   const [addPageOpen, setAddPageOpen] = useState(false);
   const [paymentBuilderOpen, setPaymentBuilderOpen] = useState(false);
+  const [socialBuilderOpen, setSocialBuilderOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
 
@@ -489,6 +491,7 @@ export default function Builder() {
             selectedHtml={selected?.html || ""}
             onOpenFormBuilder={() => setFormBuilderOpen(true)}
             onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
+            onOpenSocialBuilder={() => setSocialBuilderOpen(true)}
           />
         )}
 
@@ -698,6 +701,12 @@ export default function Builder() {
       <PaymentButtonModal
         open={paymentBuilderOpen}
         onClose={() => setPaymentBuilderOpen(false)}
+        onInsert={(html) => addBlock(html)}
+      />
+
+      <SocialShareModal
+        open={socialBuilderOpen}
+        onClose={() => setSocialBuilderOpen(false)}
         onInsert={(html) => addBlock(html)}
       />
 

@@ -1,3 +1,5 @@
+import { buildCartRuntimeHtml } from "./cart";
+
 // Prebuilt, editable page layouts (WordPress-style) for the "Add page" picker.
 // Every layout is a list of portable HTML blocks (inline styles) so it survives
 // export/publish. Sections are composed from reusable builders + theme presets,
@@ -35,6 +37,20 @@ const IMG = {
   prod2: u("https://images.unsplash.com/photo-1705242960929-8f2d111cf446", 900),
   prod3: u("https://images.unsplash.com/photo-1623824204241-f851d3bcfaf5", 900),
   prod4: u("https://images.unsplash.com/photo-1706509511714-2a1e0f74321e", 900),
+  podcast1: u("https://images.unsplash.com/photo-1478737270239-2f02b77fc618"),
+  podcast2: u("https://images.unsplash.com/photo-1589903308904-1010c2294adc"),
+  wedding1: u("https://images.unsplash.com/photo-1596457221755-b96bc3a6df18"),
+  wedding2: u("https://images.unsplash.com/photo-1591604466107-ec97de577aff"),
+  house1: u("https://images.unsplash.com/photo-1613490493576-7fde63acd811"),
+  house2: u("https://images.unsplash.com/photo-1670589953882-b94c9cb380f5"),
+  clinic1: u("https://images.unsplash.com/photo-1638202993928-7267aad84c31"),
+  clinic2: u("https://images.unsplash.com/photo-1659353888906-adb3e0041693"),
+  conf1: u("https://images.unsplash.com/photo-1559223694-98ed5e272fef"),
+  conf2: u("https://images.unsplash.com/photo-1560439513-74b037a25d84"),
+  charity1: u("https://images.unsplash.com/photo-1593113598332-cd288d649433"),
+  charity2: u("https://images.unsplash.com/photo-1628717341663-0007b0ee2597"),
+  church1: u("https://images.unsplash.com/photo-1699830506478-af7b3f5e6cc9"),
+  church2: u("https://images.unsplash.com/photo-1519491050282-cf00c82424b4"),
 };
 
 // ---- Theme presets ------------------------------------------------------------
@@ -366,12 +382,12 @@ const footer = (t, brand) =>
 
 // ---- Ecommerce sections -------------------------------------------------------
 const PRODUCTS = [
-  [IMG.prod1, "Aurora Bottle", "$38"],
-  [IMG.prod2, "Cedar Wash", "$24"],
-  [IMG.prod3, "Field Phone", "$799"],
-  [IMG.prod4, "Slate Case", "$45"],
-  [IMG.prod1, " Member Kit", "$120"],
-  [IMG.prod2, "Refill Duo", "$40"],
+  ["p-aurora", IMG.prod1, "Aurora Bottle", 38],
+  ["p-cedar", IMG.prod2, "Cedar Wash", 24],
+  ["p-field", IMG.prod3, "Field Phone", 799],
+  ["p-slate", IMG.prod4, "Slate Case", 45],
+  ["p-member", IMG.prod1, "Member Kit", 120],
+  ["p-refill", IMG.prod2, "Refill Duo", 40],
 ];
 
 const productGrid = (t) =>
@@ -382,11 +398,11 @@ const productGrid = (t) =>
       <div style="display:flex;gap:8px;">${["All", "New", "Best sellers", "Sale"].map((f, i) => `<span style="padding:8px 16px;border-radius:999px;font-size:13px;border:1px solid ${t.border};background:${i === 0 ? t.accent : "transparent"};color:${i === 0 ? t.onAccent : t.muted};">${f}</span>`).join("")}</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
-      ${PRODUCTS.map(([im, nm, pr]) => `<div style="background:${t.surface};border:1px solid ${t.border};border-radius:${t.radius};overflow:hidden;">
+      ${PRODUCTS.map(([pid, im, nm, pr]) => `<div style="background:${t.surface};border:1px solid ${t.border};border-radius:${t.radius};overflow:hidden;">
         <div style="aspect-ratio:1/1;background:#eef1f6;overflow:hidden;"><img src="${im}" alt="" style="width:100%;height:100%;object-fit:cover;" /></div>
         <div style="padding:18px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div><div style="font-family:${t.head};font-size:16px;color:${t.fg};font-weight:600;">${nm}</div><div style="font-size:15px;color:${t.muted};margin-top:2px;">${pr}</div></div>
-          <a href="#" style="padding:9px 16px;background:${t.accent};color:${t.onAccent};border-radius:${t.radius};text-decoration:none;font-size:13px;font-weight:600;">Add</a>
+          <div><div style="font-family:${t.head};font-size:16px;color:${t.fg};font-weight:600;">${nm}</div><div style="font-size:15px;color:${t.muted};margin-top:2px;">$${pr}</div></div>
+          <button type="button" data-wd-add data-wd-id="${pid}" data-wd-name="${nm}" data-wd-price="${pr}" data-wd-cur="usd" data-wd-img="${im}" style="padding:9px 16px;background:${t.accent};color:${t.onAccent};border:none;border-radius:${t.radius};cursor:pointer;font-size:13px;font-weight:600;">Add</button>
         </div>
       </div>`).join("")}
     </div>
@@ -407,7 +423,7 @@ const productDetail = (t) =>
       <p style="font-size:16px;line-height:1.7;color:${t.muted};margin:0 0 22px;">Double-walled, vacuum-sealed, and endlessly refillable. Keeps drinks cold for 24 hours and hot for 12. Made from recycled steel.</p>
       <div style="margin-bottom:20px;"><div style="font-size:13px;font-weight:600;color:${t.fg};margin-bottom:8px;">Colour</div><div style="display:flex;gap:10px;">${["#0f172a", "#b45309", "#166534", "#e2e8f0"].map((c, i) => `<span style="width:32px;height:32px;border-radius:999px;background:${c};border:2px solid ${i === 0 ? t.accent : t.border};"></span>`).join("")}</div></div>
       <div style="display:flex;gap:12px;align-items:center;">
-        <a href="#" style="flex:1;text-align:center;padding:15px;background:${t.accent};color:${t.onAccent};border-radius:${t.radius};text-decoration:none;font-weight:700;font-size:16px;">Add to cart · $38</a>
+        <button type="button" data-wd-add data-wd-id="p-aurora" data-wd-name="Aurora Bottle" data-wd-price="38" data-wd-cur="usd" data-wd-img="${IMG.prod1}" style="flex:1;text-align:center;padding:15px;background:${t.accent};color:${t.onAccent};border:none;border-radius:${t.radius};cursor:pointer;font-weight:700;font-size:16px;">Add to cart · $38</button>
         <a href="#" style="padding:15px 22px;border:1px solid ${t.border};color:${t.fg};border-radius:${t.radius};text-decoration:none;font-weight:600;">♥</a>
       </div>
       <div style="margin-top:20px;font-size:13px;color:${t.muted};">Free shipping over $50 · 30-day returns</div>
@@ -431,10 +447,58 @@ const cart = (t) =>
         <div style="font-family:${t.head};font-weight:700;font-size:18px;color:${t.fg};margin-bottom:16px;">Summary</div>
         ${[["Subtotal", "$131.00"], ["Shipping", "Free"], ["Tax", "$10.48"]].map(([k, v]) => `<div style="display:flex;justify-content:space-between;font-size:15px;color:${t.muted};padding:6px 0;">${k}<span style="color:${t.fg};">${v}</span></div>`).join("")}
         <div style="display:flex;justify-content:space-between;font-family:${t.head};font-weight:800;font-size:20px;color:${t.fg};padding:14px 0;border-top:1px solid ${t.border};margin-top:8px;">Total<span>$141.48</span></div>
-        <a href="#" style="display:block;text-align:center;padding:15px;background:${t.accent};color:${t.onAccent};border-radius:${t.radius};text-decoration:none;font-weight:700;margin-top:8px;">Checkout</a>
+        <a href="#" onclick="var b=document.getElementById('wdc-open');if(b){b.click();}return false;" style="display:block;text-align:center;padding:15px;background:${t.accent};color:${t.onAccent};border-radius:${t.radius};text-decoration:none;font-weight:700;margin-top:8px;">Checkout</a>
         <p style="font-size:12px;color:${t.muted};text-align:center;margin:12px 0 0;">Secure payment · Powered by Stripe</p>
       </div>
     </div>
+  </div>
+</section>`;
+
+const cartRuntime = (accent = "#4f46e5") => buildCartRuntimeHtml({ accent, currency: "usd" });
+
+const TClinic = { ...T.modern, accent: "#0d9488", accent2: "#14b8a6" };
+const TCharity = { ...T.modern, accent: "#ea580c", accent2: "#f97316" };
+
+// Generic ordered list — episodes, service times, schedules, tour dates.
+const simpleList = (t, title, rows) =>
+  `<section style="background:${t.bg};font-family:${t.body};padding:72px 32px;">
+  <div style="max-width:820px;margin:0 auto;">
+    <h2 style="font-family:${t.head};font-size:34px;color:${t.fg};margin:0 0 26px;letter-spacing:-.02em;font-weight:700;">${title}</h2>
+    ${rows.map(([a, b, c]) => `<div style="display:flex;align-items:center;gap:20px;padding:16px 0;border-bottom:1px solid ${t.border};">
+      <div style="font-family:${t.head};font-weight:700;color:${t.accent};min-width:120px;">${a}</div>
+      <div style="flex:1;color:${t.fg};font-weight:600;">${b}</div>
+      <div style="color:${t.muted};font-size:14px;">${c || ""}</div>
+    </div>`).join("")}
+  </div>
+</section>`;
+
+const specs = (t, items) =>
+  `<section style="background:${t.surface};font-family:${t.body};padding:64px 32px;">
+  <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+    ${items.map(([l, v]) => `<div style="background:${t.bg};border:1px solid ${t.border};border-radius:${t.radius};padding:24px;text-align:center;">
+      <div style="font-family:${t.head};font-size:30px;font-weight:800;color:${t.fg};">${v}</div>
+      <div style="color:${t.muted};font-size:12px;margin-top:6px;text-transform:uppercase;letter-spacing:.06em;">${l}</div>
+    </div>`).join("")}
+  </div>
+</section>`;
+
+const listenOn = (t) =>
+  `<section style="background:${t.surface};font-family:${t.body};padding:40px 32px;text-align:center;">
+  <div style="color:${t.muted};font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;">Listen on</div>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    ${["Spotify", "Apple Podcasts", "YouTube", "Overcast", "Pocket Casts"].map((n) => `<span style="padding:10px 20px;border:1px solid ${t.border};border-radius:999px;color:${t.fg};font-size:14px;">${n}</span>`).join("")}
+  </div>
+</section>`;
+
+const changelog = (t) =>
+  `<section style="background:${t.bg};font-family:${t.body};padding:72px 32px;">
+  <div style="max-width:760px;margin:0 auto;">
+    <h1 style="font-family:${t.head};font-size:42px;color:${t.fg};margin:0 0 8px;letter-spacing:-.02em;font-weight:700;">Changelog</h1>
+    <p style="color:${t.muted};margin:0 0 40px;font-size:16px;">Every improvement we ship, in one place.</p>
+    ${[["v3.4.0", "Jun 2026", ["New AI section generator", "Canvas rendering ~40% faster", "Fixed a handful of export edge cases"]], ["v3.3.0", "May 2026", ["Multi-page templates", "Dark mode for the editor", "Better keyboard shortcuts"]], ["v3.2.0", "Apr 2026", ["Form builder", "Publish presets", "28 new starters"]]].map(([v, d, notes]) => `<div style="display:grid;grid-template-columns:150px 1fr;gap:20px;padding:22px 0;border-top:1px solid ${t.border};">
+      <div><span style="display:inline-block;background:${t.accent}1a;color:${t.accent};font-weight:700;font-size:13px;padding:4px 10px;border-radius:8px;">${v}</span><div style="color:${t.muted};font-size:12px;margin-top:8px;">${d}</div></div>
+      <ul style="margin:0;padding-left:18px;color:${t.fg};font-size:15px;line-height:1.8;">${notes.map((n) => `<li>${n}</li>`).join("")}</ul>
+    </div>`).join("")}
   </div>
 </section>`;
 
@@ -597,19 +661,21 @@ export const PAGE_LAYOUTS = [
   ]),
 
   // ---------------- Ecommerce ----------------
-  layout("shop-catalog", "Shop", "Shop · Catalog Grid", "Product catalog with filters and add-to-cart.", T.modern, [
+  layout("shop-catalog", "Shop", "Shop · Catalog Grid", "Working catalog — add to cart opens a live checkout drawer.", T.modern, [
     nav(T.modern, "MARKET", ["Shop", "New", "About", "Cart"]), productGrid(T.modern),
-    ctaBand(T.modern, { title: "Free shipping over $50", sub: "Plus 30-day easy returns on everything.", label: "Shop now" }), footer(T.modern, "MARKET"),
+    ctaBand(T.modern, { title: "Free shipping over $50", sub: "Plus 30-day easy returns on everything.", label: "Shop now" }), footer(T.modern, "MARKET"), cartRuntime(T.modern.accent),
   ]),
-  layout("shop-catalog-bold", "Shop", "Shop · Dark Store", "Bold dark storefront grid.", T.bold, [
-    nav(T.bold, "OBSIDIAN", ["Shop", "Drops", "Story", "Cart"]), heroCenter(T.bold, { eyebrow: "SS26 drop", title: "Gear that outlasts the hype", sub: "Small-batch essentials, built to be used hard." }), productGrid(T.bold), footer(T.bold, "OBSIDIAN"),
+  layout("shop-catalog-bold", "Shop", "Shop · Dark Store", "Bold dark storefront with a working cart.", T.bold, [
+    nav(T.bold, "OBSIDIAN", ["Shop", "Drops", "Story", "Cart"]), heroCenter(T.bold, { eyebrow: "SS26 drop", title: "Gear that outlasts the hype", sub: "Small-batch essentials, built to be used hard." }), productGrid(T.bold), footer(T.bold, "OBSIDIAN"), cartRuntime(T.bold.accent),
   ]),
-  layout("shop-product", "Shop", "Product Detail", "Single product page with gallery and buy button.", T.modern, [
+  layout("shop-product", "Shop", "Product Detail", "Single product page with a working add-to-cart.", T.modern, [
     nav(T.modern, "MARKET", ["Shop", "New", "About", "Cart"]), productDetail(T.modern),
-    features(T.modern, { title: "Why you'll love it", sub: "Designed to be the last one you'll buy.", items: [{ icon: "shield", title: "Lifetime warranty", desc: "If it breaks, we replace it. Simple as that." }, { icon: "globe", title: "Carbon neutral", desc: "Every order offsets its own shipping footprint." }, { icon: "heart", title: "Loved by 10k+", desc: "Rated 4.9/5 across thousands of reviews." }] }), footer(T.modern, "MARKET"),
+    features(T.modern, { title: "Why you'll love it", sub: "Designed to be the last one you'll buy.", items: [{ icon: "shield", title: "Lifetime warranty", desc: "If it breaks, we replace it. Simple as that." }, { icon: "globe", title: "Carbon neutral", desc: "Every order offsets its own shipping footprint." }, { icon: "heart", title: "Loved by 10k+", desc: "Rated 4.9/5 across thousands of reviews." }] }), footer(T.modern, "MARKET"), cartRuntime(T.modern.accent),
   ]),
-  layout("shop-cart", "Shop", "Cart & Checkout", "Cart summary with order totals.", T.modern, [
-    nav(T.modern, "MARKET", ["Shop", "New", "About", "Cart"]), cart(T.modern), footer(T.modern, "MARKET"),
+  layout("shop-cart", "Shop", "Shop + Working Cart", "Storefront wired to a live cart drawer + Stripe/PayPal checkout.", T.modern, [
+    nav(T.modern, "MARKET", ["Shop", "New", "About", "Cart"]),
+    heroCenter(T.modern, { eyebrow: "Live demo", title: "Add to cart, then check out for real", sub: "Items save in the cart drawer (bottom-right). Checkout hands off to Stripe or PayPal." }),
+    productGrid(T.modern), cart(T.modern), footer(T.modern, "MARKET"), cartRuntime(T.modern.accent),
   ]),
 
   // ---------------- Industries ----------------
@@ -683,6 +749,62 @@ export const PAGE_LAYOUTS = [
     logos(T.modern),
     features(T.modern, { title: "Built for busy teams", sub: "Everything you need to move faster.", items: [{ icon: "bolt", title: "500+ integrations", desc: "Connect the apps you already use in a couple of clicks." }, { icon: "chart", title: "Live dashboards", desc: "See exactly what's running and what needs attention." }, { icon: "shield", title: "Enterprise-ready", desc: "SSO, audit logs and role-based access out of the box." }] }),
     pricing(T.modern), ctaBand(T.modern, { title: "Try Flowly free for 14 days", sub: "No card required. Cancel anytime." }), footer(T.modern, "Flowly"),
+  ]),
+
+  // ---------------- Niche layouts ----------------
+  layout("industry-podcast", "Industry", "Podcast", "Weekly-podcast landing with episodes + platforms.", T.bold, [
+    nav(T.bold, "SIGNAL / NOISE", ["Episodes", "About", "Subscribe", "Contact"]),
+    heroSplit(T.bold, { eyebrow: "Weekly podcast", title: "Big ideas, plainly spoken", sub: "Conversations with builders, thinkers and troublemakers. New episode every Thursday.", img: IMG.podcast1, primary: "Listen now" }),
+    listenOn(T.bold),
+    simpleList(T.bold, "Latest episodes", [["EP 48", "The art of shipping less", "52 min"], ["EP 47", "Designing for trust", "44 min"], ["EP 46", "How teams stay small", "39 min"], ["EP 45", "Taste, and how to build it", "61 min"]]),
+    ctaBand(T.bold, { title: "Never miss an episode", sub: "Subscribe wherever you listen.", label: "Subscribe" }), footer(T.bold, "SIGNAL / NOISE"),
+  ]),
+  layout("industry-church", "Industry", "Church / Faith", "Warm, welcoming church homepage.", T.elegant, [
+    nav(T.elegant, "Grace Chapel", ["Visit", "Sermons", "Events", "Give"]),
+    heroImage(T.elegant, { title: "Come as you are", sub: "A welcoming community in the heart of the city. Join us this Sunday.", img: IMG.church2, primary: "Plan your visit" }),
+    simpleList(T.elegant, "Service times", [["Sunday", "Morning worship", "9:00 & 11:00 AM"], ["Wednesday", "Bible study", "7:00 PM"], ["Friday", "Youth group", "6:30 PM"]]),
+    about(T.elegant, { title: "Our mission", body: ["We exist to love God, love people, and serve our city with open hands.", "Whoever you are and wherever you've been, there's a seat for you here."], img: IMG.church1 }),
+    ctaBand(T.elegant, { title: "Give generously", sub: "Support our community and outreach.", label: "Give online" }), footer(T.elegant, "Grace Chapel"),
+  ]),
+  layout("industry-wedding", "Industry", "Wedding", "Elegant wedding invite with schedule + RSVP.", T.editorial, [
+    nav(T.editorial, "Ava & Liam", ["Story", "Schedule", "RSVP", "Travel"]),
+    heroImage(T.editorial, { title: "Ava & Liam", sub: "are getting married — September 12, 2026 · Sonoma, California", img: IMG.wedding1, primary: "RSVP" }),
+    about(T.editorial, { title: "Our story", body: ["We met in a tiny bookshop, argued about a novel, and never really stopped talking.", "Seven years later, we'd love for you to celebrate with us."], img: IMG.wedding2 }),
+    simpleList(T.editorial, "The day", [["3:00 PM", "Ceremony", "The Garden"], ["5:00 PM", "Cocktails", "Vineyard Terrace"], ["7:00 PM", "Dinner & dancing", "The Barn"]]),
+    gallery(T.editorial, [IMG.wedding1, IMG.wedding2, IMG.land5, IMG.land7, IMG.hotel3, IMG.land3]),
+    contact(T.editorial), footer(T.editorial, "Ava & Liam"),
+  ]),
+  layout("saas-changelog", "Industry", "SaaS Changelog", "Product changelog / release-notes page.", T.modern, [
+    nav(T.modern, "Flowly"), changelog(T.modern),
+    ctaBand(T.modern, { title: "Want these updates by email?", sub: "One short digest a month.", label: "Subscribe" }), footer(T.modern, "Flowly"),
+  ]),
+  layout("industry-realestate", "Industry", "Real Estate Listing", "Single-property listing with gallery + specs.", T.modern, [
+    nav(T.modern, "Harbor Realty", ["Buy", "Sell", "Agents", "Contact"]),
+    heroImage(T.modern, { title: "Modern hillside villa", sub: "4 bed · 3 bath · 3,200 sqft · $1,850,000 · Sausalito, CA", img: IMG.house1, primary: "Book a viewing" }),
+    gallery(T.modern, [IMG.house1, IMG.house2, IMG.hotel1, IMG.hotel2, IMG.land5, IMG.land7]),
+    specs(T.modern, [["Bedrooms", "4"], ["Bathrooms", "3"], ["Area", "3,200 ft²"], ["Year built", "2022"], ["Garage", "2 cars"], ["Lot", "0.4 acre"]]),
+    contact(T.modern), footer(T.modern, "Harbor Realty"),
+  ]),
+  layout("industry-clinic", "Industry", "Medical / Clinic", "Calm, trustworthy clinic homepage.", TClinic, [
+    nav(TClinic, "Northside Clinic", ["Services", "Doctors", "Appointments", "Contact"]),
+    heroSplit(TClinic, { eyebrow: "Trusted care", title: "Health care that puts you first", sub: "Same-day appointments, friendly doctors and modern facilities — close to home.", img: IMG.clinic2, primary: "Book appointment" }),
+    features(TClinic, { title: "Our services", sub: "Comprehensive care for the whole family.", items: [{ icon: "heart", title: "Family medicine", desc: "Checkups, screenings and everyday care for all ages." }, { icon: "shield", title: "Diagnostics", desc: "On-site labs and imaging with fast, clear results." }, { icon: "spark", title: "Specialist care", desc: "A trusted network of specialists, coordinated for you." }] }),
+    team(TClinic),
+    ctaBand(TClinic, { title: "Book an appointment", sub: "Same-day and weekend slots available.", label: "Book now" }), footer(TClinic, "Northside Clinic"),
+  ]),
+  layout("industry-nonprofit", "Industry", "Nonprofit / Charity", "Mission-driven charity homepage with donate CTA.", TCharity, [
+    nav(TCharity, "Open Hands", ["Mission", "Programs", "Donate", "Volunteer"]),
+    heroImage(TCharity, { title: "Small acts, big change", sub: "We deliver food, shelter and hope to families who need it most.", img: IMG.charity2, primary: "Donate now" }),
+    stats(TCharity, [{ k: "1.2M", v: "Meals served" }, { k: "48", v: "Communities" }, { k: "9k", v: "Volunteers" }, { k: "100%", v: "Goes to programs" }]),
+    features(TCharity, { title: "Our programs", sub: "Where your support goes.", items: [{ icon: "heart", title: "Food relief", desc: "Weekly grocery boxes for families facing hardship." }, { icon: "shield", title: "Safe shelter", desc: "Emergency housing and a path back to stability." }, { icon: "spark", title: "Education", desc: "After-school programs and scholarships for kids." }] }),
+    ctaBand(TCharity, { title: "Your gift changes lives", sub: "Every dollar goes straight to the people we serve.", label: "Donate" }), footer(TCharity, "Open Hands"),
+  ]),
+  layout("industry-conference", "Industry", "Event / Conference", "Conference landing with speakers, schedule + tickets.", T.bold, [
+    nav(T.bold, "STACK 2026", ["Speakers", "Schedule", "Tickets", "Venue"]),
+    heroImage(T.bold, { title: "STACK 2026", sub: "The conference for builders · Oct 14–16 · Austin, TX", img: IMG.conf1, primary: "Get tickets" }),
+    team(T.bold),
+    simpleList(T.bold, "Day one", [["9:00", "Keynote — The next decade of the web", "Main stage"], ["11:00", "Workshop — Design systems at scale", "Room A"], ["14:00", "Panel — Building in public", "Main stage"], ["16:30", "Fireside chat + Q&A", "Main stage"]]),
+    pricing(T.bold), footer(T.bold, "STACK 2026"),
   ]),
 ];
 

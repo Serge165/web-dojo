@@ -796,6 +796,66 @@ async def commerce_payment_link(payload: PaymentLinkCreate):
         raise HTTPException(status_code=502, detail=f"Stripe payment link failed: {detail}")
 
 
+class CheckoutItem(BaseModel):
+    name: str
+    amount: float
+    currency: str = "usd"
+    quantity: int = 1
+
+
+class CheckoutSessionCreate(BaseModel):
+    items: List[CheckoutItem]
+    origin_url: Optional[str] = None
+    success_url: Optional[str] = None
+    cancel_url: Optional[str] = None
+
+
+def _create_checkout_session(items, success_url, cancel_url):
+    line_items = []
+    for it in items:
+        line_items.append({
+            "price_data": {
+                "currency": (it.currency or "usd").lower(),
+                "unit_amount": int(round(round(it.amount, 2) * 100)),
+                "product_data": {"name": (it.name.strip()[:250] or "Item")},
+            },
+            "quantity": max(1, min(999, int(it.quantity or 1))),
+        })
+    session = stripe.checkout.Session.create(
+        mode="payment",
+        line_items=line_items,
+        success_url=success_url,
+        cancel_url=cancel_url,
+    )
+    return {"url": session.url, "id": session.id}
+
+
+@api_router.post("/commerce/checkout-session")
+async def commerce_checkout_session(payload: CheckoutSessionCreate):
+    """Cart hand-off for exported static sites: the published page POSTs its
+    localStorage cart line items and gets a hosted Stripe Checkout URL back."""
+    if not payload.items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+    for it in payload.items:
+        if not it.name.strip():
+            raise HTTPException(status_code=400, detail="Each item needs a name")
+        if it.amount <= 0:
+            raise HTTPException(status_code=400, detail="Item amount must be greater than zero")
+        if it.amount > 999999:
+            raise HTTPException(status_code=400, detail="Item amount is too large")
+    origin = (payload.origin_url or "").strip().rstrip("/")
+    if not (origin.startswith("http://") or origin.startswith("https://")):
+        origin = ""
+    success_url = payload.success_url or (f"{origin}/?wd_checkout=success" if origin else "https://example.com/?wd_checkout=success")
+    cancel_url = payload.cancel_url or (f"{origin}/?wd_checkout=cancel" if origin else "https://example.com/?wd_checkout=cancel")
+    try:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, _create_checkout_session, payload.items, success_url, cancel_url)
+    except Exception as e:
+        detail = getattr(e, "user_message", None) or f"{type(e).__name__}: {e}"
+        raise HTTPException(status_code=502, detail=f"Stripe checkout failed: {detail}")
+
+
 app.include_router(api_router)
 
 app.add_middleware(

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { CATEGORIES, cardTemplate, WEB_SAFE_FONTS } from "@/lib/blocks";
-import { ChevronDown, ChevronRight, Type, Plus, Trash2, Search, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Type, Plus, Trash2, Search, X, Share2 } from "lucide-react";
 import { FileTree } from "./FileTree";
 import { ComponentThumbnail } from "./ComponentThumbnail";
 import { LayoutBuilder } from "./LayoutBuilder";
@@ -16,6 +16,7 @@ export const LeftSidebar = ({
   selectedHtml,
   onOpenFormBuilder,
   onOpenPaymentBuilder,
+  onOpenSocialBuilder,
 }) => {
   const [tab, setTab] = useState("library");
   const [open, setOpen] = useState({ components: true, navbars: true, heroes: true, sections: true });
@@ -145,6 +146,19 @@ export const LeftSidebar = ({
                 className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-1"
                 data-testid="cards-insert-btn"
               ><Plus size={12} /> Insert card row</button>
+            </div>
+          </div>
+
+          {/* Social buttons */}
+          <div className="border-b border-[#2B2B2B]">
+            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 flex items-center gap-1.5"><Share2 size={12} /> Social buttons</div>
+            <div className="px-3 pb-3">
+              <button
+                onClick={onOpenSocialBuilder}
+                className="w-full text-xs py-2 rounded bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white flex items-center justify-center gap-1.5 font-medium"
+                data-testid="open-social-builder"
+              ><Share2 size={12} /> Open social builder</button>
+              <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed">Share bar or profile links — pick platforms, shape, style & hover animation.</p>
             </div>
           </div>
 
