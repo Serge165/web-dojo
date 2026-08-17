@@ -48,6 +48,7 @@ export const RightSidebar = ({
   onDelete,
   onToggleVisible,
   onSetZIndex,
+  onApplyStyleToIds,
 }) => {
   const [tab, setTab] = useState("color");
   const [layersOpen, setLayersOpen] = useState(true);
@@ -190,6 +191,7 @@ export const RightSidebar = ({
               onDelete={onDelete}
               onToggleVisible={onToggleVisible}
               onSetZIndex={onSetZIndex}
+              onApplyStyleToIds={onApplyStyleToIds}
               hideHeader
             />
           </div>

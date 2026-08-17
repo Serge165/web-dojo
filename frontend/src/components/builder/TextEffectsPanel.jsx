@@ -1,8 +1,19 @@
-import React, { useState } from "react";
-import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library } from "lucide-react";
 import { toast } from "sonner";
+import { getFxClip, setFxClip, subscribeFxClip } from "@/lib/fxClipboard";
 
 const cssStr = (obj) => Object.entries(obj).map(([k, v]) => `${k}:${v}`).join(";");
+// A visible thumbnail for a saved style: drop text-clip props (which would make
+// a text-less box invisible) and ensure a fill so radius/shadow read.
+const libPreview = (style) => {
+  const s = { ...style };
+  delete s["-webkit-background-clip"];
+  delete s["background-clip"];
+  delete s["-webkit-text-fill-color"];
+  if (!s.background && !s["background-image"]) s.background = "#818cf8";
+  return cssStr(s).replace(/"/g, "");
+};
 const rp = (n) => Math.round(n);
 const op = (n) => Math.min(1, n).toFixed(2);
 
@@ -71,8 +82,7 @@ const addClassToRootTag = (html, cls) => {
   return html.replace(full, `<${tag}${newAttrs}>`);
 };
 
-// ---- Copy/paste effect helpers ----
-let FX_CLIPBOARD = null; // persists across panel remounts within the session
+// ---- Copy/paste style helpers (clipboard lives in lib/fxClipboard) ----
 
 const FX_PROPS = ["background-image", "background-size", "-webkit-background-clip", "background-clip", "-webkit-text-fill-color", "-webkit-text-stroke", "paint-order", "text-shadow", "animation", "color"];
 // Shape styling also carried by Copy/Paste (border/radius/corner-shape/shadow/glass).
@@ -133,7 +143,10 @@ const FxChip = ({ testid, onClick, previewHtml, label, animated }) => (
 
 export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplaceHtml, headHtml, onHeadHtmlChange }) => {
   const [intensity, setIntensity] = useState(1);
-  const [clip, setClip] = useState(FX_CLIPBOARD);
+  const [clip, setClip] = useState(getFxClip());
+  useEffect(() => subscribeFxClip(setClip), []);
+  const [library, setLibrary] = useState(() => { try { return JSON.parse(localStorage.getItem("webdojo_style_library") || "[]"); } catch { return []; } });
+  const [libName, setLibName] = useState("");
 
   const needSel = () => { if (!selected) { toast.info("Select a text element (H1–H6, p, button…) first"); return true; } return false; };
   const getPatch = (fx) => (fx.patchFn ? fx.patchFn(intensity) : fx.patch);
@@ -184,17 +197,36 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
     toast.success("Text FX cleared");
   };
 
+  const applyClipToSelected = (theClip) => {
+    let head = headHtml || "";
+    const classesToAdd = [];
+    (theClip.hover || []).forEach(({ cls, tpl }) => {
+      if (cls && head.includes(`data-wd-tfx="${cls}"`)) { classesToAdd.push(cls); return; }
+      if (tpl) { const nc = `wd-tfx-${Math.random().toString(36).slice(2, 7)}`; head += `${head ? "\n" : ""}<style data-wd-tfx="${nc}">${tpl.split("__CLS__").join(nc)}</style>`; classesToAdd.push(nc); }
+      else if (cls) classesToAdd.push(cls);
+    });
+    if (head !== (headHtml || "")) onHeadHtmlChange(head);
+    let html = selected.html;
+    if (theClip.style && Object.keys(theClip.style).length) html = mergeStyleIntoRootTag(html, theClip.style);
+    classesToAdd.forEach((c) => { if (!new RegExp(`\\b${c}\\b`).test(html)) html = addClassToRootTag(html, c); });
+    onReplaceHtml(html);
+  };
+
   const copyFx = () => {
     if (needSel()) return;
     const map = rootStyleMap(selected.html);
     const style = {};
     COPY_PROPS.forEach((p) => { const v = map[p]; if (v && !isNeutral(p, v)) style[p] = v; });
-    const hoverClasses = [...new Set([...selected.html.matchAll(/wd-tfx-[a-z0-9]+/g)].map((m) => m[0]))];
-    // `background` alone (a plain fill) is not enough to count as a copyable effect/style.
-    const meaningful = Object.keys(style).some((k) => k !== "background") || hoverClasses.length > 0;
+    const classes = [...new Set([...selected.html.matchAll(/wd-tfx-[a-z0-9]+/g)].map((m) => m[0]))];
+    const hover = classes.map((c) => {
+      const m = (headHtml || "").match(new RegExp(`<style data-wd-tfx="${c}">([\\s\\S]*?)<\\/style>`));
+      return { cls: c, tpl: m ? m[1].split(c).join("__CLS__") : null };
+    });
+    // `background` alone (a plain fill) is not enough to count as a copyable style.
+    const meaningful = Object.keys(style).some((k) => k !== "background") || hover.length > 0;
     if (!meaningful) { toast.info("This element has no effect or shape style to copy"); return; }
-    const data = { style, hoverClasses };
-    FX_CLIPBOARD = data;
+    const data = { style, hover };
+    setFxClip(data);
     setClip(data);
     toast.success("Style copied");
   };
@@ -202,11 +234,32 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
   const pasteFx = () => {
     if (needSel()) return;
     if (!clip) { toast.info("Copy a style first"); return; }
-    let html = selected.html;
-    if (Object.keys(clip.style).length) html = mergeStyleIntoRootTag(html, clip.style);
-    clip.hoverClasses.forEach((c) => { if (!new RegExp(`\\b${c}\\b`).test(html)) html = addClassToRootTag(html, c); });
-    onReplaceHtml(html);
+    applyClipToSelected(clip);
     toast.success("Style pasted onto element");
+  };
+
+  const saveToLibrary = () => {
+    if (!clip) { toast.info("Copy a style first, then save it to the library"); return; }
+    const name = libName.trim() || `Style ${library.length + 1}`;
+    const entry = { id: `lib-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name, style: clip.style || {}, hover: clip.hover || [] };
+    const next = [...library, entry];
+    setLibrary(next);
+    localStorage.setItem("webdojo_style_library", JSON.stringify(next));
+    setLibName("");
+    toast.success(`Saved "${name}" to library`);
+  };
+
+  const applyLibrary = (entry) => {
+    setFxClip(entry);
+    setClip(entry);
+    if (selected) { applyClipToSelected(entry); toast.success(`Applied "${entry.name}"`); }
+    else toast.success(`"${entry.name}" copied — select elements and paste`);
+  };
+
+  const deleteLibrary = (id) => {
+    const next = library.filter((e) => e.id !== id);
+    setLibrary(next);
+    localStorage.setItem("webdojo_style_library", JSON.stringify(next));
   };
 
   const hasHover = !!selected && /wd-tfx-/.test(selected.html);
@@ -265,6 +318,30 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       <div className="pt-3 border-t border-[#2B2B2B] grid grid-cols-2 gap-2">
         <button onClick={copyFx} disabled={!selected} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-copy"><Copy size={12} /> Copy style</button>
         <button onClick={pasteFx} disabled={!selected || !clip} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-paste"><ClipboardPaste size={12} /> Paste style</button>
+      </div>
+
+      {/* Style library (persists across projects via localStorage) */}
+      <div className="space-y-1.5 pt-3 border-t border-[#2B2B2B]">
+        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Library size={12} /> Style library</div>
+        {library.length > 0 ? (
+          <div className="grid grid-cols-3 gap-1.5">
+            {library.map((entry) => (
+              <div key={entry.id} role="button" tabIndex={0} onClick={() => applyLibrary(entry)} data-testid={`style-lib-${entry.id}`} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group cursor-pointer" title={`Apply ${entry.name}`}>
+                <div className="h-10 flex items-center justify-center" style={{ background: "linear-gradient(135deg,#eef2ff,#dbe2ef)" }}>
+                  <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${libPreview(entry.style)}"></div>` }} />
+                </div>
+                <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{entry.name}</div>
+                <button onClick={(e) => { e.stopPropagation(); deleteLibrary(entry.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-gray-300 hover:text-red-400 opacity-70 hover:opacity-100" title="Delete" data-testid={`style-lib-delete-${entry.id}`}><X size={10} /></button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[10px] text-gray-500">Copy a style, then save it here to reuse it across your projects.</p>
+        )}
+        <div className="flex gap-1.5">
+          <input value={libName} onChange={(e) => setLibName(e.target.value)} placeholder="Name this style…" className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="style-lib-name" />
+          <button onClick={saveToLibrary} disabled={!clip} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="style-lib-save"><Save size={11} /> Save to library</button>
+        </div>
       </div>
 
       <button onClick={clearFx} disabled={!selected} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-clear"><Eraser size={12} /> Clear text FX</button>

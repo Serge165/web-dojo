@@ -46,6 +46,17 @@ const patchFirstStyle = (html, patch) => {
   return html.replace(/<([a-zA-Z][^ >]*)(\s|>)/, (_, tag, s) => `<${tag} style="${styleStr}"${s}`);
 };
 
+// Add a class to the first/root tag (used when pasting hover effects).
+const addClassToFirstTag = (html, cls) => {
+  const m = html.match(/^\s*<([a-zA-Z][\w-]*)([^>]*)>/);
+  if (!m) return html;
+  const [full, tag, attrs] = m;
+  const newAttrs = /class="/.test(attrs)
+    ? attrs.replace(/class="([^"]*)"/, (mm, c) => `class="${c} ${cls}"`)
+    : `${attrs} class="${cls}"`;
+  return html.replace(full, `<${tag}${newAttrs}>`);
+};
+
 export default function Builder() {
   const [mode, setMode] = useState("design");
   const [viewport, setViewport] = useState("desktop");
@@ -273,6 +284,29 @@ export default function Builder() {
   };
   const applyBackground = (value) => patchStyle({ background: value });
   const applyColor = (value) => patchStyle({ color: value });
+
+  // Paste a copied style (from lib/fxClipboard) onto many elements at once.
+  const applyStyleToIds = useCallback((ids, clip) => {
+    if (!ids || !ids.length || !clip) return;
+    let head = headHtml;
+    const classesToAdd = [];
+    (clip.hover || []).forEach(({ cls, tpl }) => {
+      if (cls && head.includes(`data-wd-tfx="${cls}"`)) { classesToAdd.push(cls); return; }
+      if (tpl) {
+        const nc = `wd-tfx-${Math.random().toString(36).slice(2, 7)}`;
+        head += `${head ? "\n" : ""}<style data-wd-tfx="${nc}">${tpl.split("__CLS__").join(nc)}</style>`;
+        classesToAdd.push(nc);
+      } else if (cls) { classesToAdd.push(cls); }
+    });
+    if (head !== headHtml) setHeadHtml(head);
+    setElements((els) => els.map((e) => {
+      if (!ids.includes(e.id)) return e;
+      let html = e.html;
+      if (clip.style && Object.keys(clip.style).length) html = patchFirstStyle(html, clip.style);
+      classesToAdd.forEach((c) => { if (!new RegExp(`\\b${c}\\b`).test(html)) html = addClassToFirstTag(html, c); });
+      return { ...e, html };
+    }));
+  }, [headHtml]);
 
   const applyAnimation = ({ keyframes, shorthand }) => {
     if (!selected) return;
@@ -632,6 +666,7 @@ export default function Builder() {
             onDelete={removeEl}
             onToggleVisible={toggleVisible}
             onSetZIndex={setZIndex}
+            onApplyStyleToIds={applyStyleToIds}
           />
         )}
       </div>

@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (m) — Paste To Many + Style Library
+- **Paste To Many** (`LayersPanel.jsx` + `Builder.applyStyleToIds` + `lib/fxClipboard.js`): each Layers row has a checkbox; checking rows shows a batch bar with "Paste to N" that applies the copied style (text FX + shape + hover, re-injecting hover rules as needed) to all checked elements at once. Clipboard is a shared session singleton so Copy (Text FX tab) and batch Paste (Layers) share state.
+- **Style Library** (`TextEffectsPanel.jsx`): save the copied style as a named entry (persisted in `localStorage['webdojo_style_library']`) shown as clickable thumbnails; clicking applies to the selection and loads it to the clipboard (so it can then be pasted to many). Entries carry portable hover-rule templates (`__CLS__` token) so they work across projects. Delete per entry.
+- Tested: iteration_25 frontend E2E — paste-to-many (static + hover), library save/apply/delete/persist, and regression all pass 100%, zero console errors. Hardening: unique library IDs + quote-safe preview.
+
+
 ### Session Jun 2026 (l) — Effect Filter + Copy Everything (shape styling)
 - **Effect Filter** (`LayersPanel.jsx`): a toggle (`layers-filter-fx`, shows a live count) filters the Layers list to only elements carrying a text/hover effect; shows `layers-filter-empty` when none qualify.
 - **Copy Everything** (`TextEffectsPanel.jsx`): Copy/Paste (relabelled "Copy style"/"Paste style") now also carries Shape styling — `border`, `border-radius`, `corner-shape`, `box-shadow`, `backdrop-filter`, and `background` — alongside text/hover FX, read from the element's root tag. A `meaningful` guard ignores plain-background-only elements so a bare block isn't "copyable".
