@@ -145,6 +145,15 @@ export default function Builder() {
   const editHtml = (id, html) => setElements((els) => els.map((e) => e.id === id ? { ...e, html } : e));
   const replaceSelectedHtml = (html) => { if (!selected) return; editHtml(selected.id, html); };
 
+  // Wrap the currently selected element's HTML with a container div carrying
+  // the provided CSS declarations (from the Layout builder's Grid/Flex tools).
+  const wrapSelectionWithContainer = (containerStyle) => {
+    if (!selected) return;
+    const wrapped = `<div style="${containerStyle}">${selected.html}</div>`;
+    editHtml(selected.id, wrapped);
+    toast.success("Wrapped selection");
+  };
+
   const patchStyle = (patch) => {
     if (!selected) return;
     setElements((els) => els.map((e) => e.id === selected.id ? { ...e, html: patchFirstStyle(e.html, patch) } : e));
@@ -279,6 +288,8 @@ export default function Builder() {
           onFileClick={() => {}}
           savedComponents={savedComponents}
           onDeleteSavedComponent={deleteSavedComponent}
+          onWrapSelection={wrapSelectionWithContainer}
+          hasSelection={!!selected}
         />
 
         {mode === "design" ? (

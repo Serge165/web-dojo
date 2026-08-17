@@ -9,6 +9,7 @@ export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
   files, onFilesChange, onFileClick,
   savedComponents, onDeleteSavedComponent,
+  onWrapSelection, hasSelection,
 }) => {
   const [tab, setTab] = useState("library");
   const [open, setOpen] = useState({ components: true, navbars: true, heroes: true, sections: true });
@@ -181,7 +182,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "layout" && (
-        <LayoutBuilder onAddBlock={onAddBlock} />
+        <LayoutBuilder onAddBlock={onAddBlock} onWrapSelection={onWrapSelection} hasSelection={hasSelection} />
       )}
 
       {tab === "files" && (

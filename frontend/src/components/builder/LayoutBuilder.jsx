@@ -14,7 +14,7 @@ const cellHtml = (i, bg) =>
   `  <div style="min-height:80px;padding:16px;border-radius:8px;background:${bg};font-family:Manrope,sans-serif;font-size:13px;color:#1e293b;display:flex;align-items:center;justify-content:center;">Cell ${i + 1}</div>`;
 
 // ============================== FLEX ==============================
-const FlexBuilder = ({ onInsert }) => {
+const FlexBuilder = ({ onInsert, onWrap, hasSelection, actionMode }) => {
   const [direction, setDirection] = useState("row");
   const [wrap, setWrap] = useState("nowrap");
   const [justify, setJustify] = useState("flex-start");
@@ -27,7 +27,12 @@ const FlexBuilder = ({ onInsert }) => {
 
   const preview = `<div style="${container}">${Array.from({ length: items }).map((_, i) => cellHtml(i, "#f1f5f9")).join("")}</div>`;
 
-  const insert = () => onInsert(preview);
+  const isWrap = actionMode === "wrap";
+  const canAct = isWrap ? hasSelection : true;
+  const doAction = () => {
+    if (isWrap) onWrap(container);
+    else onInsert(preview);
+  };
 
   return (
     <div className="space-y-3" data-testid="flex-builder">
@@ -58,18 +63,24 @@ const FlexBuilder = ({ onInsert }) => {
       </Row>
       <NumberRow label="Gap" value={gap} onChange={setGap} min={0} max={80} testId="flex-gap" unit="px" />
       <NumberRow label="Padding" value={padding} onChange={setPadding} min={0} max={120} testId="flex-padding" unit="px" />
-      <NumberRow label="Items" value={items} onChange={setItems} min={1} max={12} testId="flex-items" unit="" />
+      {!isWrap && <NumberRow label="Items" value={items} onChange={setItems} min={1} max={12} testId="flex-items" unit="" />}
       <PreviewBox html={preview} />
       <CopyRow css={`.flex-container { ${container.replace(/;/g, ";\n  ").trim()} }`} />
-      <button onClick={insert} className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-1" data-testid="flex-insert">
-        <Plus size={12} /> Insert flex container
+      <button
+        onClick={doAction}
+        disabled={!canAct}
+        className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:bg-[#1F1F1F] disabled:text-gray-500 disabled:cursor-not-allowed text-white flex items-center justify-center gap-1"
+        data-testid="flex-insert"
+      >
+        <Plus size={12} /> {isWrap ? "Wrap selection with flex" : "Insert flex container"}
       </button>
+      {isWrap && !hasSelection && <div className="text-[10px] text-amber-400/80 text-center">Select an element on the canvas first.</div>}
     </div>
   );
 };
 
 // ============================== GRID ==============================
-const GridBuilder = ({ onInsert }) => {
+const GridBuilder = ({ onInsert, onWrap, hasSelection, actionMode }) => {
   const [cols, setCols] = useState([
     { value: 1, unit: "fr" }, { value: 1, unit: "fr" }, { value: 1, unit: "fr" },
   ]);
@@ -137,9 +148,27 @@ const GridBuilder = ({ onInsert }) => {
 
       <PreviewBox html={preview} />
       <CopyRow css={`.grid-container {\n  ${style.replace(/;/g, ";\n  ").trim()}\n}`} />
-      <button onClick={() => onInsert(preview)} className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-1" data-testid="grid-insert">
-        <Plus size={12} /> Insert grid container
-      </button>
+      {(() => {
+        const isWrap = actionMode === "wrap";
+        const canAct = isWrap ? hasSelection : true;
+        const doAction = () => {
+          if (isWrap) onWrap(style);
+          else onInsert(preview);
+        };
+        return (
+          <>
+            <button
+              onClick={doAction}
+              disabled={!canAct}
+              className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:bg-[#1F1F1F] disabled:text-gray-500 disabled:cursor-not-allowed text-white flex items-center justify-center gap-1"
+              data-testid="grid-insert"
+            >
+              <Plus size={12} /> {isWrap ? "Wrap selection with grid" : "Insert grid container"}
+            </button>
+            {isWrap && !hasSelection && <div className="text-[10px] text-amber-400/80 text-center">Select an element on the canvas first.</div>}
+          </>
+        );
+      })()}
     </div>
   );
 };
@@ -240,8 +269,9 @@ const CopyRow = ({ css }) => {
 };
 
 // ============================== ROOT ==============================
-export const LayoutBuilder = ({ onAddBlock }) => {
+export const LayoutBuilder = ({ onAddBlock, onWrapSelection, hasSelection }) => {
   const [mode, setMode] = useState("grid");
+  const [actionMode, setActionMode] = useState("insert");
   return (
     <div className="flex-1 overflow-y-auto p-3 space-y-3" data-testid="layout-builder">
       <div className="grid grid-cols-2 gap-1.5">
@@ -256,7 +286,21 @@ export const LayoutBuilder = ({ onAddBlock }) => {
           data-testid="layout-mode-flex"
         ><Columns size={12} /> Flexbox</button>
       </div>
-      {mode === "grid" ? <GridBuilder onInsert={onAddBlock} /> : <FlexBuilder onInsert={onAddBlock} />}
+      <div className="flex bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5 text-[11px]" data-testid="layout-action-toggle">
+        <button
+          onClick={() => setActionMode("insert")}
+          className={`flex-1 py-1 rounded ${actionMode === "insert" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+          data-testid="layout-action-insert"
+        >Insert new</button>
+        <button
+          onClick={() => setActionMode("wrap")}
+          className={`flex-1 py-1 rounded ${actionMode === "wrap" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+          data-testid="layout-action-wrap"
+        >Wrap selection</button>
+      </div>
+      {mode === "grid"
+        ? <GridBuilder onInsert={onAddBlock} onWrap={onWrapSelection} hasSelection={hasSelection} actionMode={actionMode} />
+        : <FlexBuilder onInsert={onAddBlock} onWrap={onWrapSelection} hasSelection={hasSelection} actionMode={actionMode} />}
     </div>
   );
 };

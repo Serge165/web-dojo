@@ -43,7 +43,9 @@ gradients into CSS gradients.
   presets (12-col, holy grail, dashboard, 3×3), track editor for columns/rows
   (value + unit: fr, px, %, rem, em, auto, minmax, min/max-content), col/row
   gaps, padding, justify/align controls, live iframe preview, CSS view + copy,
-  and "Insert container" that drops the layout onto canvas.
+  and an **Insert new / Wrap selection** toggle so builders can either drop a
+  fresh container or wrap the currently selected canvas element with the
+  generated container CSS.
 - **Files**: tree view with new file/folder, folder upload, drag-drop
   folders/files from disk (`webkitGetAsEntry`), rename/delete, drag `.html`
   files onto canvas. Persisted with project.
