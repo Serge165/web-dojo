@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration-2 review: backend + full frontend flows tested. All 8 backend endpoints pass (CRUD + 404 + new GET /api/preview/{id} returning text/html 200 including body + canvas_bg color; unknown id -> 404). Frontend flows verified: Components category (cat-toggle-components) expands and lists all component blocks; double-click block-cmp-anim-hero inserts canvas-el-*; all 8 right-inspector tabs (Color/Gradient/Style/BG/Motion/Layers/Theme/Page) switch; StyleInspector sliders present and style-padding patch updates inline style (verified padding: 88px in outer HTML using native React input setter); Motion preset (anim-preset-pop) + anim-apply adds 'animation:' to selected element; Theme aesthetics preset cottage-core changes canvas background to rgb(244,236,216) with toast; theme-tab-custom color rows visible; theme-custom-apply works; Layers panel row/z-index (updates el.style.zIndex)/visibility (sets display:none)/delete all work; BG image url + apply-bg-image adds background-image with url() on selected element; viewport toggle changes canvas width desktop=1200 -> mobile=390 -> tablet=820; Code mode mounts Monaco editor (.monaco-editor present under head-html-editor); Redo button and Cmd+Z keyboard shortcut work; Share button copies /api/preview/{id} to clipboard, backend GET /api/projects/{id} confirms persistence and /api/preview/{id} returns text/html.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "TopBar / Builder.undo()",
+        "issue": "First click on Undo button (undo-btn) has no effect on canvas state; a second click is required for the first undo to visibly apply. Cmd+Z keyboard shortcut and the Redo button work correctly on first press. Root cause: Builder.jsx `undo` calls `setFuture(...)` and `setElements/setCanvasBg/setHeadHtml/setFonts` from INSIDE the functional updater passed to `setPast(...)`. In React 18 StrictMode (dev), functional updaters are invoked twice; nested state setters run twice which lets the first click's real setElements payload be shadowed. Fix: move the side-effect setters (setFuture, setElements, setCanvasBg, setHeadHtml, setFonts, skipHistory.current=true) OUT of setPast's updater — compute `prev` from the current `past` state (via a ref) and call all setters at top-level of undo(), letting setPast's updater be a pure `p => p.slice(0,-1)`. Apply the same fix to redo() for symmetry.",
+        "selector": "[data-testid=\"undo-btn\"]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Refactor Builder.jsx undo()/redo() to remove nested state setters inside setPast/setFuture updaters. Read latest state via refs and call setElements/setCanvasBg/setHeadHtml/setFonts/setFuture (or setPast) as top-level updates so the first Undo click reliably applies (avoids React StrictMode double-invocation of updater side-effects)."
+  ],
+  "critical_code_review_comments": [
+    "Builder.jsx: setState inside another setState's functional updater is a documented React anti-pattern; StrictMode double-invocation makes it observable as 'first Undo click silently no-ops'.",
+    "Builder.jsx useEffect that re-attaches window keydown listeners has no dependency array — it runs on every render. Works because handlers close over latest state, but consider using a ref pattern to avoid unbinding/rebinding on every render."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "~97% (1 real bug: Undo button first-click)"},
+  "seed_data_creation": "Created and cleaned up TEST_it2_proj, TEST_it2_del, TEST_it2_preview projects via backend tests. A share-flow project was created on the preview URL during frontend testing and left in DB (harmless).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 2 - only remaining issue is the first-click Undo button no-op described above. All other iteration-2 features (preview endpoint, viewport toggle, Monaco, style sliders, layers z-index/visibility/delete, BG image, animation apply, theme presets + custom, Components category, Share) are fully working. When retesting, ensure the LeftSidebar Components category is toggled OPEN via cat-toggle-components before selecting block-cmp-* — it defaults collapsed. Use React's native input value setter to drive range sliders in Playwright (Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set); direct .value= assignments alone won't fire React's onChange.",
+  "rca_of_the_issue": "React StrictMode invokes state updater functions twice to help detect impurities. In Builder.jsx `undo`, several other setState calls (setFuture, setElements, setCanvasBg, setHeadHtml, setFonts) plus `skipHistory.current=true` are performed INSIDE the updater passed to setPast. When the updater runs twice in dev, these nested setters schedule updates from BOTH invocations; the effective batched result on the first click ends up not applying the intended prev-state (elements count stayed at 2 in the repro). On the second click the state ends up correct because past has been popped further along. Cmd+Z uses the same undo() but happens to work in the observed sequence because past only had one meaningful count-changing entry at that point. Fix: extract side-effects outside setPast's updater."
+}

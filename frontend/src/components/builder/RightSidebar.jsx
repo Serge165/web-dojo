@@ -1,8 +1,41 @@
 import React, { useState } from "react";
 import { ColorPicker } from "./ColorPicker";
 import { GradientMixer } from "./GradientMixer";
+import { StyleInspector } from "./StyleInspector";
+import { LayersPanel } from "./LayersPanel";
+import { BackgroundMediaPanel } from "./BackgroundMediaPanel";
+import { AnimationGenerator } from "./AnimationGenerator";
+import { ThemeGenerator } from "./ThemeGenerator";
 
-export const RightSidebar = ({ selected, onApplyBackground, onApplyColor, canvasBg, onCanvasBg }) => {
+const TABS = [
+  { id: "color", label: "Color" },
+  { id: "gradient", label: "Gradient" },
+  { id: "style", label: "Style" },
+  { id: "bg", label: "BG" },
+  { id: "anim", label: "Motion" },
+  { id: "layers", label: "Layers" },
+  { id: "theme", label: "Theme" },
+  { id: "page", label: "Page" },
+];
+
+export const RightSidebar = ({
+  selected,
+  onApplyBackground,
+  onApplyColor,
+  onPatchStyle,
+  onReplaceHtml,
+  onApplyAnimation,
+  onApplyTheme,
+  canvasBg,
+  onCanvasBg,
+  elements,
+  selectedId,
+  onSelect,
+  onMove,
+  onDelete,
+  onToggleVisible,
+  onSetZIndex,
+}) => {
   const [tab, setTab] = useState("color");
 
   return (
@@ -14,16 +47,12 @@ export const RightSidebar = ({ selected, onApplyBackground, onApplyColor, canvas
         </div>
       </div>
 
-      <div className="flex border-b border-[#2B2B2B] text-xs">
-        {[
-          { id: "color", label: "Color" },
-          { id: "gradient", label: "Gradient" },
-          { id: "page", label: "Page" },
-        ].map((t) => (
+      <div className="grid grid-cols-4 border-b border-[#2B2B2B] text-[11px]">
+        {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 py-2 ${tab === t.id ? "text-white border-b-2 border-blue-500" : "text-gray-400 hover:text-gray-200"}`}
+            className={`py-2 ${tab === t.id ? "text-white bg-[#1F1F1F]" : "text-gray-400 hover:text-gray-200"}`}
             data-testid={`insp-tab-${t.id}`}
           >{t.label}</button>
         ))}
@@ -35,24 +64,56 @@ export const RightSidebar = ({ selected, onApplyBackground, onApplyColor, canvas
             <ColorPicker
               value="#2563eb"
               alpha={1}
-              onChange={({ hex, alpha, rgba }) => {
-                // updates happen via the Apply buttons below to be predictable
-                setLastColor({ hex, alpha, rgba });
-              }}
+              onChange={({ hex, alpha, rgba }) => { setLastColor({ hex, alpha, rgba }); }}
             />
-            <ColorActions
-              onApplyBackground={onApplyBackground}
-              onApplyColor={onApplyColor}
-              disabled={!selected}
-            />
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#2B2B2B]">
+              <button
+                disabled={!selected}
+                onClick={() => onApplyBackground(_lastColor.rgba)}
+                className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                data-testid="apply-bg-btn"
+              >Apply background</button>
+              <button
+                disabled={!selected}
+                onClick={() => onApplyColor(_lastColor.rgba)}
+                className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] disabled:opacity-40 disabled:cursor-not-allowed"
+                data-testid="apply-color-btn"
+              >Apply text color</button>
+            </div>
             {!selected && <div className="text-[11px] text-gray-500">Select an element on the canvas to apply.</div>}
           </div>
         )}
 
         {tab === "gradient" && (
-          <GradientMixer
-            onApply={(gradient) => selected && onApplyBackground(gradient)}
+          <GradientMixer onApply={(g) => selected && onApplyBackground(g)} />
+        )}
+
+        {tab === "style" && (
+          <StyleInspector selected={selected} onPatch={onPatchStyle} />
+        )}
+
+        {tab === "bg" && (
+          <BackgroundMediaPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
+        )}
+
+        {tab === "anim" && (
+          <AnimationGenerator selected={selected} onApplyAnimation={onApplyAnimation} />
+        )}
+
+        {tab === "layers" && (
+          <LayersPanel
+            elements={elements}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            onMove={onMove}
+            onDelete={onDelete}
+            onToggleVisible={onToggleVisible}
+            onSetZIndex={onSetZIndex}
           />
+        )}
+
+        {tab === "theme" && (
+          <ThemeGenerator onApplyTheme={onApplyTheme} />
         )}
 
         {tab === "page" && (
@@ -62,7 +123,7 @@ export const RightSidebar = ({ selected, onApplyBackground, onApplyColor, canvas
               <div className="flex gap-2 items-center">
                 <input
                   type="color"
-                  value={canvasBg || "#ffffff"}
+                  value={/^#[0-9a-f]{6}$/i.test(canvasBg || "") ? canvasBg : "#ffffff"}
                   onChange={(e) => onCanvasBg(e.target.value)}
                   className="w-10 h-8 bg-transparent border border-[#2B2B2B] rounded"
                   data-testid="canvas-bg-color"
@@ -75,7 +136,7 @@ export const RightSidebar = ({ selected, onApplyBackground, onApplyColor, canvas
                 />
               </div>
             </div>
-            <p className="text-[11px] text-gray-500">Applies to the exported &lt;body&gt; background.</p>
+            <p className="text-[11px] text-gray-500">Applies to the exported &lt;body&gt; background. You can also paste a CSS gradient string.</p>
           </div>
         )}
       </div>
@@ -83,23 +144,5 @@ export const RightSidebar = ({ selected, onApplyBackground, onApplyColor, canvas
   );
 };
 
-// The last picked color is stored inside the tab so Apply-buttons can use it.
 let _lastColor = { hex: "#2563eb", alpha: 1, rgba: "rgba(37, 99, 235, 1)" };
 const setLastColor = (c) => { _lastColor = c; };
-
-const ColorActions = ({ onApplyBackground, onApplyColor, disabled }) => (
-  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#2B2B2B]">
-    <button
-      disabled={disabled}
-      onClick={() => onApplyBackground(_lastColor.rgba)}
-      className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
-      data-testid="apply-bg-btn"
-    >Apply background</button>
-    <button
-      disabled={disabled}
-      onClick={() => onApplyColor(_lastColor.rgba)}
-      className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] disabled:opacity-40 disabled:cursor-not-allowed"
-      data-testid="apply-color-btn"
-    >Apply text color</button>
-  </div>
-);

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { TopBar } from "@/components/builder/TopBar";
@@ -13,28 +13,24 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const uid = () => "el_" + Math.random().toString(36).slice(2, 10);
 
-// Extract first style="…" attribute from a HTML string and apply a patch.
+// Merge a patch of CSS declarations into the first inline style="…" attribute.
 const patchFirstStyle = (html, patch) => {
   if (/style="([^"]*)"/.test(html)) {
     return html.replace(/style="([^"]*)"/, (_, styles) => {
       const parts = styles.split(";").map((s) => s.trim()).filter(Boolean);
       const map = {};
-      parts.forEach((p) => {
-        const idx = p.indexOf(":");
-        if (idx > 0) map[p.slice(0, idx).trim()] = p.slice(idx + 1).trim();
-      });
+      parts.forEach((p) => { const i = p.indexOf(":"); if (i > 0) map[p.slice(0, i).trim()] = p.slice(i + 1).trim(); });
       Object.assign(map, patch);
-      const merged = Object.entries(map).map(([k, v]) => `${k}: ${v}`).join("; ");
-      return `style="${merged}"`;
+      return `style="${Object.entries(map).map(([k, v]) => `${k}: ${v}`).join("; ")}"`;
     });
   }
-  // Inject style into the first tag
   const styleStr = Object.entries(patch).map(([k, v]) => `${k}: ${v}`).join("; ");
   return html.replace(/<([a-zA-Z][^ >]*)(\s|>)/, (_, tag, s) => `<${tag} style="${styleStr}"${s}`);
 };
 
 export default function Builder() {
   const [mode, setMode] = useState("design");
+  const [viewport, setViewport] = useState("desktop");
   const [projectId, setProjectId] = useState(null);
   const [projectName, setProjectName] = useState("Untitled");
   const [elements, setElements] = useState([]);
@@ -47,17 +43,57 @@ export default function Builder() {
   const [importOpen, setImportOpen] = useState(false);
   const [importedSections, setImportedSections] = useState([]);
 
-  const selected = useMemo(() => elements.find((e) => e.id === selectedId) || null, [elements, selectedId]);
+  // Undo/Redo history stack for the doc state.
+  const [past, setPast] = useState([]);
+  const [future, setFuture] = useState([]);
+  const skipHistory = useRef(false);
+  const pastRef = useRef(past);
+  const futureRef = useRef(future);
+  useEffect(() => { pastRef.current = past; }, [past]);
+  useEffect(() => { futureRef.current = future; }, [future]);
 
+  const doc = useMemo(() => ({ elements, canvasBg, headHtml, fonts }), [elements, canvasBg, headHtml, fonts]);
+  const docRef = useRef(doc);
+  useEffect(() => { docRef.current = doc; }, [doc]);
+
+  // Push previous state on every change (unless we're in the middle of undo/redo).
+  const prevDoc = useRef(doc);
+  useEffect(() => {
+    if (skipHistory.current) { skipHistory.current = false; prevDoc.current = doc; return; }
+    if (prevDoc.current === doc) return;
+    const snapshot = prevDoc.current; // capture BEFORE the ref is reassigned
+    prevDoc.current = doc;
+    setPast((p) => [...p.slice(-49), snapshot]);
+    setFuture([]);
+  }, [doc]);
+
+  const undo = () => {
+    const p = pastRef.current;
+    if (p.length === 0) return;
+    const prev = p[p.length - 1];
+    skipHistory.current = true;
+    setFuture((f) => [docRef.current, ...f].slice(0, 50));
+    setPast(p.slice(0, -1));
+    setElements(prev.elements); setCanvasBg(prev.canvasBg); setHeadHtml(prev.headHtml); setFonts(prev.fonts);
+  };
+  const redo = () => {
+    const f = futureRef.current;
+    if (f.length === 0) return;
+    const next = f[0];
+    skipHistory.current = true;
+    setPast((p) => [...p, docRef.current]);
+    setFuture(f.slice(1));
+    setElements(next.elements); setCanvasBg(next.canvasBg); setHeadHtml(next.headHtml); setFonts(next.fonts);
+  };
+
+  const selected = useMemo(() => elements.find((e) => e.id === selectedId) || null, [elements, selectedId]);
   const project = { name: projectName, elements, head_html: headHtml, canvas_bg: canvasBg, fonts };
 
   const addBlock = useCallback((html, atIndex) => {
     const el = { id: uid(), html };
     setElements((els) => {
       const idx = typeof atIndex === "number" ? atIndex : els.length;
-      const next = [...els];
-      next.splice(idx, 0, el);
-      return next;
+      const next = [...els]; next.splice(idx, 0, el); return next;
     });
     setSelectedId(el.id);
   }, []);
@@ -68,34 +104,40 @@ export default function Builder() {
   };
   const moveEl = (id, delta) => {
     setElements((els) => {
-      const i = els.findIndex((e) => e.id === id);
-      if (i < 0) return els;
-      const j = Math.max(0, Math.min(els.length - 1, i + delta));
-      if (i === j) return els;
-      const next = [...els];
-      const [item] = next.splice(i, 1);
-      next.splice(j, 0, item);
-      return next;
+      const i = els.findIndex((e) => e.id === id); if (i < 0) return els;
+      const j = Math.max(0, Math.min(els.length - 1, i + delta)); if (i === j) return els;
+      const next = [...els]; const [item] = next.splice(i, 1); next.splice(j, 0, item); return next;
     });
   };
   const dupEl = (id) => {
     setElements((els) => {
-      const i = els.findIndex((e) => e.id === id);
-      if (i < 0) return els;
-      const clone = { id: uid(), html: els[i].html };
-      const next = [...els];
-      next.splice(i + 1, 0, clone);
-      return next;
+      const i = els.findIndex((e) => e.id === id); if (i < 0) return els;
+      const next = [...els]; next.splice(i + 1, 0, { ...els[i], id: uid() }); return next;
     });
   };
+  const toggleVisible = (id) => setElements((els) => els.map((e) => e.id === id ? { ...e, hidden: !e.hidden } : e));
+  const setZIndex = (id, z) => setElements((els) => els.map((e) => e.id === id ? { ...e, zIndex: z } : e));
+  const editHtml = (id, html) => setElements((els) => els.map((e) => e.id === id ? { ...e, html } : e));
+  const replaceSelectedHtml = (html) => { if (!selected) return; editHtml(selected.id, html); };
 
-  const applyBackground = (value) => {
+  const patchStyle = (patch) => {
     if (!selected) return;
-    setElements((els) => els.map((e) => e.id === selected.id ? { ...e, html: patchFirstStyle(e.html, { background: value }) } : e));
+    setElements((els) => els.map((e) => e.id === selected.id ? { ...e, html: patchFirstStyle(e.html, patch) } : e));
   };
-  const applyColor = (value) => {
+  const applyBackground = (value) => patchStyle({ background: value });
+  const applyColor = (value) => patchStyle({ color: value });
+
+  const applyAnimation = ({ keyframes, shorthand }) => {
     if (!selected) return;
-    setElements((els) => els.map((e) => e.id === selected.id ? { ...e, html: patchFirstStyle(e.html, { color: value }) } : e));
+    setHeadHtml((h) => `${h ? h + "\n" : ""}<style data-forge-anim="${selected.id}">\n${keyframes}\n</style>`);
+    patchStyle({ animation: shorthand });
+  };
+
+  const applyTheme = ({ headHtml: themeHead, canvasBg: themeBg, googleFont }) => {
+    // Strip any prior forge-theme style block, then append new.
+    setHeadHtml((h) => (h || "").replace(/<link[^>]*fonts\.googleapis[^>]*>|<style data-forge-theme=[^>]*>[\s\S]*?<\/style>/g, "").trim() + (h ? "\n" : "") + themeHead);
+    if (themeBg) setCanvasBg(themeBg);
+    if (googleFont && !fonts.includes(googleFont)) setFonts((f) => [...f, googleFont]);
   };
 
   const addFont = ({ family, google }) => {
@@ -114,16 +156,11 @@ export default function Builder() {
 
   const onImportSections = ({ headHtml: h, sections }) => {
     if (h) setHeadHtml((cur) => cur ? cur + "\n" + h : h);
-    setImportedSections(sections);
-    setImportOpen(true);
+    setImportedSections(sections); setImportOpen(true);
   };
+  const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
 
-  const insertImportedSection = (sec) => {
-    addBlock(sec.html);
-    toast.success(`Inserted ${sec.label}`);
-  };
-
-  // Save/Load ---
+  // Save/Load ------------------------------------------------------
   const save = async () => {
     try {
       if (projectId) {
@@ -133,38 +170,26 @@ export default function Builder() {
         setProjectId(res.data.id);
       }
       toast.success("Project saved");
-    } catch (e) {
-      toast.error("Save failed");
-      console.error(e);
-    }
+    } catch (e) { toast.error("Save failed"); console.error(e); }
   };
 
   const openLoad = async () => {
     try {
       const res = await axios.get(`${API}/projects`);
-      setProjects(res.data);
-      setLoadOpen(true);
-    } catch (e) {
-      toast.error("Failed to fetch projects");
-    }
+      setProjects(res.data); setLoadOpen(true);
+    } catch { toast.error("Failed to fetch projects"); }
   };
 
   const loadProject = async (id) => {
     try {
       const res = await axios.get(`${API}/projects/${id}`);
       const p = res.data;
-      setProjectId(p.id);
-      setProjectName(p.name);
-      setElements((p.elements || []).map((e) => ({ id: e.id || uid(), html: e.html })));
-      setHeadHtml(p.head_html || "");
-      setCanvasBg(p.canvas_bg || "#ffffff");
-      setFonts(p.fonts || []);
-      setSelectedId(null);
-      setLoadOpen(false);
+      setProjectId(p.id); setProjectName(p.name);
+      setElements((p.elements || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })));
+      setHeadHtml(p.head_html || ""); setCanvasBg(p.canvas_bg || "#ffffff"); setFonts(p.fonts || []);
+      setSelectedId(null); setLoadOpen(false); setPast([]); setFuture([]);
       toast.success(`Loaded ${p.name}`);
-    } catch (e) {
-      toast.error("Failed to load");
-    }
+    } catch { toast.error("Failed to load"); }
   };
 
   const deleteProject = async (id) => {
@@ -176,16 +201,34 @@ export default function Builder() {
     } catch { toast.error("Delete failed"); }
   };
 
-  // deselect on canvas blank click
+  const share = async () => {
+    try {
+      let id = projectId;
+      if (!id) {
+        const res = await axios.post(`${API}/projects`, project); id = res.data.id; setProjectId(id);
+      } else {
+        await axios.put(`${API}/projects/${id}`, project);
+      }
+      const url = `${process.env.REACT_APP_BACKEND_URL}/api/preview/${id}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Preview URL copied to clipboard");
+    } catch { toast.error("Share failed"); }
+  };
+
+  // Global keyboard shortcuts
   useEffect(() => {
     const onKey = (e) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
+      if (meta && (e.key.toLowerCase() === "z" && e.shiftKey || e.key.toLowerCase() === "y")) { e.preventDefault(); redo(); return; }
+      if (meta && e.key.toLowerCase() === "s") { e.preventDefault(); save(); return; }
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId && document.activeElement === document.body) {
-        removeEl(selectedId);
+        e.preventDefault(); removeEl(selectedId);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectedId]);
+  }); // re-attach each render so closures use latest state
 
   return (
     <div className="h-screen w-screen flex flex-col bg-[#0D0D0D] text-white overflow-hidden text-sm" style={{ fontFamily: "Manrope, sans-serif" }} data-testid="builder-shell">
@@ -194,8 +237,10 @@ export default function Builder() {
         projectName={projectName} setProjectName={setProjectName}
         onImportSections={onImportSections}
         project={project}
-        onSave={save}
-        onOpenLoad={openLoad}
+        onSave={save} onOpenLoad={openLoad} onShare={share}
+        onUndo={undo} onRedo={redo}
+        canUndo={past.length > 0} canRedo={future.length > 0}
+        viewport={viewport} setViewport={setViewport}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -210,8 +255,10 @@ export default function Builder() {
             onDelete={removeEl}
             onMove={moveEl}
             onDuplicate={dupEl}
+            onEditHtml={editHtml}
             canvasBg={canvasBg}
             headHtml={headHtml}
+            viewport={viewport}
           />
         ) : (
           <CodeView project={project} headHtml={headHtml} onHeadHtmlChange={setHeadHtml} />
@@ -221,12 +268,22 @@ export default function Builder() {
           selected={selected}
           onApplyBackground={applyBackground}
           onApplyColor={applyColor}
+          onPatchStyle={patchStyle}
+          onReplaceHtml={replaceSelectedHtml}
+          onApplyAnimation={applyAnimation}
+          onApplyTheme={applyTheme}
           canvasBg={canvasBg}
           onCanvasBg={setCanvasBg}
+          elements={elements}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onMove={moveEl}
+          onDelete={removeEl}
+          onToggleVisible={toggleVisible}
+          onSetZIndex={setZIndex}
         />
       </div>
 
-      {/* Load project modal */}
       <Dialog open={loadOpen} onOpenChange={setLoadOpen}>
         <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white" data-testid="load-modal">
           <DialogHeader><DialogTitle>Open project</DialogTitle></DialogHeader>
@@ -247,7 +304,6 @@ export default function Builder() {
         </DialogContent>
       </Dialog>
 
-      {/* Imported sections modal */}
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-2xl" data-testid="import-sections-modal">
           <DialogHeader><DialogTitle>Imported sections — {importedSections.length}</DialogTitle></DialogHeader>

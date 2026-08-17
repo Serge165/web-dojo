@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi.responses import HTMLResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -133,6 +134,44 @@ async def delete_project(project_id: str):
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Project not found")
     return {"ok": True}
+
+
+def _build_google_fonts_link(fonts):
+    if not fonts:
+        return ""
+    families = "&family=".join([f.replace(" ", "+") for f in fonts])
+    return (
+        '<link rel="preconnect" href="https://fonts.googleapis.com">'
+        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+        f'<link href="https://fonts.googleapis.com/css2?family={families}&display=swap" rel="stylesheet">'
+    )
+
+
+def _project_to_html(doc: dict) -> str:
+    body = "\n".join([e.get("html", "") for e in (doc.get("elements") or [])])
+    fonts_link = _build_google_fonts_link(doc.get("fonts") or [])
+    head_extra = doc.get("head_html") or ""
+    canvas_bg = doc.get("canvas_bg") or "#ffffff"
+    name = doc.get("name") or "Untitled"
+    return (
+        "<!doctype html>\n<html lang=\"en\">\n<head>\n"
+        "<meta charset=\"utf-8\" />\n"
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+        f"<title>{name}</title>\n"
+        f"{fonts_link}\n{head_extra}\n"
+        f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
+        "</head>\n<body>\n"
+        f"{body}\n"
+        "</body>\n</html>"
+    )
+
+
+@api_router.get("/preview/{project_id}", response_class=HTMLResponse)
+async def preview_project(project_id: str):
+    doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return HTMLResponse(content=_project_to_html(doc))
 
 
 app.include_router(api_router)

@@ -38,17 +38,38 @@ gradients into CSS gradients.
 
 ## Implemented (Feb 17, 2026)
 - Backend CRUD for projects (create/list/get/update/delete) tested 100% pass.
+- Public preview endpoint `GET /api/preview/{id}` returns rendered text/html.
 - Builder shell (TopBar, LeftSidebar, Canvas, RightSidebar).
-- Block library: 2 navbars, 2 heroes, 2 sections, 3 containers, 5 text tools,
-  6 toolbox items, cards with count (1-6).
+- Left sidebar library adds Components category (headers, glass navbar,
+  animated hero, animated marquee, testimonial, pricing 3-col, footer),
+  plus original navbars/heroes/sections/containers/text/toolbox and
+  cards-with-count.
 - Font manager: 8 web-safe + Google Fonts by name + shows @font-face guide in
   head editor.
 - Photoshop-style color picker + gradient mixer with copy/apply.
-- Design/Code mode toggle. Code view exposes `<head>` textarea for framework
+- Design/Code mode toggle. Code view uses Monaco editor with Emmet expansion
+  and syntax highlighting; separate `<head>` injection editor for framework
   CDNs and custom `@font-face`.
 - HTML import (file or paste) with section scanning + modal picker.
 - Export: standalone .html and .zip (html + styles.css).
-- Save/Load projects via MongoDB.
+- Save/Load projects via MongoDB. Shareable public preview URL via Share
+  button (auto-saves + copies preview link).
+- Multi-viewport preview toggle (desktop 1200 / tablet 820 / mobile 390).
+- Undo / Redo (Cmd+Z, Cmd+Shift+Z) with 50-step history.
+- Inline text edit on canvas via pencil icon on the element (contentEditable).
+- Right sidebar tabs: Color, Gradient, Style, BG, Motion, Layers, Theme, Page.
+- Style inspector sliders: padding, margin, border-radius, font-size, opacity,
+  text alignment + font weight.
+- Background media panel: bg image URL with size/position/repeat, and bg
+  video URL that wraps element with a looping full-cover video.
+- Layers panel with per-element visibility toggle, z-index editor,
+  reorder up/down, delete.
+- CSS animation generator with 9 presets (fade/slide/zoom/pop/spin/float/
+  pulse), duration/delay/easing/iteration controls, live preview and
+  Copy CSS / Apply to selection.
+- CSS theme generator: 9 aesthetic presets (cottage-core, grey-metal,
+  book-fair, brutalism, y2k, cyberpunk, memphis, glassmorphism, scandi-min)
+  + a Custom builder with color rows and Google font selector.
 
 ## Test Results (Iteration 1)
 - Backend: 100% pass.
