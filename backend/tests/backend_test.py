@@ -567,27 +567,49 @@ EXPECTED_STARTER_IDS = [
     "starter-cyberpunk", "starter-brutalism", "starter-bauhaus",
     "starter-scandi-minimal", "starter-memphis", "starter-retro-futurism",
     "starter-bloomcore", "starter-neubrutalism", "starter-corp-memphis",
+    # Iteration 8: 13 new aesthetics
+    "starter-kidcore", "starter-blueprint", "starter-editorial-warm",
+    "starter-diffused-worlds", "starter-cassette-futurism", "starter-newspaper",
+    "starter-barbiecore", "starter-win95", "starter-grunge-zine",
+    "starter-art-nouveau", "starter-swiss", "starter-goblincore",
+    "starter-dreamcore",
 ]
+
+EXPECTED_AESTHETIC_SLUGS = {
+    "art-nouveau", "barbiecore", "bauhaus", "bloomcore", "blueprint", "brutalism",
+    "cassette-futurism", "corp-memphis", "cottagecore", "cyberpunk", "dark-academia",
+    "diffused-worlds", "dreamcore", "editorial-warm", "frutiger-aero", "goblincore",
+    "grunge-zine", "kidcore", "memphis", "neubrutalism", "newspaper",
+    "retro-futurism", "scandi-minimal", "solar-punk", "swiss", "vaporwave",
+    "win95", "y2k",
+}
 
 
 class TestStarterTemplates:
-    def test_all_15_starters_present_and_first(self, client):
+    def test_all_28_starters_present_and_first(self, client):
         r = client.get(f"{API}/templates")
         assert r.status_code == 200
         arr = r.json()
         assert isinstance(arr, list)
         starters = [t for t in arr if t.get("is_starter")]
-        # Should have >= 15 total (starters + any user templates)
-        assert len(arr) >= 15, f"expected >=15 templates, got {len(arr)}"
-        # All 15 expected starter ids present, each exactly once (idempotent upsert)
+        # Should have >= 28 total (starters + any user templates)
+        assert len(arr) >= 28, f"expected >=28 templates, got {len(arr)}"
+        # Exactly 28 starters
+        assert len(starters) == 28, f"expected 28 starters, got {len(starters)}"
+        # All 28 expected starter ids present, each exactly once (idempotent upsert)
         starter_ids = [t["id"] for t in starters]
         for sid in EXPECTED_STARTER_IDS:
             assert starter_ids.count(sid) == 1, f"starter {sid} count={starter_ids.count(sid)}"
         # Each starter has aesthetic populated
+        aesthetic_slugs = set()
         for t in starters:
             assert t.get("aesthetic"), f"missing aesthetic on {t['id']}"
             assert t.get("name")
             assert isinstance(t.get("data"), dict)
+            aesthetic_slugs.add(t["aesthetic"])
+        # Verify all 28 expected aesthetic slugs are present
+        missing = EXPECTED_AESTHETIC_SLUGS - aesthetic_slugs
+        assert not missing, f"missing aesthetics: {missing}"
         # Starters appear before user templates in returned order
         first_non_starter = next((i for i, t in enumerate(arr) if not t.get("is_starter")), len(arr))
         # every element before first_non_starter must be a starter

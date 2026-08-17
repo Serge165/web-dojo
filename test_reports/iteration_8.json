@@ -1,0 +1,21 @@
+{
+  "summary": "Iteration 8 — Backend + Frontend verification of the four new areas: (1) 28 starter templates with aesthetic field; (2) WEBDOJO_SECRET_KEY env wiring survives backend restart; (3) new Forms tab + FormBuilderModal; (4) Templates modal search + aesthetic chips. Updated TestStarterTemplates in /app/backend/tests/backend_test.py to assert exactly 28 starters, all 28 expected ids present once each, and all 28 expected aesthetic slugs (art-nouveau, barbiecore, bauhaus, bloomcore, blueprint, brutalism, cassette-futurism, corp-memphis, cottagecore, cyberpunk, dark-academia, diffused-worlds, dreamcore, editorial-warm, frutiger-aero, goblincore, grunge-zine, kidcore, memphis, neubrutalism, newspaper, retro-futurism, scandi-minimal, solar-punk, swiss, vaporwave, win95, y2k). Full suite: 39/39 pass in 3.14s. Restart-persistence flow verified out-of-band: create preset with save_password=true → GET /secret returns plaintext → sudo supervisorctl restart backend → GET /secret still returns the same plaintext → starter count remains 28. Frontend UI: onboarding tour skipped, left sidebar shows all 6 tabs (library/layout/forms/files/snippets/saved), Forms tab renders 'Open form builder' + 6 preset rows (Contact form / Newsletter signup / Login / Signup / Feedback / Event RSVP). FormBuilderModal opens with every documented data-testid present (form-action, form-method, form-layout, form-theme, form-brand, form-submit-label, form-success, form-fields-list, form-preview-iframe, form-insert, form-save-component) and all 14 add-field-{type} buttons found. Adding an email field appended a row, selecting it exposed field-name/label/placeholder/required. 'Insert onto canvas' closed modal, showed 'Form inserted onto canvas' toast, and a real <form> is present in the canvas DOM. Templates modal (via templates-btn): search box + 'All · 28' chip + 28 aesthetic chips render; typing 'punk' narrows gallery to 2 templates (Cyberpunk + Solar Punk); clicking aesthetic-cyberpunk narrows to 1; clicking aesthetic-all resets to 28.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "The onboarding tour overlay (data-testid onboarding-tour) captures pointer events across the whole viewport on first load; automated tests and any first-time user must dismiss the tour before any sidebar/topbar button becomes clickable — consider adding a data-testid onboarding-skip on the Skip button (currently only a text label) and/or persisting the dismissal earlier so returning users are not blocked.",
+    "Iteration 7 hardening items remain worth addressing: exclude password_enc explicitly via a Mongo projection on list_publish_presets as defense-in-depth against future serializer regressions leaking the ciphertext."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (39/39)", "frontend": "100% (all new-area flows verified)"},
+  "seed_data_creation": "TEST_it7_* presets and TEST_it8_restart_persist preset created and cleaned up; no residual test data.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "backend_test.py TestStarterTemplates now expects exactly 28 starters and matches the aesthetic slug set. If more starters are added, update EXPECTED_STARTER_IDS + EXPECTED_AESTHETIC_SLUGS. Restart-persistence for encrypted presets is not in the pytest suite (would require supervisor restart mid-run); it was validated via an ad-hoc script (create → GET /secret → sudo supervisorctl restart backend → GET /secret returns same plaintext). Onboarding tour overlay must be dismissed via the 'Skip' text button before any topbar/sidebar interaction in Playwright tests.",
+  "rca_of_the_issue": "No issues; all backend and frontend expectations for iteration 8 are met."
+}

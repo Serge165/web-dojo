@@ -5,6 +5,7 @@ import { FileTree } from "./FileTree";
 import { ComponentThumbnail } from "./ComponentThumbnail";
 import { LayoutBuilder } from "./LayoutBuilder";
 import { SnippetsTab } from "./SnippetsTab";
+import { FormsTab } from "./FormsTab";
 
 export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
@@ -12,6 +13,7 @@ export const LeftSidebar = ({
   savedComponents, onDeleteSavedComponent,
   onWrapSelection, hasSelection,
   selectedHtml,
+  onOpenFormBuilder,
 }) => {
   const [tab, setTab] = useState("library");
   const [open, setOpen] = useState({ components: true, navbars: true, heroes: true, sections: true });
@@ -60,10 +62,11 @@ export const LeftSidebar = ({
 
   return (
     <aside className="w-64 flex-none border-r border-[#2B2B2B] bg-[#141414] flex flex-col overflow-hidden" data-testid="left-sidebar">
-      <div className="grid grid-cols-5 border-b border-[#2B2B2B] text-[10px]">
+      <div className="grid grid-cols-6 border-b border-[#2B2B2B] text-[10px]">
         {[
           { id: "library", label: "Library" },
           { id: "layout", label: "Layout" },
+          { id: "forms", label: "Forms" },
           { id: "files", label: "Files" },
           { id: "snippets", label: "Snips" },
           { id: "saved", label: `Saved${savedComponents.length ? ` · ${savedComponents.length}` : ""}` },
@@ -186,6 +189,10 @@ export const LeftSidebar = ({
 
       {tab === "layout" && (
         <LayoutBuilder onAddBlock={onAddBlock} onWrapSelection={onWrapSelection} hasSelection={hasSelection} />
+      )}
+
+      {tab === "forms" && (
+        <FormsTab onAddBlock={onAddBlock} onOpenBuilder={onOpenFormBuilder} />
       )}
 
       {tab === "snippets" && (

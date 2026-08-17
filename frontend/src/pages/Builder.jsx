@@ -17,6 +17,7 @@ import { FindReplaceModal } from "@/components/builder/FindReplaceModal";
 import { AssetsLibrary } from "@/components/builder/AssetsLibrary";
 import { AnalyticsModal } from "@/components/builder/AnalyticsModal";
 import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModal";
+import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -64,6 +65,7 @@ export default function Builder() {
   const [assetsOpen, setAssetsOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [formBuilderOpen, setFormBuilderOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
 
@@ -462,6 +464,7 @@ export default function Builder() {
           onWrapSelection={wrapSelectionWithContainer}
           hasSelection={!!selected}
           selectedHtml={selected?.html || ""}
+          onOpenFormBuilder={() => setFormBuilderOpen(true)}
         />
 
         {mode === "design" ? (
@@ -616,6 +619,18 @@ export default function Builder() {
         onClose={() => setTemplatesOpen(false)}
         currentProject={project}
         onLoadTemplate={loadFromTemplate}
+      />
+
+      <FormBuilderModal
+        open={formBuilderOpen}
+        onClose={() => setFormBuilderOpen(false)}
+        onInsert={(html) => addBlock(html)}
+        onSaveComponent={async ({ name, html, category }) => {
+          try {
+            const res = await axios.post(`${API}/components`, { name, html, category });
+            setSavedComponents((c) => [res.data, ...c]);
+          } catch { toast.error("Failed to save form to library"); }
+        }}
       />
 
       <OnboardingTour key={tourForce} force={tourForce > 0} />

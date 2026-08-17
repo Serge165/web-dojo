@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Trash2, Sparkles, Bookmark } from "lucide-react";
+import { Trash2, Sparkles, Bookmark, Search, X } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -24,6 +24,19 @@ const AESTHETIC_PREVIEWS = {
   "bloomcore": { bg: "linear-gradient(180deg,#fff5f7 0%,#ffe4ee 60%,#f8c9dc 100%)", fg: "#c14571" },
   "neubrutalism": { bg: "#fef9d9", fg: "#000000", border: "3px solid #000000" },
   "corp-memphis": { bg: "linear-gradient(135deg,#f4f0ff 0%,#dff5ec 100%)", fg: "#7a4de8" },
+  "kidcore": { bg: "linear-gradient(135deg,#fff8e1 0%,#ffde3a 100%)", fg: "#ff5b3a" },
+  "blueprint": { bg: "#0a2540", fg: "#6ab0d8" },
+  "editorial-warm": { bg: "#f5efe4", fg: "#8a7052" },
+  "diffused-worlds": { bg: "linear-gradient(160deg,#f8e6f2 0%,#eaddf4 50%,#c9d8f0 100%)", fg: "#5a4590" },
+  "cassette-futurism": { bg: "linear-gradient(180deg,#d9c9a0 0%,#b8a578 100%)", fg: "#c05a10" },
+  "newspaper": { bg: "#f4ede0", fg: "#1a1a1a" },
+  "barbiecore": { bg: "linear-gradient(180deg,#ff9ec4 0%,#ff2ea8 100%)", fg: "#ffffff" },
+  "win95": { bg: "#008080", fg: "#ffffff" },
+  "grunge-zine": { bg: "#f0ede4", fg: "#ee2a2a" },
+  "art-nouveau": { bg: "linear-gradient(135deg,#f4ecd8 0%,#e0d0a0 100%)", fg: "#3a4a25" },
+  "swiss": { bg: "#f4f4f4", fg: "#e5001a" },
+  "goblincore": { bg: "radial-gradient(circle at 30% 30%,#3a4a28 0%,#1a2412 70%)", fg: "#c8a848" },
+  "dreamcore": { bg: "radial-gradient(ellipse at 30% 30%,#ffd6ec 0%,#f3e8ff 50%,#c9d8f8 100%)", fg: "#8a5aa8" },
 };
 
 const StarterCard = ({ tpl, onUse }) => {
@@ -75,12 +88,14 @@ const UserTemplateRow = ({ tpl, onUse, onDelete }) => (
 );
 
 // Two-mode modal: save the current project as a starter template, or start a
-// new project from an existing template (including 15 built-in aesthetics).
+// new project from an existing template (including built-in aesthetics).
 export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTemplate }) => {
   const [templates, setTemplates] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState("");
+  const [aestheticFilter, setAestheticFilter] = useState("");
 
   useEffect(() => { if (open) refresh(); }, [open]);
 
@@ -91,11 +106,22 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
     } catch { toast.error("Failed to load templates"); }
   };
 
-  const { starters, userTemplates } = useMemo(() => {
+  const { starters, userTemplates, aesthetics } = useMemo(() => {
+    const q = query.trim().toLowerCase();
     const starters = templates.filter((t) => t.is_starter);
     const userTemplates = templates.filter((t) => !t.is_starter);
-    return { starters, userTemplates };
-  }, [templates]);
+    const aesthetics = Array.from(new Set(starters.map((t) => t.aesthetic).filter(Boolean))).sort();
+    const filterOne = (t) => {
+      const hitAesthetic = !aestheticFilter || t.aesthetic === aestheticFilter;
+      const hitQuery = !q || t.name.toLowerCase().includes(q) || (t.aesthetic || "").toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q);
+      return hitAesthetic && hitQuery;
+    };
+    return {
+      starters: starters.filter(filterOne),
+      userTemplates: userTemplates.filter((t) => !q || t.name.toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q)),
+      aesthetics,
+    };
+  }, [templates, query, aestheticFilter]);
 
   const saveTemplate = async () => {
     if (!name.trim()) { toast.error("Give the template a name"); return; }
@@ -128,18 +154,57 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
         <DialogHeader><DialogTitle>Project templates</DialogTitle></DialogHeader>
         <div className="space-y-5">
 
+          {/* Search + filter */}
+          <div className="flex flex-col gap-2">
+            <div className="relative">
+              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by name, description or aesthetic…"
+                className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded pl-6 pr-6 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                data-testid="tpl-search"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  data-testid="tpl-search-clear"
+                ><X size={12} /></button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1" data-testid="aesthetic-filter">
+              <button
+                onClick={() => setAestheticFilter("")}
+                className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === "" ? "border-blue-500 bg-blue-500/20 text-white" : "border-[#2B2B2B] bg-[#0D0D0D] text-gray-400 hover:border-blue-500/60"}`}
+                data-testid="aesthetic-all"
+              >All · {templates.filter((t) => t.is_starter).length}</button>
+              {aesthetics.map((a) => (
+                <button
+                  key={a}
+                  onClick={() => setAestheticFilter(a === aestheticFilter ? "" : a)}
+                  className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === a ? "border-amber-400 bg-amber-400/15 text-white" : "border-[#2B2B2B] bg-[#0D0D0D] text-gray-400 hover:border-amber-400/60"}`}
+                  data-testid={`aesthetic-${a}`}
+                >{a}</button>
+              ))}
+            </div>
+          </div>
+
           {/* Starter Gallery */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={13} className="text-amber-400" />
               <div className="text-[11px] uppercase tracking-widest text-gray-400">Starter gallery · aesthetics</div>
-              <div className="text-[10px] text-gray-600">{starters.length} built-in</div>
+              <div className="text-[10px] text-gray-600">{starters.length} showing</div>
             </div>
             <div className="grid grid-cols-3 gap-2" data-testid="starter-gallery">
               {starters.map((t) => (
                 <StarterCard key={t.id} tpl={t} onUse={(tpl) => { onLoadTemplate(tpl); onClose(); }} />
               ))}
             </div>
+            {starters.length === 0 && (
+              <div className="text-[11px] text-gray-500 py-6 text-center border border-dashed border-[#2B2B2B] rounded">No aesthetics match your search.</div>
+            )}
           </div>
 
           {/* User templates */}
