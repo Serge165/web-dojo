@@ -126,3 +126,24 @@ class TestCORS:
     def test_credentials_not_allowed(self, client):
         r = client.get("/api/", headers={"Origin": "http://localhost:3000"})
         assert "access-control-allow-credentials" not in {k.lower() for k in r.headers.keys()}
+
+
+class TestStripeNotConfigured:
+    def test_payment_link_503_when_unconfigured(self, client):
+        r = client.post("/api/commerce/payment-link", json={
+            "name": "Test Product", "amount": 9.99, "currency": "usd", "quantity": 1,
+        })
+        assert r.status_code == 503
+
+    def test_checkout_session_503_when_unconfigured(self, client):
+        r = client.post("/api/commerce/checkout-session", json={
+            "items": [{"name": "Test Item", "amount": 9.99, "currency": "usd", "quantity": 1}],
+        })
+        assert r.status_code == 503
+
+    def test_config_reports_disabled(self, client):
+        r = client.get("/api/commerce/config")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["stripe_enabled"] is False
+        assert body["publishable_key"] == ""

@@ -750,7 +750,9 @@ async def publish_project(project_id: str, payload: PublishRequest):
 # from any static page, so the builder generates a link server-side and drops
 # a "Buy" button that points at it. Uses the claimable sandbox key.
 
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY") or "sk_test_emergent"
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+if STRIPE_SECRET_KEY:
+    stripe.api_key = STRIPE_SECRET_KEY
 
 
 class PaymentLinkCreate(BaseModel):
@@ -784,6 +786,8 @@ async def commerce_config():
 
 @api_router.post("/commerce/payment-link")
 async def commerce_payment_link(payload: PaymentLinkCreate):
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Stripe is not configured on this server")
     if not payload.name.strip():
         raise HTTPException(status_code=400, detail="Product name is required")
     if payload.amount <= 0:
@@ -838,6 +842,8 @@ def _create_checkout_session(items, success_url, cancel_url):
 async def commerce_checkout_session(payload: CheckoutSessionCreate):
     """Cart hand-off for exported static sites: the published page POSTs its
     localStorage cart line items and gets a hosted Stripe Checkout URL back."""
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=503, detail="Stripe is not configured on this server")
     if not payload.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
     for it in payload.items:
