@@ -37,15 +37,37 @@ gradients into CSS gradients.
   using `jszip` + `file-saver`.
 
 ## Implemented (Feb 17, 2026)
-- Left sidebar tabs: **Library / Files / Saved**.
+- Left sidebar tabs: **Library / Layout / Files / Saved**.
+- **Library search** filters across all component categories with a live count.
+- **Layout tab** (Dreamweaver-style, modern CSS): Grid + Flexbox builders with
+  presets (12-col, holy grail, dashboard, 3×3), track editor for columns/rows
+  (value + unit: fr, px, %, rem, em, auto, minmax, min/max-content), col/row
+  gaps, padding, justify/align controls, live iframe preview, CSS view + copy,
+  and "Insert container" that drops the layout onto canvas.
 - **Files**: tree view with new file/folder, folder upload, drag-drop
   folders/files from disk (`webkitGetAsEntry`), rename/delete, drag `.html`
   files onto canvas. Persisted with project.
-- **Saved (Component Marketplace)**: save any canvas element via icon,
-  persists to `/api/components`, appears in Saved tab, draggable back to
-  canvas.
+- **Saved (Component Marketplace)**: save any canvas element via icon, stored
+  globally in `/api/components`, appears in Saved tab with **scaled iframe
+  thumbnails**, draggable back to canvas.
 - **Inline Rich Text**: floating toolbar (Bold/Italic/Underline/H1/H2/P/
   Link/Clear) shows above any inline-edited element.
+- **6 image gallery blocks** in Components (grid, masonry, scroll carousel,
+  hover zoom, polaroid stack, featured+thumbs).
+- **CDN Panel** on right sidebar (28 libraries — Tailwind, Bootstrap 5, Bulma,
+  Foundation, Pure.css, Milligram, Alpine.js, HTMX, jQuery, GSAP, Anime.js,
+  Three.js, Chart.js, D3, AOS, Swiper, Lottie, React 18, Vue 3, Preact, plus
+  Font Awesome 6, Material Icons, Material Symbols, Bootstrap Icons, Lucide,
+  Heroicons via Iconify, Phosphor, Tabler) with one-click toggle + copy
+  snippets.
+- **Code editor**: Monaco with Emmet on both panes; per-pane language selector
+  covering 40+ Monaco built-in grammars (HTML, CSS, SCSS, LESS, JS, TS/JSX,
+  JSON, XML, YAML, Markdown, MDX, Handlebars, Twig, Liquid, Pug, Razor,
+  GraphQL, PHP, Python, Ruby, Go, Rust, Java, Kotlin, Swift, C#, C++, Dart,
+  Elixir, Clojure, Scala, SQL, Shell, PowerShell, Dockerfile, Solidity, Lua,
+  R, Perl, HCL/Terraform, Bicep).
+- **BG + Layers** merged in one panel: bg image/video + z-index + visibility +
+  reorder + delete.
 - Backend CRUD for projects (create/list/get/update/delete) tested 100% pass.
 - Public preview endpoint `GET /api/preview/{id}` returns rendered text/html.
 - Builder shell (TopBar, LeftSidebar, Canvas, RightSidebar).

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CATEGORIES, cardTemplate, WEB_SAFE_FONTS } from "@/lib/blocks";
-import { ChevronDown, ChevronRight, Type, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Type, Plus, Trash2, Search, X } from "lucide-react";
 import { FileTree } from "./FileTree";
 import { ComponentThumbnail } from "./ComponentThumbnail";
+import { LayoutBuilder } from "./LayoutBuilder";
 
 export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
@@ -13,6 +14,21 @@ export const LeftSidebar = ({
   const [open, setOpen] = useState({ components: true, navbars: true, heroes: true, sections: true });
   const [cardCount, setCardCount] = useState(3);
   const [gFont, setGFont] = useState("Inter");
+  const [q, setQ] = useState("");
+
+  const filteredCategories = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    if (!query) return CATEGORIES;
+    return CATEGORIES
+      .map((c) => ({ ...c, blocks: c.blocks.filter((b) => b.label.toLowerCase().includes(query)) }))
+      .filter((c) => c.blocks.length > 0);
+  }, [q]);
+
+  const filteredSaved = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    if (!query) return savedComponents;
+    return savedComponents.filter((c) => c.name.toLowerCase().includes(query));
+  }, [q, savedComponents]);
 
   const toggle = (k) => setOpen((s) => ({ ...s, [k]: !s[k] }));
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
@@ -41,9 +57,10 @@ export const LeftSidebar = ({
 
   return (
     <aside className="w-64 flex-none border-r border-[#2B2B2B] bg-[#141414] flex flex-col overflow-hidden" data-testid="left-sidebar">
-      <div className="grid grid-cols-3 border-b border-[#2B2B2B] text-[11px]">
+      <div className="grid grid-cols-4 border-b border-[#2B2B2B] text-[11px]">
         {[
           { id: "library", label: "Library" },
+          { id: "layout", label: "Layout" },
           { id: "files", label: "Files" },
           { id: "saved", label: `Saved${savedComponents.length ? ` · ${savedComponents.length}` : ""}` },
         ].map((t) => (
@@ -58,17 +75,36 @@ export const LeftSidebar = ({
 
       {tab === "library" && (
         <div className="flex-1 overflow-y-auto">
-          {CATEGORIES.map((cat) => (
+          <div className="px-2 pt-2 pb-1.5 sticky top-0 bg-[#141414] z-10 border-b border-[#2B2B2B]">
+            <div className="relative">
+              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search components…"
+                className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded pl-6 pr-6 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                data-testid="library-search"
+              />
+              {q && (
+                <button
+                  onClick={() => setQ("")}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  data-testid="library-search-clear"
+                ><X size={12} /></button>
+              )}
+            </div>
+          </div>
+          {filteredCategories.map((cat) => (
             <div key={cat.id} className="border-b border-[#2B2B2B]">
               <button
                 onClick={() => toggle(cat.id)}
                 className="w-full flex items-center justify-between px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 hover:bg-[#1F1F1F]"
                 data-testid={`cat-toggle-${cat.id}`}
               >
-                <span>{cat.label}</span>
-                {open[cat.id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                <span>{cat.label} <span className="text-gray-500 normal-case">· {cat.blocks.length}</span></span>
+                {(open[cat.id] ?? true) || q ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
-              {open[cat.id] && (
+              {((open[cat.id] ?? true) || q) && (
                 <div className="px-2 pb-2 space-y-1.5">
                   {cat.blocks.map((b) => (
                     <BlockItem key={b.id} label={b.label} html={b.html} testId={`block-${b.id}`} />
@@ -77,6 +113,9 @@ export const LeftSidebar = ({
               )}
             </div>
           ))}
+          {filteredCategories.length === 0 && (
+            <div className="text-[11px] text-gray-500 p-4 text-center">No components match "{q}"</div>
+          )}
 
           {/* Cards with count */}
           <div className="border-b border-[#2B2B2B]">
@@ -141,6 +180,10 @@ export const LeftSidebar = ({
         </div>
       )}
 
+      {tab === "layout" && (
+        <LayoutBuilder onAddBlock={onAddBlock} />
+      )}
+
       {tab === "files" && (
         <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onAddBlock} />
       )}
@@ -152,7 +195,7 @@ export const LeftSidebar = ({
               Click the save icon on any canvas element to keep it here for future projects.
             </div>
           )}
-          {savedComponents.map((c) => (
+          {filteredSaved.map((c) => (
             <div
               key={c.id}
               draggable
