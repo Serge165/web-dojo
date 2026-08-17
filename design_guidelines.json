@@ -1,0 +1,90 @@
+{
+  "theme": "dark",
+  "archetype": "Swiss & High-Contrast (IDE Edition)",
+  "colors": {
+    "background": "#0D0D0D",
+    "surface": "#141414",
+    "surface_elevated": "#1F1F1F",
+    "border": "#2B2B2B",
+    "text_primary": "#F3F4F6",
+    "text_secondary": "#9CA3AF",
+    "accent_primary": "#2563EB",
+    "accent_hover": "#3B82F6",
+    "success": "#10B981",
+    "warning": "#F59E0B",
+    "danger": "#EF4444",
+    "canvas_bg": "#050505"
+  },
+  "typography": {
+    "font_families": {
+      "ui": "Manrope, sans-serif",
+      "code": "'JetBrains Mono', monospace"
+    },
+    "hierarchy": {
+      "h1": "text-2xl font-bold tracking-tight text-white",
+      "h2": "text-lg font-semibold tracking-tight text-white",
+      "h3": "text-sm font-semibold tracking-tight text-white",
+      "body": "text-sm font-normal text-gray-300",
+      "label": "text-xs font-medium text-gray-400 uppercase tracking-wider",
+      "code": "text-xs font-mono text-gray-300"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "1px solid #2B2B2B for all delineations. Never use box-shadows for elevation, rely on border and background lightness.",
+    "radius": "rounded-md for UI elements (buttons, inputs), rounded-none for layout panels.",
+    "hover_states": "hover:bg-[#1F1F1F] hover:text-white transition-colors duration-150",
+    "active_states": "bg-[#1F1F1F] text-white border-l-2 border-blue-500",
+    "glassmorphism": "Not recommended for this IDE setup. Keep it solid and opaque to ensure maximum legibility and performance."
+  },
+  "layouts": {
+    "app_shell": "h-screen w-screen flex flex-col bg-[#0D0D0D] text-white overflow-hidden text-sm font-sans",
+    "header": "h-14 flex-none border-b border-[#2B2B2B] bg-[#141414] flex items-center justify-between px-4",
+    "main_area": "flex-1 flex overflow-hidden",
+    "left_sidebar": "w-64 flex-none border-r border-[#2B2B2B] bg-[#141414] flex flex-col overflow-y-auto",
+    "center_canvas": "flex-1 bg-[#050505] overflow-auto relative flex flex-col",
+    "right_sidebar": "w-72 flex-none border-l border-[#2B2B2B] bg-[#141414] flex flex-col overflow-y-auto"
+  },
+  "components": {
+    "buttons": "Flat, text-sm, px-3 py-1.5 rounded-md. Primary: bg-blue-600 hover:bg-blue-500 text-white. Secondary: bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B].",
+    "inputs": "bg-[#0D0D0D] border border-[#2B2B2B] rounded-md px-2 py-1.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-white",
+    "tabs": "Use simple flex containers with text-sm. Active tab: border-b-2 border-blue-500 text-white. Inactive: text-gray-400 hover:text-gray-200.",
+    "accordion": "For left sidebar categories (Navbars, Heroes, etc). Use border-b border-[#2B2B2B]. Header has text-xs uppercase tracking-wider.",
+    "color_picker": "Right sidebar needs HEX, RGB, HSL inputs and alpha slider. Use grid-cols-4 for small inputs.",
+    "drag_drop_items": "In left sidebar: rounded bg-[#1F1F1F] border border-[#2B2B2B] p-2 flex items-center gap-2 cursor-grab hover:border-gray-500 transition-colors."
+  },
+  "motion": {
+    "micro_interactions": "Fast and snappy. 150ms ease-in-out for color/border transitions. No bouncy animations. The tool should feel immediate.",
+    "panels": "If collapsible, use 200ms ease transition on width."
+  },
+  "accessibility": {
+    "contrast": "Text against #141414 and #050505 must meet APCA or WCAG AA.",
+    "focus": "focus:outline-none focus:ring-1 focus:ring-blue-500 on all interactive elements.",
+    "data_testid": "Mandatory on all tools, inputs, buttons (e.g., data-testid='tool-navbar-drag', data-testid='color-hex-input')."
+  },
+  "media": {
+    "icons": "lucide-react for all interface icons (layout, type, image, mouse-pointer, code, save, download, settings). Size 16px for UI tools, 14px for smaller actions.",
+    "images": {
+      "placeholder_hero": "https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMG1vZGVybiUyMGFyY2hpdGVjdHVyZXxlbnwwfHx8fDE3ODY5MjgwMDR8MA&ixlib=rb-4.1.0&q=85",
+      "placeholder_avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHw0fHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdCUyMGhlYWRzaG90fGVufDB8fHx8MTc4NjkyODAwOHww&ixlib=rb-4.1.0&q=85"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Build a robust IDE layout utilizing the app_shell structure.",
+    "Top Toolbar must contain: Logo/Title, Mode Toggle (Design/Code) styled like a segmented control, Import HTML button, Export Dropdown, Save/Load actions.",
+    "Left Sidebar must have an Accordion/Collapsible sections for: Structure (Containers, Sections, Columns), Typography (Headings, Paragraphs, Font Setup), Blocks (Navbars, Heroes, Cards with quantity selector), Toolbox.",
+    "Center Canvas needs to simulate a webpage. Wrap it in an iframe or a styled div with a max-width and background white (for the user's design), while the surrounding canvas bg is #050505.",
+    "Right Sidebar is the Properties Panel: Needs a Photoshop/Illustrator-style Color Picker UI (Hex, RGB, HSL, Alpha inputs) and a Gradient Mixer that outputs CSS linear/radial gradients.",
+    "Code Editor Mode: When toggled, replace Center Canvas with a Monaco-style code editor component showing HTML/CSS.",
+    "Use Manrope for all UI text, JetBrains Mono for code blocks and inputs that take code/hex values.",
+    "Avoid gradients in the UI itself. The UI must remain flat, dark, and highly functional like Framer or VSCode."
+  ],
+  "universal_guidelines_for_main_agent": [
+    "Do not center-align the app container. Text should flow naturally.",
+    "Avoid 'AI slop' aesthetics (no unnecessary purple/pink gradients, no soft blurry blobs in the background).",
+    "Use strict 1px borders and flat backgrounds for component separation.",
+    "Always add data-testid to interactive elements.",
+    "Use pure HTML/Tailwind for the canvas elements so they are valid HTML for export.",
+    "Ensure all input fields have properly styled focus states that match the dark theme.",
+    "Icons must NOT be emojis. Use lucide-react exclusively."
+  ]
+}

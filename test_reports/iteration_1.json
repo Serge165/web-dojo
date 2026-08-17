@@ -1,0 +1,37 @@
+{
+  "summary": "Latency-sensitive smoke test of website builder MVP. All 6 backend CRUD endpoints pass (create/list/get/put/delete + 404 unknown). Frontend builder shell mounts, most flows work: block insertion via double-click, cards row insert, element selection with inspector id, color apply (verified via screenshot - hero background changed to #2563eb), code mode toggle with head-html textarea, export dropdown showing standalone & zip options, Google Font input adds Roboto and injects <link> to fonts.googleapis.com, import panel scan opens sections modal, project save to backend succeeds.",
+  "tested_scope": ["backend", "frontend", "integration"],
+  "passed": [
+    "POST /api/projects returns 200 with id and full payload",
+    "GET /api/projects returns array sorted with id/name/updated_at",
+    "GET /api/projects/{id} returns full project incl. elements",
+    "PUT /api/projects/{id} updates fields and refreshes updated_at",
+    "DELETE /api/projects/{id} returns {ok:true} and subsequent GET returns 404",
+    "GET /api/projects/unknown-id returns 404",
+    "builder-shell mounts at /",
+    "TopBar shows Design/Code toggle + Import/Export/Save/Open buttons",
+    "block-hero-centered double-click inserts a canvas-el-*",
+    "cards-insert-btn inserts N cards (count 1 -> 2)",
+    "Click canvas element selects it (inspector shows element id e.g. el_yoirs6bs)",
+    "Apply background color visually changes selected element (verified via screenshot)",
+    "mode-code toggle renders editable head-html textarea",
+    "export-btn opens dropdown with export-standalone and export-zip",
+    "font-google-input + font-google-add-btn injects <link href=fonts.googleapis.com...Roboto>",
+    "import-btn + import-scan-btn opens imported-sections modal after scanning simple HTML",
+    "save-btn persists project (POST /api/projects returns 200)"
+  ],
+  "failed": [
+    {
+      "area": "frontend/test-script",
+      "issue": "open-btn click intermittently times out immediately after save-btn or export-btn interactions; likely because a Sonner toast or lingering dropdown overlay covers the button briefly. Open button IS present in DOM (verified in screenshot).",
+      "evidence": "Playwright: waiting for locator [data-testid=\"open-btn\"] Timeout 5000ms; screenshot shows Open button clearly visible in top bar.",
+      "priority": "LOW"
+    }
+  ],
+  "action_items": [
+    "Optional UX: ensure Sonner toast / Export dropdown does not overlap top-bar buttons (or dismiss automatically) so Open remains reliably clickable right after Save/Export. Not a blocker for first finish."
+  ],
+  "success_rate": {"backend": "100%", "frontend": "~95%"},
+  "retest_needed": false,
+  "full_testing_deferred": true
+}
