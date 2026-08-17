@@ -1047,10 +1047,19 @@ async def clear_submissions(form_name: Optional[str] = None):
 
 app.include_router(api_router)
 
+_cors_origins_env = os.environ.get('CORS_ORIGINS', '').strip()
+if _cors_origins_env:
+    _cors_origins = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+else:
+    # No CORS_ORIGINS configured: default to local dev origins only, never
+    # a wildcard. The frontend sends no cookies/credentials, so this app
+    # never needs allow_credentials=True.
+    _cors_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_credentials=False,
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

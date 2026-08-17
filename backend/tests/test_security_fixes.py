@@ -111,3 +111,18 @@ class TestImportUrlRedirectRevalidation:
         r = client.post("/api/import/url", json={"url": "https://example.com/start"})
         assert r.status_code == 200
         assert captured_hosts == ["example.com", "example.com"]
+
+
+class TestCORS:
+    def test_disallowed_origin_gets_no_cors_header(self, client):
+        r = client.get("/api/", headers={"Origin": "http://evil.example"})
+        assert r.status_code == 200  # request still succeeds; browser enforces CORS client-side
+        assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
+
+    def test_default_localhost_origin_is_allowed(self, client):
+        r = client.get("/api/", headers={"Origin": "http://localhost:3000"})
+        assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+    def test_credentials_not_allowed(self, client):
+        r = client.get("/api/", headers={"Origin": "http://localhost:3000"})
+        assert "access-control-allow-credentials" not in {k.lower() for k in r.headers.keys()}
