@@ -18,6 +18,9 @@ from datetime import datetime, timezone
 from cryptography.fernet import Fernet
 import stripe
 import httpx
+import ipaddress
+import socket
+from urllib.parse import urlsplit, urljoin
 
 
 ROOT_DIR = Path(__file__).parent
@@ -861,16 +864,64 @@ class UrlImport(BaseModel):
     url: str
 
 
+def _resolve_is_public(hostname: str) -> bool:
+    """True only if every address `hostname` resolves to is public/routable."""
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    except socket.gaierror:
+        return False
+    if not infos:
+        return False
+    for _family, _type, _proto, _canon, sockaddr in infos:
+        try:
+            ip = ipaddress.ip_address(sockaddr[0])
+        except ValueError:
+            return False
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        ):
+            return False
+    return True
+
+
+def _validate_import_url(url: str) -> None:
+    """Raise HTTPException if `url` is not a safe, public http(s) URL."""
+    parts = urlsplit(url)
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        raise HTTPException(status_code=400, detail="Enter a valid http(s) URL")
+    if not _resolve_is_public(parts.hostname):
+        raise HTTPException(status_code=400, detail="That URL points to a private or internal address")
+
+
 @api_router.post("/import/url")
 async def import_url(payload: UrlImport):
-    """Fetch a public page's HTML so the builder can import its sections."""
+    """Fetch a public page's HTML so the builder can import its sections.
+
+    Redirects are followed manually (not via httpx's follow_redirects) so
+    each hop is re-validated against the same private/internal-address
+    check — otherwise an attacker-controlled redirect could bypass the
+    initial URL check and reach an internal address."""
     url = (payload.url or "").strip()
-    if not (url.startswith("http://") or url.startswith("https://")):
-        raise HTTPException(status_code=400, detail="Enter a valid http(s) URL")
+    _validate_import_url(url)
     try:
-        async with httpx.AsyncClient(follow_redirects=True, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
-            r = await client.get(url)
-        return {"html": r.text[:2_000_000], "status": r.status_code}
+        current = url
+        async with httpx.AsyncClient(follow_redirects=False, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
+            for _ in range(5):
+                r = await client.get(current)
+                if r.status_code in (301, 302, 303, 307, 308) and "location" in r.headers:
+                    nxt = urljoin(current, r.headers["location"])
+                    _validate_import_url(nxt)
+                    current = nxt
+                    continue
+                return {"html": r.text[:2_000_000], "status": r.status_code}
+        raise HTTPException(status_code=502, detail="Too many redirects")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Could not fetch that URL ({type(e).__name__})")
 
