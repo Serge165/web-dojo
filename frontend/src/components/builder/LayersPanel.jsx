@@ -1,5 +1,5 @@
-import React from "react";
-import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick, Filter } from "lucide-react";
 
 // Extract a short label from raw HTML: first tag name + inner text preview.
 const labelFor = (html) => {
@@ -34,6 +34,9 @@ const fxOf = (html) => {
 export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, onToggleVisible, onSetZIndex, hideHeader }) => {
   // Rendered in reverse so the topmost item in the list == topmost on the page.
   const rev = [...elements].map((e, i) => ({ ...e, idx: i })).reverse();
+  const [onlyFx, setOnlyFx] = useState(false);
+  const list = onlyFx ? rev.filter((el) => { const f = fxOf(el.html); return f.text || f.hover; }) : rev;
+  const fxCount = rev.filter((el) => { const f = fxOf(el.html); return f.text || f.hover; }).length;
   return (
     <div className="space-y-1.5" data-testid="layers-panel">
       {!hideHeader && (
@@ -42,9 +45,19 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
           <span className="font-mono">z-index</span>
         </div>
       )}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-gray-500">{onlyFx ? `${list.length} with effects` : `${elements.length} layers`}</span>
+        <button
+          onClick={() => setOnlyFx((v) => !v)}
+          className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border ${onlyFx ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`}
+          data-testid="layers-filter-fx"
+          title="Show only elements that carry a text/hover effect"
+        ><Filter size={10} /> Effects{fxCount ? ` · ${fxCount}` : ""}</button>
+      </div>
       <div className="space-y-1 max-h-[360px] overflow-y-auto pr-1">
         {rev.length === 0 && <div className="text-[11px] text-gray-500">No layers yet — drop a block on the canvas.</div>}
-        {rev.map((el) => {
+        {rev.length > 0 && list.length === 0 && <div className="text-[11px] text-gray-500" data-testid="layers-filter-empty">No elements carry an effect yet.</div>}
+        {list.map((el) => {
           const hidden = /(^|;)\s*display\s*:\s*none/i.test(el.html);
           const fx = fxOf(el.html);
           return (

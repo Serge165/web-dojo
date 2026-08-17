@@ -1,0 +1,18 @@
+{
+  "summary": "Verified iteration_24 additions on Web Dojo: (1) Layers Effect Filter (layers-filter-fx) hides non-effect rows and shows layers-filter-empty when nothing carries an effect; (2) Copy/Paste now carries Shape styling (border-radius + box-shadow) along with Text FX from the ROOT tag; (3) Plain-background-only root is NOT copyable and leaves paste disabled. Zero console/page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TextEffectsPanel: `background` is included in COPY_PROPS/SHAPE_PROPS with a neutral check that only filters 'none'/'transparent'/'initial'/rgba(0,0,0,0); a solid non-neutral background (e.g. #ffffff) IS copied. The 'meaningful' guard excludes 'background' from counting alone, but on paste it's still applied. Verify this matches product intent — paste currently overwrites destination background if source has one alongside another shape prop.",
+    "LayersPanel: fxOf regex `${prop}\\s*:` allows substring shadow matches inside larger property names (though current props end with unique tokens, it's fragile). Consider word-boundary anchoring similar to rootStyleMap parsing."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped as requested)", "frontend": "100% (4/4 spec scenarios)"},
+  "seed_data_creation": "Ephemeral canvas blocks (Large Header x3, later a fresh Large Header) added/removed within the session via reload.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 24 PASS matrix (all zero-error):\n- Effect Filter: Added 3 Large Headers, applied textfx-static-neon to first only. layers-filter-fx button shows 'Effects · 1'. Toggling ON: list contracts to exactly 1 layer-row, button gets bg-blue-600 active class, summary text '1 with effects'. Toggling OFF: 3 rows restored. After textfx-clear on the fx element, toggling filter ON reveals data-testid='layers-filter-empty' with the 'No elements carry an effect yet.' copy.\n- Copy Shape+Text: On block A, insp-tab-shape -> shape-preset-soft (adds border-radius + box-shadow to root header), then insp-tab-textfx -> textfx-static-sunset. textfx-copy toast 'Style copied'. Select B, textfx-paste enabled, click -> B outerHTML now contains border-radius, box-shadow, linear-gradient, background-clip. Toast 'Style pasted onto element'.\n- Plain-bg edge case: Reload -> fresh Large Header only has background:#fff. textfx-paste initially disabled. textfx-copy -> toast 'This element has no effect or shape style to copy'. textfx-paste REMAINS disabled (clip never set).\n- 0 pageerrors, 0 console errors across the whole session.",
+  "rca_of_the_issue": "N/A — no defects found in this iteration."
+}

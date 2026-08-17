@@ -75,6 +75,9 @@ const addClassToRootTag = (html, cls) => {
 let FX_CLIPBOARD = null; // persists across panel remounts within the session
 
 const FX_PROPS = ["background-image", "background-size", "-webkit-background-clip", "background-clip", "-webkit-text-fill-color", "-webkit-text-stroke", "paint-order", "text-shadow", "animation", "color"];
+// Shape styling also carried by Copy/Paste (border/radius/corner-shape/shadow/glass).
+const SHAPE_PROPS = ["border", "border-radius", "corner-shape", "box-shadow", "backdrop-filter", "-webkit-backdrop-filter", "background"];
+const COPY_PROPS = [...FX_PROPS, ...SHAPE_PROPS];
 const NEUTRALS = {
   "-webkit-text-stroke": (v) => !(parseFloat(v) > 0),
   "text-shadow": (v) => v === "none",
@@ -85,6 +88,13 @@ const NEUTRALS = {
   "color": (v) => v === "inherit" || v === "currentcolor",
   "-webkit-text-fill-color": (v) => v === "currentcolor",
   "background-size": (v) => v === "auto",
+  "border": (v) => v === "none" || parseFloat(v) === 0,
+  "border-radius": (v) => v === "0" || v === "0px",
+  "corner-shape": (v) => v === "round",
+  "box-shadow": (v) => v === "none",
+  "backdrop-filter": (v) => v === "none",
+  "-webkit-backdrop-filter": (v) => v === "none",
+  "background": (v) => v === "none" || v === "transparent" || v === "initial" || /rgba\(0,\s*0,\s*0,\s*0\)/.test(v),
 };
 // Parse ONLY the root tag's own style attribute into a prop->value map, so
 // copyFx doesn't pick up nested-element styles or substring matches
@@ -178,23 +188,25 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
     if (needSel()) return;
     const map = rootStyleMap(selected.html);
     const style = {};
-    FX_PROPS.forEach((p) => { const v = map[p]; if (v && !isNeutral(p, v)) style[p] = v; });
+    COPY_PROPS.forEach((p) => { const v = map[p]; if (v && !isNeutral(p, v)) style[p] = v; });
     const hoverClasses = [...new Set([...selected.html.matchAll(/wd-tfx-[a-z0-9]+/g)].map((m) => m[0]))];
-    if (!Object.keys(style).length && !hoverClasses.length) { toast.info("This element has no effect to copy"); return; }
+    // `background` alone (a plain fill) is not enough to count as a copyable effect/style.
+    const meaningful = Object.keys(style).some((k) => k !== "background") || hoverClasses.length > 0;
+    if (!meaningful) { toast.info("This element has no effect or shape style to copy"); return; }
     const data = { style, hoverClasses };
     FX_CLIPBOARD = data;
     setClip(data);
-    toast.success("Effect copied");
+    toast.success("Style copied");
   };
 
   const pasteFx = () => {
     if (needSel()) return;
-    if (!clip) { toast.info("Copy an effect first"); return; }
+    if (!clip) { toast.info("Copy a style first"); return; }
     let html = selected.html;
     if (Object.keys(clip.style).length) html = mergeStyleIntoRootTag(html, clip.style);
     clip.hoverClasses.forEach((c) => { if (!new RegExp(`\\b${c}\\b`).test(html)) html = addClassToRootTag(html, c); });
     onReplaceHtml(html);
-    toast.success("Effect pasted onto element");
+    toast.success("Style pasted onto element");
   };
 
   const hasHover = !!selected && /wd-tfx-/.test(selected.html);
@@ -251,8 +263,8 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       </div>
 
       <div className="pt-3 border-t border-[#2B2B2B] grid grid-cols-2 gap-2">
-        <button onClick={copyFx} disabled={!selected} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-copy"><Copy size={12} /> Copy effect</button>
-        <button onClick={pasteFx} disabled={!selected || !clip} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-paste"><ClipboardPaste size={12} /> Paste effect</button>
+        <button onClick={copyFx} disabled={!selected} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-copy"><Copy size={12} /> Copy style</button>
+        <button onClick={pasteFx} disabled={!selected || !clip} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-paste"><ClipboardPaste size={12} /> Paste style</button>
       </div>
 
       <button onClick={clearFx} disabled={!selected} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-clear"><Eraser size={12} /> Clear text FX</button>

@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (l) — Effect Filter + Copy Everything (shape styling)
+- **Effect Filter** (`LayersPanel.jsx`): a toggle (`layers-filter-fx`, shows a live count) filters the Layers list to only elements carrying a text/hover effect; shows `layers-filter-empty` when none qualify.
+- **Copy Everything** (`TextEffectsPanel.jsx`): Copy/Paste (relabelled "Copy style"/"Paste style") now also carries Shape styling — `border`, `border-radius`, `corner-shape`, `box-shadow`, `backdrop-filter`, and `background` — alongside text/hover FX, read from the element's root tag. A `meaningful` guard ignores plain-background-only elements so a bare block isn't "copyable".
+- Tested: iteration_24 frontend E2E — filter, shape-carrying copy/paste, no-effect gate, and regression all pass 100%, zero console errors.
+
+
 ### Session Jun 2026 (k) — Jump To Effected + Copy/Paste Effect
 - **Jump To Effected** (`LayersPanel.jsx`): the effect badge (`layer-fx-<id>`) is now a button — clicking it selects that element and smooth-scrolls it into view on the canvas.
 - **Copy/Paste Effect** (`TextEffectsPanel.jsx`): "Copy effect" captures the selected element's Text FX (root-tag FX style props via `rootStyleMap`, scoped so nested/substring styles don't leak) plus any `wd-tfx-*` hover classes into a session clipboard; "Paste effect" applies both to another selected element in one `onReplaceHtml` (`mergeStyleIntoRootTag` + `addClassToRootTag`). Pasted hover works because the injected `<style data-wd-tfx>` is global by class. Copying an element with no effect is a no-op with a clear toast.
