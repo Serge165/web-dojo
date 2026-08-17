@@ -1,0 +1,30 @@
+{
+  "summary": "Tested two new features. (1) LAYERS SELECT-ALL: 'Check all' bar (layers-select-bar) renders with 'All · N' and 'Effected · N'; Effected is disabled with 0 fx and enables to the correct count after applying a static (textfx-static-neon on layer #1) and hover (textfx-hover-pop on layer #2) effect. Clicking 'All' checks 4/4 (batch bar shows '4 selected'); clicking 'Effected' checks 2/4 (only effected layers); 'Clear' hides the batch bar. (2) LIBRARY CATEGORIES: Saving styles with categories 'Headings' and 'Buttons' groups them under style-lib-group-Headings / -Buttons; saving with an empty category field lands in style-lib-group-Uncategorized. Collapse toggle (style-lib-group-toggle-*) hides/shows chips. Filter dropdown (style-lib-filter) appears with 2+ cats and narrows list; 'all' restores all groups. Categories persist across reload via localStorage 'webdojo_style_library'. Export JSON entries include 'category' and importing a payload with a new 'category' creates a new group. Regression: textfx-intensity, textfx-copy/paste, textfx-clear, layers-filter-fx, layers-paste-many still work. Found and fixed ONE bug that blocked the entire feature: `Filter` icon was used but not imported in TextEffectsPanel.jsx (ReferenceError crashed the panel as soon as 2+ categories existed).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "TextEffectsPanel style library save", "issue": "libCategory input is not cleared after saveToLibrary (only libName is). If a user saves 'Foo' with category 'Buttons' then wants the next save to land in 'Uncategorized', they must manually clear the category field — otherwise it silently persists the previous category. Consider `setLibCategory('')` alongside `setLibName('')`, or leave it deliberately as a 'sticky category' UX but signal it.", "selector": "[data-testid=\"style-lib-category\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Text FX → Style library filter dropdown", "issues": ["React hydration warning: `<span> cannot be a child of <option>` fires whenever the filter dropdown mounts, because the Emergent visual-editor overlay wraps the dynamic `{library.length}` expression inside `<option>` in a `<span>`. Only observed in the preview env; still worth working around by pre-formatting the string, e.g. `const allLabel = \\`All categories · ${library.length}\\`; ... <option value=\"all\">{allLabel}</option>` so no expression node is inserted inside <option>."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "(FIXED by tester) Add `Filter` to the lucide-react import in TextEffectsPanel.jsx — previously used at L386 but not imported, crashing the panel with 'ReferenceError: Filter is not defined' whenever a 2+ category filter dropdown would render.",
+    "(LOW) Reset libCategory to '' inside saveToLibrary so saving after selecting an old category doesn't silently reuse it.",
+    "(LOW) Refactor <option>{`All categories · ${library.length}`}</option> to avoid the dynamic-expression span the visual editor injects, silencing the hydration warning."
+  ],
+  "critical_code_review_comments": [
+    "TextEffectsPanel.jsx L2 originally imported ChevronDown/ChevronRight/Folder for the new category UI but forgot Filter — an ESLint no-undef rule (react/jsx-no-undef) would have caught this before merge.",
+    "LayersPanel.jsx fxOf() uses a regex against the raw HTML string which will match nested-element styles too (e.g. a child <span style=\"text-shadow:...\">). It's fine for the current inline-style pattern but flag as brittle if inner HTML ever contains multiple styled tags — consider parsing only the root tag's style attribute like rootStyleMap() in TextEffectsPanel."
+  ],
+  "updated_files": ["/app/frontend/src/components/builder/TextEffectsPanel.jsx"],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% after fixing the missing `Filter` import"},
+  "seed_data_creation": "Dropped blocks cmp-header-lrg, cmp-anim-hero, cmp-footer, cmp-testimonial. Saved 3 library styles (Neon Head→Headings, Gold Btn→Buttons, Nocat→Uncategorized). Imported 1 style ImpX→Imports via /tmp/lib_import.json.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 27 PASS matrix (0 functional errors after fix). Repro cheatsheet: skip tour via [data-testid=tour-skip]; double-click block-cmp-* items in LeftSidebar to add without DnD; canvas els selectable via [data-testid^=canvas-el-]. Layers dock is auto-expanded — layers-select-bar shows once elements.length>0. layers-select-effected is disabled when fxCount===0 and its label is 'Effected' or 'Effected · N'; layers-select-all label is 'All · N'. TextFX categories saved to localStorage 'webdojo_style_library' with keys {id,name,category,style,hover}; empty category → 'Uncategorized'. Filter dropdown (style-lib-filter) only appears when libCategories.length>1. Fixture files: /tmp/lib_import.json. Known env-only console noise: '<span> cannot be a child of <option>' hydration warning fired by the Emergent visual-editor overlay around L393 of TextEffectsPanel — safe to ignore for testing, but flagged in design_issues for eventual cleanup. libCategory input persists across saves (see LOW ui_bug).",
+  "rca_of_the_issue": "Root cause of the blocking crash: TextEffectsPanel.jsx used `<Filter size={11}/>` at line 386 in the new category filter row but the corresponding lucide-react import was omitted, so React threw 'ReferenceError: Filter is not defined' every time a second category was saved and the dropdown tried to render. Fixed by adding `Filter` to the import list on line 2. No other functional issues; the two remaining findings are non-blocking UX/lint items."
+}

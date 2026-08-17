@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (o) — Select All Effected + Style Library Categories
+- **Select All Effected** (`LayersPanel.jsx`): a "Check all" bar (`layers-select-bar`, shows when there are layers) with two buttons — **All · N** (`layers-select-all`, checks every layer) and **Effected · N** (`layers-select-effected`, checks only layers carrying a text/hover effect; disabled when `fxCount===0`). Both feed the existing batch bar so users can Paste-to-many in one tap. Reused the pre-existing `selectAll`/`selectEffected` helpers (they had no UI before).
+- **Style Library Categories** (`TextEffectsPanel.jsx`): saving a style now takes an optional free-typed **folder/category** (`style-lib-category`, empty → "Uncategorized"), with a `<datalist>` autocomplete of existing categories. The library renders grouped under **collapsible folder headers** (`style-lib-group-<cat>` / toggle `style-lib-group-toggle-<cat>`) and, when 2+ categories exist, a **filter dropdown** (`style-lib-filter`) narrows to one category. Categories persist in `localStorage['webdojo_style_library']` (entry shape now `{id,name,category,style,hover}`) and are preserved through export/import (dedupe key includes category).
+- Tested: iteration_27 frontend E2E — both features + regression (intensity, copy/paste, clear, layers filter, paste-to-many) pass 100%. Fixes applied: missing `Filter` lucide import (was crashing the filter dropdown), and pre-formatted `<option>` labels to silence a visual-editor hydration warning.
+
+
 ### Session Jun 2026 (n) — Style Library export / import
 - **Export / Import Style Library** (`TextEffectsPanel.jsx`): Export (`style-lib-export`) downloads the saved library as `webdojo-style-library.json`; Import (`style-lib-import` → hidden `style-lib-import-input`) reads a JSON file, validates it's an array of `{name,style,hover}` entries, dedupes against existing (by name+style+hover), assigns fresh unique ids, and merges + persists to localStorage. Invalid files show an error toast and leave the library intact. Lets teammates share style presets as files.
 - Tested: iteration_26 frontend E2E — export download, import merge/dedupe/validate, persist-across-reload, and regression all pass, zero console errors.

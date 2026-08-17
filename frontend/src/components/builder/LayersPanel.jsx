@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick, Filter, ClipboardPaste } from "lucide-react";
+import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick, Filter, ClipboardPaste, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 import { getFxClip, subscribeFxClip } from "@/lib/fxClipboard";
 
@@ -47,6 +47,8 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
     onApplyStyleToIds(ids, getFxClip());
     toast.success(`Style pasted onto ${ids.length} element${ids.length === 1 ? "" : "s"}`);
   };
+  const selectAll = () => setChecked(new Set(elements.map((e) => e.id)));
+  const selectEffected = () => setChecked(new Set(elements.filter((e) => { const f = fxOf(e.html); return f.text || f.hover; }).map((e) => e.id)));
   const list = onlyFx ? rev.filter((el) => { const f = fxOf(el.html); return f.text || f.hover; }) : rev;
   const fxCount = rev.filter((el) => { const f = fxOf(el.html); return f.text || f.hover; }).length;
   return (
@@ -66,6 +68,24 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
           title="Show only elements that carry a text/hover effect"
         ><Filter size={10} /> Effects{fxCount ? ` · ${fxCount}` : ""}</button>
       </div>
+      {elements.length > 0 && (
+        <div className="flex items-center gap-1.5" data-testid="layers-select-bar">
+          <span className="text-[10px] text-gray-500 flex items-center gap-1"><CheckSquare size={10} /> Check all:</span>
+          <button
+            onClick={selectEffected}
+            disabled={fxCount === 0}
+            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            data-testid="layers-select-effected"
+            title="Check every layer that carries a text/hover effect"
+          ><Sparkles size={10} className="text-indigo-400" /> Effected{fxCount ? ` · ${fxCount}` : ""}</button>
+          <button
+            onClick={selectAll}
+            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-blue-500"
+            data-testid="layers-select-all"
+            title="Check every layer"
+          >All · {elements.length}</button>
+        </div>
+      )}
       {checked.size > 0 && (
         <div className="flex items-center gap-2 p-1.5 rounded bg-blue-600/15 border border-blue-500/40" data-testid="layers-batch-bar">
           <span className="text-[10px] text-blue-200">{checked.size} selected</span>

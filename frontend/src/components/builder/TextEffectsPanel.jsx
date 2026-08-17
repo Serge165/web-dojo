@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library, Download, Upload } from "lucide-react";
+import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library, Download, Upload, ChevronDown, ChevronRight, Folder, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { getFxClip, setFxClip, subscribeFxClip } from "@/lib/fxClipboard";
 
@@ -147,7 +147,11 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
   useEffect(() => subscribeFxClip(setClip), []);
   const [library, setLibrary] = useState(() => { try { return JSON.parse(localStorage.getItem("webdojo_style_library") || "[]"); } catch { return []; } });
   const [libName, setLibName] = useState("");
+  const [libCategory, setLibCategory] = useState("");
+  const [libFilter, setLibFilter] = useState("all");
+  const [collapsed, setCollapsed] = useState(new Set());
   const fileRef = useRef(null);
+  const toggleCollapsed = (cat) => setCollapsed((s) => { const n = new Set(s); n.has(cat) ? n.delete(cat) : n.add(cat); return n; });
 
   const needSel = () => { if (!selected) { toast.info("Select a text element (H1–H6, p, button…) first"); return true; } return false; };
   const getPatch = (fx) => (fx.patchFn ? fx.patchFn(intensity) : fx.patch);
@@ -242,12 +246,13 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
   const saveToLibrary = () => {
     if (!clip) { toast.info("Copy a style first, then save it to the library"); return; }
     const name = libName.trim() || `Style ${library.length + 1}`;
-    const entry = { id: `lib-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name, style: clip.style || {}, hover: clip.hover || [] };
+    const category = libCategory.trim() || "Uncategorized";
+    const entry = { id: `lib-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, name, category, style: clip.style || {}, hover: clip.hover || [] };
     const next = [...library, entry];
     setLibrary(next);
     localStorage.setItem("webdojo_style_library", JSON.stringify(next));
     setLibName("");
-    toast.success(`Saved "${name}" to library`);
+    toast.success(`Saved "${name}" to ${category}`);
   };
 
   const applyLibrary = (entry) => {
@@ -286,11 +291,11 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       try {
         const parsed = JSON.parse(reader.result);
         if (!Array.isArray(parsed)) throw new Error("not an array");
-        const seen = new Set(library.map((x) => JSON.stringify({ n: x.name, s: x.style, h: x.hover })));
+        const seen = new Set(library.map((x) => JSON.stringify({ n: x.name, c: x.category || "Uncategorized", s: x.style, h: x.hover })));
         const incoming = parsed
           .filter((x) => x && typeof x === "object" && x.style && typeof x.style === "object")
-          .filter((x) => !seen.has(JSON.stringify({ n: x.name, s: x.style, h: x.hover })))
-          .map((x, i) => ({ id: `lib-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`, name: String(x.name || "Imported style"), style: x.style, hover: Array.isArray(x.hover) ? x.hover : [] }));
+          .filter((x) => !seen.has(JSON.stringify({ n: x.name, c: x.category || "Uncategorized", s: x.style, h: x.hover })))
+          .map((x, i) => ({ id: `lib-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`, name: String(x.name || "Imported style"), category: String(x.category || "Uncategorized"), style: x.style, hover: Array.isArray(x.hover) ? x.hover : [] }));
         if (!incoming.length) { toast.info("Nothing new to import"); return; }
         const next = [...library, ...incoming];
         setLibrary(next);
@@ -303,6 +308,11 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
 
   const hasHover = !!selected && /wd-tfx-/.test(selected.html);
   const animPreviewCss = ANIM_FX.map((fx) => (fx.keyframesFn ? fx.keyframesFn(`wdtfxprev_${fx.id}`, intensity) : fx.keyframes(`wdtfxprev_${fx.id}`))).join("\n");
+  const libCategories = [...new Set(library.map((e) => e.category || "Uncategorized"))].sort((a, b) => (a === "Uncategorized" ? 1 : b === "Uncategorized" ? -1 : a.localeCompare(b)));
+  const libFiltered = libFilter === "all" ? library : library.filter((e) => (e.category || "Uncategorized") === libFilter);
+  const libGroups = libCategories
+    .map((cat) => ({ cat, items: libFiltered.filter((e) => (e.category || "Uncategorized") === cat) }))
+    .filter((g) => g.items.length);
 
   return (
     <div className="space-y-4" data-testid="text-fx-panel">
@@ -370,23 +380,67 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
           </div>
         </div>
         {library.length > 0 ? (
-          <div className="grid grid-cols-3 gap-1.5">
-            {library.map((entry) => (
-              <div key={entry.id} role="button" tabIndex={0} onClick={() => applyLibrary(entry)} data-testid={`style-lib-${entry.id}`} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group cursor-pointer" title={`Apply ${entry.name}`}>
-                <div className="h-10 flex items-center justify-center" style={{ background: "linear-gradient(135deg,#eef2ff,#dbe2ef)" }}>
-                  <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${libPreview(entry.style)}"></div>` }} />
-                </div>
-                <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{entry.name}</div>
-                <button onClick={(e) => { e.stopPropagation(); deleteLibrary(entry.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-gray-300 hover:text-red-400 opacity-70 hover:opacity-100" title="Delete" data-testid={`style-lib-delete-${entry.id}`}><X size={10} /></button>
+          <>
+            {libCategories.length > 1 && (
+              <div className="flex items-center gap-1.5">
+                <Filter size={11} className="text-gray-500 flex-none" />
+                <select
+                  value={libCategories.includes(libFilter) || libFilter === "all" ? libFilter : "all"}
+                  onChange={(e) => setLibFilter(e.target.value)}
+                  className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[10px] text-gray-200 outline-none focus:border-blue-500"
+                  data-testid="style-lib-filter"
+                >
+                  <option value="all">{`All categories · ${library.length}`}</option>
+                  {libCategories.map((cat) => {
+                    const count = library.filter((e) => (e.category || "Uncategorized") === cat).length;
+                    return <option key={cat} value={cat}>{`${cat} · ${count}`}</option>;
+                  })}
+                </select>
               </div>
-            ))}
-          </div>
+            )}
+            <div className="space-y-2">
+              {libGroups.map(({ cat, items }) => {
+                const isOpen = !collapsed.has(cat);
+                return (
+                  <div key={cat} data-testid={`style-lib-group-${cat}`}>
+                    <button
+                      onClick={() => toggleCollapsed(cat)}
+                      className="w-full flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-200 py-0.5"
+                      data-testid={`style-lib-group-toggle-${cat}`}
+                    >
+                      {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                      <Folder size={11} className="text-amber-400/70" />
+                      <span className="uppercase tracking-wider">{cat}</span>
+                      <span className="text-gray-600">· {items.length}</span>
+                    </button>
+                    {isOpen && (
+                      <div className="grid grid-cols-3 gap-1.5 mt-1">
+                        {items.map((entry) => (
+                          <div key={entry.id} role="button" tabIndex={0} onClick={() => applyLibrary(entry)} data-testid={`style-lib-${entry.id}`} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group cursor-pointer" title={`Apply ${entry.name}`}>
+                            <div className="h-10 flex items-center justify-center" style={{ background: "linear-gradient(135deg,#eef2ff,#dbe2ef)" }}>
+                              <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${libPreview(entry.style)}"></div>` }} />
+                            </div>
+                            <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{entry.name}</div>
+                            <button onClick={(e) => { e.stopPropagation(); deleteLibrary(entry.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-gray-300 hover:text-red-400 opacity-70 hover:opacity-100" title="Delete" data-testid={`style-lib-delete-${entry.id}`}><X size={10} /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
         ) : (
           <p className="text-[10px] text-gray-500">Copy a style, then save it here to reuse it across your projects.</p>
         )}
-        <div className="flex gap-1.5">
-          <input value={libName} onChange={(e) => setLibName(e.target.value)} placeholder="Name this style…" className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="style-lib-name" />
-          <button onClick={saveToLibrary} disabled={!clip} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="style-lib-save"><Save size={11} /> Save to library</button>
+        <div className="space-y-1.5">
+          <input value={libName} onChange={(e) => setLibName(e.target.value)} placeholder="Name this style…" className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="style-lib-name" />
+          <div className="flex gap-1.5">
+            <input value={libCategory} onChange={(e) => setLibCategory(e.target.value)} placeholder="Folder / category (optional)…" list="wd-lib-cats" className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="style-lib-category" />
+            <datalist id="wd-lib-cats">{libCategories.map((c) => <option key={c} value={c} />)}</datalist>
+            <button onClick={saveToLibrary} disabled={!clip} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="style-lib-save"><Save size={11} /> Save</button>
+          </div>
         </div>
       </div>
 
