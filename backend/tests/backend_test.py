@@ -452,3 +452,163 @@ class TestPublishUnreachable:
         assert r.status_code == 502, f"expected 502, got {r.status_code}: {r.text}"
         detail = r.json().get("detail", "")
         assert "upload failed" in detail.lower(), f"unexpected detail: {detail}"
+
+
+
+# ---------- Iteration 7: Publish Presets (encrypted password) ----------
+
+class TestPublishPresets:
+    created = []
+
+    def test_list_returns_array(self, client):
+        r = client.get(f"{API}/publish-presets")
+        assert r.status_code == 200, r.text
+        assert isinstance(r.json(), list)
+
+    def test_create_with_password_and_fetch_secret(self, client):
+        payload = {
+            "name": "TEST_it7_preset_saved",
+            "host": "ftp.example.com",
+            "port": 21,
+            "username": "deploy",
+            "password": "s3cret-P@ss!",
+            "save_password": True,
+            "remote_path": "/public_html",
+            "protocol": "ftps",
+            "include_zip": True,
+        }
+        r = client.post(f"{API}/publish-presets", json=payload)
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d["name"] == payload["name"]
+        assert d["host"] == payload["host"]
+        assert d["username"] == payload["username"]
+        assert d["protocol"] == "ftps"
+        assert d["include_zip"] is True
+        assert d["has_password"] is True
+        assert "password" not in d  # public model must not leak plaintext or ciphertext
+        assert isinstance(d["id"], str) and d["id"]
+        TestPublishPresets.created.append(d["id"])
+
+        # secret endpoint returns the decrypted plaintext
+        s = client.get(f"{API}/publish-presets/{d['id']}/secret")
+        assert s.status_code == 200
+        assert s.json() == {"password": "s3cret-P@ss!"}
+
+        # list surfaces it and has_password stays True
+        lst = client.get(f"{API}/publish-presets").json()
+        me = next((p for p in lst if p["id"] == d["id"]), None)
+        assert me is not None
+        assert me["has_password"] is True
+
+    def test_create_without_password_returns_empty_secret(self, client):
+        payload = {
+            "name": "TEST_it7_preset_nopwd",
+            "host": "sftp.example.com",
+            "port": 22,
+            "username": "deploy",
+            "password": "will-not-be-saved",
+            "save_password": False,
+            "protocol": "sftp",
+        }
+        r = client.post(f"{API}/publish-presets", json=payload)
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d["has_password"] is False
+        TestPublishPresets.created.append(d["id"])
+
+        s = client.get(f"{API}/publish-presets/{d['id']}/secret")
+        assert s.status_code == 200
+        assert s.json() == {"password": ""}
+
+    def test_create_missing_required_400(self, client):
+        # missing name
+        r1 = client.post(f"{API}/publish-presets", json={"name": "", "host": "h", "username": "u"})
+        assert r1.status_code == 400, r1.text
+        # missing host
+        r2 = client.post(f"{API}/publish-presets", json={"name": "n", "host": "", "username": "u"})
+        assert r2.status_code == 400
+        # missing username
+        r3 = client.post(f"{API}/publish-presets", json={"name": "n", "host": "h", "username": ""})
+        assert r3.status_code == 400
+
+    def test_delete_preset_and_verify_removal(self, client):
+        # create dedicated preset for deletion
+        r = client.post(f"{API}/publish-presets", json={
+            "name": "TEST_it7_preset_del", "host": "h", "username": "u",
+            "password": "p", "save_password": False,
+        })
+        pid = r.json()["id"]
+        d = client.delete(f"{API}/publish-presets/{pid}")
+        assert d.status_code == 200
+        assert d.json().get("ok") is True
+        lst = client.get(f"{API}/publish-presets").json()
+        assert not any(p["id"] == pid for p in lst)
+        # secret on deleted returns 404
+        assert client.get(f"{API}/publish-presets/{pid}/secret").status_code == 404
+
+    def test_delete_unknown_404(self, client):
+        assert client.delete(f"{API}/publish-presets/nope-xyz").status_code == 404
+
+    @classmethod
+    def teardown_class(cls):
+        for pid in cls.created:
+            try:
+                requests.delete(f"{API}/publish-presets/{pid}", timeout=10)
+            except Exception:
+                pass
+
+
+# ---------- Iteration 7: Starter templates ----------
+
+EXPECTED_STARTER_IDS = [
+    "starter-frutiger-aero", "starter-dark-academia", "starter-solar-punk",
+    "starter-cottagecore", "starter-y2k", "starter-vaporwave",
+    "starter-cyberpunk", "starter-brutalism", "starter-bauhaus",
+    "starter-scandi-minimal", "starter-memphis", "starter-retro-futurism",
+    "starter-bloomcore", "starter-neubrutalism", "starter-corp-memphis",
+]
+
+
+class TestStarterTemplates:
+    def test_all_15_starters_present_and_first(self, client):
+        r = client.get(f"{API}/templates")
+        assert r.status_code == 200
+        arr = r.json()
+        assert isinstance(arr, list)
+        starters = [t for t in arr if t.get("is_starter")]
+        # Should have >= 15 total (starters + any user templates)
+        assert len(arr) >= 15, f"expected >=15 templates, got {len(arr)}"
+        # All 15 expected starter ids present, each exactly once (idempotent upsert)
+        starter_ids = [t["id"] for t in starters]
+        for sid in EXPECTED_STARTER_IDS:
+            assert starter_ids.count(sid) == 1, f"starter {sid} count={starter_ids.count(sid)}"
+        # Each starter has aesthetic populated
+        for t in starters:
+            assert t.get("aesthetic"), f"missing aesthetic on {t['id']}"
+            assert t.get("name")
+            assert isinstance(t.get("data"), dict)
+        # Starters appear before user templates in returned order
+        first_non_starter = next((i for i, t in enumerate(arr) if not t.get("is_starter")), len(arr))
+        # every element before first_non_starter must be a starter
+        assert all(arr[i].get("is_starter") for i in range(first_non_starter))
+
+    def test_delete_starter_returns_403(self, client):
+        r = client.delete(f"{API}/templates/starter-frutiger-aero")
+        assert r.status_code == 403, r.text
+        detail = r.json().get("detail", "")
+        assert "starter" in detail.lower() and "cannot" in detail.lower()
+        # Verify still present
+        arr = client.get(f"{API}/templates").json()
+        assert any(t["id"] == "starter-frutiger-aero" for t in arr)
+
+    def test_user_template_still_deletable(self, client):
+        r = client.post(f"{API}/templates", json={
+            "name": "TEST_it7_user_tpl", "description": "x", "data": {"pages": []},
+        })
+        assert r.status_code == 200
+        tid = r.json()["id"]
+        assert r.json().get("is_starter") is False
+        d = client.delete(f"{API}/templates/{tid}")
+        assert d.status_code == 200
+        assert d.json().get("ok") is True

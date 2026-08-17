@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 7 — Backend-only verification of the two new areas: encrypted Publish Presets CRUD (Fernet) and the 15 seeded starter aesthetic templates. Added two new test classes to /app/backend/tests/backend_test.py (TestPublishPresets: list/create-with-password+decrypt-secret/create-without-password/400-validation/delete/404; TestStarterTemplates: all 15 starter ids present exactly once with aesthetic populated and sorted first, DELETE starter returns 403 with 'Starter templates cannot be deleted', user templates still deletable). Full suite now 39/39 pass in 3.2s. Verified idempotent upsert by restarting the backend (sudo supervisorctl restart backend) and re-running TestStarterTemplates — starter count remains exactly 1 per id (starter_ids.count(sid) == 1) so the on_startup seed does not duplicate. Regression on prior endpoints (projects/preview/components/snippets/templates/analytics/publish 502) all still green.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py list_publish_presets iterates the cursor with 'async for' but does not project out password_enc — while _serialize doesn't touch that key and only has_password is exposed, consider excluding password_enc via a projection ({'_id': 0, 'password_enc': 0}) as defense-in-depth against future serializer changes leaking the ciphertext.",
+    "PublishPresetCreate.password is Optional[str] with default '' — save_password=True + empty password silently stores has_password=False. That's the current (and probably intended) behavior, but the frontend toggle should ensure a non-empty password is captured before enabling the encrypted save so users are not surprised by has_password=False after ticking the box.",
+    "Fernet key is auto-generated to /app/backend/.preset_key on first boot when WEBDOJO_SECRET_KEY is unset — fine for dev, but in production every pod would generate its own key and decryption would fail across instances. Recommend surfacing WEBDOJO_SECRET_KEY as a required env var for prod deployments."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {
+    "backend": "100% (39/39)",
+    "frontend": "not tested (backend-only request)"
+  },
+  "seed_data_creation": "TEST_it7_preset_saved, TEST_it7_preset_nopwd, TEST_it7_preset_del publish-presets and TEST_it7_user_tpl template — all cleaned up via teardown / inline delete.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Publish-preset public model correctly hides password_enc / plaintext (verified by asserting 'password' key absent on POST response). Idempotent starter seeding verified with a live supervisor restart — count remains 1 per starter id. If starter_templates.py is edited, ensure ids stay stable or the seed will produce orphans (the current code only upserts by id, it never deletes stale starters).",
+  "rca_of_the_issue": "No issues; all 39 tests pass including new preset encryption round-trip (Fernet encrypt on create -> decrypt on /secret) and full 15-starter presence + 403-on-delete-starter."
+}

@@ -1,32 +1,123 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Server, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Server, ShieldCheck, ShieldAlert, Trash2, KeyRound, Unlock, ChevronRight } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
 const monoCls = inputCls + " font-mono";
 
-// Modal that gathers FTP / FTPS / SFTP credentials, then POSTs to the
-// backend to upload the generated site to the destination server.
+const EMPTY = {
+  host: "",
+  port: "",
+  username: "",
+  password: "",
+  remote_path: "/public_html",
+  protocol: "ftp",
+  html_filename: "index.html",
+  css_filename: "styles.css",
+  include_zip: false,
+};
+
+// Modal that gathers FTP / FTPS / SFTP credentials, supports saving
+// reusable presets (with optional encrypted-password storage), then
+// POSTs to the backend to upload the generated site.
 export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSaved }) => {
-  const [form, setForm] = useState({
-    host: "",
-    port: "",
-    username: "",
-    password: "",
-    remote_path: "/public_html",
-    protocol: "ftp",
-    html_filename: "index.html",
-    css_filename: "styles.css",
-    include_zip: false,
-  });
+  const [form, setForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetId, setSelectedPresetId] = useState("");
+  const [savePreset, setSavePreset] = useState(false);
+  const [presetName, setPresetName] = useState("");
+  const [savePassword, setSavePassword] = useState(true);
 
   const update = (patch) => setForm((f) => ({ ...f, ...patch }));
+
+  useEffect(() => {
+    if (open) refreshPresets();
+  }, [open]);
+
+  const refreshPresets = async () => {
+    try {
+      const r = await axios.get(`${API}/publish-presets`);
+      setPresets(r.data || []);
+    } catch (e) {
+      // non-fatal
+    }
+  };
+
+  const applyPreset = async (preset) => {
+    setSelectedPresetId(preset.id);
+    let password = "";
+    if (preset.has_password) {
+      try {
+        const r = await axios.get(`${API}/publish-presets/${preset.id}/secret`);
+        password = r.data.password || "";
+      } catch {
+        toast.error("Could not load saved password");
+      }
+    }
+    setForm({
+      host: preset.host || "",
+      port: preset.port ? String(preset.port) : "",
+      username: preset.username || "",
+      password,
+      remote_path: preset.remote_path || "/",
+      protocol: preset.protocol || "ftp",
+      html_filename: preset.html_filename || "index.html",
+      css_filename: preset.css_filename || "styles.css",
+      include_zip: !!preset.include_zip,
+    });
+    toast.success(`Loaded preset "${preset.name}"`);
+  };
+
+  const deletePreset = async (id, e) => {
+    e.stopPropagation();
+    try {
+      await axios.delete(`${API}/publish-presets/${id}`);
+      setPresets((p) => p.filter((x) => x.id !== id));
+      if (selectedPresetId === id) setSelectedPresetId("");
+      toast.success("Preset removed");
+    } catch {
+      toast.error("Delete failed");
+    }
+  };
+
+  const saveCurrentAsPreset = async () => {
+    if (!presetName.trim()) {
+      toast.error("Give the preset a name");
+      return;
+    }
+    if (!form.host || !form.username) {
+      toast.error("Host and username are required to save a preset");
+      return;
+    }
+    try {
+      const payload = {
+        name: presetName.trim(),
+        host: form.host.trim(),
+        username: form.username.trim(),
+        password: form.password,
+        save_password: savePassword && !!form.password,
+        remote_path: form.remote_path.trim() || "/",
+        protocol: form.protocol,
+        html_filename: form.html_filename.trim() || "index.html",
+        css_filename: form.css_filename.trim() || "styles.css",
+        include_zip: form.include_zip,
+      };
+      if (form.port) payload.port = Number(form.port);
+      await axios.post(`${API}/publish-presets`, payload);
+      setSavePreset(false);
+      setPresetName("");
+      toast.success(`Preset "${payload.name}" saved`);
+      refreshPresets();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Save failed");
+    }
+  };
 
   const publish = async () => {
     if (!form.host || !form.username || !form.password) {
@@ -69,15 +160,44 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-lg" data-testid="publish-modal">
+      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-lg max-h-[90vh] overflow-y-auto" data-testid="publish-modal">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Server size={16} /> Publish “{projectName}”</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 text-sm">
+          {presets.length > 0 && (
+            <div className="rounded border border-[#2B2B2B] bg-[#0D0D0D] p-2" data-testid="publish-presets-list">
+              <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5 px-1">Saved profiles</div>
+              <div className="space-y-1 max-h-[140px] overflow-y-auto">
+                {presets.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => applyPreset(p)}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer group ${selectedPresetId === p.id ? "bg-blue-600/25 border border-blue-500/60" : "hover:bg-[#1F1F1F] border border-transparent"}`}
+                    data-testid={`preset-row-${p.id}`}
+                  >
+                    {p.has_password ? <KeyRound size={12} className="text-emerald-400 shrink-0" /> : <Unlock size={12} className="text-gray-500 shrink-0" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-white truncate">{p.name}</div>
+                      <div className="text-[10px] text-gray-500 font-mono truncate">{p.protocol}://{p.username}@{p.host}{p.remote_path}</div>
+                    </div>
+                    <button
+                      onClick={(e) => deletePreset(p.id, e)}
+                      className="p-1 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100"
+                      data-testid={`preset-del-${p.id}`}
+                      title="Delete preset"
+                    ><Trash2 size={11} /></button>
+                    <ChevronRight size={12} className="text-gray-600 opacity-0 group-hover:opacity-100" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 text-[11px] px-2 py-1.5 rounded border border-[#2B2B2B] bg-[#0D0D0D]">
             {isSecure ? <ShieldCheck size={12} className="text-emerald-400" /> : <ShieldAlert size={12} className="text-amber-400" />}
-            <span className="text-gray-400">Credentials are sent to the Web Dojo API and used once for this upload — nothing is stored.</span>
+            <span className="text-gray-400">Web Dojo encrypts saved passwords with Fernet on the server. Live upload creds are used once and not logged.</span>
           </div>
 
           <div>
@@ -140,6 +260,51 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
             <input type="checkbox" checked={form.include_zip} onChange={(e) => update({ include_zip: e.target.checked })} data-testid="publish-include-zip" />
             Also upload a <span className="font-mono">site.zip</span> archive
           </label>
+
+          {/* Save-as-preset */}
+          <div className="rounded border border-[#2B2B2B] bg-[#0D0D0D] p-2">
+            {!savePreset ? (
+              <button
+                onClick={() => { setSavePreset(true); setPresetName(form.host || ""); }}
+                className="w-full text-[11px] py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+                data-testid="preset-save-toggle"
+              >+ Save these settings as a preset</button>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-[10px] uppercase tracking-wider text-gray-500">New preset</div>
+                <input
+                  value={presetName}
+                  onChange={(e) => setPresetName(e.target.value)}
+                  className={inputCls}
+                  placeholder="e.g. Production · ftp.example.com"
+                  data-testid="preset-name"
+                />
+                <label className={`flex items-center gap-2 text-[11px] ${form.password ? "text-gray-300" : "text-gray-600"}`}>
+                  <input
+                    type="checkbox"
+                    checked={savePassword && !!form.password}
+                    disabled={!form.password}
+                    onChange={(e) => setSavePassword(e.target.checked)}
+                    data-testid="preset-save-password"
+                  />
+                  Save password (encrypted) so it auto-fills next time
+                  {!form.password && <span className="text-[10px] text-amber-500/80">— enter a password first</span>}
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveCurrentAsPreset}
+                    className="flex-1 text-[11px] py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white"
+                    data-testid="preset-save-confirm"
+                  >Save preset</button>
+                  <button
+                    onClick={() => { setSavePreset(false); setPresetName(""); }}
+                    className="text-[11px] py-1.5 px-3 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+                    data-testid="preset-save-cancel"
+                  >Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {result && !result.error && (
             <div className="text-[11px] rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 p-2" data-testid="publish-success">

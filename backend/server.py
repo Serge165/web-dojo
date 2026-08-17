@@ -15,6 +15,7 @@ import ssl
 from pathlib import Path
 import uuid
 from datetime import datetime, timezone
+from cryptography.fernet import Fernet
 
 
 ROOT_DIR = Path(__file__).parent
@@ -117,6 +118,8 @@ class ProjectTemplate(BaseModel):
     name: str
     description: str = ""
     thumbnail: Optional[str] = None
+    aesthetic: Optional[str] = None
+    is_starter: bool = False
     data: Any  # snapshot of the project (pages, template, fonts, etc.)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -125,7 +128,77 @@ class ProjectTemplateCreate(BaseModel):
     name: str
     description: str = ""
     thumbnail: Optional[str] = None
+    aesthetic: Optional[str] = None
     data: Any
+
+
+class PublishPresetPublic(BaseModel):
+    id: str
+    name: str
+    host: str
+    port: Optional[int] = None
+    username: str
+    remote_path: str = "/"
+    protocol: str = "ftp"
+    html_filename: str = "index.html"
+    css_filename: str = "styles.css"
+    include_zip: bool = False
+    has_password: bool = False
+    created_at: datetime
+
+
+class PublishPreset(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    host: str
+    port: Optional[int] = None
+    username: str
+    remote_path: str = "/"
+    protocol: str = "ftp"
+    html_filename: str = "index.html"
+    css_filename: str = "styles.css"
+    include_zip: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class PublishPresetCreate(BaseModel):
+    name: str
+    host: str
+    port: Optional[int] = None
+    username: str
+    password: Optional[str] = ""
+    save_password: bool = True
+    remote_path: str = "/"
+    protocol: str = "ftp"
+    html_filename: str = "index.html"
+    css_filename: str = "styles.css"
+    include_zip: bool = False
+
+
+# ---------- Encryption helpers for preset passwords ----------
+
+_KEY_PATH = ROOT_DIR / ".preset_key"
+
+def _get_fernet() -> Fernet:
+    key = os.environ.get("WEBDOJO_SECRET_KEY")
+    if not key and _KEY_PATH.exists():
+        key = _KEY_PATH.read_text().strip()
+    if not key:
+        key = Fernet.generate_key().decode()
+        try:
+            _KEY_PATH.write_text(key)
+        except Exception:
+            pass
+    return Fernet(key.encode() if isinstance(key, str) else key)
+
+
+def _encrypt(value: str) -> str:
+    return _get_fernet().encrypt(value.encode()).decode()
+
+
+def _decrypt(token: str) -> str:
+    return _get_fernet().decrypt(token.encode()).decode()
 
 
 def _serialize(doc: dict) -> dict:
@@ -367,7 +440,10 @@ async def delete_snippet(snippet_id: str):
 async def list_templates():
     cursor = db.templates.find({}, {"_id": 0}).sort("created_at", -1)
     items = await cursor.to_list(500)
-    return [ProjectTemplate(**_deserialize(it)) for it in items]
+    # Starters first, then user templates newest-first
+    parsed = [ProjectTemplate(**_deserialize(it)) for it in items]
+    parsed.sort(key=lambda t: (not t.is_starter, -(t.created_at.timestamp())))
+    return parsed
 
 
 @api_router.post("/templates", response_model=ProjectTemplate)
@@ -380,9 +456,67 @@ async def create_template(payload: ProjectTemplateCreate):
 
 @api_router.delete("/templates/{template_id}")
 async def delete_template(template_id: str):
-    res = await db.templates.delete_one({"id": template_id})
-    if res.deleted_count == 0:
+    existing = await db.templates.find_one({"id": template_id}, {"_id": 0, "is_starter": 1})
+    if not existing:
         raise HTTPException(status_code=404, detail="Template not found")
+    if existing.get("is_starter"):
+        raise HTTPException(status_code=403, detail="Starter templates cannot be deleted")
+    await db.templates.delete_one({"id": template_id})
+    return {"ok": True}
+
+
+# ---------- Publish presets ----------
+
+@api_router.get("/publish-presets", response_model=List[PublishPresetPublic])
+async def list_publish_presets():
+    items = []
+    # Explicitly exclude the ciphertext from the projection as defense-in-depth
+    # so future serializer changes cannot leak encrypted passwords.
+    async for doc in db.publish_presets.find({}, {"_id": 0, "password_enc": 0}).sort("created_at", -1):
+        deser = _deserialize(doc)
+        # Re-derive has_password by looking up the raw doc once (cheap: same _id already located).
+        raw = await db.publish_presets.find_one({"id": deser["id"]}, {"_id": 0, "password_enc": 1})
+        deser["has_password"] = bool(raw and raw.get("password_enc"))
+        items.append(PublishPresetPublic(**deser))
+    return items
+
+
+@api_router.post("/publish-presets", response_model=PublishPresetPublic)
+async def create_publish_preset(payload: PublishPresetCreate):
+    if not payload.name.strip() or not payload.host.strip() or not payload.username.strip():
+        raise HTTPException(status_code=400, detail="name, host and username are required")
+    preset = PublishPreset(**payload.model_dump(exclude={"password", "save_password"}))
+    doc = _serialize(preset.model_dump())
+    # Only store an encrypted blob when the user explicitly opted in AND provided a value.
+    should_save_pw = payload.save_password and bool(payload.password)
+    if should_save_pw:
+        try:
+            doc["password_enc"] = _encrypt(payload.password)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to encrypt password: {e}")
+    await db.publish_presets.insert_one(doc.copy())
+    return PublishPresetPublic(**{**preset.model_dump(), "has_password": should_save_pw})
+
+
+@api_router.get("/publish-presets/{preset_id}/secret")
+async def get_publish_preset_secret(preset_id: str):
+    doc = await db.publish_presets.find_one({"id": preset_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Preset not found")
+    enc = doc.get("password_enc")
+    if not enc:
+        return {"password": ""}
+    try:
+        return {"password": _decrypt(enc)}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to decrypt password")
+
+
+@api_router.delete("/publish-presets/{preset_id}")
+async def delete_publish_preset(preset_id: str):
+    res = await db.publish_presets.delete_one({"id": preset_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Preset not found")
     return {"ok": True}
 
 
@@ -620,6 +754,25 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def seed_starter_templates():
+    """Idempotent upsert of curated starter templates on boot."""
+    try:
+        from starter_templates import STARTER_TEMPLATES
+    except Exception as e:
+        logger.warning(f"starter_templates import failed: {e}")
+        return
+    for tpl in STARTER_TEMPLATES:
+        try:
+            await db.templates.update_one(
+                {"id": tpl["id"]},
+                {"$set": tpl},
+                upsert=True,
+            )
+        except Exception as e:
+            logger.warning(f"Failed to seed starter {tpl.get('id')}: {e}")
 
 
 @app.on_event("shutdown")
