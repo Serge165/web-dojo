@@ -152,7 +152,7 @@ export const CATEGORIES = [
         html: `<section style="padding:80px 32px;background:#fafafa;font-family:Manrope,sans-serif;">
   <div style="max-width:820px;margin:0 auto;text-align:center;">
     <div style="font-size:80px;color:#cbd5e1;line-height:1;margin-bottom:-24px;">“</div>
-    <p style="font-size:26px;letter-spacing:-0.01em;line-height:1.35;color:#0f172a;margin:0 0 24px;">Forge changed the way our team ships marketing pages. We went from 2 weeks to 2 days.</p>
+    <p style="font-size:26px;letter-spacing:-0.01em;line-height:1.35;color:#0f172a;margin:0 0 24px;">Web Dojo changed the way our team ships marketing pages. We went from 2 weeks to 2 days.</p>
     <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
       <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=srgb&fm=jpg&w=200&q=80" style="width:44px;height:44px;border-radius:999px;object-fit:cover;" alt="" />
       <div style="text-align:left;"><div style="font-weight:600;color:#0f172a;font-size:14px;">Alex Rivera</div><div style="font-size:12px;color:#64748b;">Head of Design, Northwind</div></div>
@@ -195,15 +195,137 @@ export const CATEGORIES = [
         html: `<footer style="padding:56px 32px 32px;background:#0f172a;color:#cbd5e1;font-family:Manrope,sans-serif;">
   <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;">
     <div>
-      <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">◤ Forge</div>
+      <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">◤ Web Dojo</div>
       <p style="font-size:13px;color:#94a3b8;margin:0;max-width:280px;">Design and ship faster. Built for humans, powered by the web.</p>
     </div>
     <div><div style="font-weight:600;color:#fff;margin-bottom:8px;font-size:13px;">Product</div><ul style="list-style:none;padding:0;margin:0;font-size:13px;line-height:2;"><li>Features</li><li>Pricing</li><li>Changelog</li></ul></div>
     <div><div style="font-weight:600;color:#fff;margin-bottom:8px;font-size:13px;">Company</div><ul style="list-style:none;padding:0;margin:0;font-size:13px;line-height:2;"><li>About</li><li>Blog</li><li>Careers</li></ul></div>
     <div><div style="font-weight:600;color:#fff;margin-bottom:8px;font-size:13px;">Legal</div><ul style="list-style:none;padding:0;margin:0;font-size:13px;line-height:2;"><li>Terms</li><li>Privacy</li></ul></div>
   </div>
-  <div style="border-top:1px solid #1e293b;margin-top:32px;padding-top:20px;text-align:center;font-size:12px;color:#64748b;">© 2026 Forge. All rights reserved.</div>
+  <div style="border-top:1px solid #1e293b;margin-top:32px;padding-top:20px;text-align:center;font-size:12px;color:#64748b;">© 2026 Web Dojo. All rights reserved.</div>
 </footer>`,
+      },
+    ],
+  },
+  {
+    id: "timelines",
+    label: "Timelines",
+    blocks: [
+      {
+        id: "cmp-timeline-vert",
+        label: "Vertical Timeline",
+        html: `<section style="padding:80px 32px;background:#ffffff;font-family:Manrope,sans-serif;">
+  <div style="max-width:720px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0 0 32px;color:#0f172a;">Our journey</h2>
+    <ol style="list-style:none;padding:0;margin:0;border-left:2px solid #e5e7eb;">
+      ${[
+        ["2021","Founded","Started in a small studio with three founders and a shared laptop."],
+        ["2022","Product launch","Shipped v1 to 400 early users during a two-week beta."],
+        ["2023","Series A","Raised $8M to expand the team and reach new markets."],
+        ["2024","Global reach","Opened offices in Berlin and Singapore, hit 50k users."],
+        ["Today","Still shipping","10 products, 120 teammates, one mission."],
+      ].map(([year,title,desc])=>`<li style="position:relative;padding:0 0 32px 24px;">
+        <span style="position:absolute;left:-9px;top:4px;width:16px;height:16px;border-radius:999px;background:#2563eb;border:3px solid #ffffff;box-shadow:0 0 0 2px #2563eb;"></span>
+        <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#64748b;margin-bottom:4px;">${year}</div>
+        <div style="font-size:18px;font-weight:600;color:#0f172a;margin-bottom:4px;">${title}</div>
+        <p style="margin:0;font-size:14px;color:#475569;line-height:1.55;">${desc}</p>
+      </li>`).join("")}
+    </ol>
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-timeline-alt",
+        label: "Alternating Timeline",
+        html: `<section style="padding:80px 32px;background:#fafafa;font-family:Manrope,sans-serif;">
+  <div style="max-width:900px;margin:0 auto;position:relative;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0 0 32px;color:#0f172a;text-align:center;">Milestones</h2>
+    <div style="position:absolute;left:50%;top:120px;bottom:0;width:2px;background:#e2e8f0;transform:translateX(-50%);"></div>
+    ${[
+      ["Q1","Concept sprint","Whiteboarding sessions and 12 prototypes.",true],
+      ["Q2","Closed beta","Invited 200 makers to shape the product.",false],
+      ["Q3","Public launch","Grew to 15k signups in the first month.",true],
+      ["Q4","Team scale","Doubled the design and eng teams.",false],
+    ].map(([tag,title,desc,left])=>`
+      <div style="display:grid;grid-template-columns:1fr 24px 1fr;align-items:flex-start;gap:16px;margin-bottom:36px;">
+        <div style="text-align:${left?"right":"left"};grid-column:${left?"1":"3"};padding:${left?"0 24px 0 0":"0 0 0 24px"};">
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#2563eb;margin-bottom:6px;">${tag}</div>
+          <div style="font-size:18px;font-weight:600;color:#0f172a;margin-bottom:4px;">${title}</div>
+          <p style="margin:0;font-size:14px;color:#64748b;line-height:1.55;">${desc}</p>
+        </div>
+        <div style="grid-column:2;display:flex;justify-content:center;padding-top:6px;">
+          <span style="width:14px;height:14px;border-radius:999px;background:#2563eb;box-shadow:0 0 0 4px #ffffff, 0 0 0 6px #2563eb;"></span>
+        </div>
+      </div>`).join("")}
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-timeline-hori",
+        label: "Horizontal Timeline",
+        html: `<section style="padding:80px 32px;background:#0f172a;color:#ffffff;font-family:Manrope,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0 0 40px;color:#ffffff;">Roadmap 2026</h2>
+    <div style="position:relative;padding-top:24px;">
+      <div style="position:absolute;left:0;right:0;top:36px;height:2px;background:#1e293b;"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative;">
+        ${[
+          ["Q1","Foundations","Refactor + design system"],
+          ["Q2","AI Studio","Prompt-to-page module"],
+          ["Q3","Team spaces","Multi-user + comments"],
+          ["Q4","Marketplace","Sell templates on-platform"],
+        ].map(([q,t,d],i,arr)=>`<div style="text-align:center;">
+          <span style="display:inline-block;width:16px;height:16px;border-radius:999px;background:${i===0?"#22d3ee":"#334155"};border:3px solid #0f172a;box-shadow:0 0 0 2px ${i===0?"#22d3ee":"#334155"};margin-bottom:24px;"></span>
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;">${q}</div>
+          <div style="font-size:16px;font-weight:600;color:#ffffff;margin-bottom:4px;">${t}</div>
+          <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.5;">${d}</p>
+        </div>`).join("")}
+      </div>
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-timeline-cards",
+        label: "Card Timeline",
+        html: `<section style="padding:80px 32px;background:#ffffff;font-family:Manrope,sans-serif;">
+  <div style="max-width:920px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0 0 32px;color:#0f172a;">Release history</h2>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      ${[
+        ["v3.0","Feb 2026","Contextual editors, timeline blocks, and CDN library."],
+        ["v2.4","Jan 2026","Component marketplace + file tree with drag-drop imports."],
+        ["v2.0","Nov 2025","Grid & Flexbox layout builders, aesthetic themes."],
+        ["v1.0","Aug 2025","First public release with WYSIWYG editor and code mode."],
+      ].map(([ver,date,note])=>`<article style="display:grid;grid-template-columns:120px 12px 1fr;align-items:start;gap:20px;padding:20px;border:1px solid #e5e7eb;border-radius:14px;background:#ffffff;">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:#0f172a;">${ver}</div>
+          <div style="font-size:12px;color:#64748b;">${date}</div>
+        </div>
+        <div style="width:2px;height:100%;background:#e5e7eb;position:relative;">
+          <span style="position:absolute;left:-4px;top:6px;width:10px;height:10px;border-radius:999px;background:#2563eb;"></span>
+        </div>
+        <p style="margin:0;font-size:14px;color:#334155;line-height:1.6;">${note}</p>
+      </article>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "cmp-timeline-steps",
+        label: "Numbered Steps",
+        html: `<section style="padding:80px 32px;background:#f5f0ea;font-family:Manrope,sans-serif;">
+  <div style="max-width:960px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-0.02em;margin:0 0 32px;color:#1e293b;">How it works</h2>
+    <ol style="counter-reset:step;list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
+      ${["Sign up","Design","Preview","Ship"].map((title,i)=>`<li style="counter-increment:step;position:relative;padding:24px;background:#ffffff;border-radius:16px;border:1px solid #e7e2d8;">
+        <span style="position:absolute;top:-14px;left:24px;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:999px;background:#1e293b;color:#ffffff;font-weight:700;font-size:14px;">${i+1}</span>
+        <div style="font-size:16px;font-weight:600;color:#0f172a;margin:12px 0 4px;">${title}</div>
+        <p style="margin:0;font-size:13px;color:#64748b;line-height:1.55;">Short description of step ${i+1} — what happens and why it matters.</p>
+      </li>`).join("")}
+    </ol>
+  </div>
+</section>`,
       },
     ],
   },

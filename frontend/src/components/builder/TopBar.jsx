@@ -48,7 +48,7 @@ export const TopBar = ({
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex items-center gap-1.5">
           <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold">◤</div>
-          <span className="text-sm font-semibold tracking-tight text-white">Forge</span>
+          <span className="text-sm font-semibold tracking-tight text-white">Web Dojo</span>
         </div>
         <div className="h-6 w-px bg-[#2B2B2B]" />
         <input
