@@ -1,0 +1,40 @@
+{
+  "summary": "Iteration 4 — Tested onboarding tour, Publish (FTP/FTPS/SFTP) modal, and backend publish endpoint plus regression. Backend: 16/17 pytest passed (12 regression + 4/5 new publish tests). Regression (Projects CRUD, /api/preview, /api/components CRUD) all green. Publish schema validation passes for missing host/username/unknown-protocol/unknown-project. HOWEVER the unreachable-host case returns 500 instead of the documented 502 due to a real backend bug in exception handling (nested tuple `ftplib.all_errors` inside another tuple raises TypeError). Frontend: All 7 tour steps render, Finish sets localStorage['webdojo.tour.done']='1', reload does not re-open the tour, help-btn re-opens it. Publish modal opens on publish-btn, protocol toggles (ftp→21, sftp→22, ftps→21) update port placeholder, and clicking publish-submit with only host filled shows a red toast ('Host, username and password are required') without crashing. Regression sanity (title 'Web Dojo — WYSIWYG Builder', share/save/library/layout/code buttons) intact.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/projects/{id}/publish",
+        "issue": "Unreachable-host path returns 500 instead of 502. Root cause: `except (ftplib.all_errors, OSError, RuntimeError) as e:` — ftplib.all_errors is already a tuple, so this creates a nested tuple. Python raises `TypeError: catching classes that do not inherit from BaseException is not allowed`, which is not caught by the endpoint's outer `except Exception` (already too late — the first except clause itself raised the TypeError during pattern evaluation). Fix: unpack it → `except (*ftplib.all_errors, OSError, RuntimeError, socket.gaierror) as e:` OR change to `except Exception as e:` and drop the specific tuple.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "PublishModal", "issues": ["Radix DialogContent missing Description or aria-describedby — a11y warning in console (non-blocking)"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix nested-tuple in server.py:391 `except (ftplib.all_errors, OSError, RuntimeError)` → unpack with `*ftplib.all_errors` (or use a single `except Exception` block) so unreachable hosts return 502 as designed instead of 500."
+  ],
+  "critical_code_review_comments": [
+    "server.py publish_project: nested tuple in except clause is a real defect masking the 502 error path — user-facing symptom will be an 'Internal Server Error' on any bad host/creds.",
+    "PublishModal.jsx: password is submitted in JSON to the backend and forwarded via ftplib/paramiko; ensure REACT_APP_BACKEND_URL is always HTTPS in production (it currently is via the preview URL, but this is worth calling out in docs)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "94% (16/17)", "frontend": "100% (tour + publish modal + regression sanity)"},
+  "seed_data_creation": "Pytest created & cleaned TEST_it4_pub, TEST_it2_proj/TEST_it2_del/TEST_it2_preview projects and TEST_it7_cmp components.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Onboarding tour auto-shows only when localStorage['webdojo.tour.done'] is absent — clear it before the first navigation. Publish endpoint uses FastAPI Pydantic which returns 422 for missing keys; the developer's manual check `if not payload.host or not payload.username` returns 400 for empty strings, so tests send empty-string values rather than omit keys. The 500 vs 502 bug is deterministic — any unreachable host will 500 until the except clause is unpacked.",
+  "rca_of_the_issue": "server.py line 391: `except (ftplib.all_errors, OSError, RuntimeError) as e:` — ftplib.all_errors is a tuple `(Exception, error_reply, error_temp, error_perm, error_proto)`. Placing a tuple inside another tuple creates a nested tuple, which Python cannot use as an exception spec. When the FTP connect() raises OSError, the interpreter tries to match against the nested tuple and raises `TypeError: catching classes that do not inherit from BaseException is not allowed`. This TypeError propagates out of the try/except entirely (because it's raised during except-clause evaluation, not inside the try block), so FastAPI's default handler returns 500. Fix: `except (*ftplib.all_errors, OSError, RuntimeError) as e:` (unpack) or collapse to `except Exception as e:`."
+}

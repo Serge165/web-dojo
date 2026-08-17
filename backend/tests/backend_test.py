@@ -175,3 +175,64 @@ class TestComponentsCRUD:
                 requests.delete(f"{API}/components/{cid}", timeout=10)
             except Exception:
                 pass
+
+
+# ---------- Publish endpoint (iteration 4) ----------
+
+class TestPublish:
+    def _make_project(self, client, created_ids):
+        r = client.post(f"{API}/projects", json={
+            "name": "TEST_it4_pub",
+            "elements": [{"id": "e1", "html": "<section id='e1'><h1 style='color:red'>Pub</h1></section>"}],
+            "canvas_bg": "#eeeeee",
+        })
+        assert r.status_code == 200
+        pid = r.json()["id"]
+        created_ids.append(pid)
+        return pid
+
+    def test_publish_missing_host(self, client, created_ids):
+        pid = self._make_project(client, created_ids)
+        r = client.post(f"{API}/projects/{pid}/publish", json={
+            "host": "", "username": "u", "password": "p", "protocol": "ftp"
+        })
+        assert r.status_code == 400, r.text
+        assert "host" in r.json().get("detail", "").lower()
+
+    def test_publish_missing_username(self, client, created_ids):
+        pid = created_ids[-1]
+        r = client.post(f"{API}/projects/{pid}/publish", json={
+            "host": "127.0.0.1", "username": "", "password": "p", "protocol": "ftp"
+        })
+        assert r.status_code == 400, r.text
+        assert "username" in r.json().get("detail", "").lower()
+
+    def test_publish_unknown_protocol(self, client, created_ids):
+        pid = created_ids[-1]
+        r = client.post(f"{API}/projects/{pid}/publish", json={
+            "host": "127.0.0.1", "username": "u", "password": "p", "protocol": "webdav"
+        })
+        assert r.status_code == 400, r.text
+        assert "protocol" in r.json().get("detail", "").lower()
+
+    def test_publish_unknown_project_404(self, client):
+        r = client.post(f"{API}/projects/nope-xyz/publish", json={
+            "host": "127.0.0.1", "username": "u", "password": "p", "protocol": "ftp"
+        })
+        assert r.status_code == 404, r.text
+
+    def test_publish_unreachable_host_502(self, client, created_ids):
+        pid = created_ids[-1]
+        # Hit the backend directly on localhost:8001 — the public ingress
+        # (Cloudflare) intercepts backend-emitted 5xx responses and replaces
+        # the JSON body with its own HTML error page, which would hide the
+        # real backend detail. We still verify the status code + JSON detail.
+        r = requests.post(
+            f"http://localhost:8001/api/projects/{pid}/publish",
+            json={"host": "127.0.0.1", "port": 1, "username": "u",
+                  "password": "p", "protocol": "ftp"},
+            timeout=60,
+        )
+        assert r.status_code == 502, f"expected 502, got {r.status_code}: {r.text}"
+        detail = r.json().get("detail", "")
+        assert "upload failed" in detail.lower(), f"unexpected detail: {detail}"

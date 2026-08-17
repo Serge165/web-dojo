@@ -75,6 +75,16 @@ gradients into CSS gradients.
   (template-columns/rows/col-gap/row-gap/padding/justify+align items), and
   Card/Container (bg/padding/radius/border/shadow). Detection also inspects
   one level deep so wrapper-around-button/image blocks show the right editor.
+- **Timelines** category: 5 pure-CSS timelines (Vertical, Alternating,
+  Horizontal, Card release history, Numbered steps).
+- **Publish (FTP/FTPS/SFTP)**: `POST /api/projects/{id}/publish` uploads the
+  generated site to any host. Modal collects host/port/username/password/
+  remote path + protocol; credentials are per-request only, never persisted.
+- **Onboarding Tour**: 7-step first-run tour (Welcome → Library → Layout →
+  Code → Share → Save → Ready) with `localStorage['webdojo.tour.done']`
+  persistence and a Help button in the top bar that restarts it.
+- **Brand**: renamed everywhere from Forge to Web Dojo (top bar, tab title,
+  sample blocks).
 - Backend CRUD for projects (create/list/get/update/delete) tested 100% pass.
 - Public preview endpoint `GET /api/preview/{id}` returns rendered text/html.
 - Builder shell (TopBar, LeftSidebar, Canvas, RightSidebar).

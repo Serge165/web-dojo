@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Code2, MousePointer2, Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2 } from "lucide-react";
+import { Code2, MousePointer2, Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle } from "lucide-react";
 import { scanHtml } from "@/lib/importHtml";
 import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { toast } from "sonner";
@@ -14,6 +14,8 @@ export const TopBar = ({
   onUndo, onRedo, canUndo, canRedo,
   viewport, setViewport,
   onShare,
+  onPublish,
+  onStartTour,
 }) => {
   const fileRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -129,8 +131,10 @@ export const TopBar = ({
         )}
 
         <button onClick={onShare} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" title="Copy shareable preview URL" data-testid="share-btn"><Link2 size={12} /> Share</button>
+        <button onClick={onPublish} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" title="Upload via FTP / SFTP" data-testid="publish-btn"><Server size={12} /> Publish</button>
         <button onClick={onSave} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white" data-testid="save-btn"><Save size={12} /> Save</button>
         <button onClick={onOpenLoad} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" data-testid="load-btn"><FolderOpen size={12} /> Open</button>
+        <button onClick={onStartTour} className="p-1.5 rounded-md hover:bg-[#1F1F1F] text-gray-300" title="Restart onboarding tour" data-testid="help-btn"><HelpCircle size={14} /></button>
       </div>
     </header>
   );

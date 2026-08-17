@@ -1,13 +1,18 @@
 from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional, Any
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import io
+import re
 import logging
+import asyncio
+import ftplib
+import ssl
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional, Any
 import uuid
 from datetime import datetime, timezone
 
@@ -222,6 +227,179 @@ async def delete_component(component_id: str):
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Component not found")
     return {"ok": True}
+
+
+# ---------- Publish (FTP / FTPS / SFTP) ----------
+
+class PublishRequest(BaseModel):
+    host: str
+    port: Optional[int] = None
+    username: str
+    password: str
+    remote_path: str = "/"
+    protocol: str = "ftp"  # ftp | ftps | sftp
+    include_zip: bool = False
+    html_filename: str = "index.html"
+    css_filename: str = "styles.css"
+
+
+def _strip_inline_styles(body_html: str):
+    """Extract inline style attributes into deduplicated CSS classes.
+    Returns (html_with_classes, css_string)."""
+    rules = []
+    counter = {"n": 0}
+
+    def repl(match):
+        i = counter["n"]
+        counter["n"] += 1
+        cls = f"el-{i}"
+        rules.append(f".{cls} {{ {match.group(1)} }}")
+        return f'class="{cls}"'
+
+    transformed = re.sub(r'style="([^"]*)"', repl, body_html)
+    return transformed, "\n".join(rules)
+
+
+def _build_project_bundle(doc: dict, html_filename: str, css_filename: str):
+    """Return (index_html, styles_css) using the doc's data."""
+    body = "\n".join([e.get("html", "") for e in (doc.get("elements") or [])])
+    cleaned_body, css_body = _strip_inline_styles(body)
+    fonts_link = _build_google_fonts_link(doc.get("fonts") or [])
+    head_extra = doc.get("head_html") or ""
+    canvas_bg = doc.get("canvas_bg") or "#ffffff"
+    name = doc.get("name") or "Untitled"
+    styles = f"body{{margin:0;background:{canvas_bg};}}\n" + css_body
+    html = (
+        "<!doctype html>\n<html lang=\"en\">\n<head>\n"
+        "<meta charset=\"utf-8\" />\n"
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+        f"<title>{name}</title>\n"
+        f"{fonts_link}\n{head_extra}\n"
+        f'<link rel="stylesheet" href="{css_filename}" />\n'
+        "</head>\n<body>\n"
+        f"{cleaned_body}\n"
+        "</body>\n</html>"
+    )
+    return html, styles
+
+
+def _ftp_upload(payload: PublishRequest, files: dict):
+    """Blocking FTP/FTPS upload. Runs in a thread from the async endpoint."""
+    port = payload.port or (21 if payload.protocol == "ftp" else 21)
+    if payload.protocol == "ftps":
+        ftp = ftplib.FTP_TLS(context=ssl.create_default_context())
+    else:
+        ftp = ftplib.FTP()
+    ftp.connect(payload.host, port, timeout=30)
+    ftp.login(payload.username, payload.password)
+    if payload.protocol == "ftps":
+        ftp.prot_p()
+    remote = (payload.remote_path or "/").rstrip("/") or "/"
+    if remote != "/":
+        # Ensure remote path exists (best-effort).
+        parts = [p for p in remote.split("/") if p]
+        acc = ""
+        for p in parts:
+            acc = f"{acc}/{p}" if acc else f"/{p}"
+            try:
+                ftp.cwd(acc)
+            except ftplib.error_perm:
+                try:
+                    ftp.mkd(acc)
+                    ftp.cwd(acc)
+                except ftplib.error_perm as e:
+                    raise RuntimeError(f"Failed to create remote path {acc}: {e}")
+        ftp.cwd(remote)
+    uploaded = []
+    for name, content in files.items():
+        buf = io.BytesIO(content.encode("utf-8") if isinstance(content, str) else content)
+        ftp.storbinary(f"STOR {name}", buf)
+        uploaded.append(name)
+    ftp.quit()
+    return uploaded
+
+
+def _sftp_upload(payload: PublishRequest, files: dict):
+    """Blocking SFTP upload via paramiko."""
+    import paramiko  # local import so ftp-only deployments still boot
+    port = payload.port or 22
+    transport = paramiko.Transport((payload.host, port))
+    try:
+        transport.connect(username=payload.username, password=payload.password)
+        sftp = paramiko.SFTPClient.from_transport(transport)
+        remote = (payload.remote_path or ".").rstrip("/") or "."
+        # Ensure directory exists.
+        if remote not in (".", "/"):
+            parts = [p for p in remote.split("/") if p]
+            acc = "" if remote.startswith("/") else "."
+            for p in parts:
+                acc = f"{acc}/{p}" if acc else f"/{p}" if remote.startswith("/") else p
+                try:
+                    sftp.stat(acc)
+                except IOError:
+                    sftp.mkdir(acc)
+            try:
+                sftp.chdir(remote)
+            except IOError:
+                pass
+        uploaded = []
+        for name, content in files.items():
+            data = content.encode("utf-8") if isinstance(content, str) else content
+            with sftp.open(name, "wb") as fp:
+                fp.write(data)
+            uploaded.append(name)
+        sftp.close()
+        return uploaded
+    finally:
+        transport.close()
+
+
+@api_router.post("/projects/{project_id}/publish")
+async def publish_project(project_id: str, payload: PublishRequest):
+    doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    protocol = (payload.protocol or "ftp").lower()
+    if protocol not in {"ftp", "ftps", "sftp"}:
+        raise HTTPException(status_code=400, detail="protocol must be one of: ftp, ftps, sftp")
+    if not payload.host or not payload.username:
+        raise HTTPException(status_code=400, detail="host and username are required")
+
+    html_name = payload.html_filename or "index.html"
+    css_name = payload.css_filename or "styles.css"
+    index_html, styles_css = _build_project_bundle(doc, html_name, css_name)
+    files = {html_name: index_html, css_name: styles_css}
+
+    if payload.include_zip:
+        try:
+            import zipfile
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr(html_name, index_html)
+                zf.writestr(css_name, styles_css)
+            files["site.zip"] = buf.getvalue()
+        except Exception:
+            pass
+
+    try:
+        loop = asyncio.get_running_loop()
+        if protocol == "sftp":
+            uploaded = await loop.run_in_executor(None, _sftp_upload, payload, files)
+        else:
+            uploaded = await loop.run_in_executor(None, _ftp_upload, payload, files)
+    except (*ftplib.all_errors, OSError, RuntimeError) as e:
+        raise HTTPException(status_code=502, detail=f"Upload failed: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Upload failed: {type(e).__name__}: {e}")
+
+    return {
+        "ok": True,
+        "protocol": protocol,
+        "host": payload.host,
+        "path": payload.remote_path,
+        "uploaded": uploaded,
+    }
 
 
 app.include_router(api_router)

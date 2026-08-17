@@ -8,6 +8,8 @@ import { Canvas } from "@/components/builder/Canvas";
 import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
+import { PublishModal } from "@/components/builder/PublishModal";
+import { OnboardingTour } from "@/components/builder/OnboardingTour";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -44,6 +46,8 @@ export default function Builder() {
   const [projects, setProjects] = useState([]);
   const [importOpen, setImportOpen] = useState(false);
   const [importedSections, setImportedSections] = useState([]);
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [tourForce, setTourForce] = useState(0);
 
   // Undo/Redo history stack for the doc state.
   const [past, setPast] = useState([]);
@@ -250,6 +254,23 @@ export default function Builder() {
     } catch { toast.error("Share failed"); }
   };
 
+  // Ensures the project is saved on the backend and returns its id so the
+  // Publish modal can POST to /api/projects/{id}/publish.
+  const ensureSaved = async () => {
+    try {
+      if (projectId) {
+        await axios.put(`${API}/projects/${projectId}`, project);
+        return projectId;
+      }
+      const res = await axios.post(`${API}/projects`, project);
+      setProjectId(res.data.id);
+      return res.data.id;
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  };
+
   // Global keyboard shortcuts
   useEffect(() => {
     const onKey = (e) => {
@@ -273,6 +294,8 @@ export default function Builder() {
         onImportSections={onImportSections}
         project={project}
         onSave={save} onOpenLoad={openLoad} onShare={share}
+        onPublish={() => setPublishOpen(true)}
+        onStartTour={() => setTourForce((v) => v + 1)}
         onUndo={undo} onRedo={redo}
         canUndo={past.length > 0} canRedo={future.length > 0}
         viewport={viewport} setViewport={setViewport}
@@ -373,6 +396,15 @@ export default function Builder() {
           </div>
         </DialogContent>
       </Dialog>
+      <PublishModal
+        open={publishOpen}
+        onClose={() => setPublishOpen(false)}
+        projectId={projectId}
+        projectName={projectName}
+        onEnsureSaved={ensureSaved}
+      />
+
+      <OnboardingTour key={tourForce} force={tourForce > 0} />
     </div>
   );
 }
