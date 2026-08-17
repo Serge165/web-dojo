@@ -38,6 +38,8 @@ export default function Builder() {
   const [canvasBg, setCanvasBg] = useState("#ffffff");
   const [headHtml, setHeadHtml] = useState("");
   const [fonts, setFonts] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [savedComponents, setSavedComponents] = useState([]);
   const [loadOpen, setLoadOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [importOpen, setImportOpen] = useState(false);
@@ -52,7 +54,7 @@ export default function Builder() {
   useEffect(() => { pastRef.current = past; }, [past]);
   useEffect(() => { futureRef.current = future; }, [future]);
 
-  const doc = useMemo(() => ({ elements, canvasBg, headHtml, fonts }), [elements, canvasBg, headHtml, fonts]);
+  const doc = useMemo(() => ({ elements, canvasBg, headHtml, fonts, files }), [elements, canvasBg, headHtml, fonts, files]);
   const docRef = useRef(doc);
   useEffect(() => { docRef.current = doc; }, [doc]);
 
@@ -74,7 +76,7 @@ export default function Builder() {
     skipHistory.current = true;
     setFuture((f) => [docRef.current, ...f].slice(0, 50));
     setPast(p.slice(0, -1));
-    setElements(prev.elements); setCanvasBg(prev.canvasBg); setHeadHtml(prev.headHtml); setFonts(prev.fonts);
+    setElements(prev.elements); setCanvasBg(prev.canvasBg); setHeadHtml(prev.headHtml); setFonts(prev.fonts); setFiles(prev.files || []);
   };
   const redo = () => {
     const f = futureRef.current;
@@ -83,11 +85,34 @@ export default function Builder() {
     skipHistory.current = true;
     setPast((p) => [...p, docRef.current]);
     setFuture(f.slice(1));
-    setElements(next.elements); setCanvasBg(next.canvasBg); setHeadHtml(next.headHtml); setFonts(next.fonts);
+    setElements(next.elements); setCanvasBg(next.canvasBg); setHeadHtml(next.headHtml); setFonts(next.fonts); setFiles(next.files || []);
   };
 
   const selected = useMemo(() => elements.find((e) => e.id === selectedId) || null, [elements, selectedId]);
-  const project = { name: projectName, elements, head_html: headHtml, canvas_bg: canvasBg, fonts };
+  const project = { name: projectName, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files };
+
+  // Load saved components on mount.
+  useEffect(() => {
+    axios.get(`${API}/components`).then((r) => setSavedComponents(r.data)).catch(() => {});
+  }, []);
+
+  const saveAsComponent = async (el) => {
+    const name = prompt("Name this component", "My component");
+    if (!name) return;
+    try {
+      const res = await axios.post(`${API}/components`, { name, html: el.html });
+      setSavedComponents((c) => [res.data, ...c]);
+      toast.success(`Saved “${name}”`);
+    } catch { toast.error("Failed to save component"); }
+  };
+
+  const deleteSavedComponent = async (id) => {
+    try {
+      await axios.delete(`${API}/components/${id}`);
+      setSavedComponents((c) => c.filter((x) => x.id !== id));
+      toast.success("Component removed");
+    } catch { toast.error("Delete failed"); }
+  };
 
   const addBlock = useCallback((html, atIndex) => {
     const el = { id: uid(), html };
@@ -187,6 +212,7 @@ export default function Builder() {
       setProjectId(p.id); setProjectName(p.name);
       setElements((p.elements || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })));
       setHeadHtml(p.head_html || ""); setCanvasBg(p.canvas_bg || "#ffffff"); setFonts(p.fonts || []);
+      setFiles(p.files || []);
       setSelectedId(null); setLoadOpen(false); setPast([]); setFuture([]);
       toast.success(`Loaded ${p.name}`);
     } catch { toast.error("Failed to load"); }
@@ -244,7 +270,16 @@ export default function Builder() {
       />
 
       <div className="flex-1 flex overflow-hidden">
-        <LeftSidebar onAddBlock={(html) => addBlock(html)} onAddFont={addFont} fonts={fonts} />
+        <LeftSidebar
+          onAddBlock={(html) => addBlock(html)}
+          onAddFont={addFont}
+          fonts={fonts}
+          files={files}
+          onFilesChange={setFiles}
+          onFileClick={() => {}}
+          savedComponents={savedComponents}
+          onDeleteSavedComponent={deleteSavedComponent}
+        />
 
         {mode === "design" ? (
           <Canvas
@@ -256,6 +291,7 @@ export default function Builder() {
             onMove={moveEl}
             onDuplicate={dupEl}
             onEditHtml={editHtml}
+            onSaveComponent={saveAsComponent}
             canvasBg={canvasBg}
             headHtml={headHtml}
             viewport={viewport}

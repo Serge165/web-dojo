@@ -37,6 +37,15 @@ gradients into CSS gradients.
   using `jszip` + `file-saver`.
 
 ## Implemented (Feb 17, 2026)
+- Left sidebar tabs: **Library / Files / Saved**.
+- **Files**: tree view with new file/folder, folder upload, drag-drop
+  folders/files from disk (`webkitGetAsEntry`), rename/delete, drag `.html`
+  files onto canvas. Persisted with project.
+- **Saved (Component Marketplace)**: save any canvas element via icon,
+  persists to `/api/components`, appears in Saved tab, draggable back to
+  canvas.
+- **Inline Rich Text**: floating toolbar (Bold/Italic/Underline/H1/H2/P/
+  Link/Clear) shows above any inline-edited element.
 - Backend CRUD for projects (create/list/get/update/delete) tested 100% pass.
 - Public preview endpoint `GET /api/preview/{id}` returns rendered text/html.
 - Builder shell (TopBar, LeftSidebar, Canvas, RightSidebar).

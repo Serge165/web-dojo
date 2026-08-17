@@ -33,6 +33,7 @@ class Project(BaseModel):
     head_html: str = ""
     canvas_bg: str = "#ffffff"
     fonts: List[str] = Field(default_factory=list)
+    files: List[Any] = Field(default_factory=list)
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -43,6 +44,7 @@ class ProjectCreate(BaseModel):
     head_html: str = ""
     canvas_bg: str = "#ffffff"
     fonts: List[str] = []
+    files: List[Any] = []
 
 
 class ProjectUpdate(BaseModel):
@@ -51,12 +53,30 @@ class ProjectUpdate(BaseModel):
     head_html: Optional[str] = None
     canvas_bg: Optional[str] = None
     fonts: Optional[List[str]] = None
+    files: Optional[List[Any]] = None
 
 
 class ProjectSummary(BaseModel):
     id: str
     name: str
     updated_at: datetime
+
+
+class SavedComponent(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    category: str = "custom"
+    html: str
+    thumbnail: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class SavedComponentCreate(BaseModel):
+    name: str
+    category: str = "custom"
+    html: str
+    thumbnail: Optional[str] = None
 
 
 def _serialize(doc: dict) -> dict:
@@ -172,6 +192,36 @@ async def preview_project(project_id: str):
     if not doc:
         raise HTTPException(status_code=404, detail="Project not found")
     return HTMLResponse(content=_project_to_html(doc))
+
+
+# ---------- Saved components ----------
+
+@api_router.get("/components", response_model=List[SavedComponent])
+async def list_components():
+    cursor = db.components.find({}, {"_id": 0}).sort("created_at", -1)
+    items = await cursor.to_list(500)
+    result = []
+    for it in items:
+        it = _deserialize(it)
+        result.append(SavedComponent(**it))
+    return result
+
+
+@api_router.post("/components", response_model=SavedComponent)
+async def create_component(payload: SavedComponentCreate):
+    comp = SavedComponent(**payload.model_dump())
+    doc = comp.model_dump()
+    doc = _serialize(doc)
+    await db.components.insert_one(doc.copy())
+    return comp
+
+
+@api_router.delete("/components/{component_id}")
+async def delete_component(component_id: str):
+    res = await db.components.delete_one({"id": component_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Component not found")
+    return {"ok": True}
 
 
 app.include_router(api_router)

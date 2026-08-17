@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Trash2, ArrowUp, ArrowDown, Copy, Pencil } from "lucide-react";
+import { Trash2, ArrowUp, ArrowDown, Copy, Pencil, Save } from "lucide-react";
+import { InlineToolbar } from "./InlineToolbar";
 
 const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 
 export const Canvas = ({
   elements, selectedId, onSelect, onDrop, onDelete, onMove, onDuplicate,
-  onEditHtml, canvasBg, headHtml, viewport = "desktop",
+  onEditHtml, onSaveComponent, canvasBg, headHtml, viewport = "desktop",
 }) => {
   const dropRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
+  const editingRef = useRef(null);
 
   useEffect(() => {
     if (!headHtml) return;
@@ -70,17 +72,20 @@ export const Canvas = ({
               >
                 {editingId === el.id ? (
                   <div
+                    ref={editingRef}
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => { onEditHtml(el.id, e.currentTarget.innerHTML); setEditingId(null); }}
                     dangerouslySetInnerHTML={{ __html: el.html }}
                     className="focus:outline-none"
+                    data-testid={`inline-editor-${el.id}`}
                   />
                 ) : (
                   <div dangerouslySetInnerHTML={{ __html: el.html }} />
                 )}
                 <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
-                  <IconBtn testId={`el-edit-${el.id}`} title="Edit text inline" onClick={(e) => { e.stopPropagation(); setEditingId(el.id); }}><Pencil size={12} /></IconBtn>
+                  <IconBtn testId={`el-edit-${el.id}`} title="Edit text inline" onClick={(e) => { e.stopPropagation(); setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}><Pencil size={12} /></IconBtn>
+                  <IconBtn testId={`el-save-${el.id}`} title="Save as component" onClick={(e) => { e.stopPropagation(); onSaveComponent && onSaveComponent(el); }}><Save size={12} /></IconBtn>
                   <IconBtn testId={`el-up-${el.id}`} title="Move up" onClick={(e) => { e.stopPropagation(); onMove(el.id, -1); }}><ArrowUp size={12} /></IconBtn>
                   <IconBtn testId={`el-down-${el.id}`} title="Move down" onClick={(e) => { e.stopPropagation(); onMove(el.id, 1); }}><ArrowDown size={12} /></IconBtn>
                   <IconBtn testId={`el-dup-${el.id}`} title="Duplicate" onClick={(e) => { e.stopPropagation(); onDuplicate(el.id); }}><Copy size={12} /></IconBtn>
@@ -92,6 +97,7 @@ export const Canvas = ({
           <DropSlot onDrop={(e) => handleDrop(e, elements.length)} onDragOver={handleDragOver} index={elements.length} tail />
         </div>
       </div>
+      {editingId && <InlineToolbar targetRef={editingRef} />}
     </div>
   );
 };
