@@ -11,6 +11,7 @@ os.environ.setdefault("DB_NAME", "webdojo_test")
 
 import pytest
 from starlette.testclient import TestClient
+import stat
 
 import server
 
@@ -147,3 +148,16 @@ class TestStripeNotConfigured:
         body = r.json()
         assert body["stripe_enabled"] is False
         assert body["publishable_key"] == ""
+
+
+class TestFernetKeyFilePermissions:
+    def test_key_file_created_owner_only(self, tmp_path, monkeypatch):
+        monkeypatch.delenv("WEBDOJO_SECRET_KEY", raising=False)
+        key_path = tmp_path / "test.preset_key"
+        monkeypatch.setattr(server, "_KEY_PATH", key_path)
+
+        server._get_fernet()
+
+        assert key_path.exists()
+        mode = stat.S_IMODE(key_path.stat().st_mode)
+        assert mode == 0o600

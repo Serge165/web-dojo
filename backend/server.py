@@ -193,6 +193,7 @@ def _get_fernet() -> Fernet:
         key = Fernet.generate_key().decode()
         try:
             _KEY_PATH.write_text(key)
+            os.chmod(_KEY_PATH, 0o600)
         except Exception:
             pass
     return Fernet(key.encode() if isinstance(key, str) else key)
