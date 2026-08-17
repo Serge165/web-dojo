@@ -221,6 +221,222 @@ class TestPublish:
         })
         assert r.status_code == 404, r.text
 
+# ---------- Iteration 6: Snippets CRUD ----------
+
+class TestSnippetsCRUD:
+    created = []
+
+    def test_create_snippet(self, client):
+        payload = {"name": "TEST_it6_snip", "language": "html", "content": "<h1>hi</h1>", "tags": ["t1"]}
+        r = client.post(f"{API}/snippets", json=payload)
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d["name"] == "TEST_it6_snip"
+        assert d["language"] == "html"
+        assert d["content"] == "<h1>hi</h1>"
+        assert d["tags"] == ["t1"]
+        assert isinstance(d["id"], str) and d["id"]
+        TestSnippetsCRUD.created.append(d["id"])
+
+    def test_list_reverse_created(self, client):
+        # create second, ensure it comes first in the list
+        r = client.post(f"{API}/snippets", json={"name": "TEST_it6_snip2", "content": "x"})
+        assert r.status_code == 200
+        sid2 = r.json()["id"]
+        TestSnippetsCRUD.created.append(sid2)
+        lst = client.get(f"{API}/snippets").json()
+        # find positions
+        ids = [s["id"] for s in lst]
+        assert sid2 in ids and TestSnippetsCRUD.created[0] in ids
+        assert ids.index(sid2) < ids.index(TestSnippetsCRUD.created[0]), "list should be reverse-created order"
+
+    def test_delete_snippet(self, client):
+        sid = TestSnippetsCRUD.created.pop()
+        r = client.delete(f"{API}/snippets/{sid}")
+        assert r.status_code == 200
+        assert r.json().get("ok") is True
+        lst = client.get(f"{API}/snippets").json()
+        assert not any(s["id"] == sid for s in lst)
+
+    def test_delete_unknown_404(self, client):
+        r = client.delete(f"{API}/snippets/nope-xyz")
+        assert r.status_code == 404
+
+    @classmethod
+    def teardown_class(cls):
+        for sid in cls.created:
+            try:
+                requests.delete(f"{API}/snippets/{sid}", timeout=10)
+            except Exception:
+                pass
+
+
+# ---------- Iteration 6: Templates CRUD ----------
+
+class TestTemplatesCRUD:
+    created = []
+
+    def test_create_template(self, client):
+        payload = {"name": "TEST_it6_tpl", "description": "d", "data": {"pages": [{"id": "home", "name": "Home"}]}}
+        r = client.post(f"{API}/templates", json=payload)
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d["name"] == "TEST_it6_tpl"
+        assert d["description"] == "d"
+        assert d["data"]["pages"][0]["id"] == "home"
+        assert isinstance(d["id"], str) and d["id"]
+        TestTemplatesCRUD.created.append(d["id"])
+
+    def test_list_templates(self, client):
+        lst = client.get(f"{API}/templates").json()
+        assert isinstance(lst, list)
+        assert any(t["id"] == TestTemplatesCRUD.created[0] for t in lst)
+
+    def test_delete_template(self, client):
+        tid = TestTemplatesCRUD.created.pop()
+        r = client.delete(f"{API}/templates/{tid}")
+        assert r.status_code == 200
+        assert r.json().get("ok") is True
+        lst = client.get(f"{API}/templates").json()
+        assert not any(t["id"] == tid for t in lst)
+
+    def test_delete_unknown_404(self, client):
+        r = client.delete(f"{API}/templates/nope-xyz")
+        assert r.status_code == 404
+
+    @classmethod
+    def teardown_class(cls):
+        for tid in cls.created:
+            try:
+                requests.delete(f"{API}/templates/{tid}", timeout=10)
+            except Exception:
+                pass
+
+
+# ---------- Iteration 6: Analytics & Preview counter ----------
+
+class TestAnalytics:
+    def test_unknown_project_404(self, client):
+        r = client.get(f"{API}/projects/nope-xyz/analytics")
+        assert r.status_code == 404
+
+    def test_analytics_shape_and_preview_increments(self, client, created_ids):
+        # fresh project
+        r = client.post(f"{API}/projects", json={"name": "TEST_it6_analytics", "elements": [], "canvas_bg": "#111111"})
+        assert r.status_code == 200
+        pid = r.json()["id"]
+        created_ids.append(pid)
+
+        # baseline
+        a0 = client.get(f"{API}/projects/{pid}/analytics")
+        assert a0.status_code == 200
+        base = a0.json()
+        assert set(["total_views", "total_publishes", "recent", "by_day", "project_id"]).issubset(base.keys())
+        base_views = base["total_views"]
+
+        # hit preview twice
+        assert client.get(f"{API}/preview/{pid}").status_code == 200
+        assert client.get(f"{API}/preview/{pid}").status_code == 200
+
+        a1 = client.get(f"{API}/projects/{pid}/analytics").json()
+        assert a1["total_views"] >= base_views + 2
+        assert isinstance(a1["recent"], list)
+        assert isinstance(a1["by_day"], list)
+
+
+# ---------- Iteration 6: Project pages + template round-trip ----------
+
+class TestPagesAndTemplate:
+    def test_pages_active_template_roundtrip(self, client, created_ids):
+        payload = {
+            "name": "TEST_it6_pages",
+            "pages": [
+                {"id": "home", "name": "Home", "slug": "index", "status": "draft",
+                 "elements": [{"id": "e1", "html": "<h1>Home</h1>"}],
+                 "head_html": "", "canvas_bg": "#ffffff", "fonts": [], "seo": {}},
+                {"id": "p2", "name": "About", "slug": "about", "status": "review",
+                 "elements": [], "head_html": "", "canvas_bg": "#eeeeee", "fonts": [], "seo": {}},
+            ],
+            "active_page_id": "p2",
+            "template": {"header_html": "<header>H</header>", "footer_html": "<footer>F</footer>", "use_template": True},
+        }
+        r = client.post(f"{API}/projects", json=payload)
+        assert r.status_code == 200, r.text
+        d = r.json()
+        pid = d["id"]
+        created_ids.append(pid)
+        assert d["active_page_id"] == "p2"
+        assert len(d["pages"]) == 2
+        assert d["template"]["use_template"] is True
+
+        g = client.get(f"{API}/projects/{pid}").json()
+        assert g["active_page_id"] == "p2"
+        assert len(g["pages"]) == 2
+        assert g["pages"][0]["id"] == "home"
+        assert g["pages"][1]["name"] == "About"
+        assert g["template"]["header_html"] == "<header>H</header>"
+
+    def test_preview_seo_meta_and_template_wrapper(self, client, created_ids):
+        payload = {
+            "name": "TEST_it6_seo",
+            "pages": [
+                {"id": "home", "name": "Home", "slug": "index", "status": "draft",
+                 "elements": [{"id": "e1", "html": "<section id='e1'>MAIN</section>"}],
+                 "head_html": "", "canvas_bg": "#ffffff", "fonts": [],
+                 "seo": {"description": "hello world", "title": "SEO Title"}},
+            ],
+            "active_page_id": "home",
+            "template": {"header_html": "<header id='wrap-h'>HEADER</header>",
+                         "footer_html": "<footer id='wrap-f'>FOOTER</footer>",
+                         "use_template": True},
+        }
+        r = client.post(f"{API}/projects", json=payload)
+        assert r.status_code == 200
+        pid = r.json()["id"]
+        created_ids.append(pid)
+
+        prev = client.get(f"{API}/preview/{pid}")
+        assert prev.status_code == 200
+        body = prev.text
+        assert '<meta name="description" content="hello world"' in body
+        assert "<title>SEO Title</title>" in body
+        assert "HEADER" in body
+        assert "FOOTER" in body
+        assert "MAIN" in body
+        # ensure header appears before body element and footer after
+        assert body.index("HEADER") < body.index("MAIN") < body.index("FOOTER")
+
+    def test_preview_wrapper_disabled_when_use_template_false(self, client, created_ids):
+        payload = {
+            "name": "TEST_it6_seo_off",
+            "pages": [
+                {"id": "home", "name": "Home", "slug": "index", "status": "draft",
+                 "elements": [{"id": "e1", "html": "<section>MAIN2</section>"}],
+                 "head_html": "", "canvas_bg": "#ffffff", "fonts": [], "seo": {}},
+            ],
+            "active_page_id": "home",
+            "template": {"header_html": "<header>WRAP_H</header>",
+                         "footer_html": "<footer>WRAP_F</footer>",
+                         "use_template": False},
+        }
+        r = client.post(f"{API}/projects", json=payload)
+        pid = r.json()["id"]
+        created_ids.append(pid)
+        body = client.get(f"{API}/preview/{pid}").text
+        assert "MAIN2" in body
+        assert "WRAP_H" not in body
+        assert "WRAP_F" not in body
+
+
+# ---------- Existing publish test kept ----------
+
+class TestPublishUnreachable:
+    def _make(self, client, created_ids):
+        r = client.post(f"{API}/projects", json={"name": "TEST_it4_pub2", "elements": [], "canvas_bg": "#fff"})
+        pid = r.json()["id"]
+        created_ids.append(pid)
+        return pid
+
     def test_publish_unreachable_host_502(self, client, created_ids):
         pid = created_ids[-1]
         # Hit the backend directly on localhost:8001 — the public ingress

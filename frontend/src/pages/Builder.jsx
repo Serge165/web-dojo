@@ -10,6 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Trash2 } from "lucide-react";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
+import { PagesBar } from "@/components/builder/PagesBar";
+import { TemplateEditor } from "@/components/builder/TemplateEditor";
+import { SeoPanel } from "@/components/builder/SeoPanel";
+import { FindReplaceModal } from "@/components/builder/FindReplaceModal";
+import { AssetsLibrary } from "@/components/builder/AssetsLibrary";
+import { AnalyticsModal } from "@/components/builder/AnalyticsModal";
+import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModal";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -48,6 +55,17 @@ export default function Builder() {
   const [importedSections, setImportedSections] = useState([]);
   const [publishOpen, setPublishOpen] = useState(false);
   const [tourForce, setTourForce] = useState(0);
+
+  // Multi-page + template + panels state.
+  const [pages, setPages] = useState(() => [{ id: "home", name: "Home", slug: "index", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [] }]);
+  const [activePageId, setActivePageId] = useState("home");
+  const [template, setTemplate] = useState({ header_html: "", footer_html: "", use_template: false });
+  const [findOpen, setFindOpen] = useState(false);
+  const [assetsOpen, setAssetsOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
+  const [seoOpen, setSeoOpen] = useState(false);
 
   // Undo/Redo history stack for the doc state.
   const [past, setPast] = useState([]);
@@ -93,7 +111,65 @@ export default function Builder() {
   };
 
   const selected = useMemo(() => elements.find((e) => e.id === selectedId) || null, [elements, selectedId]);
-  const project = { name: projectName, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files };
+
+  // Keep the active page's snapshot in sync with the editing state.
+  useEffect(() => {
+    setPages((ps) => ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p));
+  }, [elements, headHtml, canvasBg, fonts, activePageId]);
+
+  const activePage = useMemo(() => pages.find((p) => p.id === activePageId) || pages[0], [pages, activePageId]);
+
+  const project = {
+    name: projectName,
+    // legacy top-level fields mirror the active page for backward compat
+    elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files,
+    pages, active_page_id: activePageId, template,
+  };
+
+  // ------------- Page ops -------------
+  const switchPage = (id) => {
+    const target = pages.find((p) => p.id === id);
+    if (!target || id === activePageId) return;
+    // Persist current edits into pages first (effect will run, but this keeps immediate state clean)
+    setPages((ps) => ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p));
+    setActivePageId(id);
+    setElements(target.elements || []);
+    setHeadHtml(target.head_html || "");
+    setCanvasBg(target.canvas_bg || "#ffffff");
+    setFonts(target.fonts || []);
+    setSelectedId(null);
+  };
+  const newPage = () => {
+    const id = uid();
+    const name = `Page ${pages.length + 1}`;
+    setPages((ps) => {
+      const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p);
+      return [...persisted, { id, name, slug: name.toLowerCase().replace(/\s+/g, "-"), status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [] }];
+    });
+    setActivePageId(id);
+    setElements([]);
+    setHeadHtml("");
+    setCanvasBg("#ffffff");
+    setFonts([]);
+    setSelectedId(null);
+  };
+  const removePage = (id) => {
+    if (pages.length <= 1) { toast.error("Keep at least one page"); return; }
+    const next = pages.filter((p) => p.id !== id);
+    setPages(next);
+    if (activePageId === id) {
+      const t = next[0];
+      setActivePageId(t.id);
+      setElements(t.elements || []);
+      setHeadHtml(t.head_html || "");
+      setCanvasBg(t.canvas_bg || "#ffffff");
+      setFonts(t.fonts || []);
+      setSelectedId(null);
+    }
+  };
+  const renamePage = (id, name) => setPages((ps) => ps.map((p) => p.id === id ? { ...p, name } : p));
+  const setPageStatus = (id, status) => setPages((ps) => ps.map((p) => p.id === id ? { ...p, status } : p));
+  const setPageSeo = (seo) => setPages((ps) => ps.map((p) => p.id === activePageId ? { ...p, seo } : p));
 
   // Load saved components on mount.
   useEffect(() => {
@@ -223,12 +299,67 @@ export default function Builder() {
       const res = await axios.get(`${API}/projects/${id}`);
       const p = res.data;
       setProjectId(p.id); setProjectName(p.name);
-      setElements((p.elements || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })));
-      setHeadHtml(p.head_html || ""); setCanvasBg(p.canvas_bg || "#ffffff"); setFonts(p.fonts || []);
+      // Hydrate pages (with legacy fallback).
+      let nextPages;
+      let activeId;
+      if (p.pages && p.pages.length) {
+        nextPages = p.pages.map((pg) => ({
+          id: pg.id || uid(),
+          name: pg.name || "Home",
+          slug: pg.slug || "index",
+          status: pg.status || "draft",
+          seo: pg.seo || {},
+          elements: (pg.elements || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })),
+          head_html: pg.head_html || "",
+          canvas_bg: pg.canvas_bg || "#ffffff",
+          fonts: pg.fonts || [],
+        }));
+        const found = nextPages.find((x) => x.id === p.active_page_id);
+        activeId = found ? found.id : nextPages[0].id;
+      } else {
+        const homeId = uid();
+        nextPages = [{
+          id: homeId, name: p.name || "Home", slug: "index", status: "draft", seo: {},
+          elements: (p.elements || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })),
+          head_html: p.head_html || "", canvas_bg: p.canvas_bg || "#ffffff", fonts: p.fonts || [],
+        }];
+        activeId = homeId;
+      }
+      setPages(nextPages);
+      setActivePageId(activeId);
+      const active = nextPages.find((x) => x.id === activeId);
+      setElements(active.elements || []);
+      setHeadHtml(active.head_html || "");
+      setCanvasBg(active.canvas_bg || "#ffffff");
+      setFonts(active.fonts || []);
+      setTemplate(p.template || { header_html: "", footer_html: "", use_template: false });
       setFiles(p.files || []);
       setSelectedId(null); setLoadOpen(false); setPast([]); setFuture([]);
       toast.success(`Loaded ${p.name}`);
     } catch { toast.error("Failed to load"); }
+  };
+
+  // Load a saved project template as a fresh project.
+  const loadFromTemplate = (tpl) => {
+    const data = tpl.data || {};
+    setProjectId(null);
+    setProjectName(`${tpl.name} — copy`);
+    const templatePages = (data.pages && data.pages.length) ? data.pages : [{
+      id: uid(), name: "Home", slug: "index", status: "draft", seo: {},
+      elements: data.elements || [], head_html: data.head_html || "",
+      canvas_bg: data.canvas_bg || "#ffffff", fonts: data.fonts || [],
+    }];
+    const nextPages = templatePages.map((pg) => ({ ...pg, id: uid() }));
+    setPages(nextPages);
+    setActivePageId(nextPages[0].id);
+    setElements(nextPages[0].elements || []);
+    setHeadHtml(nextPages[0].head_html || "");
+    setCanvasBg(nextPages[0].canvas_bg || "#ffffff");
+    setFonts(nextPages[0].fonts || []);
+    setTemplate(data.template || { header_html: "", footer_html: "", use_template: false });
+    setFiles(data.files || []);
+    setSelectedId(null); setPast([]); setFuture([]);
+    toast.success(`Started new project from “${tpl.name}”`);
   };
 
   const deleteProject = async (id) => {
@@ -278,6 +409,7 @@ export default function Builder() {
       if (meta && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
       if (meta && (e.key.toLowerCase() === "z" && e.shiftKey || e.key.toLowerCase() === "y")) { e.preventDefault(); redo(); return; }
       if (meta && e.key.toLowerCase() === "s") { e.preventDefault(); save(); return; }
+      if (meta && e.key.toLowerCase() === "f") { e.preventDefault(); setFindOpen(true); return; }
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId && document.activeElement === document.body) {
         e.preventDefault(); removeEl(selectedId);
       }
@@ -296,9 +428,25 @@ export default function Builder() {
         onSave={save} onOpenLoad={openLoad} onShare={share}
         onPublish={() => setPublishOpen(true)}
         onStartTour={() => setTourForce((v) => v + 1)}
+        onFind={() => setFindOpen(true)}
+        onAssets={() => setAssetsOpen(true)}
+        onAnalytics={() => setAnalyticsOpen(true)}
+        onTemplates={() => setTemplatesOpen(true)}
         onUndo={undo} onRedo={redo}
         canUndo={past.length > 0} canRedo={future.length > 0}
         viewport={viewport} setViewport={setViewport}
+      />
+
+      <PagesBar
+        pages={pages}
+        activePageId={activePageId}
+        onSwitch={switchPage}
+        onAdd={newPage}
+        onRemove={removePage}
+        onRename={renamePage}
+        onSetStatus={setPageStatus}
+        onOpenSeo={() => setSeoOpen(true)}
+        onOpenTemplate={() => setTemplateEditorOpen(true)}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -313,6 +461,7 @@ export default function Builder() {
           onDeleteSavedComponent={deleteSavedComponent}
           onWrapSelection={wrapSelectionWithContainer}
           hasSelection={!!selected}
+          selectedHtml={selected?.html || ""}
         />
 
         {mode === "design" ? (
@@ -402,6 +551,71 @@ export default function Builder() {
         projectId={projectId}
         projectName={projectName}
         onEnsureSaved={ensureSaved}
+      />
+
+      <TemplateEditor
+        open={templateEditorOpen}
+        onClose={() => setTemplateEditorOpen(false)}
+        template={template}
+        onChange={setTemplate}
+      />
+
+      <SeoPanel
+        open={seoOpen}
+        onClose={() => setSeoOpen(false)}
+        seo={activePage?.seo}
+        pageName={activePage?.name}
+        onChange={setPageSeo}
+      />
+
+      <FindReplaceModal
+        open={findOpen}
+        onClose={() => setFindOpen(false)}
+        pages={pages}
+        activePageId={activePageId}
+        onSetPages={(next) => {
+          setPages(next);
+          const a = next.find((p) => p.id === activePageId);
+          if (a) {
+            setElements(a.elements || []);
+            setHeadHtml(a.head_html || "");
+          }
+        }}
+        headHtml={headHtml}
+        onSetHeadHtml={setHeadHtml}
+        template={template}
+        onSetTemplate={setTemplate}
+        files={files}
+        onSetFiles={setFiles}
+      />
+
+      <AssetsLibrary
+        open={assetsOpen}
+        onClose={() => setAssetsOpen(false)}
+        project={project}
+        onReplace={(updated) => {
+          if (updated.pages) {
+            setPages(updated.pages);
+            const a = updated.pages.find((p) => p.id === activePageId);
+            if (a) { setElements(a.elements || []); setHeadHtml(a.head_html || ""); }
+          }
+          if (updated.template) setTemplate(updated.template);
+          if (updated.head_html !== undefined) setHeadHtml(updated.head_html);
+        }}
+      />
+
+      <AnalyticsModal
+        open={analyticsOpen}
+        onClose={() => setAnalyticsOpen(false)}
+        projectId={projectId}
+        projectName={projectName}
+      />
+
+      <ProjectTemplatesModal
+        open={templatesOpen}
+        onClose={() => setTemplatesOpen(false)}
+        currentProject={project}
+        onLoadTemplate={loadFromTemplate}
       />
 
       <OnboardingTour key={tourForce} force={tourForce > 0} />

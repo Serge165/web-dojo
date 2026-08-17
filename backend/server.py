@@ -39,6 +39,10 @@ class Project(BaseModel):
     canvas_bg: str = "#ffffff"
     fonts: List[str] = Field(default_factory=list)
     files: List[Any] = Field(default_factory=list)
+    # Multi-page + template system
+    pages: List[Any] = Field(default_factory=list)
+    active_page_id: Optional[str] = None
+    template: Optional[Any] = None  # { header_html, footer_html, use_template }
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -50,6 +54,9 @@ class ProjectCreate(BaseModel):
     canvas_bg: str = "#ffffff"
     fonts: List[str] = []
     files: List[Any] = []
+    pages: List[Any] = []
+    active_page_id: Optional[str] = None
+    template: Optional[Any] = None
 
 
 class ProjectUpdate(BaseModel):
@@ -59,6 +66,9 @@ class ProjectUpdate(BaseModel):
     canvas_bg: Optional[str] = None
     fonts: Optional[List[str]] = None
     files: Optional[List[Any]] = None
+    pages: Optional[List[Any]] = None
+    active_page_id: Optional[str] = None
+    template: Optional[Any] = None
 
 
 class ProjectSummary(BaseModel):
@@ -82,6 +92,40 @@ class SavedComponentCreate(BaseModel):
     category: str = "custom"
     html: str
     thumbnail: Optional[str] = None
+
+
+class Snippet(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    language: str = "html"
+    content: str
+    tags: List[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class SnippetCreate(BaseModel):
+    name: str
+    language: str = "html"
+    content: str
+    tags: List[str] = []
+
+
+class ProjectTemplate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str = ""
+    thumbnail: Optional[str] = None
+    data: Any  # snapshot of the project (pages, template, fonts, etc.)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ProjectTemplateCreate(BaseModel):
+    name: str
+    description: str = ""
+    thumbnail: Optional[str] = None
+    data: Any
 
 
 def _serialize(doc: dict) -> dict:
@@ -172,18 +216,65 @@ def _build_google_fonts_link(fonts):
     )
 
 
-def _project_to_html(doc: dict) -> str:
-    body = "\n".join([e.get("html", "") for e in (doc.get("elements") or [])])
-    fonts_link = _build_google_fonts_link(doc.get("fonts") or [])
-    head_extra = doc.get("head_html") or ""
-    canvas_bg = doc.get("canvas_bg") or "#ffffff"
-    name = doc.get("name") or "Untitled"
+def _seo_head(seo: dict) -> str:
+    if not seo:
+        return ""
+    parts = []
+    def esc(v: str) -> str:
+        return str(v).replace('"', "&quot;").replace("<", "&lt;")
+    if seo.get("description"): parts.append(f'<meta name="description" content="{esc(seo["description"])}" />')
+    if seo.get("keywords"): parts.append(f'<meta name="keywords" content="{esc(seo["keywords"])}" />')
+    if seo.get("canonical"): parts.append(f'<link rel="canonical" href="{esc(seo["canonical"])}" />')
+    if seo.get("favicon"): parts.append(f'<link rel="icon" href="{esc(seo["favicon"])}" />')
+    if seo.get("og_title"): parts.append(f'<meta property="og:title" content="{esc(seo["og_title"])}" />')
+    if seo.get("og_description"): parts.append(f'<meta property="og:description" content="{esc(seo["og_description"])}" />')
+    if seo.get("og_image"): parts.append(f'<meta property="og:image" content="{esc(seo["og_image"])}" />')
+    if seo.get("twitter_card"): parts.append(f'<meta name="twitter:card" content="{esc(seo["twitter_card"])}" />')
+    return "\n".join(parts)
+
+
+def _active_page(doc: dict) -> dict:
+    """Return the currently active page data (falls back to legacy top-level fields)."""
+    pages = doc.get("pages") or []
+    if pages:
+        active_id = doc.get("active_page_id")
+        for p in pages:
+            if p.get("id") == active_id:
+                return p
+        return pages[0]
+    return {
+        "id": "home",
+        "name": doc.get("name") or "Home",
+        "slug": "index",
+        "status": "draft",
+        "elements": doc.get("elements") or [],
+        "head_html": doc.get("head_html") or "",
+        "canvas_bg": doc.get("canvas_bg") or "#ffffff",
+        "fonts": doc.get("fonts") or [],
+        "seo": {},
+    }
+
+
+def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
+    p = page or _active_page(doc)
+    template = doc.get("template") or {}
+    use_tpl = bool(template.get("use_template"))
+    header = template.get("header_html", "") if use_tpl else ""
+    footer = template.get("footer_html", "") if use_tpl else ""
+    body_parts = [e.get("html", "") for e in (p.get("elements") or [])]
+    body = "\n".join([header] + body_parts + [footer])
+    fonts_link = _build_google_fonts_link(p.get("fonts") or doc.get("fonts") or [])
+    head_extra = p.get("head_html") or doc.get("head_html") or ""
+    canvas_bg = p.get("canvas_bg") or doc.get("canvas_bg") or "#ffffff"
+    seo = p.get("seo") or {}
+    seo_head = _seo_head(seo)
+    title = seo.get("title") or p.get("name") or doc.get("name") or "Untitled"
     return (
         "<!doctype html>\n<html lang=\"en\">\n<head>\n"
         "<meta charset=\"utf-8\" />\n"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
-        f"<title>{name}</title>\n"
-        f"{fonts_link}\n{head_extra}\n"
+        f"<title>{title}</title>\n"
+        f"{fonts_link}\n{seo_head}\n{head_extra}\n"
         f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
         "</head>\n<body>\n"
         f"{body}\n"
@@ -192,11 +283,27 @@ def _project_to_html(doc: dict) -> str:
 
 
 @api_router.get("/preview/{project_id}", response_class=HTMLResponse)
-async def preview_project(project_id: str):
+async def preview_project(project_id: str, page_id: Optional[str] = None):
     doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Project not found")
-    return HTMLResponse(content=_project_to_html(doc))
+    page = None
+    if page_id and doc.get("pages"):
+        for p in doc["pages"]:
+            if p.get("id") == page_id:
+                page = p
+                break
+    # Log a view for analytics.
+    try:
+        await db.analytics.insert_one({
+            "project_id": project_id,
+            "page_id": page_id or (page.get("id") if page else None),
+            "event": "preview_view",
+            "ts": datetime.now(timezone.utc).isoformat(),
+        })
+    except Exception:
+        pass
+    return HTMLResponse(content=_project_to_html(doc, page))
 
 
 # ---------- Saved components ----------
@@ -227,6 +334,88 @@ async def delete_component(component_id: str):
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Component not found")
     return {"ok": True}
+
+
+# ---------- Snippets ----------
+
+@api_router.get("/snippets", response_model=List[Snippet])
+async def list_snippets():
+    cursor = db.snippets.find({}, {"_id": 0}).sort("created_at", -1)
+    items = await cursor.to_list(500)
+    return [Snippet(**_deserialize(it)) for it in items]
+
+
+@api_router.post("/snippets", response_model=Snippet)
+async def create_snippet(payload: SnippetCreate):
+    snip = Snippet(**payload.model_dump())
+    doc = _serialize(snip.model_dump())
+    await db.snippets.insert_one(doc.copy())
+    return snip
+
+
+@api_router.delete("/snippets/{snippet_id}")
+async def delete_snippet(snippet_id: str):
+    res = await db.snippets.delete_one({"id": snippet_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Snippet not found")
+    return {"ok": True}
+
+
+# ---------- Project templates ----------
+
+@api_router.get("/templates", response_model=List[ProjectTemplate])
+async def list_templates():
+    cursor = db.templates.find({}, {"_id": 0}).sort("created_at", -1)
+    items = await cursor.to_list(500)
+    return [ProjectTemplate(**_deserialize(it)) for it in items]
+
+
+@api_router.post("/templates", response_model=ProjectTemplate)
+async def create_template(payload: ProjectTemplateCreate):
+    tpl = ProjectTemplate(**payload.model_dump())
+    doc = _serialize(tpl.model_dump())
+    await db.templates.insert_one(doc.copy())
+    return tpl
+
+
+@api_router.delete("/templates/{template_id}")
+async def delete_template(template_id: str):
+    res = await db.templates.delete_one({"id": template_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"ok": True}
+
+
+# ---------- Analytics ----------
+
+@api_router.get("/projects/{project_id}/analytics")
+async def project_analytics(project_id: str):
+    exists = await db.projects.find_one({"id": project_id}, {"_id": 0, "id": 1})
+    if not exists:
+        raise HTTPException(status_code=404, detail="Project not found")
+    total_views = await db.analytics.count_documents({"project_id": project_id, "event": "preview_view"})
+    total_publishes = await db.analytics.count_documents({"project_id": project_id, "event": "publish"})
+    recent = []
+    async for ev in db.analytics.find({"project_id": project_id}, {"_id": 0}).sort("ts", -1).limit(50):
+        recent.append(ev)
+    # Views grouped by day (last 30)
+    pipeline = [
+        {"$match": {"project_id": project_id, "event": "preview_view"}},
+        {"$project": {"day": {"$substr": ["$ts", 0, 10]}}},
+        {"$group": {"_id": "$day", "count": {"$sum": 1}}},
+        {"$sort": {"_id": 1}},
+        {"$limit": 30},
+    ]
+    by_day = []
+    async for row in db.analytics.aggregate(pipeline):
+        by_day.append({"day": row["_id"], "count": row["count"]})
+    return {
+        "project_id": project_id,
+        "total_views": total_views,
+        "total_publishes": total_publishes,
+        "recent": recent,
+        "by_day": by_day,
+    }
 
 
 # ---------- Publish (FTP / FTPS / SFTP) ----------
@@ -392,6 +581,20 @@ async def publish_project(project_id: str, payload: PublishRequest):
         raise HTTPException(status_code=502, detail=f"Upload failed: {e}")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Upload failed: {type(e).__name__}: {e}")
+
+    # Log publish event for analytics.
+    try:
+        await db.analytics.insert_one({
+            "project_id": project_id,
+            "event": "publish",
+            "protocol": protocol,
+            "host": payload.host,
+            "path": payload.remote_path,
+            "files": uploaded,
+            "ts": datetime.now(timezone.utc).isoformat(),
+        })
+    except Exception:
+        pass
 
     return {
         "ok": True,

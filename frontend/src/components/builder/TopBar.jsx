@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Code2, MousePointer2, Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle } from "lucide-react";
+import { Code2, MousePointer2, Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate } from "lucide-react";
 import { scanHtml } from "@/lib/importHtml";
 import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ export const TopBar = ({
   onShare,
   onPublish,
   onStartTour,
+  onFind, onAssets, onAnalytics, onTemplates,
 }) => {
   const fileRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -132,6 +133,12 @@ export const TopBar = ({
 
         <button onClick={onShare} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" title="Copy shareable preview URL" data-testid="share-btn"><Link2 size={12} /> Share</button>
         <button onClick={onPublish} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" title="Upload via FTP / SFTP" data-testid="publish-btn"><Server size={12} /> Publish</button>
+        <div className="h-6 w-px bg-[#2B2B2B]" />
+        <button onClick={onFind} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Find & Replace (Cmd+F)" data-testid="find-btn"><Search size={14} /></button>
+        <button onClick={onAssets} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Design tokens (colors/fonts/spacing)" data-testid="assets-btn"><Palette size={14} /></button>
+        <button onClick={onAnalytics} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Analytics" data-testid="analytics-btn"><BarChart3 size={14} /></button>
+        <button onClick={onTemplates} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Project templates" data-testid="templates-btn"><LayoutTemplate size={14} /></button>
+        <div className="h-6 w-px bg-[#2B2B2B]" />
         <button onClick={onSave} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white" data-testid="save-btn"><Save size={12} /> Save</button>
         <button onClick={onOpenLoad} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" data-testid="load-btn"><FolderOpen size={12} /> Open</button>
         <button onClick={onStartTour} className="p-1.5 rounded-md hover:bg-[#1F1F1F] text-gray-300" title="Restart onboarding tour" data-testid="help-btn"><HelpCircle size={14} /></button>

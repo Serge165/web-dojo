@@ -80,11 +80,14 @@ gradients into CSS gradients.
 - **Publish (FTP/FTPS/SFTP)**: `POST /api/projects/{id}/publish` uploads the
   generated site to any host. Modal collects host/port/username/password/
   remote path + protocol; credentials are per-request only, never persisted.
-- **Onboarding Tour**: 7-step first-run tour (Welcome → Library → Layout →
-  Code → Share → Save → Ready) with `localStorage['webdojo.tour.done']`
-  persistence and a Help button in the top bar that restarts it.
-- **Brand**: renamed everywhere from Forge to Web Dojo (top bar, tab title,
-  sample blocks).
+- **Multi-page projects**: PagesBar with add/rename (double-click)/delete/switch, workflow status pills (draft/review/published), per-page elements/head/canvas_bg/fonts/seo persisted.
+- **Site-wide template**: shared header/footer HTML wraps every page when enabled (Template modal). Round-tripped via Project.template.
+- **SEO per page**: title/description/keywords/canonical/favicon/og_title/og_description/og_image/twitter_card → injected into rendered `<head>` on preview + export.
+- **Snippets library**: `/api/snippets` CRUD. Left sidebar "Snips" tab lets you save named code fragments (any language) and drag them back to any project.
+- **Find & Replace**: Cmd+F modal with scopes (current page, all pages, head+template, files), regex + case flags, live match count.
+- **Design tokens library**: palette icon in top bar — scans all pages/head/template for hex colors, font families, and spacing values with counts; click any token to rename it across the entire project.
+- **Analytics**: `GET /api/projects/{id}/analytics` — preview endpoint logs `preview_view` events, publish endpoint logs `publish` events. Modal shows totals, a 30-day bar chart, and recent activity feed.
+- **Project templates**: `/api/templates` CRUD. Modal lets you save the current project (pages, template, files, tokens) as a starter template and start a new project from any existing template.
 - Backend CRUD for projects (create/list/get/update/delete) tested 100% pass.
 - Public preview endpoint `GET /api/preview/{id}` returns rendered text/html.
 - Builder shell (TopBar, LeftSidebar, Canvas, RightSidebar).
