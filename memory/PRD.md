@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (j) — Effect Badges + FX Intensity
+- **Effect Badges** (`LayersPanel.jsx`): each layer row now shows a small marker when the element carries an effect — a Sparkles icon (indigo) for text FX and/or a MousePointerClick icon (cyan) for hover FX (`layer-fx-<id>`). Detection is value-aware (parses actual style values) so cleared placeholders (`text-shadow:none`, `-webkit-text-stroke:0`, `background-clip:border-box`, `animation:none`) correctly drop the badge.
+- **FX Intensity** (`TextEffectsPanel.jsx`): a slider (25–250%, `textfx-intensity`) scales glow/shadow/stroke strength of Text FX before applying. Static, animated (keyframes) and hover effects all respect it; the chip previews (including animated keyframes) update live as the slider moves.
+- Tested: iterations 19–21 — intensity scaling (~2x at 200%), badge appear/update/clear, and Text FX regressions all pass; zero console errors. (Badge-clear needed a follow-up fix: value parsing instead of lookahead regex, which backtracked.)
+
+
 ### Session Jun 2026 (i) — Text FX polish: live-animating previews + hover cleanup
 - **FX Live Preview** (`TextEffectsPanel.jsx`): the Animated chips (shimmer/rainbow/pulse/flicker/float/wobble) now animate their little "Ag" previews live via fixed-name `@keyframes wdtfxprev_*` injected once into the panel, so the motion is visible before applying.
 - **Per-Element Hover Cleanup**: a "Remove hover from element" button (`textfx-hover-clear`, enabled only when the selected element has hover FX) strips every `wd-tfx-*` class from the element root tag and removes the matching injected `<style data-wd-tfx>` blocks from headHtml — verified it clears multiple stacked hover effects cleanly.

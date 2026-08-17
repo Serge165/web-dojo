@@ -1,0 +1,30 @@
+{
+  "summary": "Frontend-only verification of Web Dojo Text FX 'FX intensity' slider and Layers Effect Badges. 4 of 5 spec assertions PASS (intensity scaling on static neon, hover hglow scaled ~21px at 150%, animated pulse-preview keyframes regenerate on intensity change, static preview chip inline style rescales live). ONE defect: layer-fx-<id> badge does NOT disappear after textfx-clear, because LayersPanel.fxOf regex matches the CSS property NAMES that textfx-clear leaves behind ('text-shadow: none' and '-webkit-text-stroke: 0'). All regression assertions (sunset gradient/clip, shimmer keyframes+inline animation, hover-clear stripping) PASS. Zero console errors across all flows.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "LayersPanel.jsx (fxOf) vs TextEffectsPanel.jsx (clearFx)",
+        "issue": "After clicking textfx-clear the element still shows the sparkles (text FX) badge indefinitely. clearFx patches inline style with 'text-shadow: none; -webkit-text-stroke: 0; background-image: none; -webkit-background-clip: border-box; background-clip: border-box'. LayersPanel.fxOf uses /-webkit-text-stroke|-webkit-background-clip:\\s*text|background-clip:\\s*text|text-shadow|wdtfx_/i which matches the property NAMES regardless of value, so 'text-shadow: none' and '-webkit-text-stroke: 0' both keep the badge visible. Spec requires: 'the layer-fx-<id> badge disappears when the element no longer carries any effect.'",
+        "selector": "[data-testid=layer-fx-<id>]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix LayersPanel.fxOf so it does not treat cleared/neutral values as an active effect. Options: (a) tighten regex to negative-lookaheads like /text-shadow:\\s*(?!none)/i and /-webkit-text-stroke:\\s*(?!0[;\"\\s])/i (and same for background-clip: text vs border-box); or (b) change TextEffectsPanel.clearFx to REMOVE those properties from inline style instead of writing 'none'/'0' placeholders (e.g., pass empty string so patchStyle deletes the property)."
+  ],
+  "critical_code_review_comments": [
+    "LayersPanel.fxOf() key-only regex is brittle; any neutralised inline value keeps the badge on. Prefer semantic value-aware detection or track FX state via a data-attribute the panel sets/unsets."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "80% (4/5 spec items pass; 1 badge-clear defect)"},
+  "seed_data_creation": "Ephemeral: Large Header block added via dblclick on block-cmp-header-lrg; selected first canvas-el-*.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 19 - Text FX 'Intensity' + Layers effect badges:\n\nPASS assertions (recorded):\n1) textfx-intensity default = 100. Static neon @100% produced text-shadow blurs [4,8,18,36]px matching STATIC_FX.neon.patchFn(1). After slider -> 200 (via native setter + input/change events), the STATIC neon preview chip's inner <span style> updated live to blurs [8,16,36,72]px. Re-clicking textfx-static-neon at 200% wrote inline text-shadow with blurs [8,16,36,72]px (~2x scaling).\n2) Slider -> 150; clicking textfx-hover-hglow injected <style data-wd-tfx=\"wd-tfx-XXXXX\"> whose :hover rule was 'text-shadow:0 0 21px currentColor;' (14*1.5).\n3) The <style> child of [data-testid=text-fx-panel] regenerated on intensity change: '@keyframes wdtfxprev_pulse' contained 0%/100%: 0 0 6px ... 50%: 0 0 22px at 100% and 0 0 9px ... 0 0 33px at 150% (i.e., 6*i, 22*i rounded).\n4) Regression: textfx-static-sunset writes linear-gradient + background-clip:text + -webkit-text-fill-color:transparent; textfx-anim-shimmer injects '@keyframes wdtfx_shimmer_*' AND adds inline 'animation:' shorthand; textfx-hover-pop then textfx-hover-clear strips 'wd-tfx-' class from element and removes the matching <style data-wd-tfx> block.\n5) Layers badge appears correctly: absent initially, appears with Sparkles after textfx-static-neon, gains MousePointerClick after textfx-hover-lift, and MousePointerClick disappears after textfx-hover-clear.\n\nFAIL (single defect): After textfx-hover-clear followed by textfx-clear on a Large Header wrapper, the element's <header> inline style becomes '... text-shadow: none; ... -webkit-text-stroke: 0; ... background-clip: border-box; ...'. LayersPanel.fxOf's regex matches 'text-shadow' and '-webkit-text-stroke' substrings unconditionally, so [data-testid=layer-fx-<id>] remains rendered (count=1 with Sparkles icon) even though no visible effect remains. Reproduce: add block, select, apply textfx-static-neon, click textfx-clear -> badge stays.\n\nConsole errors during all flows: 0. Playwright script inlined in iteration_19 output; not persisted to /app/tests as this is frontend-only.",
+  "rca_of_the_issue": "Root cause: LayersPanel.fxOf uses a permissive key-only regex (/-webkit-text-stroke|-webkit-background-clip:\\s*text|background-clip:\\s*text|text-shadow|wdtfx_/i) to decide whether to show the sparkles badge. TextEffectsPanel.clearFx neutralises effects by writing placeholder values ('text-shadow':'none', '-webkit-text-stroke':'0') rather than removing the properties. So the property names survive in the inline style attribute and keep the regex satisfied. Fix by (a) making fxOf value-aware, or (b) making clearFx pass empty strings so patchStyle removes the properties from the element's style declaration."
+}

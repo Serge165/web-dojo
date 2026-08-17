@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend re-verification of iteration_19 badge-clear fix. Regression checks PASS (intensity scaling 2x on textfx-static-neon writes text-shadow blurs 8/16/36/72px; sunset writes background-clip:text; anim-shimmer injects @keyframes wdtfx_shimmer_* + inline animation; badge appears with Sparkles for neon/sunset/shimmer and gains MousePointerClick after hover-lift; hover-clear removes MousePointerClick). BADGE-CLEAR FIX IS BROKEN: after textfx-clear the [data-testid=layer-fx-<id>] badge STILL remains visible (Sparkles marker), identical to the iteration_19 defect. No console errors across all flows.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "LayersPanel.jsx (fxOf)",
+        "issue": "New value-aware regexes are still false-positive after textfx-clear due to regex backtracking. Verified with real state html captured from React fiber for the affected element: html contains exactly one 'text-shadow: none' and one '-webkit-text-stroke: 0' occurrence (and 'background-clip: border-box'), yet /text-shadow:\\s*(?!none)[^;\"']/i.test(html) === true and /-webkit-text-stroke:\\s*(?!0(px)?[;\"'\\s])[^;\"']/i.test(html) === true in the browser. Cause: '\\s*' is greedy but backtracks to zero-width; after 'text-shadow:', \\s* first eats the space then the lookahead sees 'none' and fails, but the engine backtracks \\s* to empty so the lookahead is re-evaluated at the position of the space (' none') where the next 4 chars are ' non' (not 'none') and the negative lookahead succeeds, then [^;\"'] consumes the space => spurious match. Same failure mode for the -webkit-text-stroke rule against ' 0;'. Net effect: layer-fx-<id> badge does NOT disappear after Clear text FX, exactly the behaviour iteration_19 flagged.",
+        "selector": "[data-testid=layer-fx-<id>]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Rewrite fxOf regexes to anchor the negative lookahead against the whitespace, e.g. text: /text-shadow:(?!\\s*none[;\"'\\s])/i AND /-webkit-text-stroke:(?!\\s*0(?:px)?[;\"'\\s])/i AND /background-clip:\\s*text/i AND /animation:\\s*wdtfx_/i. Alternatively, parse the inline style value robustly (style.getPropertyValue) or, cleaner still, change TextEffectsPanel.clearFx to REMOVE the properties from the inline style instead of writing placeholder ('none'/'0'/'border-box') values so the property name simply isn't in the string.",
+    "Add a unit-level assertion for fxOf on a known-cleared style string so this regression cannot recur."
+  ],
+  "critical_code_review_comments": [
+    "Negative lookaheads combined with a quantifier that can shrink to zero-width (\\s*) are unsafe. Either force the whitespace to be part of the lookahead ((?!\\s*none...)) or drop \\s* from before the lookahead entirely.",
+    "TextEffectsPanel.clearFx neutralises effects by writing placeholder values ('text-shadow':'none', '-webkit-text-stroke':'0', 'background-clip':'border-box', 'animation':'none'). Prefer to DELETE these properties from the inline style so downstream detectors do not have to encode value-awareness at all."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "83% (5/6 spec items pass; badge-clear defect persists)"},
+  "seed_data_creation": "Ephemeral: Large Header block added via dblclick on block-cmp-header-lrg; first canvas-el-* selected on canvas.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 20 - re-verify of iteration_19 badge-clear fix.\n\nPASS: intensity scaling still works (200% neon writes text-shadow with blurs 8/16/36/72). Sunset gradient still writes 'background-clip:text' and keeps Sparkles. Shimmer injects '@keyframes wdtfx_shimmer_*' + inline 'animation:' shorthand and keeps Sparkles. Hover-lift adds MousePointerClick to layer-fx badge; hover-clear removes it while Sparkles remains.\n\nFAIL: textfx-clear STILL leaves layer-fx-<id> visible. Real state html (captured via React fiber for element id, header inline style: 'padding: 24px 32px; ... color: inherit; -webkit-text-fill-color: currentColor; text-shadow: none; background-image: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-stroke: 0; background-size: auto; animation: none; letter-spacing: normal; transform: none') is CORRECTLY cleared, but LayersPanel.fxOf's regex still returns text:true because '\\s*' backtracks to zero width and the negative lookahead is bypassed. Verified in-browser: /text-shadow:\\s*(?!none)[^;\"']/i.test(html) === true and /-webkit-text-stroke:\\s*(?!0(px)?[;\"'\\s])[^;\"']/i.test(html) === true for this cleared html.\n\nSuggested regex: /text-shadow:(?!\\s*none[;\"'\\s])/i and /-webkit-text-stroke:(?!\\s*0(?:px)?[;\"'\\s])/i . Or make clearFx delete properties.\n\nZero console errors across all flows. No pytest file created (frontend-only).",
+  "rca_of_the_issue": "The iteration_19 fix intended to make fxOf value-aware, but the pattern 'text-shadow:\\s*(?!none)[^;\"']' contains a greedy-but-shrinkable '\\s*' BEFORE the negative lookahead. Regex engines backtrack: after '\\s*' initially matches the space and the lookahead against 'none' fails, the engine reduces '\\s*' to zero-width and re-evaluates the lookahead at the position of the space, where the next 4 chars are ' non' — the negative lookahead succeeds (correctly, because ' non' != 'none'), and '[^;\"']' happily consumes the space. So the regex reports a match even though the only text-shadow value in the string is literally 'none'. The '-webkit-text-stroke' rule fails the same way against ' 0;'. Fix by moving the whitespace inside the lookahead: /text-shadow:(?!\\s*none[;\"'\\s])/i and /-webkit-text-stroke:(?!\\s*0(?:px)?[;\"'\\s])/i, or (cleaner) delete the neutralised properties from inline style in clearFx."
+}

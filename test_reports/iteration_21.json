@@ -1,0 +1,22 @@
+{
+  "summary": "Re-verified iteration_20 badge-clear defect after 2nd fix attempt (LayersPanel.fxOf rewritten to parse actual style VALUES via styleVal helper: text-shadow!='none', -webkit-text-stroke parseFloat>0, background-clip=='text', animation contains 'wdtfx_'). ALL 6 spec scenarios PASS. No console errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Suggestion (non-blocking): TextEffectsPanel.clearFx still writes neutral placeholder values ('text-shadow:none', '-webkit-text-stroke:0', 'background-clip:border-box', 'animation:none') instead of DELETING those properties. Any future detector that inspects only property presence (rather than value) will regress. Consider removing the properties from the inline style instead.",
+    "Add a unit test (jest/vitest) for LayersPanel.fxOf covering both a cleared style string and each genuine effect string to lock this in."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% (6/6 scenarios pass)"},
+  "seed_data_creation": "Ephemeral: single Large Header block added via dblclick on block-cmp-header-lrg; first canvas-el-* selected.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 21 - RE-VERIFIED badge-clear fix (2nd attempt with value-parsing fxOf). Results captured on element el_xfmcixe6:\n\nPASS matrix:\n- neon -> badge+Sparkles=true; clear -> badge=false\n- sunset -> badge+Sparkles=true; clear -> badge=false\n- neon+hover-lift stacked -> badge+Sparkles+MousePointerClick=true; hover-clear -> Sparkles remains, MousePointerClick removed, badge still present; textfx-clear -> badge=false\n- shimmer (anim) -> badge+Sparkles=true; clear -> badge=false\n- 50% intensity + hollow (stroke=1.0px currentColor) -> badge+Sparkles=true; clear -> badge=false\n- 200% intensity + neon -> text-shadow: '0 0 8px #0ff,0 0 16px #0ff,0 0 36px #0ff,0 0 72px #06f' (2x baseline of 4/8/18/36) -> badge=true\n\nFinal cleared inline style captured: '... color: inherit; -webkit-text-fill-color: currentColor; text-shadow: none; background-image: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-stroke: 0; background-size: auto; animation: none; letter-spacing: normal; transform: none' and layer-fx badge is CORRECTLY absent.\n\nZero console errors across all flows. Frontend-only; no pytest run.",
+  "rca_of_the_issue": "Previous iteration_20 defect: fxOf used regex like /text-shadow:\\s*(?!none)[^;\"']/i where \\s* before the negative lookahead could backtrack to zero width and bypass the lookahead. Fixed by rewriting fxOf to explicitly extract the value via styleVal(html,prop) using /prop\\s*:\\s*([^;\"']+)/i and then comparing against the meaningful predicate (ts!=='none', parseFloat(stroke)>0, clip==='text', anim.includes('wdtfx_')). This avoids lookahead-backtracking altogether and correctly returns text:false for the cleared style string. Verified in the live UI."
+}

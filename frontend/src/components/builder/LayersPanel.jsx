@@ -1,11 +1,34 @@
 import React from "react";
-import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2 } from "lucide-react";
+import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick } from "lucide-react";
 
 // Extract a short label from raw HTML: first tag name + inner text preview.
 const labelFor = (html) => {
   const tag = (html.match(/<([a-zA-Z][a-zA-Z0-9]*)/) || [])[1] || "el";
   const text = (html.replace(/<[^>]+>/g, " ").trim() || "").slice(0, 26);
   return `${tag}${text ? " · " + text : ""}`;
+};
+
+// Detect Text FX / hover effects carried by an element so the row can flag them.
+// Parse actual values (not just property names) so cleared placeholders
+// (text-shadow:none, -webkit-text-stroke:0, background-clip:border-box,
+// animation:none) do NOT keep the badge lit.
+const styleVal = (html, prop) => {
+  const m = html.match(new RegExp(`${prop}\\s*:\\s*([^;"']+)`, "i"));
+  return m ? m[1].trim().toLowerCase() : null;
+};
+const fxOf = (html) => {
+  const ts = styleVal(html, "text-shadow");
+  const stroke = styleVal(html, "-webkit-text-stroke");
+  const clip = styleVal(html, "background-clip");
+  const anim = styleVal(html, "animation");
+  return {
+    text:
+      (!!ts && ts !== "none") ||
+      (!!stroke && parseFloat(stroke) > 0) ||
+      clip === "text" ||
+      (!!anim && anim.includes("wdtfx_")),
+    hover: /wd-tfx-/.test(html),
+  };
 };
 
 export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, onToggleVisible, onSetZIndex, hideHeader }) => {
@@ -23,6 +46,7 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
         {rev.length === 0 && <div className="text-[11px] text-gray-500">No layers yet — drop a block on the canvas.</div>}
         {rev.map((el) => {
           const hidden = /(^|;)\s*display\s*:\s*none/i.test(el.html);
+          const fx = fxOf(el.html);
           return (
             <div
               key={el.id}
@@ -35,6 +59,12 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
                 title="Toggle visibility"
                 data-testid={`layer-vis-${el.id}`}
               >{hidden ? <EyeOff size={12} /> : <Eye size={12} />}</button>
+              {(fx.text || fx.hover) && (
+                <span className="flex items-center gap-0.5" data-testid={`layer-fx-${el.id}`}>
+                  {fx.text && <Sparkles size={11} className="text-indigo-400" title="Text effect" />}
+                  {fx.hover && <MousePointerClick size={11} className="text-cyan-400" title="Hover effect" />}
+                </span>
+              )}
               <button
                 onClick={() => onSelect(el.id)}
                 className="flex-1 text-left text-[11px] font-mono text-gray-200 truncate"
