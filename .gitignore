@@ -52,6 +52,9 @@ __pycache__/
 venv/
 .venv/
 
+# Secrets
+backend/.preset_key
+
 # Development tools
 chainlit.md
 .chainlit
