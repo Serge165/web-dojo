@@ -92,7 +92,7 @@ export const RightSidebar = ({
         )}
 
         {tab === "style" && (
-          <StyleInspector selected={selected} onPatch={onPatchStyle} />
+          <StyleInspector selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
         )}
 
         {tab === "bg" && (

@@ -1,4 +1,5 @@
 import React from "react";
+import { ContextualEditors } from "./ContextualEditors";
 
 const readStyle = (html, prop) => {
   const m = html && html.match(/style="([^"]*)"/);
@@ -38,7 +39,7 @@ const Slider = ({ min, max, step, value, onChange, testId, unit }) => (
   </div>
 );
 
-export const StyleInspector = ({ selected, onPatch }) => {
+export const StyleInspector = ({ selected, onPatch, onReplaceHtml }) => {
   if (!selected) {
     return <div className="text-[11px] text-gray-500">Select an element on the canvas to edit its style.</div>;
   }
@@ -95,6 +96,8 @@ export const StyleInspector = ({ selected, onPatch }) => {
           >{b.label}</button>
         ))}
       </div>
+
+      <ContextualEditors selected={selected} onPatch={onPatch} onReplaceHtml={onReplaceHtml} />
     </div>
   );
 };

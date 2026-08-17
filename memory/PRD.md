@@ -68,8 +68,13 @@ gradients into CSS gradients.
   GraphQL, PHP, Python, Ruby, Go, Rust, Java, Kotlin, Swift, C#, C++, Dart,
   Elixir, Clojure, Scala, SQL, Shell, PowerShell, Dockerfile, Solidity, Lua,
   R, Perl, HCL/Terraform, Bicep).
-- **BG + Layers** merged in one panel: bg image/video + z-index + visibility +
-  reorder + delete.
+- **Contextual editors** (Style tab): auto-detected per-element editors below
+  the generic sliders — Button (label/bg/color/paddingXY/radius/font-size/
+  border), Image (src/alt/object-fit/width/height/radius), Flex container
+  (direction/wrap/justify/align/gap/padding), Grid container
+  (template-columns/rows/col-gap/row-gap/padding/justify+align items), and
+  Card/Container (bg/padding/radius/border/shadow). Detection also inspects
+  one level deep so wrapper-around-button/image blocks show the right editor.
 - Backend CRUD for projects (create/list/get/update/delete) tested 100% pass.
 - Public preview endpoint `GET /api/preview/{id}` returns rendered text/html.
 - Builder shell (TopBar, LeftSidebar, Canvas, RightSidebar).

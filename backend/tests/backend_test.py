@@ -120,3 +120,58 @@ class TestPreview:
     def test_preview_unknown_404(self, client):
         r = client.get(f"{API}/preview/nope")
         assert r.status_code == 404
+
+
+# ---------- Saved components CRUD (iteration 7 regression) ----------
+
+class TestComponentsCRUD:
+    created = []
+
+    def test_list_initial(self, client):
+        r = client.get(f"{API}/components")
+        assert r.status_code == 200
+        assert isinstance(r.json(), list)
+
+    def test_create_component(self, client):
+        payload = {
+            "name": "TEST_it7_cmp",
+            "category": "custom",
+            "html": "<div id='c1'><button>Hi</button></div>",
+            "thumbnail": "data:image/png;base64,AAAA",
+        }
+        r = client.post(f"{API}/components", json=payload)
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d["name"] == payload["name"]
+        assert d["category"] == "custom"
+        assert d["html"] == payload["html"]
+        assert d["thumbnail"] == payload["thumbnail"]
+        assert isinstance(d["id"], str) and len(d["id"]) > 0
+        TestComponentsCRUD.created.append(d["id"])
+
+        # verify via list
+        lst = client.get(f"{API}/components").json()
+        assert any(c["id"] == d["id"] for c in lst)
+
+    def test_delete_component(self, client):
+        # create then delete
+        r = client.post(f"{API}/components", json={"name": "TEST_it7_cmp_del", "html": "<div/>"})
+        cid = r.json()["id"]
+        d = client.delete(f"{API}/components/{cid}")
+        assert d.status_code == 200
+        assert d.json().get("ok") is True
+        # verify gone
+        lst = client.get(f"{API}/components").json()
+        assert not any(c["id"] == cid for c in lst)
+
+    def test_delete_unknown_404(self, client):
+        r = client.delete(f"{API}/components/nope-xyz")
+        assert r.status_code == 404
+
+    @classmethod
+    def teardown_class(cls):
+        for cid in cls.created:
+            try:
+                requests.delete(f"{API}/components/{cid}", timeout=10)
+            except Exception:
+                pass
