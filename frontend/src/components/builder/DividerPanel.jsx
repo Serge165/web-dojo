@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FlipHorizontal, FlipVertical, Plus } from "lucide-react";
+import { FlipHorizontal, FlipVertical, Plus, ArrowUpToLine, ArrowDownToLine, ChevronsDown } from "lucide-react";
 import { toast } from "sonner";
 
 // SVG section dividers (shapedivider-style) rendered on a 0 0 1200 120 viewBox
@@ -27,18 +27,28 @@ const buildSvg = (shape, color, height, flipX, flipY, fill100) => {
   return `<svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="display:block;width:100%;${hStyle};${t ? `transform:${t};` : ""}">${inner}</svg>`;
 };
 
-export const DividerPanel = ({ onAddBlock }) => {
+export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
   const [shapeId, setShapeId] = useState("wave");
   const [color, setColor] = useState("#6366f1");
   const [height, setHeight] = useState(80);
   const [flipX, setFlipX] = useState(false);
   const [flipY, setFlipY] = useState(false);
+  const [placement, setPlacement] = useState("end");
   const shape = DIVIDERS.find((d) => d.id === shapeId) || DIVIDERS[0];
+
+  const selIndex = elements.findIndex((e) => e.id === selectedId);
+  const hasSel = selIndex >= 0;
 
   const insert = () => {
     const svg = buildSvg(shape, color, height, flipX, flipY, false);
-    onAddBlock(`<div style="width:100%;line-height:0;overflow:hidden;">${svg}</div>`);
-    toast.success("Divider inserted — place it above or below a section");
+    const html = `<div style="width:100%;line-height:0;overflow:hidden;">${svg}</div>`;
+    const eff = placement !== "end" && hasSel ? placement : "end";
+    let atIndex;
+    if (eff === "below") atIndex = selIndex + 1;
+    else if (eff === "above") atIndex = selIndex;
+    onAddBlock(html, atIndex);
+    const where = eff === "below" ? "below the selected section" : eff === "above" ? "above the selected section" : "at the end of the page";
+    toast.success(`Divider snapped ${where}`);
   };
 
   return (
@@ -92,8 +102,34 @@ export const DividerPanel = ({ onAddBlock }) => {
         <button onClick={() => setFlipY((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipY ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-300 hover:text-white"}`} data-testid="divider-flip-y"><FlipVertical size={13} /> Flip Y</button>
       </div>
 
+      {/* Snap placement */}
+      <div className="pt-1">
+        <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5">Snap placement</div>
+        <div className="grid grid-cols-3 gap-1">
+          {[
+            { id: "above", label: "Above", icon: ArrowUpToLine },
+            { id: "below", label: "Below", icon: ArrowDownToLine },
+            { id: "end", label: "Page end", icon: ChevronsDown },
+          ].map(({ id, label, icon: Icon }) => {
+            const disabled = id !== "end" && !hasSel;
+            const active = placement === id && !disabled;
+            return (
+              <button
+                key={id}
+                disabled={disabled}
+                onClick={() => setPlacement(id)}
+                className={`flex flex-col items-center gap-1 py-2 rounded border text-[10px] ${active ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"} disabled:opacity-40 disabled:cursor-not-allowed`}
+                data-testid={`divider-place-${id}`}
+                title={disabled ? "Select a section first" : `Snap ${label}`}
+              ><Icon size={13} /> {label}</button>
+            );
+          })}
+        </div>
+        {!hasSel && <p className="text-[10px] text-gray-500 mt-1">Select a section on the canvas to snap the divider flush above or below it.</p>}
+      </div>
+
       <button onClick={insert} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="divider-insert"><Plus size={14} /> Insert divider</button>
-      <p className="text-[10px] text-gray-500">Adds a full-width SVG divider block. Use the Layers palette or drag handles to place it flush against a section. Flip Y to sit it at the top of a section.</p>
+      <p className="text-[10px] text-gray-500">Dividers render edge-to-edge with no gap. Set the fill color to match the neighbouring section, and use Flip Y to sit it at the top of a section.</p>
     </div>
   );
 };

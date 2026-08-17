@@ -1,8 +1,44 @@
 import React, { useState } from "react";
-import { Square, Sparkles, Eraser } from "lucide-react";
+import { Square, Sparkles, Eraser, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 
 const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
 const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
+
+const cssStr = (obj) => Object.entries(obj).map(([k, v]) => `${k}:${v}`).join(";");
+
+// One-click combined style presets applied to the selected element.
+const PRESETS = [
+  { id: "glass", label: "Glass card", bg: "linear-gradient(135deg,#6366f1,#ec4899)", patch: {
+    background: "rgba(255,255,255,0.10)", "backdrop-filter": "blur(12px)", "-webkit-backdrop-filter": "blur(12px)",
+    border: "1px solid rgba(255,255,255,0.20)", "border-radius": "16px", "corner-shape": "round", "box-shadow": "0 8px 32px rgba(0,0,0,0.25)",
+  } },
+  { id: "frosted", label: "Frosted dark", bg: "linear-gradient(135deg,#0ea5e9,#8b5cf6)", patch: {
+    background: "rgba(17,17,17,0.55)", "backdrop-filter": "blur(16px) saturate(140%)", "-webkit-backdrop-filter": "blur(16px) saturate(140%)",
+    border: "1px solid rgba(255,255,255,0.08)", "border-radius": "18px", "box-shadow": "0 12px 40px rgba(0,0,0,0.45)",
+  } },
+  { id: "neu", label: "Neumorphic", bg: "#e0e5ec", patch: {
+    background: "#e0e5ec", border: "none", "border-radius": "20px", "box-shadow": "8px 8px 18px #a3b1c6, -8px -8px 18px #ffffff",
+  } },
+  { id: "neu-inset", label: "Neu inset", bg: "#e0e5ec", patch: {
+    background: "#e0e5ec", border: "none", "border-radius": "20px", "box-shadow": "inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff",
+  } },
+  { id: "soft", label: "Soft card", bg: "#ffffff", patch: {
+    background: "#ffffff", border: "1px solid rgba(0,0,0,0.06)", "border-radius": "14px", "box-shadow": "0 2px 10px rgba(0,0,0,0.08)",
+  } },
+  { id: "elevated", label: "Elevated", bg: "#ffffff", patch: {
+    "border-radius": "14px", "box-shadow": "0 24px 48px -12px rgba(0,0,0,0.28)",
+  } },
+  { id: "pill", label: "Pill", bg: "linear-gradient(135deg,#22d3ee,#6366f1)", patch: {
+    "border-radius": "999px",
+  } },
+  { id: "neon", label: "Neon", bg: "#0b0b12", patch: {
+    background: "#0b0b12", border: "2px solid #22d3ee", "border-radius": "12px", "box-shadow": "0 0 14px #22d3ee, inset 0 0 14px rgba(34,211,238,0.25)",
+  } },
+  { id: "squircle-glow", label: "Squircle glow", bg: "linear-gradient(135deg,#6366f1,#a855f7)", patch: {
+    "border-radius": "28px", "corner-shape": "squircle", "box-shadow": "0 0 36px rgba(99,102,241,0.55)",
+  } },
+];
 
 // CSS3 corner-shape keywords (Chrome/Edge 139+). Companion to border-radius —
 // round(default) / squircle / bevel / scoop / square / notch.
@@ -57,8 +93,29 @@ export const ShapePanel = ({ selected, onPatch }) => {
   const clear = () => selected && onPatch({ border: "none", "border-radius": "0", "corner-shape": "round", "box-shadow": "none" });
   const setAllRadius = (v) => { setR(v); setTl(v); setTr(v); setBr(v); setBl(v); };
 
+  const applyPreset = (p) => {
+    if (!selected) { toast.info("Select an element first, then tap a preset"); return; }
+    onPatch(p.patch);
+    toast.success(`Applied "${p.label}"`);
+  };
+
   return (
     <div className="space-y-4" data-testid="shape-panel">
+      {/* One-click presets */}
+      <div className="space-y-1.5">
+        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Wand2 size={12} /> One-click presets</div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {PRESETS.map((p) => (
+            <button key={p.id} onClick={() => applyPreset(p)} data-testid={`shape-preset-${p.id}`} className="rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group" title={`Apply ${p.label}`}>
+              <div className="h-11 flex items-center justify-center" style={{ background: p.bg }}>
+                <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${cssStr({ background: "#c7d2fe", ...p.patch })}"></div>` }} />
+              </div>
+              <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{p.label}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Live preview over a checkerboard */}
       <div
         className="rounded-lg border border-[#2B2B2B] flex items-center justify-center h-[130px]"

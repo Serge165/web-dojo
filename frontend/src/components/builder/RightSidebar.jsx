@@ -117,7 +117,7 @@ export const RightSidebar = ({
         )}
 
         {tab === "divider" && (
-          <DividerPanel onAddBlock={onAddBlock} />
+          <DividerPanel onAddBlock={onAddBlock} elements={elements} selectedId={selectedId} />
         )}
 
         {tab === "anim" && (

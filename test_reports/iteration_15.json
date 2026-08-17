@@ -1,0 +1,19 @@
+{
+  "summary": "Frontend-only regression for two new right-sidebar features: Shape one-click presets and Divider snap placement. Both features work as specified. No console errors observed. Base Shape/Divider controls still function.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "None; ephemeral canvas blocks (Heading 1, Button) added during the run.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Verified in iteration_15:\n\n1) Shape one-click presets (top of Shape tab):\n   - With NO selection: clicking any shape-preset-* chip shows the toast 'Select an element first, then tap a preset' and does not mutate the canvas.\n   - With a selected element (added Heading 1, clicked it):\n     * shape-preset-glass -> the first real tag inside canvas-el (the <h1>) inline style contains 'backdrop-filter', 'box-shadow' and 'border-radius' (also -webkit-backdrop-filter, corner-shape, border, background). Toast 'Applied \"Glass card\"'.\n     * shape-preset-neu -> inline style contains the neumorphic dual box-shadow with color '#a3b1c6' and border-radius:20px.\n   Note: styles are patched onto the FIRST descendant tag (not on the canvas-el wrapper nor on the immediate wrapper div). Any future assertion must inspect canvas-el.outerHTML (or first real tag) rather than element.firstElementChild.getAttribute('style').\n\n2) Divider snap placement (Divider tab):\n   - Initial state (no selection): divider-place-above and divider-place-below are disabled, divider-place-end is enabled, and the hint 'Select a section on the canvas to snap the divider flush above or below it.' is shown.\n   - With two blocks on canvas (Heading 1 at idx 0, Button at idx 1), selecting the first block, picking divider-shape-triangle, choosing divider-place-below, then divider-insert:\n     * new divider block inserted at index 1 (between the two originals). Order: [heading, NEW_DIVIDER, button]. Divider block contains <svg><path>. Toast: 'Divider snapped below the selected section'.\n   - Then reselecting the first (heading) block, divider-place-above, divider-insert:\n     * new divider inserted at index 0 (above heading). Order: [NEW_DIVIDER, heading, prev_divider, button]. Toast: 'Divider snapped above the selected section'.\n\n3) Regression:\n   - shape-corner-squircle + shape-apply -> outerHTML contains 'corner-shape:squircle'.\n   - shape-clear -> outerHTML contains 'border:none'.\n   - Layers dock (data-testid='layers-dock') visible with populated rows.\n   - Tab switching between Color/Shape/Divider works.\n   - No console errors captured in any scenario.\n\nMinor UX observation (report-only, not a bug per spec): the app does not deselect the current element when clicking an empty area of canvas-area or pressing Escape. This means once an element has been selected, above/below stay enabled even without clicking a new element. This is expected behaviour given selection persistence and is not part of this iteration's scope; the initial no-selection state (before any selection) does properly disable them.",
+  "rca_of_the_issue": "N/A - all specified behaviours verified working."
+}

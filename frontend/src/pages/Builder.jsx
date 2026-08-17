@@ -535,7 +535,7 @@ export default function Builder() {
       <div className="flex-1 flex overflow-hidden">
         {mode !== "preview" && (
           <LeftSidebar
-            onAddBlock={(html) => addBlock(html)}
+            onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
             onAddFont={addFont}
             fonts={fonts}
             files={files}
@@ -624,7 +624,7 @@ export default function Builder() {
             onCanvasBg={setCanvasBg}
             headHtml={headHtml}
             onHeadHtmlChange={setHeadHtml}
-            onAddBlock={(html) => addBlock(html)}
+            onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
             elements={elements}
             selectedId={selectedId}
             onSelect={setSelectedId}

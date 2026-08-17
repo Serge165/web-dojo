@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (f) — Divider snapping + Shape presets
+- **Divider snapping** (`DividerPanel.jsx`): a "Snap placement" control (Above / Below / Page end) inserts the SVG divider block at the correct index relative to the selected section (`onAddBlock(html, atIndex)` → `addBlock` splice). Above/Below disable until a section is selected. Blocks render edge-to-edge in export/preview so dividers sit flush.
+- **Shape presets** (`ShapePanel.jsx`): a "One-click presets" row of 9 curated combined styles (Glass card, Frosted dark, Neumorphic, Neu inset, Soft card, Elevated, Pill, Neon, Squircle glow). Clicking applies the full style patch (background/backdrop-filter/border/radius/corner-shape/box-shadow) to the selected element instantly; toasts a prompt if nothing is selected.
+- Tested: iteration_15 frontend E2E — both features + regression pass 100%, no console errors.
+
+
 ### Session Jun 2026 (e) — CSV export, Shape tab, Divider tab, docked Layers
 - **CSV export** in the Submissions inbox: a CSV button in the modal header downloads the current form-group's entries as a spreadsheet (`SubmissionsModal.downloadCsv`).
 - **Shape tab** (new right-sidebar tab, `ShapePanel.jsx`): border (width/style/color), corner radius (linked or per-corner), CSS3 `corner-shape` (round/squircle/bevel/scoop/square/notch), box-shadow builder (presets + custom x/y/blur/spread/color/inset), live preview + Apply/Clear to selection.
