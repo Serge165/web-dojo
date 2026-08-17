@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any
@@ -189,6 +189,10 @@ def _get_fernet() -> Fernet:
     key = os.environ.get("WEBDOJO_SECRET_KEY")
     if not key and _KEY_PATH.exists():
         key = _KEY_PATH.read_text().strip()
+        try:
+            os.chmod(_KEY_PATH, 0o600)
+        except Exception:
+            pass
     if not key:
         key = Fernet.generate_key().decode()
         try:
@@ -1070,6 +1074,36 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+_PUBLIC_CORS_PATHS = {"/api/submissions", "/api/commerce/checkout-session"}
+
+
+@app.middleware("http")
+async def _public_cors_override(request: Request, call_next):
+    """A handful of endpoints are, by design, called cross-origin from
+    arbitrary published/exported-site domains (form submissions, cart
+    checkout) rather than the builder's own frontend. The strict
+    CORSMiddleware above restricts everything else to a fixed origin
+    allowlist; this override widens exactly those two paths back open
+    (no credentials are ever involved for either, so a wildcard origin is
+    safe here) without touching the strict default everything else gets.
+    Registered after CORSMiddleware, so it wraps outermost and can run
+    before CORSMiddleware sees the request (short-circuiting OPTIONS) and
+    override its response headers afterward."""
+    if request.url.path in _PUBLIC_CORS_PATHS:
+        if request.method == "OPTIONS":
+            return Response(
+                status_code=200,
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST, OPTIONS",
+                    "Access-Control-Allow-Headers": "Content-Type, Accept",
+                },
+            )
+        response = await call_next(request)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
+    return await call_next(request)
 
 logging.basicConfig(
     level=logging.INFO,

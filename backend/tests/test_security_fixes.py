@@ -12,6 +12,7 @@ os.environ.setdefault("DB_NAME", "webdojo_test")
 import pytest
 from starlette.testclient import TestClient
 import stat
+from cryptography.fernet import Fernet
 
 import server
 
@@ -129,6 +130,35 @@ class TestCORS:
         assert "access-control-allow-credentials" not in {k.lower() for k in r.headers.keys()}
 
 
+class TestPublicCORSOverride:
+    def test_submissions_options_allows_any_origin(self, client):
+        r = client.options("/api/submissions", headers={
+            "Origin": "https://some-random-published-site.example",
+            "Access-Control-Request-Method": "POST",
+        })
+        assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_checkout_session_options_allows_any_origin(self, client):
+        r = client.options("/api/commerce/checkout-session", headers={
+            "Origin": "https://another-published-site.example",
+            "Access-Control-Request-Method": "POST",
+        })
+        assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_checkout_session_post_response_carries_wildcard_origin(self, client):
+        # Stripe isn't configured in this sandbox, so this 503s (per Task 4's
+        # fix) before touching the db — but the CORS header must still be set.
+        r = client.post("/api/commerce/checkout-session", json={
+            "items": [{"name": "Test", "amount": 9.99, "currency": "usd", "quantity": 1}],
+        }, headers={"Origin": "https://another-published-site.example"})
+        assert r.status_code == 503
+        assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_other_endpoints_unaffected_by_public_override(self, client):
+        r = client.get("/api/", headers={"Origin": "https://evil.example"})
+        assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
+
+
 class TestStripeNotConfigured:
     def test_payment_link_503_when_unconfigured(self, client):
         r = client.post("/api/commerce/payment-link", json={
@@ -159,5 +189,17 @@ class TestFernetKeyFilePermissions:
         server._get_fernet()
 
         assert key_path.exists()
+        mode = stat.S_IMODE(key_path.stat().st_mode)
+        assert mode == 0o600
+
+    def test_existing_key_file_permissions_repaired(self, tmp_path, monkeypatch):
+        monkeypatch.delenv("WEBDOJO_SECRET_KEY", raising=False)
+        key_path = tmp_path / "existing.preset_key"
+        key_path.write_text(Fernet.generate_key().decode())
+        os.chmod(key_path, 0o644)  # simulate a pre-fix, loosely-permissioned file
+        monkeypatch.setattr(server, "_KEY_PATH", key_path)
+
+        server._get_fernet()
+
         mode = stat.S_IMODE(key_path.stat().st_mode)
         assert mode == 0o600
