@@ -30,6 +30,15 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (e) — CSV export, Shape tab, Divider tab, docked Layers
+- **CSV export** in the Submissions inbox: a CSV button in the modal header downloads the current form-group's entries as a spreadsheet (`SubmissionsModal.downloadCsv`).
+- **Shape tab** (new right-sidebar tab, `ShapePanel.jsx`): border (width/style/color), corner radius (linked or per-corner), CSS3 `corner-shape` (round/squircle/bevel/scoop/square/notch), box-shadow builder (presets + custom x/y/blur/spread/color/inset), live preview + Apply/Clear to selection.
+- **Divider tab** (new right-sidebar tab, `DividerPanel.jsx`): 10 SVG section-divider presets (wave, waves, curve, curve-alt, tilt, triangle, arrow, book, split, zigzag) with color, height, flip X/Y; inserts a full-width SVG block.
+- **Layers moved out of the tabs** into a persistent, collapsible docked palette at the bottom of the right sidebar (GIMP/Photoshop-style), `data-testid='layers-dock'`. `LayersPanel` gained a `hideHeader` prop.
+- Right sidebar TABS are now 11 items in `grid-cols-4`: color, gradient, style, shape, bg, blend, divider, anim, theme, cdn, page.
+- Tested: iteration_14 frontend E2E — all 4 features + regression pass, no console errors.
+
+
 ### Session Jun 2026 (d) — Form Submissions Inbox + Mode-tab relocation (P0)
 - **Form Submissions Inbox**: forms built in Web Dojo now post to a real backend so deployed/previewed demo sites capture real entries.
   - Backend (`server.py`): `Submission` model + `POST /api/submissions` (parses JSON and form/multipart, reserved `_wd_*` keys → metadata, rest → `data`; returns JSON `{ok,id}` when `Accept: application/json`, else an HTML thank-you page; empty → 400), `GET /api/submissions` (newest-first, `?project_id=` / `?form_name=` filters), `DELETE /api/submissions/{id}`, `DELETE /api/submissions?form_name=`.

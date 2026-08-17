@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Inbox, RefreshCw, Trash2, Mail, FileText, ExternalLink } from "lucide-react";
+import { Inbox, RefreshCw, Trash2, Mail, FileText, ExternalLink, Download } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -46,11 +46,44 @@ export const SubmissionsModal = ({ open, onClose }) => {
     } catch { toast.error("Delete failed"); }
   };
 
+  const csvEscape = (v) => {
+    const s = Array.isArray(v) ? v.join("; ") : String(v ?? "");
+    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const downloadCsv = () => {
+    const rows = visible;
+    if (!rows.length) { toast.error("Nothing to export"); return; }
+    const fieldKeys = Array.from(rows.reduce((set, r) => { Object.keys(r.data || {}).forEach((k) => set.add(k)); return set; }, new Set()));
+    const header = ["Submitted", "Form", "Page", ...fieldKeys];
+    const lines = [header.map(csvEscape).join(",")];
+    rows.forEach((r) => {
+      const line = [new Date(r.created_at).toISOString(), r.form_name || "", r.page_url || "", ...fieldKeys.map((k) => r.data?.[k])];
+      lines.push(line.map(csvEscape).join(","));
+    });
+    const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const label = group === "__all__" ? "all-forms" : group.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+    a.download = `webdojo-submissions-${label}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast.success(`Exported ${rows.length} submission${rows.length === 1 ? "" : "s"} to CSV`);
+  };
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-5xl w-[92vw] max-h-[86vh] overflow-hidden p-0" data-testid="submissions-modal">
         <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
-          <DialogTitle className="flex items-center gap-2 text-base"><Inbox size={16} className="text-blue-400" /> Form submissions inbox</DialogTitle>
+          <div className="flex items-center justify-between gap-3">
+            <DialogTitle className="flex items-center gap-2 text-base"><Inbox size={16} className="text-blue-400" /> Form submissions inbox</DialogTitle>
+            <button onClick={downloadCsv} disabled={visible.length === 0} className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed mr-6" data-testid="submissions-export-csv">
+              <Download size={13} /> CSV
+            </button>
+          </div>
           <DialogDescription className="text-xs text-gray-500">Every form you build posts here automatically — deployed and previewed demo sites capture real entries.</DialogDescription>
         </DialogHeader>
 

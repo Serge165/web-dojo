@@ -3,20 +3,24 @@ import { ColorPicker } from "./ColorPicker";
 import { GradientMixer } from "./GradientMixer";
 import { StyleInspector } from "./StyleInspector";
 import { LayersPanel } from "./LayersPanel";
+import { ShapePanel } from "./ShapePanel";
+import { DividerPanel } from "./DividerPanel";
 import { BackgroundMediaPanel } from "./BackgroundMediaPanel";
 import { BlendPanel } from "./BlendPanel";
 import { AnimationGenerator } from "./AnimationGenerator";
 import { ThemeGenerator } from "./ThemeGenerator";
 import { CDNPanel } from "./CDNPanel";
+import { Layers as LayersIcon, ChevronDown, ChevronRight } from "lucide-react";
 
 const TABS = [
   { id: "color", label: "Color" },
   { id: "gradient", label: "Gradient" },
   { id: "style", label: "Style" },
+  { id: "shape", label: "Shape" },
   { id: "bg", label: "BG" },
   { id: "blend", label: "Blend" },
+  { id: "divider", label: "Divider" },
   { id: "anim", label: "Motion" },
-  { id: "layers", label: "Layers" },
   { id: "theme", label: "Theme" },
   { id: "cdn", label: "CDN" },
   { id: "page", label: "Page" },
@@ -44,6 +48,7 @@ export const RightSidebar = ({
   onSetZIndex,
 }) => {
   const [tab, setTab] = useState("color");
+  const [layersOpen, setLayersOpen] = useState(true);
 
   return (
     <aside className="w-80 flex-none border-l border-[#2B2B2B] bg-[#141414] flex flex-col overflow-hidden" data-testid="right-sidebar">
@@ -54,7 +59,7 @@ export const RightSidebar = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-5 border-b border-[#2B2B2B] text-[11px]">
+      <div className="grid grid-cols-4 border-b border-[#2B2B2B] text-[11px]">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -107,16 +112,12 @@ export const RightSidebar = ({
           <BlendPanel selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
         )}
 
-        {tab === "layers" && (
-          <LayersPanel
-            elements={elements}
-            selectedId={selectedId}
-            onSelect={onSelect}
-            onMove={onMove}
-            onDelete={onDelete}
-            onToggleVisible={onToggleVisible}
-            onSetZIndex={onSetZIndex}
-          />
+        {tab === "shape" && (
+          <ShapePanel selected={selected} onPatch={onPatchStyle} />
+        )}
+
+        {tab === "divider" && (
+          <DividerPanel onAddBlock={onAddBlock} />
         )}
 
         {tab === "anim" && (
@@ -152,6 +153,32 @@ export const RightSidebar = ({
               </div>
             </div>
             <p className="text-[11px] text-gray-500">Applies to the exported &lt;body&gt; background. You can also paste a CSS gradient string.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Docked Layers palette (GIMP/Photoshop-style) — always available */}
+      <div className="flex-none border-t border-[#2B2B2B] flex flex-col" data-testid="layers-dock" style={{ maxHeight: "42%" }}>
+        <button
+          onClick={() => setLayersOpen((o) => !o)}
+          className="flex items-center justify-between px-3 py-2 text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-200 flex-none"
+          data-testid="layers-dock-toggle"
+        >
+          <span className="flex items-center gap-1.5"><LayersIcon size={12} /> Layers · {elements.length}</span>
+          {layersOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        </button>
+        {layersOpen && (
+          <div className="overflow-y-auto px-3 pb-3">
+            <LayersPanel
+              elements={elements}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              onMove={onMove}
+              onDelete={onDelete}
+              onToggleVisible={onToggleVisible}
+              onSetZIndex={onSetZIndex}
+              hideHeader
+            />
           </div>
         )}
       </div>

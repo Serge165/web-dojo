@@ -8,15 +8,17 @@ const labelFor = (html) => {
   return `${tag}${text ? " · " + text : ""}`;
 };
 
-export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, onToggleVisible, onSetZIndex }) => {
+export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, onToggleVisible, onSetZIndex, hideHeader }) => {
   // Rendered in reverse so the topmost item in the list == topmost on the page.
   const rev = [...elements].map((e, i) => ({ ...e, idx: i })).reverse();
   return (
     <div className="space-y-1.5" data-testid="layers-panel">
-      <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-500">
-        <span>Layers · {elements.length}</span>
-        <span className="font-mono">z-index</span>
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-500">
+          <span>Layers · {elements.length}</span>
+          <span className="font-mono">z-index</span>
+        </div>
+      )}
       <div className="space-y-1 max-h-[360px] overflow-y-auto pr-1">
         {rev.length === 0 && <div className="text-[11px] text-gray-500">No layers yet — drop a block on the canvas.</div>}
         {rev.map((el) => {
