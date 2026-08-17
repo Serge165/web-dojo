@@ -1,0 +1,27 @@
+{
+  "summary": "Verified iteration_22 two new features (Jump To Effected + Copy/Paste Effect) on Web Dojo builder. Primary spec assertions PASS. One edge-case defect found: 'copy on element with no effect' does NOT show 'no effect to copy' toast for composite blocks because copyFx's styleValOf regex is unscoped (matches any style value anywhere in the block HTML string, including inner-element styles and prop-name substrings such as `background-color:` bleeding into a `color:` match).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "TextEffectsPanel.copyFx", "issue": "Edge-case: selecting a fresh Large Header block (no FX ever applied) and clicking textfx-copy still shows toast 'Effect copied' and enables paste. Expected: 'This element has no effect to copy'. Root cause: `styleValOf(html, prop)` uses an un-anchored regex `${prop}\\s*:\\s*([^;\"']+)` that (a) matches any style attribute deep inside the block html, not only the root tag, and (b) can match `color` inside `background-color:` (no word-boundary before the prop name). For a Large Header block, inner elements carry `background:#ffffff`, `color:#...`, etc., so at least one FX_PROPS entry is captured, treated as non-neutral, and stored on the clipboard.", "selector": "[data-testid='textfx-copy']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "In TextEffectsPanel.copyFx, scope style extraction to the ROOT tag only (parse selected.html root `<tag ...>` attributes and read only that root's `style=\"...\"`), and use word-boundary/prefix-safe matching for prop names (e.g., `(^|;|\\s)color\\s*:` so `background-color:` is not misread as `color:`). This will also make paste behave correctly when only the root's own effect props are copied."
+  ],
+  "critical_code_review_comments": [
+    "TextEffectsPanel.styleValOf lacks a word boundary before the property token, so prop='color' matches inside 'background-color:' / '-webkit-text-fill-color:'. Anchor the token with `(?:^|[;\\s\"'])` or parse the root style attribute into a dictionary.",
+    "copyFx reads across the entire block HTML (nested children too) but pasteFx only merges into the root tag — asymmetric scope. Copy and paste should both operate on the ROOT tag exclusively for consistency with onPatch/patchStyle.",
+    "Consider also filtering FX_PROPS to properties that onPatch can actually apply on the root (skip nested-only artifacts), and dedupe with a shared root-style parser used by copyFx, pasteFx and LayersPanel.fxOf."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "Primary features (Jump To Effected + Copy/Paste transfer of style+hover class): 100% PASS. Edge case 'no effect to copy': FAIL. Regression (clear/hover-clear/intensity/badge value-awareness): 100% PASS. Zero console errors."},
+  "seed_data_creation": "Ephemeral: three Large Header blocks (block-cmp-header-lrg) double-clicked onto canvas per test session.",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 22 PASS matrix (Large Header blocks A/B/C):\n- T1 Jump-To-Effected: layer-fx-<id> is a <BUTTON>; applying textfx-static-neon to A, then selecting B, then clicking badge_A -> layer-row-A gains 'border-blue-500' + canvas-el-A visible in viewport ✓\n- T2 Copy/Paste: A after textfx-static-sunset + textfx-hover-lift shows both Sparkles+MousePointerClick markers (2 SVGs); textfx-copy toast 'Effect copied', paste enabled. Selecting B and clicking textfx-paste -> B outerHTML contains linear-gradient(...), background-clip:text, -webkit-text-fill-color:transparent, and the SAME wd-tfx-<hash> class from A. B's layer-fx badge shows 2 markers, toast 'Effect pasted onto element' ✓\n- T3 EDGE FAIL: fresh Large Header C -> textfx-copy still says 'Effect copied' (should be 'This element has no effect to copy'). Root cause detailed in ui_bugs.\n- T4 Regression: textfx-clear removes Sparkles marker (hover class remains -> 1 svg on badge); textfx-hover-clear removes badge entirely; intensity 200% + neon produces '0 0 8px' shadow (2x the 4px baseline). ✓\n- Zero console errors across all flows.\nGradient-only paste path (paste style without hover) was not explicitly re-tested since the primary combined path already proved style transfer; can be added if desired.",
+  "rca_of_the_issue": "TextEffectsPanel.copyFx delegates prop lookup to styleValOf(html, prop) whose regex is `${prop}\\s*:\\s*([^;\"']+)`. Two flaws surface for composite blocks: (1) NO scope — matches any style attribute anywhere in the block html, so nested children (e.g., a Large Header's inner `<header style=\"...background:#ffffff\">` or `<a style=\"color:#0f172a\">`) leak values; (2) NO left boundary — prop='color' matches inside `background-color:` / `-webkit-text-fill-color:` / any *-color: suffix. Both flaws combined guarantee that a virgin composite block will yield at least one non-neutral prop capture, so `Object.keys(style).length` is > 0 and the 'no effect to copy' guard never fires. Fix by (a) extracting only the root-tag style attribute into a key→value map (like pasteFx's mergeStyleIntoRootTag already does for target), and (b) checking prop with a left-anchor such as `(?:^|[;\\s\"'])color\\s*:`."
+}

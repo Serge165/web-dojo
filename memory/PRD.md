@@ -30,6 +30,12 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (k) — Jump To Effected + Copy/Paste Effect
+- **Jump To Effected** (`LayersPanel.jsx`): the effect badge (`layer-fx-<id>`) is now a button — clicking it selects that element and smooth-scrolls it into view on the canvas.
+- **Copy/Paste Effect** (`TextEffectsPanel.jsx`): "Copy effect" captures the selected element's Text FX (root-tag FX style props via `rootStyleMap`, scoped so nested/substring styles don't leak) plus any `wd-tfx-*` hover classes into a session clipboard; "Paste effect" applies both to another selected element in one `onReplaceHtml` (`mergeStyleIntoRootTag` + `addClassToRootTag`). Pasted hover works because the injected `<style data-wd-tfx>` is global by class. Copying an element with no effect is a no-op with a clear toast.
+- Tested: iterations 22–23 — both features + regression pass, zero console errors. (copyFx needed a follow-up scope fix so composite blocks with inner styles don't falsely report an effect.)
+
+
 ### Session Jun 2026 (j) — Effect Badges + FX Intensity
 - **Effect Badges** (`LayersPanel.jsx`): each layer row now shows a small marker when the element carries an effect — a Sparkles icon (indigo) for text FX and/or a MousePointerClick icon (cyan) for hover FX (`layer-fx-<id>`). Detection is value-aware (parses actual style values) so cleared placeholders (`text-shadow:none`, `-webkit-text-stroke:0`, `background-clip:border-box`, `animation:none`) correctly drop the badge.
 - **FX Intensity** (`TextEffectsPanel.jsx`): a slider (25–250%, `textfx-intensity`) scales glow/shadow/stroke strength of Text FX before applying. Static, animated (keyframes) and hover effects all respect it; the chip previews (including animated keyframes) update live as the slider moves.

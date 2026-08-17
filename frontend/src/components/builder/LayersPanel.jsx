@@ -60,10 +60,15 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
                 data-testid={`layer-vis-${el.id}`}
               >{hidden ? <EyeOff size={12} /> : <Eye size={12} />}</button>
               {(fx.text || fx.hover) && (
-                <span className="flex items-center gap-0.5" data-testid={`layer-fx-${el.id}`}>
-                  {fx.text && <Sparkles size={11} className="text-indigo-400" title="Text effect" />}
-                  {fx.hover && <MousePointerClick size={11} className="text-cyan-400" title="Hover effect" />}
-                </span>
+                <button
+                  onClick={() => { onSelect(el.id); const n = document.querySelector(`[data-testid="canvas-el-${el.id}"]`); if (n) n.scrollIntoView({ behavior: "smooth", block: "center" }); }}
+                  className="flex items-center gap-0.5 hover:brightness-150"
+                  title="Jump to this element"
+                  data-testid={`layer-fx-${el.id}`}
+                >
+                  {fx.text && <Sparkles size={11} className="text-indigo-400" />}
+                  {fx.hover && <MousePointerClick size={11} className="text-cyan-400" />}
+                </button>
               )}
               <button
                 onClick={() => onSelect(el.id)}

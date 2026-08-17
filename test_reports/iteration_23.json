@@ -1,0 +1,18 @@
+{
+  "summary": "Re-verified iteration_22 medium defect fix: TextEffectsPanel.copyFx now uses rootStyleMap(html) scoped to the selected element's ROOT tag style attribute (dict-based lookup, no substring aliasing). All three spec scenarios PASS with zero console/page errors.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "rootStyleMap and mergeStyleIntoRootTag both parse the root style attribute independently — extract a shared helper to keep copy/paste symmetric and avoid future drift.",
+    "FX_PROPS still includes 'color', which some non-FX components may legitimately set on the root tag; isNeutral only catches 'inherit'/'currentcolor'. Consider limiting FX_PROPS or extending NEUTRALS if a root sets an ordinary color."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% (Fix + Copy/Paste + Jump-To-Effected)"},
+  "seed_data_creation": "Ephemeral canvas: several block-cmp-header-lrg blocks added and removed by page reloads within the same session.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 23 PASS matrix:\n- T1 Copy/Paste (Large Header A -> B): applied textfx-static-sunset + textfx-hover-lift on A; textfx-copy toast 'Effect copied', paste enabled. Selecting B and clicking textfx-paste -> B.outerHTML contains 'linear-gradient', 'background-clip:text', '-webkit-text-fill-color:transparent', wd-tfx-* class; B layer-fx badge svg count = 2 (Sparkles + MousePointerClick) ✓\n- T2 Same-session no-FX block C: rootStyleMap({}) returned by the same regex used in copyFx; toast 'This element has no effect to copy' fired; paste stays enabled because A's clipboard survives (correct: failed copy must not clear prior clip) ✓\n- T3 Fresh reload virgin Large Header: paste disabled initially, textfx-copy -> toast 'This element has no effect to copy', paste REMAINS disabled ✓ (the exact spec assertion)\n- T4 Jump-To-Effected: neon applied to A, select B, click layer-fx-<A>; layer-row-A gains 'border-blue-500' class (selected) ✓\n- 0 pageerror, 0 console errors.",
+  "rca_of_the_issue": "The medium defect from iteration_22 has been resolved. copyFx now reads only the root tag's style attribute via rootStyleMap(html): it regex-matches the first tag, extracts its style=\"...\" attribute, splits on ';' and builds a lowercased prop->value map. Substring aliasing (color vs background-color) and nested-element leakage are both eliminated. For a fresh Large Header the map is empty, so Object.keys(style).length === 0 and the guard fires as expected."
+}

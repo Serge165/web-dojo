@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Type, Sparkles, MousePointerClick, Eraser, Gauge } from "lucide-react";
+import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste } from "lucide-react";
 import { toast } from "sonner";
 
 const cssStr = (obj) => Object.entries(obj).map(([k, v]) => `${k}:${v}`).join(";");
@@ -71,6 +71,48 @@ const addClassToRootTag = (html, cls) => {
   return html.replace(full, `<${tag}${newAttrs}>`);
 };
 
+// ---- Copy/paste effect helpers ----
+let FX_CLIPBOARD = null; // persists across panel remounts within the session
+
+const FX_PROPS = ["background-image", "background-size", "-webkit-background-clip", "background-clip", "-webkit-text-fill-color", "-webkit-text-stroke", "paint-order", "text-shadow", "animation", "color"];
+const NEUTRALS = {
+  "-webkit-text-stroke": (v) => !(parseFloat(v) > 0),
+  "text-shadow": (v) => v === "none",
+  "background-image": (v) => v === "none",
+  "animation": (v) => v === "none",
+  "background-clip": (v) => v !== "text",
+  "-webkit-background-clip": (v) => v !== "text",
+  "color": (v) => v === "inherit" || v === "currentcolor",
+  "-webkit-text-fill-color": (v) => v === "currentcolor",
+  "background-size": (v) => v === "auto",
+};
+// Parse ONLY the root tag's own style attribute into a prop->value map, so
+// copyFx doesn't pick up nested-element styles or substring matches
+// (e.g. `color` inside `background-color`).
+const rootStyleMap = (html) => {
+  const map = {};
+  const tag = html.match(/^\s*<[a-zA-Z][\w-]*[^>]*>/);
+  if (tag) {
+    const sm = tag[0].match(/\sstyle="([^"]*)"/i);
+    if (sm) sm[1].split(";").forEach((d) => { const i = d.indexOf(":"); if (i > 0) map[d.slice(0, i).trim().toLowerCase()] = d.slice(i + 1).trim(); });
+  }
+  return map;
+};
+const isNeutral = (p, v) => (NEUTRALS[p] ? NEUTRALS[p](v.toLowerCase()) : false);
+
+const mergeStyleIntoRootTag = (html, styleObj) => {
+  const m = html.match(/^\s*<([a-zA-Z][\w-]*)([^>]*)>/);
+  if (!m) return html;
+  const [full, tag, attrs] = m;
+  const existing = {};
+  const sm = attrs.match(/style="([^"]*)"/);
+  if (sm) sm[1].split(";").forEach((d) => { const i = d.indexOf(":"); if (i > 0) existing[d.slice(0, i).trim()] = d.slice(i + 1).trim(); });
+  Object.assign(existing, styleObj);
+  const styleStr = Object.entries(existing).filter(([k, v]) => k && v !== "").map(([k, v]) => `${k}:${v}`).join(";");
+  const newAttrs = sm ? attrs.replace(/style="[^"]*"/, `style="${styleStr}"`) : `${attrs} style="${styleStr}"`;
+  return html.replace(full, `<${tag}${newAttrs}>`);
+};
+
 const FxChip = ({ testid, onClick, previewHtml, label, animated }) => (
   <button onClick={onClick} data-testid={testid} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group bg-[#0D0D0D]" title={label}>
     <div className="h-9 flex items-center justify-center px-1" dangerouslySetInnerHTML={{ __html: previewHtml }} />
@@ -81,6 +123,7 @@ const FxChip = ({ testid, onClick, previewHtml, label, animated }) => (
 
 export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplaceHtml, headHtml, onHeadHtmlChange }) => {
   const [intensity, setIntensity] = useState(1);
+  const [clip, setClip] = useState(FX_CLIPBOARD);
 
   const needSel = () => { if (!selected) { toast.info("Select a text element (H1–H6, p, button…) first"); return true; } return false; };
   const getPatch = (fx) => (fx.patchFn ? fx.patchFn(intensity) : fx.patch);
@@ -129,6 +172,29 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       "background-size": "auto", animation: "none", "letter-spacing": "normal", transform: "none", color: "inherit",
     });
     toast.success("Text FX cleared");
+  };
+
+  const copyFx = () => {
+    if (needSel()) return;
+    const map = rootStyleMap(selected.html);
+    const style = {};
+    FX_PROPS.forEach((p) => { const v = map[p]; if (v && !isNeutral(p, v)) style[p] = v; });
+    const hoverClasses = [...new Set([...selected.html.matchAll(/wd-tfx-[a-z0-9]+/g)].map((m) => m[0]))];
+    if (!Object.keys(style).length && !hoverClasses.length) { toast.info("This element has no effect to copy"); return; }
+    const data = { style, hoverClasses };
+    FX_CLIPBOARD = data;
+    setClip(data);
+    toast.success("Effect copied");
+  };
+
+  const pasteFx = () => {
+    if (needSel()) return;
+    if (!clip) { toast.info("Copy an effect first"); return; }
+    let html = selected.html;
+    if (Object.keys(clip.style).length) html = mergeStyleIntoRootTag(html, clip.style);
+    clip.hoverClasses.forEach((c) => { if (!new RegExp(`\\b${c}\\b`).test(html)) html = addClassToRootTag(html, c); });
+    onReplaceHtml(html);
+    toast.success("Effect pasted onto element");
   };
 
   const hasHover = !!selected && /wd-tfx-/.test(selected.html);
@@ -182,6 +248,11 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
         </div>
         <button onClick={stripHover} disabled={!hasHover} className="w-full flex items-center justify-center gap-1.5 text-[11px] py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed mt-1" data-testid="textfx-hover-clear"><Eraser size={11} /> Remove hover from element</button>
         <p className="text-[10px] text-gray-500">Hover effects run on your published/previewed site. Preview them in the Preview tab.</p>
+      </div>
+
+      <div className="pt-3 border-t border-[#2B2B2B] grid grid-cols-2 gap-2">
+        <button onClick={copyFx} disabled={!selected} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-copy"><Copy size={12} /> Copy effect</button>
+        <button onClick={pasteFx} disabled={!selected || !clip} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-paste"><ClipboardPaste size={12} /> Paste effect</button>
       </div>
 
       <button onClick={clearFx} disabled={!selected} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-clear"><Eraser size={12} /> Clear text FX</button>
