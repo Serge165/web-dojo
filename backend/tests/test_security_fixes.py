@@ -51,3 +51,29 @@ class TestImportUrlSSRF:
     def test_still_rejects_empty(self, client):
         r = client.post("/api/import/url", json={"url": ""})
         assert r.status_code == 400
+
+
+class TestImportUrlRedirectRevalidation:
+    def test_redirect_to_private_ip_is_blocked(self, client, monkeypatch):
+        class FakeResponse:
+            def __init__(self, status_code, headers=None, text=""):
+                self.status_code = status_code
+                self.headers = headers or {}
+                self.text = text
+
+        class FakeAsyncClient:
+            def __init__(self, *a, **kw):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                return False
+
+            async def get(self, url, **kw):
+                return FakeResponse(302, headers={"location": "http://127.0.0.1/internal"})
+
+        monkeypatch.setattr(server.httpx, "AsyncClient", FakeAsyncClient)
+        r = client.post("/api/import/url", json={"url": "https://example.com/redirect-me"})
+        assert r.status_code == 400

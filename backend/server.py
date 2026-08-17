@@ -864,59 +864,64 @@ class UrlImport(BaseModel):
     url: str
 
 
-def _resolve_is_public(hostname: str) -> bool:
-    """True only if every address `hostname` resolves to is public/routable."""
+def _resolve_safe_ip(hostname: str) -> str:
+    """Resolve hostname to a single public IP. Raises HTTPException if it
+    cannot be resolved to a safe (public/routable) address. ip.is_global
+    covers private/loopback/link-local/reserved/multicast/unspecified AND
+    the CGNAT range (100.64.0.0/10), which those individual checks miss."""
     try:
         infos = socket.getaddrinfo(hostname, None)
     except socket.gaierror:
-        return False
-    if not infos:
-        return False
+        raise HTTPException(status_code=400, detail="Could not resolve host")
     for _family, _type, _proto, _canon, sockaddr in infos:
         try:
             ip = ipaddress.ip_address(sockaddr[0])
         except ValueError:
-            return False
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_link_local
-            or ip.is_reserved
-            or ip.is_multicast
-            or ip.is_unspecified
-        ):
-            return False
-    return True
+            continue
+        if ip.is_global:
+            return str(ip)
+    raise HTTPException(status_code=400, detail="That URL points to a private or internal address")
 
 
-def _validate_import_url(url: str) -> None:
-    """Raise HTTPException if `url` is not a safe, public http(s) URL."""
+def _validate_import_url(url: str):
+    """Validate `url` is a safe, public http(s) URL and pin its connection
+    to the exact IP that was validated (rather than the hostname), so a
+    later independent DNS lookup by the HTTP client can't be swapped to a
+    private address between validation and connection (DNS rebinding).
+    Returns (pinned_url, original_hostname)."""
     parts = urlsplit(url)
     if parts.scheme not in ("http", "https") or not parts.hostname:
         raise HTTPException(status_code=400, detail="Enter a valid http(s) URL")
-    if not _resolve_is_public(parts.hostname):
-        raise HTTPException(status_code=400, detail="That URL points to a private or internal address")
+    ip = _resolve_safe_ip(parts.hostname)
+    host_part = f"[{ip}]" if ":" in ip else ip
+    netloc = f"{host_part}:{parts.port}" if parts.port else host_part
+    pinned_url = parts._replace(netloc=netloc).geturl()
+    return pinned_url, parts.hostname
 
 
 @api_router.post("/import/url")
 async def import_url(payload: UrlImport):
     """Fetch a public page's HTML so the builder can import its sections.
 
-    Redirects are followed manually (not via httpx's follow_redirects) so
-    each hop is re-validated against the same private/internal-address
-    check — otherwise an attacker-controlled redirect could bypass the
-    initial URL check and reach an internal address."""
+    Every hop (initial URL and each redirect) is resolved and validated by
+    _validate_import_url, and the actual connection is pinned to that
+    validated IP (Host header + SNI set to the original hostname so
+    name-based routing and TLS still work) so the HTTP client's own,
+    separate DNS resolution can never be swapped to a private address
+    between our check and the real connection."""
     url = (payload.url or "").strip()
-    _validate_import_url(url)
     try:
-        current = url
+        current, host = _validate_import_url(url)
         async with httpx.AsyncClient(follow_redirects=False, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
             for _ in range(5):
-                r = await client.get(current)
+                r = await client.get(
+                    current,
+                    headers={"Host": host},
+                    extensions={"sni_hostname": host},
+                )
                 if r.status_code in (301, 302, 303, 307, 308) and "location" in r.headers:
                     nxt = urljoin(current, r.headers["location"])
-                    _validate_import_url(nxt)
-                    current = nxt
+                    current, host = _validate_import_url(nxt)
                     continue
                 return {"html": r.text[:2_000_000], "status": r.status_code}
         raise HTTPException(status_code=502, detail="Too many redirects")
