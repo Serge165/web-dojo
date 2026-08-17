@@ -7,7 +7,7 @@ import { RightSidebar } from "@/components/builder/RightSidebar";
 import { Canvas } from "@/components/builder/Canvas";
 import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
+import { Trash2, Eye } from "lucide-react";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
 import { PagesBar } from "@/components/builder/PagesBar";
@@ -18,6 +18,7 @@ import { AssetsLibrary } from "@/components/builder/AssetsLibrary";
 import { AnalyticsModal } from "@/components/builder/AnalyticsModal";
 import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModal";
 import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
+import { buildStandaloneHtml } from "@/lib/exportHtml";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -452,22 +453,24 @@ export default function Builder() {
       />
 
       <div className="flex-1 flex overflow-hidden">
-        <LeftSidebar
-          onAddBlock={(html) => addBlock(html)}
-          onAddFont={addFont}
-          fonts={fonts}
-          files={files}
-          onFilesChange={setFiles}
-          onFileClick={() => {}}
-          savedComponents={savedComponents}
-          onDeleteSavedComponent={deleteSavedComponent}
-          onWrapSelection={wrapSelectionWithContainer}
-          hasSelection={!!selected}
-          selectedHtml={selected?.html || ""}
-          onOpenFormBuilder={() => setFormBuilderOpen(true)}
-        />
+        {mode !== "preview" && (
+          <LeftSidebar
+            onAddBlock={(html) => addBlock(html)}
+            onAddFont={addFont}
+            fonts={fonts}
+            files={files}
+            onFilesChange={setFiles}
+            onFileClick={() => {}}
+            savedComponents={savedComponents}
+            onDeleteSavedComponent={deleteSavedComponent}
+            onWrapSelection={wrapSelectionWithContainer}
+            hasSelection={!!selected}
+            selectedHtml={selected?.html || ""}
+            onOpenFormBuilder={() => setFormBuilderOpen(true)}
+          />
+        )}
 
-        {mode === "design" ? (
+        {mode === "design" && (
           <Canvas
             elements={elements}
             selectedId={selectedId}
@@ -482,30 +485,59 @@ export default function Builder() {
             headHtml={headHtml}
             viewport={viewport}
           />
-        ) : (
+        )}
+        {mode === "code" && (
           <CodeView project={project} headHtml={headHtml} onHeadHtmlChange={setHeadHtml} />
         )}
+        {mode === "preview" && (
+          <div className="flex-1 flex flex-col bg-[#0D0D0D] overflow-hidden" data-testid="preview-mode">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[#2B2B2B] bg-[#141414] text-xs">
+              <div className="flex items-center gap-2 text-gray-400">
+                <Eye size={12} className="text-emerald-400" /> Live preview · {viewport} · what your visitors will see
+              </div>
+              <div className="text-[10px] text-gray-500 font-mono">{elements.length} block{elements.length === 1 ? "" : "s"} · exit via Design tab</div>
+            </div>
+            <div className="flex-1 flex justify-center items-start overflow-auto p-6">
+              {/* Sandbox intentionally allows scripts + same-origin because the content
+                  is authored by the user and rendered via srcDoc (no cross-origin risk). */}
+              <iframe
+                title="live-preview"
+                srcDoc={buildStandaloneHtml(project)}
+                className="bg-white shadow-2xl border border-[#2B2B2B] transition-all"
+                style={{
+                  width: viewport === "mobile" ? "390px" : viewport === "tablet" ? "820px" : "1280px",
+                  height: "100%",
+                  minHeight: "600px",
+                }}
+                sandbox="allow-forms allow-same-origin allow-scripts"
+                data-testid="preview-iframe"
+              />
+            </div>
+          </div>
+        )}
 
-        <RightSidebar
-          selected={selected}
-          onApplyBackground={applyBackground}
-          onApplyColor={applyColor}
-          onPatchStyle={patchStyle}
-          onReplaceHtml={replaceSelectedHtml}
-          onApplyAnimation={applyAnimation}
-          onApplyTheme={applyTheme}
-          canvasBg={canvasBg}
-          onCanvasBg={setCanvasBg}
-          headHtml={headHtml}
-          onHeadHtmlChange={setHeadHtml}
-          elements={elements}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onMove={moveEl}
-          onDelete={removeEl}
-          onToggleVisible={toggleVisible}
-          onSetZIndex={setZIndex}
-        />
+        {mode !== "preview" && (
+          <RightSidebar
+            selected={selected}
+            onApplyBackground={applyBackground}
+            onApplyColor={applyColor}
+            onPatchStyle={patchStyle}
+            onReplaceHtml={replaceSelectedHtml}
+            onApplyAnimation={applyAnimation}
+            onApplyTheme={applyTheme}
+            canvasBg={canvasBg}
+            onCanvasBg={setCanvasBg}
+            headHtml={headHtml}
+            onHeadHtmlChange={setHeadHtml}
+            elements={elements}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onMove={moveEl}
+            onDelete={removeEl}
+            onToggleVisible={toggleVisible}
+            onSetZIndex={setZIndex}
+          />
+        )}
       </div>
 
       <Dialog open={loadOpen} onOpenChange={setLoadOpen}>

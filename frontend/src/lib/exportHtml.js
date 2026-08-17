@@ -42,6 +42,28 @@ ${body}
 </html>`;
 };
 
+// Flatten a stored template (with pages[]) into a project-shape that
+// buildStandaloneHtml can consume — used by the Starter Preview modal.
+// Note: starter templates never contain <script> tags, so the preview
+// iframe intentionally uses `sandbox="allow-same-origin"` without
+// `allow-scripts`. If future starters add script-driven animations,
+// update TemplatePreviewModal's sandbox attribute accordingly.
+export const buildTemplatePreviewHtml = (tpl) => {
+  const data = tpl?.data || {};
+  const page = (data.pages && data.pages[0]) || { elements: [], canvas_bg: "#ffffff", fonts: [] };
+  const elements = page.elements || [];
+  const canvas_bg = page.canvas_bg || data.canvas_bg || "#ffffff";
+  const fonts = page.fonts || data.fonts || [];
+  const head_html = (data.head_html || "") + (page.head_html || "");
+  return buildStandaloneHtml({
+    name: tpl.name,
+    elements,
+    canvas_bg,
+    fonts,
+    head_html,
+  });
+};
+
 export const downloadStandalone = (project) => {
   const html = buildStandaloneHtml(project);
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });

@@ -1,0 +1,18 @@
+{
+  "summary": "Iteration 9 — Frontend-only verification of the two new features in this cycle: (1) Preview mode (third TopBar tab) and (2) Template Preview Modal in Templates gallery. Backend regression: single GET /api/templates confirmed 28 total / 28 starters (unchanged). Frontend Playwright flow (viewport 1920x1080, onboarding dismissed via 'Skip' text): TopBar shows Design/Code/Preview; clicking mode-preview hides LeftSidebar (0 nodes) and RightSidebar (0 nodes) and mounts data-testid=preview-iframe. Viewport buttons resize the iframe correctly: desktop=1280px, tablet=820px, mobile=390px. Returning to Design restores LeftSidebar. Opening the Templates modal (templates-btn) renders 28 starter cards. Clicking tpl-preview-starter-dreamcore does NOT load the template (project name stays 'Untitled') and opens data-testid=template-preview-modal with all expected controls present (preview-desktop/preview-tablet/preview-mobile, preview-cancel, preview-use, template-preview-iframe). Viewport switch inside the preview modal resizes template-preview-iframe (1280/820/390). preview-cancel closes only the preview and returns to the templates gallery (templates-modal still open, project name unchanged). Reopening the preview and clicking preview-use closes BOTH modals and loads the template — project-name-input became 'Dreamcore — copy' and canvas rendered the Dreamcore hero. Toast 'Started new project from “Dreamcore”' shown. No console errors captured during the run.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/backend_test.py"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TemplatePreviewModal sandbox='allow-same-origin' without allow-scripts is fine for the current templates, but if future starters embed <script> for animations they will silently no-op — consider explicitly documenting this constraint on buildTemplatePreviewHtml.",
+    "Preview mode iframe uses sandbox='allow-forms allow-same-origin allow-scripts' which is safe for local srcDoc, but same-origin + scripts together technically escapes the sandbox — acceptable here since content is author-generated, worth a code comment."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (regression: 1/1)", "frontend": "100% (all new-flow assertions passed)"},
+  "seed_data_creation": "None — no persisted state created.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Preview mode (mode-preview) and Template Preview Modal (tpl-preview-{id} → template-preview-modal → preview-use/preview-cancel) are fully wired. Both use sandboxed iframes; template modal uses only allow-same-origin (no scripts) while builder preview allows scripts. Onboarding tour still requires clicking the 'Skip' text button (no data-testid) before any topbar/sidebar interaction — carry-over item from iter 8.",
+  "rca_of_the_issue": "N/A — no defects observed."
+}

@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Trash2, Sparkles, Bookmark, Search, X } from "lucide-react";
+import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone } from "lucide-react";
+import { buildTemplatePreviewHtml } from "@/lib/exportHtml";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -39,22 +40,25 @@ const AESTHETIC_PREVIEWS = {
   "dreamcore": { bg: "radial-gradient(ellipse at 30% 30%,#ffd6ec 0%,#f3e8ff 50%,#c9d8f8 100%)", fg: "#8a5aa8" },
 };
 
-const StarterCard = ({ tpl, onUse }) => {
+const StarterCard = ({ tpl, onPreview }) => {
   const preview = AESTHETIC_PREVIEWS[tpl.aesthetic] || { bg: "#1F1F1F", fg: "#ffffff" };
   return (
     <button
-      onClick={() => onUse(tpl)}
-      className="text-left rounded-lg border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60 overflow-hidden transition-colors"
-      data-testid={`tpl-use-${tpl.id}`}
+      onClick={() => onPreview(tpl)}
+      className="text-left rounded-lg border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60 overflow-hidden transition-colors group relative"
+      data-testid={`tpl-preview-${tpl.id}`}
     >
       <div
-        className="h-24 flex items-end p-3"
+        className="h-24 flex items-end p-3 relative"
         style={{ background: preview.bg, border: preview.border }}
       >
         <span
           style={{ color: preview.fg }}
           className="text-[11px] font-semibold uppercase tracking-widest opacity-90"
         >{tpl.aesthetic}</span>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-white text-xs font-medium flex items-center gap-1.5"><Eye size={12} /> Preview</span>
+        </div>
       </div>
       <div className="p-3">
         <div className="flex items-center gap-1.5 text-sm text-white truncate">
@@ -64,6 +68,63 @@ const StarterCard = ({ tpl, onUse }) => {
         <div className="text-[11px] text-gray-500 line-clamp-2 mt-1">{tpl.description || "—"}</div>
       </div>
     </button>
+  );
+};
+
+// Full-screen preview overlay. Renders the template into a sandboxed iframe
+// with device presets and a "Use this template" CTA.
+const TemplatePreviewModal = ({ tpl, onClose, onUse }) => {
+  const [viewport, setViewport] = useState("desktop");
+  const html = useMemo(() => (tpl ? buildTemplatePreviewHtml(tpl) : ""), [tpl]);
+  if (!tpl) return null;
+  const width = viewport === "mobile" ? 390 : viewport === "tablet" ? 820 : 1280;
+  return (
+    <Dialog open={!!tpl} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-[95vw] w-[95vw] max-h-[92vh] overflow-hidden p-0" data-testid="template-preview-modal">
+        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
+          <DialogTitle className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-base">
+              <Sparkles size={14} className="text-amber-400" />
+              {tpl.name}
+              <span className="text-[10px] uppercase tracking-widest text-gray-500 border border-[#2B2B2B] rounded px-1.5 py-0.5">{tpl.aesthetic}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5" data-testid="preview-viewport">
+                {[{ id: "desktop", Icon: Monitor }, { id: "tablet", Icon: Tablet }, { id: "mobile", Icon: Smartphone }].map(({ id, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setViewport(id)}
+                    className={`p-1.5 rounded ${viewport === id ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+                    data-testid={`preview-${id}`}
+                    title={id}
+                  ><Icon size={12} /></button>
+                ))}
+              </div>
+              <button
+                onClick={onClose}
+                className="text-xs px-3 py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+                data-testid="preview-cancel"
+              >Close</button>
+              <button
+                onClick={() => onUse(tpl)}
+                className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium"
+                data-testid="preview-use"
+              >Use this template</button>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 bg-[#0D0D0D] overflow-auto p-6 flex justify-center items-start" style={{ height: "calc(92vh - 68px)" }}>
+          <iframe
+            title="template-preview"
+            srcDoc={html}
+            className="bg-white shadow-2xl border border-[#2B2B2B] transition-all"
+            style={{ width: `${width}px`, minHeight: "600px", height: "100%" }}
+            sandbox="allow-same-origin"
+            data-testid="template-preview-iframe"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -96,6 +157,7 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
   const [aestheticFilter, setAestheticFilter] = useState("");
+  const [previewTpl, setPreviewTpl] = useState(null);
 
   useEffect(() => { if (open) refresh(); }, [open]);
 
@@ -149,6 +211,7 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-3xl max-h-[85vh] overflow-y-auto" data-testid="templates-modal">
         <DialogHeader><DialogTitle>Project templates</DialogTitle></DialogHeader>
@@ -199,7 +262,7 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
             </div>
             <div className="grid grid-cols-3 gap-2" data-testid="starter-gallery">
               {starters.map((t) => (
-                <StarterCard key={t.id} tpl={t} onUse={(tpl) => { onLoadTemplate(tpl); onClose(); }} />
+                <StarterCard key={t.id} tpl={t} onPreview={(tpl) => setPreviewTpl(tpl)} />
               ))}
             </div>
             {starters.length === 0 && (
@@ -243,5 +306,16 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
         </div>
       </DialogContent>
     </Dialog>
+
+    <TemplatePreviewModal
+      tpl={previewTpl}
+      onClose={() => setPreviewTpl(null)}
+      onUse={(tpl) => {
+        setPreviewTpl(null);
+        onLoadTemplate(tpl);
+        onClose();
+      }}
+    />
+    </>
   );
 };

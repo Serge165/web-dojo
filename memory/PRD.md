@@ -30,6 +30,10 @@ gradients into CSS gradients.
 
 ## Implemented (through Feb 17, 2026)
 
+### Session Feb 17, 2026 (part 3)
+- **Template Preview Modal** — clicking a starter card now opens a full-screen preview (device viewport switcher desktop/tablet/mobile, sandboxed iframe rendering the template's first page). "Use this template" confirms and loads; "Close" returns to the gallery without loading.
+- **Preview Mode** — TopBar mode toggle is now Design | Code | **Preview**. Preview hides both sidebars and renders the current project in a device-framed iframe using `buildStandaloneHtml`. Viewport switcher applies. Users can taste-test their site as a visitor would.
+
 ### Session Feb 17, 2026 (part 2)
 - **Real Form Builder** — new `Forms` tab in the LeftSidebar. Contains 6 draggable presets (Contact, Newsletter, Login, Signup, Feedback, Event RSVP) plus an "Open form builder" button. `FormBuilderModal` opens a split-panel editor: left column has form settings (action URL, method, layout, theme light/dark/brand, accent colour, submit label, success helper), a fields list with reorder/delete and a 14-type add palette (text, email, password, tel, url, number, date, time, textarea, select, checkbox, radio, file, hidden), and a per-field editor (name, label, placeholder, required, options, rows, accept, value). Right column shows a live iframe preview that updates on every keystroke. Two actions: `Insert onto canvas` (adds the generated portable `<form>` block via `addBlock`) and `Save to library` (posts to `/api/components` with `category: "forms"`). Form HTML is fully inline-styled so it survives export/publish.
 - **28 Aesthetic Starters** — added 13 more starter templates on top of the original 15: Kidcore Scrapbook, Blueprint, Editorial Warm, Diffused Worlds, Cassette Futurism, Newspaper Editorial, Barbiecore, Windows 95, Grunge Zine, Art Nouveau, Swiss Modernism, Goblincore, Dreamcore. Aesthetic slugs chosen after a 2026-trend web scrape (kidcore/scrapbook, diffused worlds, editorial warm confirmed as 2026 trends).
@@ -73,7 +77,8 @@ gradients into CSS gradients.
 - CSS timelines tools + rename to "Web Dojo".
 
 ## Test Results
-- **Iteration 8 (Feb 17, 2026)**: Backend 39/39 pass — 28 starters seeded correctly, encrypted preset passwords survive backend restart, all preset validation still works. Frontend: Forms tab renders 6 presets + Open builder button; FormBuilderModal opens with all data-testids present, add-field/select/edit/insert flow works, real `<form>` HTML lands on canvas. Templates modal search + 28 aesthetic chips filter correctly; "punk" narrows to 2, "cyberpunk" chip narrows to 1, "All" resets.
+- **Iteration 9 (Feb 17, 2026)**: Frontend green — Preview mode hides sidebars and mounts device-framed iframe (1280/820/390), Template Preview modal opens on starter click without loading the template until "Use this template" is clicked, viewport switch resizes the modal iframe, Cancel returns to gallery without side-effects, Use confirms and loads. Backend regression: 28 starters unchanged.
+- **Iteration 8 (Feb 17, 2026)**: Backend 39/39 pass — 28 starters seeded correctly, encrypted preset passwords survive backend restart, all preset validation still works. Frontend: Forms tab renders 6 presets + Open builder button; FormBuilderModal opens with all data-testids present, add-field/select/edit/insert flow works, real `<form>` HTML lands on canvas. Templates modal search + 28 aesthetic chips filter correctly.
 - **Iteration 7 (Feb 17, 2026)**: Backend 39/39 pass — Publish preset encrypt/decrypt round-trip, 400 validation, 404 on unknown, 15 starters present with correct aesthetic + is_starter, starter DELETE returns 403, user templates still deletable, idempotent seeding survives supervisor restart.
 - **Prior iterations 1–6**: Backend + frontend broadly green.
 

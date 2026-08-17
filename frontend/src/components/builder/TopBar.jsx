@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Code2, MousePointer2, Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate } from "lucide-react";
+import { Code2, MousePointer2, Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Eye } from "lucide-react";
 import { scanHtml } from "@/lib/importHtml";
 import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { toast } from "sonner";
@@ -96,6 +96,11 @@ export const TopBar = ({
             className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
             data-testid="mode-code"
           ><Code2 size={12} /> Code</button>
+          <button
+            onClick={() => setMode("preview")}
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+            data-testid="mode-preview"
+          ><Eye size={12} /> Preview</button>
         </div>
       </div>
 
