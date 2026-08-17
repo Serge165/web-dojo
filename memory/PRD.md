@@ -30,6 +30,11 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (q) — Theme hover preview
+- **Live mini-page preview on hover** (`ThemeGenerator.jsx`): hovering any aesthetic card in the Theme tab pops a fixed 264px mock landing page (`theme-hover-preview` → `theme-preview-<id>`) rendered in that theme's real palette + font — a Brand navbar, a "Make it yours." hero, muted body copy, a filled + outlined button pair, and two mini cards. The Google font is lazily injected on first hover (`ensureFont`, weights 400/600/800) so the type is faithful; button label color auto-contrasts via luminance. The popover is `position:fixed` + `pointer-events:none` (anchored to the left of the sidebar), so it never clips or blocks the click-to-apply.
+- Tested: iteration_29 frontend E2E — hover shows/swaps/hides correctly, click still applies the theme, all 21 cards + Custom sub-tab regress clean, zero console errors.
+
+
 ### Session Jun 2026 (p) — Effect Presets Pack + 12 new aesthetic themes
 - **Day-one Style Library seed** (`lib/starterStyles.js` + `TextEffectsPanel.jsx`): the Style Library now ships 24 ready-made styles pre-sorted into 5 folders — **Headings** (gradient/glow text FX), **Buttons** (gradient pill, glass, neon outline, sunset CTA, sticker), **Cards** (glass, frosted, neumorphic, soft, aurora), **Badges** (pill labels), **Fonts** (serif/mono/wide-caps/glow type styles). Seeded once on first run, guarded by `localStorage['webdojo_style_library_seeded']` (deduped by id; deleting a starter and reloading does NOT bring it back). The category filter/folder UI from session (o) now shows out of the box.
 - **12 new aesthetic themes** (`lib/themes.js`, now 21 total) — researched from 2026 color-trend sources: Dark Academia, Vaporwave, Dopamine Brights, Mocha Mousse, Digital Lavender, Neo Acid, Solar Botanical, Midnight Foxglove, Terracotta Linen, Synthwave, Peach Fuzz, Sage Matcha. Each carries a curated palette (7 CSS vars), a 4-color swatch, canvas bg and a Google font chosen to support the 300–700 weight range so `themeHeadHtml` links never 400.

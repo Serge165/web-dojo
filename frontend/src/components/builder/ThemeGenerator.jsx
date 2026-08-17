@@ -3,8 +3,61 @@ import { THEMES, themeHeadHtml, buildCustomThemeHead } from "@/lib/themes";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
+// Lazily inject a theme's Google font so the hover preview renders in the real
+// typeface (only fires once per family, and only when a card is hovered).
+const loadedFonts = new Set();
+const ensureFont = (family) => {
+  if (!family || loadedFonts.has(family)) return;
+  loadedFonts.add(family);
+  const l = document.createElement("link");
+  l.rel = "stylesheet";
+  l.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@400;600;800&display=swap`;
+  document.head.appendChild(l);
+};
+
+const hexLum = (c) => {
+  const m = /^#?([0-9a-f]{6})$/i.exec((c || "").trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+};
+const onColor = (c) => { const l = hexLum(c); return l == null ? "#ffffff" : l > 0.6 ? "#111111" : "#ffffff"; };
+
+// A tiny live mock landing page rendered in the theme's own palette + font.
+const MiniThemePreview = ({ t }) => {
+  const c = t.colors;
+  const text = c["--fc-text"], muted = c["--fc-muted"], primary = c["--fc-primary"];
+  const accent = c["--fc-accent"], surface = c["--fc-surface"], border = c["--fc-border"];
+  const bar = (w, col, op = 1) => `<div style="width:${w};height:4px;border-radius:3px;background:${col};opacity:${op};margin-top:4px"></div>`;
+  const card = (top) => `<div style="flex:1;background:${surface};border:1px solid ${border};border-radius:6px;padding:7px"><div style="width:60%;height:5px;border-radius:3px;background:${top}"></div>${bar("92%", muted, 0.5)}${bar("74%", muted, 0.5)}</div>`;
+  const html = `
+    <div style="background:${surface};border-bottom:1px solid ${border};display:flex;align-items:center;gap:7px;padding:8px 10px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${primary}"></div>
+      <div style="font-size:9px;font-weight:700;color:${text}">Brand</div>
+      <div style="margin-left:auto;display:flex;gap:9px;font-size:8px;color:${muted}"><span>Home</span><span>About</span></div>
+    </div>
+    <div style="padding:14px 12px">
+      <div style="font-size:16px;font-weight:800;line-height:1.05;color:${text}">Make it yours.</div>
+      <div style="font-size:8.5px;color:${muted};margin-top:5px;line-height:1.4">A quick taste of this aesthetic — its colours, type &amp; buttons.</div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <div style="font-size:8px;font-weight:700;color:${onColor(primary)};background:${primary};border-radius:6px;padding:5px 11px">Get started</div>
+        <div style="font-size:8px;font-weight:700;color:${accent};border:1px solid ${accent};border-radius:6px;padding:5px 11px">Learn more</div>
+      </div>
+    </div>
+    <div style="padding:0 12px 12px;display:flex;gap:6px">${card(primary)}${card(accent)}</div>`;
+  return (
+    <div
+      className="rounded-lg overflow-hidden shadow-2xl ring-1 ring-black/50"
+      style={{ width: 264, background: t.canvas_bg, fontFamily: t.font }}
+      data-testid={`theme-preview-${t.id}`}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+};
+
 export const ThemeGenerator = ({ onApplyTheme }) => {
   const [tab, setTab] = useState("presets");
+  const [preview, setPreview] = useState(null);
   const [custom, setCustom] = useState({
     primary: "#2563eb",
     accent: "#f59e0b",
@@ -39,6 +92,14 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
             <button
               key={t.id}
               onClick={() => { onApplyTheme({ headHtml: themeHeadHtml(t), canvasBg: t.canvas_bg, googleFont: t.google_font }); toast.success(`Applied ${t.name}`); }}
+              onMouseEnter={(e) => {
+                ensureFont(t.google_font);
+                const r = e.currentTarget.getBoundingClientRect();
+                const left = Math.max(8, r.left - 264 - 14);
+                const top = Math.min(Math.max(8, r.top - 24), window.innerHeight - 236);
+                setPreview({ t, top, left });
+              }}
+              onMouseLeave={() => setPreview(null)}
               className="flex items-center gap-3 p-2 rounded border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60 text-left"
               data-testid={`theme-preset-${t.id}`}
             >
@@ -104,6 +165,12 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
               data-testid="theme-custom-apply"
             >Apply theme</button>
           </div>
+        </div>
+      )}
+
+      {preview && (
+        <div className="fixed z-[9999] pointer-events-none" style={{ top: preview.top, left: preview.left }} data-testid="theme-hover-preview">
+          <MiniThemePreview t={preview.t} />
         </div>
       )}
     </div>
