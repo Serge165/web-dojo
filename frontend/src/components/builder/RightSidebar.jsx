@@ -5,6 +5,7 @@ import { StyleInspector } from "./StyleInspector";
 import { LayersPanel } from "./LayersPanel";
 import { ShapePanel } from "./ShapePanel";
 import { DividerPanel } from "./DividerPanel";
+import { TextEffectsPanel } from "./TextEffectsPanel";
 import { BackgroundMediaPanel } from "./BackgroundMediaPanel";
 import { BlendPanel } from "./BlendPanel";
 import { AnimationGenerator } from "./AnimationGenerator";
@@ -21,6 +22,7 @@ const TABS = [
   { id: "blend", label: "Blend" },
   { id: "divider", label: "Divider" },
   { id: "anim", label: "Motion" },
+  { id: "textfx", label: "Text FX" },
   { id: "theme", label: "Theme" },
   { id: "cdn", label: "CDN" },
   { id: "page", label: "Page" },
@@ -118,6 +120,17 @@ export const RightSidebar = ({
 
         {tab === "divider" && (
           <DividerPanel onAddBlock={onAddBlock} elements={elements} selectedId={selectedId} />
+        )}
+
+        {tab === "textfx" && (
+          <TextEffectsPanel
+            selected={selected}
+            onPatch={onPatchStyle}
+            onApplyAnimation={onApplyAnimation}
+            onReplaceHtml={onReplaceHtml}
+            headHtml={headHtml}
+            onHeadHtmlChange={onHeadHtmlChange}
+          />
         )}
 
         {tab === "anim" && (

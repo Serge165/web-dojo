@@ -46,19 +46,39 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
     return "#" + [r, g, b].map((n) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, "0")).join("");
   };
 
-  const matchSectionColor = () => {
-    if (!hasSel) return;
-    const node = document.querySelector(`[data-testid="canvas-el-${selectedId}"]`);
-    if (!node) { toast.error("Could not read that section"); return; }
-    let found = null;
+  const readBg = (elId) => {
+    const node = document.querySelector(`[data-testid="canvas-el-${elId}"]`);
+    if (!node) return null;
     for (const el of [node, ...node.querySelectorAll("*")]) {
       const bg = getComputedStyle(el).backgroundColor;
-      if (bg && bg !== "transparent" && bg.replace(/\s/g, "") !== "rgba(0,0,0,0)") { found = bg; break; }
+      if (bg && bg !== "transparent" && bg.replace(/\s/g, "") !== "rgba(0,0,0,0)") return rgbToHex(bg);
     }
-    const hex = found && rgbToHex(found);
+    return null;
+  };
+
+  const matchSectionColor = () => {
+    if (!hasSel) return;
+    const hex = readBg(selectedId);
     if (!hex) { toast.error("That section has no solid background to match"); return; }
     setColor(hex);
-    toast.success("Matched divider fill to the section background");
+    toast.success("Matched fill to the selected section");
+  };
+
+  // The "far side" section = the one on the other side of the snap direction:
+  // below-placement -> next section, above-placement -> previous section.
+  const neighborIndex = placement === "above" ? selIndex - 1 : placement === "below" ? selIndex + 1 : -1;
+  const neighborEl = hasSel && neighborIndex >= 0 && neighborIndex < elements.length ? elements[neighborIndex] : null;
+  const neighborTitle = placement === "end"
+    ? "Pick Above/Below placement to match the far-side section"
+    : !neighborEl ? "No section on that side"
+    : placement === "below" ? "Match the section below the divider" : "Match the section above the divider";
+
+  const matchNeighborColor = () => {
+    if (!neighborEl) return;
+    const hex = readBg(neighborEl.id);
+    if (!hex) { toast.error("That neighbouring section has no solid background"); return; }
+    setColor(hex);
+    toast.success("Matched fill to the far-side section");
   };
 
   const insert = () => {
@@ -119,14 +139,6 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
         </div>
       </div>
 
-      <button
-        onClick={matchSectionColor}
-        disabled={!hasSel}
-        className="w-full flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed"
-        data-testid="divider-match-color"
-        title={hasSel ? "Match fill to the selected section's background" : "Select a section first"}
-      ><Pipette size={13} /> Match selected section color</button>
-
       <div className="flex gap-2">
         <button onClick={() => setFlipX((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipX ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-300 hover:text-white"}`} data-testid="divider-flip-x"><FlipHorizontal size={13} /> Flip X</button>
         <button onClick={() => setFlipY((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipY ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-300 hover:text-white"}`} data-testid="divider-flip-y"><FlipVertical size={13} /> Flip Y</button>
@@ -156,6 +168,15 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
           })}
         </div>
         {!hasSel && <p className="text-[10px] text-gray-500 mt-1">Select a section on the canvas to snap the divider flush above or below it.</p>}
+      </div>
+
+      {/* Auto-match fill */}
+      <div>
+        <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5">Auto-match fill</div>
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={matchSectionColor} disabled={!hasSel} className="flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="divider-match-color" title="Match the selected section's background"><Pipette size={13} /> Selected</button>
+          <button onClick={matchNeighborColor} disabled={!neighborEl} className="flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="divider-match-neighbor" title={neighborTitle}><Pipette size={13} /> Far side</button>
+        </div>
       </div>
 
       <button onClick={insert} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="divider-insert"><Plus size={14} /> Insert divider</button>

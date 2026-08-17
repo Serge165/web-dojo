@@ -133,8 +133,8 @@ export const ShapePanel = ({ selected, onPatch }) => {
         <div className="grid grid-cols-3 gap-1.5">
           {[...PRESETS, ...customPresets].map((p) => (
             <div key={p.id} role="button" tabIndex={0} onClick={() => applyPreset(p)} data-testid={`shape-preset-${p.id}`} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group cursor-pointer" title={`Apply ${p.label}`}>
-              <div className="h-11 flex items-center justify-center" style={{ background: p.bg }}>
-                <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${cssStr({ background: "#c7d2fe", ...p.patch })}"></div>` }} />
+              <div className="h-11 flex items-center justify-center" style={{ background: p.custom ? "linear-gradient(135deg,#eef2ff,#dbe2ef)" : p.bg }}>
+                <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${cssStr({ background: p.patch.background || (p.custom ? "#818cf8" : "#c7d2fe"), ...p.patch })}"></div>` }} />
               </div>
               <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{p.label}</div>
               {p.custom && (

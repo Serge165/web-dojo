@@ -30,6 +30,18 @@ gradients into CSS gradients.
 
 ## Implemented (through Jun 2026)
 
+### Session Jun 2026 (h) — Match Neighbor, Preset Thumbnails, Text FX tab
+- **Match Neighbor** (`DividerPanel.jsx`): the auto-match area now has two buttons — "Selected" (matches the selected section) and "Far side" (matches the section on the other side of the snap direction: below-placement → next section, above-placement → previous section). Disabled at Page-end placement or when no far-side section exists.
+- **Preset Thumbnails** (`ShapePanel.jsx`): saved custom presets now render a faithful thumbnail using their real patch values (border/radius/corner-shape/box-shadow) over a light backdrop, instead of the generic dark swatch.
+- **Text FX tab** (new right-sidebar tab, `TextEffectsPanel.jsx`) — flamingtext-style heading/text effects applied to the selected element:
+  - Fill & stroke (inline `onPatchStyle`): Sunset/Ocean/Candy/Gold gradient clips, Hollow/Stroke outline (`-webkit-text-stroke`), Neon, Fire, Chrome, Retro 3D, Long shadow, Soft glow.
+  - Animated (injects `@keyframes` via `onApplyAnimation` + inline animation): Shimmer, Rainbow, Pulse glow, Flicker, Float, Wobble.
+  - Hover (adds a scoped `wd-tfx-*` class to the root tag + injects a `<style>:hover` rule into headHtml): Color pop, Underline grow, Glow, Lift, Skew, Spread.
+  - Clear text FX resets the relevant properties.
+- Right sidebar now has 12 tabs in `grid-cols-4`.
+- Tested: iteration_17 frontend E2E — all three features + regression pass 100%, zero console errors.
+
+
 ### Session Jun 2026 (g) — Divider auto-match color + save custom shape presets
 - **Auto-Match Color** (`DividerPanel.jsx`): a "Match selected section color" button reads the selected section's rendered background via `getComputedStyle` (walks node + descendants for the first solid color), converts rgb→hex, and sets the divider fill in one tap. Disabled until a section is selected.
 - **Save My Preset** (`ShapePanel.jsx`): a name input + "Save current" button captures the current border/radius/corner-shape/box-shadow as a named custom preset, persisted to `localStorage['webdojo_shape_presets']` and rendered alongside the 9 built-ins with a delete (X) control. Custom presets apply one-click like the built-ins and survive reload.
