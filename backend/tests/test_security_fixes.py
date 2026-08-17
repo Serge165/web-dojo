@@ -158,6 +158,23 @@ class TestPublicCORSOverride:
         r = client.get("/api/", headers={"Origin": "https://evil.example"})
         assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
 
+    def test_get_submissions_not_exposed_to_foreign_origin(self, client, monkeypatch):
+        class FakeCursor:
+            def sort(self, *a, **kw):
+                return self
+
+            async def to_list(self, *a, **kw):
+                return []
+
+        class FakeCollection:
+            def find(self, *a, **kw):
+                return FakeCursor()
+
+        monkeypatch.setattr(server.db, "submissions", FakeCollection())
+        r = client.get("/api/submissions", headers={"Origin": "https://evil.example"})
+        assert r.status_code == 200
+        assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
+
 
 class TestStripeNotConfigured:
     def test_payment_link_503_when_unconfigured(self, client):

@@ -1084,13 +1084,15 @@ async def _public_cors_override(request: Request, call_next):
     arbitrary published/exported-site domains (form submissions, cart
     checkout) rather than the builder's own frontend. The strict
     CORSMiddleware above restricts everything else to a fixed origin
-    allowlist; this override widens exactly those two paths back open
-    (no credentials are ever involved for either, so a wildcard origin is
-    safe here) without touching the strict default everything else gets.
+    allowlist; this override widens exactly those two paths back open for
+    POST/OPTIONS only (no credentials are ever involved for either, so a
+    wildcard origin is safe here) without touching the strict default
+    everything else gets — including GET/DELETE on /api/submissions,
+    which return/erase stored form data and must stay origin-restricted.
     Registered after CORSMiddleware, so it wraps outermost and can run
     before CORSMiddleware sees the request (short-circuiting OPTIONS) and
     override its response headers afterward."""
-    if request.url.path in _PUBLIC_CORS_PATHS:
+    if request.url.path in _PUBLIC_CORS_PATHS and request.method in ("POST", "OPTIONS"):
         if request.method == "OPTIONS":
             return Response(
                 status_code=200,
