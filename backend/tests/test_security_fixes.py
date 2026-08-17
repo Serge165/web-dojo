@@ -77,3 +77,37 @@ class TestImportUrlRedirectRevalidation:
         monkeypatch.setattr(server.httpx, "AsyncClient", FakeAsyncClient)
         r = client.post("/api/import/url", json={"url": "https://example.com/redirect-me"})
         assert r.status_code == 400
+
+    def test_relative_redirect_resolves_against_real_hostname(self, client, monkeypatch):
+        captured_hosts = []
+
+        class FakeResponse:
+            def __init__(self, status_code, headers=None, text=""):
+                self.status_code = status_code
+                self.headers = headers or {}
+                self.text = text
+
+        call_count = {"n": 0}
+
+        class FakeAsyncClient:
+            def __init__(self, *a, **kw):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                return False
+
+            async def get(self, url, headers=None, **kw):
+                captured_hosts.append(headers.get("Host") if headers else None)
+                call_count["n"] += 1
+                if call_count["n"] == 1:
+                    # Relative redirect — must resolve against the real hostname.
+                    return FakeResponse(302, headers={"location": "/next-page"})
+                return FakeResponse(200, text="<html>ok</html>")
+
+        monkeypatch.setattr(server.httpx, "AsyncClient", FakeAsyncClient)
+        r = client.post("/api/import/url", json={"url": "https://example.com/start"})
+        assert r.status_code == 200
+        assert captured_hosts == ["example.com", "example.com"]

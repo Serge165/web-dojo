@@ -908,20 +908,22 @@ async def import_url(payload: UrlImport):
     validated IP (Host header + SNI set to the original hostname so
     name-based routing and TLS still work) so the HTTP client's own,
     separate DNS resolution can never be swapped to a private address
-    between our check and the real connection."""
+    between our check and the real connection. current_url always carries
+    the real hostname (never the pinned IP) so that relative redirect
+    targets resolve against the correct base on every hop."""
     url = (payload.url or "").strip()
     try:
-        current, host = _validate_import_url(url)
+        current_url = url
         async with httpx.AsyncClient(follow_redirects=False, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
             for _ in range(5):
+                pinned_url, host = _validate_import_url(current_url)
                 r = await client.get(
-                    current,
+                    pinned_url,
                     headers={"Host": host},
                     extensions={"sni_hostname": host},
                 )
                 if r.status_code in (301, 302, 303, 307, 308) and "location" in r.headers:
-                    nxt = urljoin(current, r.headers["location"])
-                    current, host = _validate_import_url(nxt)
+                    current_url = urljoin(current_url, r.headers["location"])
                     continue
                 return {"html": r.text[:2_000_000], "status": r.status_code}
         raise HTTPException(status_code=502, detail="Too many redirects")
