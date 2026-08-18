@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { escAttr, escText } from "./escapeHtml";
 
 const buildFontLinks = (fonts) => {
   if (!fonts || fonts.length === 0) return "";
@@ -8,10 +9,8 @@ const buildFontLinks = (fonts) => {
     .join("&family=");
   return `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=${families}&display=swap" rel="stylesheet">`;
+<link href="https://fonts.googleapis.com/css2?family=${escAttr(families)}&display=swap" rel="stylesheet">`;
 };
-
-const escAttr = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 const buildSeoMeta = (seo) => {
   const s = seo || {};
@@ -56,7 +55,7 @@ export const buildStandaloneHtml = (project) => {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${pageTitle(project)}</title>
+<title>${escText(pageTitle(project))}</title>
 ${seoMeta}
 ${fonts}
 ${project.head_html || ""}
@@ -106,7 +105,7 @@ export const buildCleanExport = (project) => {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${pageTitle(project)}</title>
+<title>${escText(pageTitle(project))}</title>
 ${seoMeta}
 ${fonts}
 ${project.head_html || ""}

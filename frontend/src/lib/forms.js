@@ -1,19 +1,13 @@
 // Portable form-block generator: converts a form config into a
 // standalone HTML block with inline styles that survives export/publish.
 
+import { escAttr as escape } from "./escapeHtml.js";
+
 const uid = (p = "f") => `${p}-${Math.random().toString(36).slice(2, 8)}`;
 
 // Default backend inbox for forms built in Web Dojo. Deployed/previewed sites
 // POST here so submissions are captured. Users can override with Formspree/etc.
 const SUBMIT_ENDPOINT = `${process.env.REACT_APP_BACKEND_URL}/api/submissions`;
-
-const escape = (s = "") =>
-  String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
 
 export const FIELD_TYPES = [
   { v: "text", l: "Text" },
