@@ -1,3 +1,5 @@
+import { escAttr, escText } from "./escapeHtml.js";
+
 // Client-side shopping cart runtime for EXPORTED static sites.
 // - Cart lives in localStorage; a floating button + slide-out drawer show it.
 // - Stripe checkout hands off to Web Dojo's hosted backend (baked below), which
@@ -8,9 +10,9 @@
 const BACKEND = process.env.REACT_APP_BACKEND_URL || "";
 
 export const buildAddToCartButton = ({ id, name, amount, currency = "usd", image = "", label = "Add to cart", accent = "#4f46e5", radius = "10px" }) =>
-  `<button type="button" data-wd-add data-wd-id="${id || name}" data-wd-name="${name}" data-wd-price="${Number(amount) || 0}" data-wd-cur="${currency}" data-wd-img="${image}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border:none;border-radius:${radius};background:${accent};color:#fff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">
+  `<button type="button" data-wd-add data-wd-id="${escAttr(id || name)}" data-wd-name="${escAttr(name)}" data-wd-price="${Number(amount) || 0}" data-wd-cur="${currency}" data-wd-img="${escAttr(image)}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border:none;border-radius:${radius};background:${accent};color:#fff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-  ${label}
+  ${escText(label)}
 </button>`;
 
 // currency + accent + optional paypalClientId configure the whole store.
