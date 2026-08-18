@@ -36,14 +36,38 @@ class TestResponsiveCss:
 
 class TestCleanExportGridResponsive:
     def test_strip_inline_styles_adds_responsive_override_for_grid(self):
-        html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">content</div>'
-        transformed, css = server._strip_inline_styles(html)
-        assert 'class="el-0"' in transformed
-        assert ".el-0 { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }" in css
-        assert "@media (max-width: 768px) { .el-0 { grid-template-columns: 1fr !important; } }" in css
+        elements = [{"id": "el_abc123", "html": '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">content</div>'}]
+        transformed, css = server._strip_inline_styles(elements)
+        assert 'class="el-el_abc123"' in transformed
+        assert ".el-el_abc123 { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }" in css
+        assert "@media (max-width: 768px) { .el-el_abc123 { grid-template-columns: 1fr !important; } }" in css
 
     def test_strip_inline_styles_skips_override_for_non_grid_elements(self):
-        html = '<div style="color:red;padding:10px;">content</div>'
-        transformed, css = server._strip_inline_styles(html)
-        assert ".el-0 { color:red;padding:10px; }" in css
+        elements = [{"id": "el_xyz789", "html": '<div style="color:red;padding:10px;">content</div>'}]
+        transformed, css = server._strip_inline_styles(elements)
+        assert ".el-el_xyz789 { color:red;padding:10px; }" in css
         assert "@media" not in css
+
+    def test_strip_inline_styles_suffixes_nested_style_attrs(self):
+        elements = [{"id": "el_1", "html": '<section style="padding:20px;"><h1 style="color:blue;">Hi</h1><p style="margin:0;">Body</p></section>'}]
+        transformed, css = server._strip_inline_styles(elements)
+        assert 'class="el-el_1"' in transformed
+        assert 'class="el-el_1__1"' in transformed
+        assert 'class="el-el_1__2"' in transformed
+        assert ".el-el_1 { padding:20px; }" in css
+        assert ".el-el_1__1 { color:blue; }" in css
+        assert ".el-el_1__2 { margin:0; }" in css
+
+    def test_strip_inline_styles_keeps_ids_stable_across_reordering(self):
+        a = {"id": "el_a", "html": '<div style="color:red;">A</div>'}
+        b = {"id": "el_b", "html": '<div style="color:blue;">B</div>'}
+        html_ab, _css_ab = server._strip_inline_styles([a, b])
+        html_ba, _css_ba = server._strip_inline_styles([b, a])
+        assert 'class="el-el_a"' in html_ab and 'class="el-el_a"' in html_ba
+        assert 'class="el-el_b"' in html_ab and 'class="el-el_b"' in html_ba
+
+    def test_strip_inline_styles_handles_element_with_no_style_attr(self):
+        elements = [{"id": "el_plain", "html": '<div>no style here</div>'}]
+        transformed, css = server._strip_inline_styles(elements)
+        assert transformed == '<div>no style here</div>'
+        assert css == ""

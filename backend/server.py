@@ -611,34 +611,44 @@ class PublishRequest(BaseModel):
     css_filename: str = "styles.css"
 
 
-def _strip_inline_styles(body_html: str):
-    """Extract inline style attributes into deduplicated CSS classes.
-    Returns (html_with_classes, css_string). An extracted rule that sets
-    grid-template-columns also gets a companion responsive override —
-    RESPONSIVE_CSS's generic [style*="grid-template-columns"] selector
-    can't match here since the style attribute this function removes is
-    exactly what it targets."""
+def _strip_inline_styles(elements):
+    """Extract inline style attributes into deduplicated CSS classes, one
+    stable class per source element. An element's root style="..." becomes
+    .el-<id>; any additional style="..." attributes nested inside that
+    same element's HTML (e.g. a hero block with several styled child divs)
+    become .el-<id>__1, .el-<id>__2, ... in encounter order. Stable,
+    id-based naming (rather than a global sequential counter) lets the
+    live CSS-pane editor round-trip an edit back onto the correct element
+    even after blocks are reordered, added, or removed.
+    Returns (html_with_classes, css_string)."""
     rules = []
-    counter = {"n": 0}
+    out_html_parts = []
 
-    def repl(match):
-        i = counter["n"]
-        counter["n"] += 1
-        cls = f"el-{i}"
-        declarations = match.group(1)
-        rules.append(f".{cls} {{ {declarations} }}")
-        if "grid-template-columns" in declarations:
-            rules.append(f"@media (max-width: 768px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
-        return f'class="{cls}"'
+    def make_repl(el_id):
+        counter = {"n": 0}
 
-    transformed = re.sub(r'style="([^"]*)"', repl, body_html)
-    return transformed, "\n".join(rules)
+        def repl(match):
+            n = counter["n"]
+            counter["n"] += 1
+            cls = f"el-{el_id}" if n == 0 else f"el-{el_id}__{n}"
+            declarations = match.group(1)
+            rules.append(f".{cls} {{ {declarations} }}")
+            if "grid-template-columns" in declarations:
+                rules.append(f"@media (max-width: 768px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
+            return f'class="{cls}"'
+        return repl
+
+    for el in elements:
+        el_id = el.get("id") or ""
+        html = el.get("html", "")
+        out_html_parts.append(re.sub(r'style="([^"]*)"', make_repl(el_id), html))
+
+    return "\n".join(out_html_parts), "\n".join(rules)
 
 
 def _build_project_bundle(doc: dict, html_filename: str, css_filename: str):
     """Return (index_html, styles_css) using the doc's data."""
-    body = "\n".join([e.get("html", "") for e in (doc.get("elements") or [])])
-    cleaned_body, css_body = _strip_inline_styles(body)
+    cleaned_body, css_body = _strip_inline_styles(doc.get("elements") or [])
     fonts_link = _build_google_fonts_link(doc.get("fonts") or [])
     head_extra = doc.get("head_html") or ""
     canvas_bg = doc.get("canvas_bg") or "#ffffff"
