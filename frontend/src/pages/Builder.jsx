@@ -66,6 +66,7 @@ export default function Builder() {
   const [selectedId, setSelectedId] = useState(null);
   const [canvasBg, setCanvasBg] = useState("#ffffff");
   const [headHtml, setHeadHtml] = useState("");
+  const [customJs, setCustomJs] = useState("");
   const [fonts, setFonts] = useState([]);
   const [files, setFiles] = useState([]);
   const [savedComponents, setSavedComponents] = useState([]);
@@ -77,7 +78,7 @@ export default function Builder() {
   const [tourForce, setTourForce] = useState(0);
 
   // Multi-page + template + panels state.
-  const [pages, setPages] = useState(() => [{ id: "home", name: "Home", slug: "index", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [] }]);
+  const [pages, setPages] = useState(() => [{ id: "home", name: "Home", slug: "index", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" }]);
   const [activePageId, setActivePageId] = useState("home");
   const [template, setTemplate] = useState({ header_html: "", footer_html: "", use_template: false });
   const [findOpen, setFindOpen] = useState(false);
@@ -102,7 +103,7 @@ export default function Builder() {
   useEffect(() => { pastRef.current = past; }, [past]);
   useEffect(() => { futureRef.current = future; }, [future]);
 
-  const doc = useMemo(() => ({ elements, canvasBg, headHtml, fonts, files }), [elements, canvasBg, headHtml, fonts, files]);
+  const doc = useMemo(() => ({ elements, canvasBg, headHtml, fonts, files, customJs }), [elements, canvasBg, headHtml, fonts, files, customJs]);
   const docRef = useRef(doc);
   useEffect(() => { docRef.current = doc; }, [doc]);
 
@@ -124,7 +125,7 @@ export default function Builder() {
     skipHistory.current = true;
     setFuture((f) => [docRef.current, ...f].slice(0, 50));
     setPast(p.slice(0, -1));
-    setElements(prev.elements); setCanvasBg(prev.canvasBg); setHeadHtml(prev.headHtml); setFonts(prev.fonts); setFiles(prev.files || []);
+    setElements(prev.elements); setCanvasBg(prev.canvasBg); setHeadHtml(prev.headHtml); setFonts(prev.fonts); setFiles(prev.files || []); setCustomJs(prev.customJs || "");
   };
   const redo = () => {
     const f = futureRef.current;
@@ -133,15 +134,15 @@ export default function Builder() {
     skipHistory.current = true;
     setPast((p) => [...p, docRef.current]);
     setFuture(f.slice(1));
-    setElements(next.elements); setCanvasBg(next.canvasBg); setHeadHtml(next.headHtml); setFonts(next.fonts); setFiles(next.files || []);
+    setElements(next.elements); setCanvasBg(next.canvasBg); setHeadHtml(next.headHtml); setFonts(next.fonts); setFiles(next.files || []); setCustomJs(next.customJs || "");
   };
 
   const selected = useMemo(() => elements.find((e) => e.id === selectedId) || null, [elements, selectedId]);
 
   // Keep the active page's snapshot in sync with the editing state.
   useEffect(() => {
-    setPages((ps) => ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p));
-  }, [elements, headHtml, canvasBg, fonts, activePageId]);
+    setPages((ps) => ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p));
+  }, [elements, headHtml, canvasBg, fonts, customJs, activePageId]);
 
   const activePage = useMemo(() => pages.find((p) => p.id === activePageId) || pages[0], [pages, activePageId]);
 
@@ -149,7 +150,7 @@ export default function Builder() {
     id: projectId,
     name: projectName,
     // legacy top-level fields mirror the active page for backward compat
-    elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files,
+    elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files, custom_js: customJs,
     seo: activePage?.seo || {},
     pages, active_page_id: activePageId, template,
   };
@@ -159,26 +160,28 @@ export default function Builder() {
     const target = pages.find((p) => p.id === id);
     if (!target || id === activePageId) return;
     // Persist current edits into pages first (effect will run, but this keeps immediate state clean)
-    setPages((ps) => ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p));
+    setPages((ps) => ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p));
     setActivePageId(id);
     setElements(target.elements || []);
     setHeadHtml(target.head_html || "");
     setCanvasBg(target.canvas_bg || "#ffffff");
     setFonts(target.fonts || []);
+    setCustomJs(target.custom_js || "");
     setSelectedId(null);
   };
   const newPage = () => {
     const id = uid();
     const name = `Page ${pages.length + 1}`;
     setPages((ps) => {
-      const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p);
-      return [...persisted, { id, name, slug: name.toLowerCase().replace(/\s+/g, "-"), status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [] }];
+      const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
+      return [...persisted, { id, name, slug: name.toLowerCase().replace(/\s+/g, "-"), status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" }];
     });
     setActivePageId(id);
     setElements([]);
     setHeadHtml("");
     setCanvasBg("#ffffff");
     setFonts([]);
+    setCustomJs("");
     setSelectedId(null);
   };
   const addPageFromLayout = (layout) => {
@@ -187,14 +190,15 @@ export default function Builder() {
     const bg = layout.canvasBg || "#ffffff";
     const fnts = layout.fonts || [];
     setPages((ps) => {
-      const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts } : p);
-      return [...persisted, { id, name: layout.label, slug: layout.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: bg, fonts: fnts }];
+      const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
+      return [...persisted, { id, name: layout.label, slug: layout.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: bg, fonts: fnts, custom_js: "" }];
     });
     setActivePageId(id);
     setElements(els);
     setHeadHtml("");
     setCanvasBg(bg);
     setFonts(fnts);
+    setCustomJs("");
     setSelectedId(null);
     toast.success(`Added "${layout.label}" page`);
   };
@@ -209,6 +213,7 @@ export default function Builder() {
       setHeadHtml(t.head_html || "");
       setCanvasBg(t.canvas_bg || "#ffffff");
       setFonts(t.fonts || []);
+      setCustomJs(t.custom_js || "");
       setSelectedId(null);
     }
   };
@@ -370,7 +375,7 @@ export default function Builder() {
     if (!data || !data._webdojo) { toast.error("That file isn't a Web Dojo project"); return; }
     setProjectId(null);
     setProjectName(data.name || "Imported project");
-    const src = (data.pages && data.pages.length) ? data.pages : [{ id: uid(), name: "Home", slug: "index", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [] }];
+    const src = (data.pages && data.pages.length) ? data.pages : [{ id: uid(), name: "Home", slug: "index", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" }];
     const nextPages = src.map((pg) => ({ ...pg, id: uid() }));
     setPages(nextPages);
     setActivePageId(nextPages[0].id);
@@ -378,6 +383,7 @@ export default function Builder() {
     setHeadHtml(nextPages[0].head_html || "");
     setCanvasBg(nextPages[0].canvas_bg || "#ffffff");
     setFonts(nextPages[0].fonts || []);
+    setCustomJs(nextPages[0].custom_js || "");
     setFiles(data.files || []);
     setSelectedId(null); setPast([]); setFuture([]);
     toast.success("Project imported");
@@ -429,6 +435,7 @@ export default function Builder() {
           head_html: pg.head_html || "",
           canvas_bg: pg.canvas_bg || "#ffffff",
           fonts: pg.fonts || [],
+          custom_js: pg.custom_js || "",
         }));
         const found = nextPages.find((x) => x.id === p.active_page_id);
         activeId = found ? found.id : nextPages[0].id;
@@ -438,6 +445,7 @@ export default function Builder() {
           id: homeId, name: p.name || "Home", slug: "index", status: "draft", seo: {},
           elements: (p.elements || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })),
           head_html: p.head_html || "", canvas_bg: p.canvas_bg || "#ffffff", fonts: p.fonts || [],
+          custom_js: p.custom_js || "",
         }];
         activeId = homeId;
       }
@@ -448,6 +456,7 @@ export default function Builder() {
       setHeadHtml(active.head_html || "");
       setCanvasBg(active.canvas_bg || "#ffffff");
       setFonts(active.fonts || []);
+      setCustomJs(active.custom_js || "");
       setTemplate(p.template || { header_html: "", footer_html: "", use_template: false });
       setFiles(p.files || []);
       setSelectedId(null); setLoadOpen(false); setPast([]); setFuture([]);
@@ -463,7 +472,7 @@ export default function Builder() {
     const templatePages = (data.pages && data.pages.length) ? data.pages : [{
       id: uid(), name: "Home", slug: "index", status: "draft", seo: {},
       elements: data.elements || [], head_html: data.head_html || "",
-      canvas_bg: data.canvas_bg || "#ffffff", fonts: data.fonts || [],
+      canvas_bg: data.canvas_bg || "#ffffff", fonts: data.fonts || [], custom_js: data.custom_js || "",
     }];
     const nextPages = templatePages.map((pg) => ({ ...pg, id: uid() }));
     setPages(nextPages);
@@ -472,6 +481,7 @@ export default function Builder() {
     setHeadHtml(nextPages[0].head_html || "");
     setCanvasBg(nextPages[0].canvas_bg || "#ffffff");
     setFonts(nextPages[0].fonts || []);
+    setCustomJs(nextPages[0].custom_js || "");
     setTemplate(data.template || { header_html: "", footer_html: "", use_template: false });
     setFiles(data.files || []);
     setSelectedId(null); setPast([]); setFuture([]);
@@ -615,7 +625,16 @@ export default function Builder() {
           />
         )}
         {mode === "code" && (
-          <CodeView project={project} headHtml={headHtml} onHeadHtmlChange={setHeadHtml} />
+          <CodeView
+            project={project}
+            elements={elements}
+            onElementsChange={setElements}
+            headHtml={headHtml}
+            onHeadHtmlChange={setHeadHtml}
+            customJs={customJs}
+            onCustomJsChange={setCustomJs}
+            onSave={save}
+          />
         )}
         {mode === "preview" && (
           <div className="flex-1 flex flex-col bg-[#0D0D0D] overflow-hidden" data-testid="preview-mode">
