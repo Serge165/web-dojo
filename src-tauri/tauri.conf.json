@@ -6,8 +6,8 @@
   "build": {
     "frontendDist": "../frontend/build",
     "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "cd ../frontend && npm start",
-    "beforeBuildCommand": "cd ../frontend && npm run build:tauri"
+    "beforeDevCommand": "cd frontend && npm start",
+    "beforeBuildCommand": "cd frontend && npm run build:tauri"
   },
   "app": {
     "windows": [
@@ -25,8 +25,14 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["appimage", "deb", "rpm"],
-    "externalBin": ["../backend/dist/webdojo-backend"],
+    "targets": [
+      "appimage",
+      "deb",
+      "rpm"
+    ],
+    "externalBin": [
+      "../backend/dist/webdojo-backend"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
