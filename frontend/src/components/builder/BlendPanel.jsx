@@ -10,6 +10,13 @@ const BLEND_MODES = [
 
 const SAMPLE = "https://images.unsplash.com/photo-1502691876148-a84978e59af8?w=600&q=70";
 
+// Matches a wrapper this exact panel previously produced, so re-applying
+// the overlay (e.g. after tweaking the color) replaces it instead of
+// nesting a second wrapper around the first — greedy [\s\S]* + the
+// anchored $ correctly finds the LAST occurrence of the trailing overlay
+// div even if the inner content itself contains similar-looking divs.
+const OVERLAY_RE = /^<div style="position:relative;overflow:hidden;" data-wd-overlay="1">([\s\S]*)<div style="position:absolute;inset:0;background:[^;]*;mix-blend-mode:[^;]*;pointer-events:none;"><\/div><\/div>$/;
+
 export const BlendPanel = ({ selected, onPatch, onReplaceHtml }) => {
   const [mix, setMix] = useState("normal");
   const [bgMix, setBgMix] = useState("normal");
@@ -22,7 +29,13 @@ export const BlendPanel = ({ selected, onPatch, onReplaceHtml }) => {
 
   const addOverlay = () => {
     if (!selected) return;
-    onReplaceHtml(`<div style="position:relative;overflow:hidden;">${selected.html}<div style="position:absolute;inset:0;background:${overlayColor};mix-blend-mode:${overlayMode};pointer-events:none;"></div></div>`);
+    // If already wrapped by this panel, unwrap back to the original inner
+    // content first so re-applying replaces the overlay instead of
+    // nesting a second one around the first (was: infinite nesting on
+    // repeated clicks).
+    const existing = selected.html.match(OVERLAY_RE);
+    const inner = existing ? existing[1] : selected.html;
+    onReplaceHtml(`<div style="position:relative;overflow:hidden;" data-wd-overlay="1">${inner}<div style="position:absolute;inset:0;background:${overlayColor};mix-blend-mode:${overlayMode};pointer-events:none;"></div></div>`);
   };
 
   const ModeGrid = ({ value, onPick, testPrefix }) => (
