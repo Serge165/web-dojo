@@ -118,6 +118,27 @@ export default function Builder() {
     setFuture([]);
   }, [doc]);
 
+  // Autosave: silently persist ~2.5s after the user stops editing.
+  // Independent of the undo/redo history effect above — an undo/redo is a
+  // perfectly good thing to autosave too, unlike history itself, which
+  // must not record its own transitions.
+  const [saveStatus, setSaveStatus] = useState("idle"); // idle | unsaved | saving | saved | error
+  const autosaveTimerRef = useRef(null);
+  const prevAutosaveDocRef = useRef(doc);
+  useEffect(() => {
+    if (prevAutosaveDocRef.current === doc) return;
+    prevAutosaveDocRef.current = doc;
+    setSaveStatus("unsaved");
+    clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(() => { persist(true); }, 2500);
+    // persist/project are intentionally omitted: `project` is a fresh
+    // object literal every render, so listing it would reset this timer
+    // on every re-render (not just real edits) and the debounce would
+    // never actually fire during active use.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doc]);
+  useEffect(() => () => clearTimeout(autosaveTimerRef.current), []);
+
   const undo = () => {
     const p = pastRef.current;
     if (p.length === 0) return;
@@ -397,7 +418,10 @@ export default function Builder() {
   };
 
   // Save/Load ------------------------------------------------------
-  const save = async () => {
+  // silent=true (autosave) skips the success/error toasts so it doesn't
+  // interrupt typing; the manual Save button (silent=false) keeps them.
+  const persist = async (silent) => {
+    setSaveStatus("saving");
     try {
       if (projectId) {
         await axios.put(`${API}/projects/${projectId}`, project);
@@ -405,9 +429,15 @@ export default function Builder() {
         const res = await axios.post(`${API}/projects`, project);
         setProjectId(res.data.id);
       }
-      toast.success("Project saved");
-    } catch (e) { toast.error("Save failed"); console.error(e); }
+      setSaveStatus("saved");
+      if (!silent) toast.success("Project saved");
+    } catch (e) {
+      setSaveStatus("error");
+      if (!silent) toast.error("Save failed");
+      console.error(e);
+    }
   };
+  const save = () => { clearTimeout(autosaveTimerRef.current); persist(false); };
 
   const openLoad = async () => {
     try {
@@ -552,7 +582,7 @@ export default function Builder() {
         onImportSections={onImportSections}
         project={project}
         onOpenTransfer={() => setTransferOpen(true)}
-        onSave={save} onOpenLoad={openLoad} onShare={share}
+        onSave={save} saveStatus={saveStatus} onOpenLoad={openLoad} onShare={share}
         onPublish={() => setPublishOpen(true)}
         onStartTour={() => setTourForce((v) => v + 1)}
         onFind={() => setFindOpen(true)}

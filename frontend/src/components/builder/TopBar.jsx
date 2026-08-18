@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Inbox } from "lucide-react";
+import { Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Inbox, Loader2, Check, AlertCircle } from "lucide-react";
 import { scanHtml } from "@/lib/importHtml";
 import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ export const TopBar = ({
   onImportSections,
   project,
   onSave,
+  saveStatus,
   onOpenLoad,
   onUndo, onRedo, canUndo, canRedo,
   viewport, setViewport,
@@ -129,6 +130,10 @@ export const TopBar = ({
         <button onClick={onTemplates} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Project templates" data-testid="templates-btn"><LayoutTemplate size={14} /></button>
         <button onClick={onSubmissions} className="p-1.5 rounded hover:bg-[#1F1F1F] text-gray-300" title="Form submissions inbox" data-testid="submissions-btn"><Inbox size={14} /></button>
         <div className="h-6 w-px bg-[#2B2B2B]" />
+        {saveStatus === "saving" && <span className="flex items-center gap-1 text-[11px] text-gray-500" data-testid="save-status-saving"><Loader2 size={12} className="animate-spin" /> Saving…</span>}
+        {saveStatus === "saved" && <span className="flex items-center gap-1 text-[11px] text-emerald-500/80" data-testid="save-status-saved"><Check size={12} /> Saved</span>}
+        {saveStatus === "unsaved" && <span className="text-[11px] text-gray-500" data-testid="save-status-unsaved">Unsaved changes</span>}
+        {saveStatus === "error" && <span className="flex items-center gap-1 text-[11px] text-red-400" data-testid="save-status-error"><AlertCircle size={12} /> Save failed</span>}
         <button onClick={onSave} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white" data-testid="save-btn"><Save size={12} /> Save</button>
         <button onClick={onOpenLoad} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" data-testid="load-btn"><FolderOpen size={12} /> Open</button>
         <button onClick={onStartTour} className="p-1.5 rounded-md hover:bg-[#1F1F1F] text-gray-300" title="Restart onboarding tour" data-testid="help-btn"><HelpCircle size={14} /></button>
