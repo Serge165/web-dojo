@@ -167,7 +167,7 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
               key={previewDark ? "d" : "l"}
               srcDoc={`<!doctype html><html><head><meta charset="utf-8" /><style>body{margin:0;padding:48px 24px;background:${bg};display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 96px);}</style></head><body>${html}</body></html>`}
               className="flex-1 w-full border-0"
-              sandbox="allow-scripts allow-same-origin"
+              sandbox="allow-scripts"
               data-testid="social-preview-iframe"
             />
           </div>

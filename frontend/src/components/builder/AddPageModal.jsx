@@ -103,7 +103,7 @@ export const AddPageModal = ({ open, onClose, onAddBlank, onAddLayout }) => {
                 title="layout-preview"
                 srcDoc={previewHtml}
                 className="w-full h-full bg-white rounded-md border border-[#2B2B2B]"
-                sandbox="allow-same-origin allow-scripts allow-forms"
+                sandbox="allow-scripts allow-forms"
                 data-testid="add-page-preview-iframe"
               />
             </div>

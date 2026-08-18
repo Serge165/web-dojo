@@ -131,7 +131,7 @@ export const PaymentButtonModal = ({ open, onClose, onInsert }) => {
               key={provider + previewHtml.length}
               srcDoc={`<!doctype html><html><head><meta charset="utf-8" /><style>body{margin:0;padding:36px;background:#f5f5f5;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 72px);} .empty{color:#94a3b8;font-size:13px;text-align:center;}</style></head><body>${previewHtml || '<div class="empty">Your button preview appears here.<br/>' + (provider === "stripe" ? "Generate a Stripe link to see it." : "Paste a PayPal Client ID to see it.") + '</div>'}</body></html>`}
               className="flex-1 w-full border-0"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              sandbox="allow-scripts allow-popups allow-forms"
               data-testid="payment-preview-iframe"
             />
           </div>

@@ -625,8 +625,13 @@ export default function Builder() {
               <div className="text-[10px] text-gray-500 font-mono">{elements.length} block{elements.length === 1 ? "" : "s"} · exit via Design tab</div>
             </div>
             <div className="flex-1 flex justify-center items-start overflow-auto p-6">
-              {/* Sandbox intentionally allows scripts + same-origin because the content
-                  is authored by the user and rendered via srcDoc (no cross-origin risk). */}
+              {/* allow-same-origin is intentionally NOT set: combined with
+                  allow-scripts it would give this iframe's content (user-
+                  authored, rendered via srcDoc) the app's real origin
+                  instead of an opaque one — letting injected content reach
+                  back into the live builder's DOM/localStorage via
+                  window.parent. allow-scripts alone keeps the origin
+                  opaque, which is what actually isolates it. */}
               <iframe
                 title="live-preview"
                 srcDoc={buildStandaloneHtml(project)}
@@ -636,7 +641,7 @@ export default function Builder() {
                   height: "100%",
                   minHeight: "600px",
                 }}
-                sandbox="allow-forms allow-same-origin allow-scripts"
+                sandbox="allow-forms allow-scripts"
                 data-testid="preview-iframe"
               />
             </div>
