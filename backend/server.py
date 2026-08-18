@@ -701,6 +701,9 @@ async def publish_project(project_id: str, payload: PublishRequest):
 
     html_name = payload.html_filename or "index.html"
     css_name = payload.css_filename or "styles.css"
+    for fname in (html_name, css_name):
+        if "/" in fname or "\\" in fname or fname.startswith("."):
+            raise HTTPException(status_code=400, detail="Filenames must be a plain name with no path separators")
     index_html, styles_css = _build_project_bundle(doc, html_name, css_name)
     files = {html_name: index_html, css_name: styles_css}
 

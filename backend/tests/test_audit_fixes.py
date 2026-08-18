@@ -84,3 +84,48 @@ class TestZeroDecimalCurrency:
 
     def test_jpy_rounds_to_whole_yen(self):
         assert server._to_unit_amount(500.7, "jpy") == 501
+
+
+class TestPublishFilenameTraversal:
+    def _mock_project(self, monkeypatch):
+        class FakeCollection:
+            async def find_one(self, *a, **kw):
+                return {"id": "anyid", "name": "Test", "elements": [], "fonts": [], "head_html": "", "canvas_bg": "#fff"}
+
+        monkeypatch.setattr(server.db, "projects", FakeCollection())
+
+    def test_rejects_path_traversal_html_filename(self, client, monkeypatch):
+        self._mock_project(monkeypatch)
+        r = client.post("/api/projects/anyid/publish", json={
+            "host": "example.com", "username": "u", "password": "p",
+            "html_filename": "../../etc/passwd",
+        })
+        assert r.status_code == 400
+
+    def test_rejects_backslash_css_filename(self, client, monkeypatch):
+        self._mock_project(monkeypatch)
+        r = client.post("/api/projects/anyid/publish", json={
+            "host": "example.com", "username": "u", "password": "p",
+            "css_filename": "..\\..\\windows\\win.ini",
+        })
+        assert r.status_code == 400
+
+    def test_rejects_leading_dot_filename(self, client, monkeypatch):
+        self._mock_project(monkeypatch)
+        r = client.post("/api/projects/anyid/publish", json={
+            "host": "example.com", "username": "u", "password": "p",
+            "html_filename": ".htaccess",
+        })
+        assert r.status_code == 400
+
+    def test_normal_filenames_pass_validation(self, client, monkeypatch):
+        # Port 1 on loopback has nothing listening, so this fails fast with
+        # a connection error once past filename validation — confirming it
+        # got past the 400 check (a 502 upload failure, not 400). Same
+        # pattern as the existing backend_test.py publish tests.
+        self._mock_project(monkeypatch)
+        r = client.post("/api/projects/anyid/publish", json={
+            "host": "127.0.0.1", "port": 1, "username": "u", "password": "p",
+            "html_filename": "index.html", "css_filename": "styles.css",
+        })
+        assert r.status_code != 400
