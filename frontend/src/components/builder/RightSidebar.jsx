@@ -52,6 +52,7 @@ export const RightSidebar = ({
 }) => {
   const [tab, setTab] = useState("color");
   const [layersOpen, setLayersOpen] = useState(true);
+  const [lastColor, setLastColor] = useState({ hex: "#2563eb", alpha: 1, rgba: "rgba(37, 99, 235, 1)" });
 
   return (
     <aside className="w-80 flex-none border-l border-[#2B2B2B] bg-[#141414] flex flex-col overflow-hidden" data-testid="right-sidebar">
@@ -77,20 +78,20 @@ export const RightSidebar = ({
         {tab === "color" && (
           <div className="space-y-3">
             <ColorPicker
-              value="#2563eb"
-              alpha={1}
-              onChange={({ hex, alpha, rgba }) => { setLastColor({ hex, alpha, rgba }); }}
+              value={lastColor.hex}
+              alpha={lastColor.alpha}
+              onChange={({ hex, alpha, rgba }) => setLastColor({ hex, alpha, rgba })}
             />
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#2B2B2B]">
               <button
                 disabled={!selected}
-                onClick={() => onApplyBackground(_lastColor.rgba)}
+                onClick={() => onApplyBackground(lastColor.rgba)}
                 className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
                 data-testid="apply-bg-btn"
               >Apply background</button>
               <button
                 disabled={!selected}
-                onClick={() => onApplyColor(_lastColor.rgba)}
+                onClick={() => onApplyColor(lastColor.rgba)}
                 className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] disabled:opacity-40 disabled:cursor-not-allowed"
                 data-testid="apply-color-btn"
               >Apply text color</button>
@@ -200,6 +201,3 @@ export const RightSidebar = ({
     </aside>
   );
 };
-
-let _lastColor = { hex: "#2563eb", alpha: 1, rgba: "rgba(37, 99, 235, 1)" };
-const setLastColor = (c) => { _lastColor = c; };
