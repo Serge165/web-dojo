@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import Editor, { loader } from "@monaco-editor/react";
-import { emmetHTML, emmetCSS } from "emmet-monaco-es";
+import { emmetHTML, emmetCSS, emmetJSX } from "emmet-monaco-es";
 
 let emmetRegistered = false;
 
@@ -10,10 +10,15 @@ export const CodeEditor = ({ value, onChange, language = "html", readOnly = fals
   const handleMount = (editor, monaco) => {
     editorRef.current = editor;
     if (!emmetRegistered) {
-      // Register emmet abbreviation expansion (Tab) for HTML & CSS
+      // Register emmet abbreviation expansion (Tab) for HTML, CSS, and
+      // JS/TS. JS/TS use the dedicated emmetJSX engine (className=, JSX
+      // expansion rules) rather than emmetHTML (class=, HTML rules) — a
+      // JS/TS pane fed HTML-flavored Emmet would expand abbreviations
+      // with the wrong attribute conventions.
       try {
-        emmetHTML(monaco, ["html", "javascript", "typescript", "twig"]);
+        emmetHTML(monaco, ["html", "twig"]);
         emmetCSS(monaco, ["css", "scss", "less"]);
+        emmetJSX(monaco, ["javascript", "typescript"]);
         emmetRegistered = true;
       } catch (e) {
         console.warn("emmet register failed", e);
