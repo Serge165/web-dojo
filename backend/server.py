@@ -43,6 +43,7 @@ class Project(BaseModel):
     name: str
     elements: List[Any] = Field(default_factory=list)
     head_html: str = ""
+    custom_js: str = ""
     canvas_bg: str = "#ffffff"
     fonts: List[str] = Field(default_factory=list)
     files: List[Any] = Field(default_factory=list)
@@ -58,6 +59,7 @@ class ProjectCreate(BaseModel):
     name: str
     elements: List[Any] = []
     head_html: str = ""
+    custom_js: str = ""
     canvas_bg: str = "#ffffff"
     fonts: List[str] = []
     files: List[Any] = []
@@ -70,6 +72,7 @@ class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     elements: Optional[List[Any]] = None
     head_html: Optional[str] = None
+    custom_js: Optional[str] = None
     canvas_bg: Optional[str] = None
     fonts: Optional[List[str]] = None
     files: Optional[List[Any]] = None
@@ -335,6 +338,7 @@ def _active_page(doc: dict) -> dict:
         "head_html": doc.get("head_html") or "",
         "canvas_bg": doc.get("canvas_bg") or "#ffffff",
         "fonts": doc.get("fonts") or [],
+        "custom_js": doc.get("custom_js") or "",
         "seo": {},
     }
 
@@ -350,6 +354,19 @@ RESPONSIVE_CSS = (
     "}</style>"
 )
 
+_SCRIPT_CLOSE_RE = re.compile(r'</script', re.IGNORECASE)
+
+
+def _esc_raw_script(code: str) -> str:
+    """Neutralize a literal '</script' inside raw JS source before splicing
+    it into a <script> block. HTML's script-content parsing rule is purely
+    textual — it ends the block at the first literal "</script" substring
+    it finds, even inside a JS string, comment, or template literal — so
+    this defuses that substring without changing what the code does (a
+    backslash before "/" is a no-op escape in those contexts). Mirrored in
+    frontend/src/lib/escapeHtml.js's escRawScript — keep both in sync."""
+    return _SCRIPT_CLOSE_RE.sub(r'<\\/script', code or "")
+
 
 def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
     p = page or _active_page(doc)
@@ -362,6 +379,8 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
     fonts_link = _build_google_fonts_link(p.get("fonts") or doc.get("fonts") or [])
     head_extra = p.get("head_html") or doc.get("head_html") or ""
     canvas_bg = p.get("canvas_bg") or doc.get("canvas_bg") or "#ffffff"
+    custom_js = p.get("custom_js") or doc.get("custom_js") or ""
+    custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
     seo = p.get("seo") or {}
     seo_head = _seo_head(seo)
     title = seo.get("title") or p.get("name") or doc.get("name") or "Untitled"
@@ -376,6 +395,7 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
         f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
         "</head>\n<body>\n"
         f"{body}\n"
+        f"{custom_js_tag}"
         "</body>\n</html>"
     )
 
@@ -622,6 +642,8 @@ def _build_project_bundle(doc: dict, html_filename: str, css_filename: str):
     fonts_link = _build_google_fonts_link(doc.get("fonts") or [])
     head_extra = doc.get("head_html") or ""
     canvas_bg = doc.get("canvas_bg") or "#ffffff"
+    custom_js = doc.get("custom_js") or ""
+    custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
     name = doc.get("name") or "Untitled"
     styles = f"body{{margin:0;background:{canvas_bg};}}\n" + css_body
     html = (
@@ -635,6 +657,7 @@ def _build_project_bundle(doc: dict, html_filename: str, css_filename: str):
         f'<link rel="stylesheet" href="{css_filename}" />\n'
         "</head>\n<body>\n"
         f"{cleaned_body}\n"
+        f"{custom_js_tag}"
         "</body>\n</html>"
     )
     return html, styles
