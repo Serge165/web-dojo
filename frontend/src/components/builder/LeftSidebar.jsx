@@ -91,6 +91,7 @@ export const LeftSidebar = ({
       </div>
 
       {tab === "library" && (
+        <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto">
           <div className="px-2 pt-2 pb-1.5 sticky top-0 bg-[#141414] z-10 border-b border-[#2B2B2B]">
             <div className="relative">
@@ -227,6 +228,8 @@ export const LeftSidebar = ({
             </div>
           </div>
         </div>
+        {previewNode}
+        </div>
       )}
 
       {tab === "layout" && (
@@ -283,7 +286,6 @@ export const LeftSidebar = ({
           ))}
         </div>
       )}
-      {previewNode}
     </aside>
   );
 };

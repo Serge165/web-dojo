@@ -1,46 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ComponentThumbnail } from "./ComponentThumbnail";
 
-// Shared animated hover-preview for any draggable HTML block card (Library,
-// CDN tools, Forms, Shop, Snippets). Renders the block's real HTML through
-// the same sandboxed-iframe thumbnail already used for the Saved tab, so the
-// preview always matches actual output instead of a hand-built mockup.
+// Shared hover-preview for any draggable HTML block card (Library, CDN
+// tools, Forms, Shop, Snippets). Renders as a docked panel pinned to the
+// bottom of the sidebar tab it's used in — NOT a floating/fixed-position
+// overlay. WebKitGTK (Tauri's Linux renderer, used by the packaged
+// desktop build) does not reliably let a pointer-events:none floating
+// element pass drag-and-drop hit-testing through to whatever's under it
+// the way Chromium does — a floating popup version of this component
+// blocked drag-and-drop in the desktop app even though it worked fine in
+// the browser. A docked panel sidesteps the whole problem: it never
+// overlaps the canvas or any other draggable item, on any renderer.
 export const useHoverPreview = () => {
-  const [preview, setPreview] = useState(null);
-
-  // The preview popover's own pointer-events:none doesn't reliably keep it
-  // out of the way of an HTML5 drag-and-drop operation — iframes (used
-  // here for the live thumbnail) can still intercept dragover/drop hit
-  // testing in some browsers regardless of that CSS, since they have
-  // their own separate rendering/input context. Drop the preview the
-  // instant ANY drag starts anywhere on the page, so it's gone from the
-  // DOM before the user drags over the canvas to drop.
-  useEffect(() => {
-    const onDragStart = () => setPreview(null);
-    document.addEventListener("dragstart", onDragStart);
-    return () => document.removeEventListener("dragstart", onDragStart);
-  }, []);
+  const [preview, setPreview] = useState(null); // { html } | null
 
   const previewProps = (html) => ({
-    onMouseEnter: (e) => {
-      if (!html) return;
-      const r = e.currentTarget.getBoundingClientRect();
-      const left = Math.max(8, r.left - 264 - 14);
-      const top = Math.min(Math.max(8, r.top - 24), window.innerHeight - 236);
-      setPreview({ html, top, left });
-    },
+    onMouseEnter: () => { if (html) setPreview({ html }); },
     onMouseLeave: () => setPreview(null),
   });
 
-  const previewNode = preview && (
-    <div
-      className="fixed z-[9999] pointer-events-none animate-in fade-in-0 zoom-in-95 duration-150"
-      style={{ top: preview.top, left: preview.left }}
-      data-testid="block-hover-preview"
-    >
-      <div className="rounded-lg overflow-hidden shadow-2xl ring-1 ring-black/50 bg-white">
-        <ComponentThumbnail html={preview.html} width={264} height={200} scale={0.22} />
-      </div>
+  const previewNode = (
+    <div className="border-t border-[#2B2B2B] bg-[#0D0D0D] flex-none" data-testid="block-hover-preview">
+      {preview ? (
+        <div className="p-2">
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5">Preview</div>
+          <div className="rounded-lg overflow-hidden border border-[#2B2B2B] bg-white">
+            <ComponentThumbnail html={preview.html} width={232} height={140} scale={0.19} />
+          </div>
+        </div>
+      ) : (
+        <div className="p-3 text-[10px] text-gray-600 text-center">Hover a block to preview it here</div>
+      )}
     </div>
   );
 

@@ -13,7 +13,8 @@ export const FormsTab = ({ onAddBlock, onOpenBuilder }) => {
   const { previewProps, previewNode } = useHoverPreview();
 
   return (
-    <div className="flex-1 overflow-y-auto p-2 space-y-3" data-testid="forms-tab">
+    <div className="flex-1 flex flex-col overflow-hidden" data-testid="forms-tab">
+    <div className="flex-1 overflow-y-auto p-2 space-y-3">
       <button
         onClick={onOpenBuilder}
         className="w-full py-2.5 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs flex items-center justify-center gap-2 font-medium"
@@ -50,6 +51,7 @@ export const FormsTab = ({ onAddBlock, onOpenBuilder }) => {
       <div className="text-[11px] text-gray-500 leading-relaxed px-1 pt-2 border-t border-[#2B2B2B]">
         Presets are portable HTML — set the <span className="font-mono text-gray-400">action</span> URL to your backend, Formspree, Basin, or any endpoint that accepts <span className="font-mono text-gray-400">multipart/form-data</span>.
       </div>
+    </div>
       {previewNode}
     </div>
   );

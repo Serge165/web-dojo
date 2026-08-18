@@ -45,7 +45,8 @@ export const SnippetsTab = ({ onInsertHtml, selectedHtml }) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-2 space-y-3" data-testid="snippets-tab">
+    <div className="flex-1 flex flex-col overflow-hidden" data-testid="snippets-tab">
+    <div className="flex-1 overflow-y-auto p-2 space-y-3">
       <div className="p-2 rounded border border-[#2B2B2B] bg-[#0D0D0D] space-y-2">
         <div className="text-[10px] uppercase tracking-wider text-gray-500">New snippet</div>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500" data-testid="snip-name" />
@@ -83,6 +84,7 @@ export const SnippetsTab = ({ onInsertHtml, selectedHtml }) => {
           </div>
         ))}
       </div>
+    </div>
       {previewNode}
     </div>
   );
