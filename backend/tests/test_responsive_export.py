@@ -32,3 +32,18 @@ class TestResponsiveCss:
         head_close = html.index("</head>")
         css_pos = html.index("@media (max-width: 768px)")
         assert css_pos < head_close
+
+
+class TestCleanExportGridResponsive:
+    def test_strip_inline_styles_adds_responsive_override_for_grid(self):
+        html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">content</div>'
+        transformed, css = server._strip_inline_styles(html)
+        assert 'class="el-0"' in transformed
+        assert ".el-0 { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }" in css
+        assert "@media (max-width: 768px) { .el-0 { grid-template-columns: 1fr !important; } }" in css
+
+    def test_strip_inline_styles_skips_override_for_non_grid_elements(self):
+        html = '<div style="color:red;padding:10px;">content</div>'
+        transformed, css = server._strip_inline_styles(html)
+        assert ".el-0 { color:red;padding:10px; }" in css
+        assert "@media" not in css

@@ -588,7 +588,11 @@ class PublishRequest(BaseModel):
 
 def _strip_inline_styles(body_html: str):
     """Extract inline style attributes into deduplicated CSS classes.
-    Returns (html_with_classes, css_string)."""
+    Returns (html_with_classes, css_string). An extracted rule that sets
+    grid-template-columns also gets a companion responsive override —
+    RESPONSIVE_CSS's generic [style*="grid-template-columns"] selector
+    can't match here since the style attribute this function removes is
+    exactly what it targets."""
     rules = []
     counter = {"n": 0}
 
@@ -596,7 +600,10 @@ def _strip_inline_styles(body_html: str):
         i = counter["n"]
         counter["n"] += 1
         cls = f"el-{i}"
-        rules.append(f".{cls} {{ {match.group(1)} }}")
+        declarations = match.group(1)
+        rules.append(f".{cls} {{ {declarations} }}")
+        if "grid-template-columns" in declarations:
+            rules.append(f"@media (max-width: 768px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
         return f'class="{cls}"'
 
     transformed = re.sub(r'style="([^"]*)"', repl, body_html)

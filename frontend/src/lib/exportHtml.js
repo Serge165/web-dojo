@@ -37,11 +37,18 @@ const pageTitle = (project) => (project.seo && project.seo.title) || project.nam
 
 const stripInlineStyles = (html) => {
   // Extract style attributes, replace with class, and build CSS rules.
+  // A rule that sets grid-template-columns also gets a companion
+  // responsive override — RESPONSIVE_CSS's generic
+  // [style*="grid-template-columns"] selector can't match here since the
+  // style attribute this function removes is exactly what it targets.
   const rules = [];
   let counter = 0;
   const transformed = html.replace(/style="([^"]*)"/g, (_, styles) => {
     const cls = `el-${counter++}`;
     rules.push(`.${cls} { ${styles} }`);
+    if (styles.includes("grid-template-columns")) {
+      rules.push(`@media (max-width: 768px) { .${cls} { grid-template-columns: 1fr !important; } }`);
+    }
     return `class="${cls}"`;
   });
   return { html: transformed, css: rules.join("\n") };
