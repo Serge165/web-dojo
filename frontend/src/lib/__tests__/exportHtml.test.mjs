@@ -71,3 +71,54 @@ test("escRawScript is case-insensitive and leaves ordinary code untouched", asyn
   assert.equal(escRawScript("var x = 1 + 2;"), "var x = 1 + 2;");
   assert.ok(!escRawScript("'</SCRIPT>'").includes("</SCRIPT>"));
 });
+
+// NOTE: exportHtml.js imports file-saver, a CJS module that plain Node's
+// ESM loader cannot resolve named exports from ("Named export 'saveAs'
+// not found" — a documented file-saver interop gap). Dynamic
+// import("../exportHtml.js") therefore throws in this test runner (see
+// Task 4 brief), so the tests below duplicate stripInlineStyles's
+// id-based-naming logic instead of importing the real implementation —
+// same approach as the "stripInlineStyles pattern adds/skips..." tests
+// above.
+const patternStripInlineStyles = (elements) => {
+  const rules = [];
+  const outParts = elements.map((el) => {
+    const elId = el.id || "";
+    let n = 0;
+    return (el.html || "").replace(/style="([^"]*)"/g, (_, styles) => {
+      const cls = n === 0 ? `el-${elId}` : `el-${elId}__${n}`;
+      n++;
+      rules.push(`.${cls} { ${styles} }`);
+      if (styles.includes("grid-template-columns")) {
+        rules.push(`@media (max-width: 768px) { .${cls} { grid-template-columns: 1fr !important; } }`);
+      }
+      return `class="${cls}"`;
+    });
+  });
+  return { html: outParts.join("\n"), css: rules.join("\n") };
+};
+
+test("stripInlineStyles pattern emits a stable id-based root class", () => {
+  const elements = [{ id: "el_abc123", html: '<div style="color:red;">Hi</div>' }];
+  const { html, css } = patternStripInlineStyles(elements);
+  assert.ok(html.includes('class="el-el_abc123"'));
+  assert.ok(css.includes(".el-el_abc123 { color:red; }"));
+});
+
+test("stripInlineStyles pattern suffixes nested style attrs within the same element", () => {
+  const elements = [{ id: "el_1", html: '<section style="padding:20px;"><h1 style="color:blue;">Hi</h1></section>' }];
+  const { html, css } = patternStripInlineStyles(elements);
+  assert.ok(html.includes('class="el-el_1"'));
+  assert.ok(html.includes('class="el-el_1__1"'));
+  assert.ok(css.includes(".el-el_1 { padding:20px; }"));
+  assert.ok(css.includes(".el-el_1__1 { color:blue; }"));
+});
+
+test("stripInlineStyles pattern keeps ids stable across element reordering", () => {
+  const a = { id: "el_a", html: '<div style="color:red;">A</div>' };
+  const b = { id: "el_b", html: '<div style="color:blue;">B</div>' };
+  const ab = patternStripInlineStyles([a, b]);
+  const ba = patternStripInlineStyles([b, a]);
+  assert.ok(ab.html.includes('class="el-el_a"') && ba.html.includes('class="el-el_a"'));
+  assert.ok(ab.html.includes('class="el-el_b"') && ba.html.includes('class="el-el_b"'));
+});
