@@ -653,8 +653,14 @@ alongside any extracted rule that sets grid-template-columns."
 
 Visual confirmation of actual mobile rendering needs the project owner —
 no browser is available in this sandbox. Verify via the app's own
-mobile-viewport preview toggle (390px) after all three tasks land: open a
-project with a feature grid or pricing table block, switch to mobile
-preview, confirm the grid collapses to one column — and separately export
-via both "Standalone HTML" and "Clean HTML + CSS zip" to confirm both
-paths produce a responsive grid.
+**Preview mode** (Design/Code/Preview toggle at the top of the center
+pane, not the Design-mode canvas) with the viewport switcher set to
+mobile (390px): open a project with a feature grid or pricing table
+block, switch to Preview mode, confirm the grid collapses to one column.
+Note: the Design-mode canvas does NOT show this — it renders elements
+into a plain-width div in the app's own DOM with no RESPONSIVE_CSS
+injected and a media query keyed to the real browser viewport, not the
+390px simulated width, so checking there will produce a false negative.
+Separately export via both "Standalone HTML" and "Clean HTML + CSS zip"
+to confirm both paths produce a responsive grid (the exported HTML file's
+`<head>` should contain the `@media (max-width: 768px)` block either way).

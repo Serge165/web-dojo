@@ -338,6 +338,11 @@ def _active_page(doc: dict) -> dict:
         "seo": {},
     }
 
+
+# Mirrored in frontend/src/lib/responsiveCss.js as RESPONSIVE_CSS — the two
+# HTML-assembly paths (backend preview/publish, frontend export) don't
+# share code, so this constant is intentionally duplicated. Keep both in
+# sync if you change this.
 RESPONSIVE_CSS = (
     "<style>@media (max-width: 768px) {"
     "[style*=\"grid-template-columns\"] { grid-template-columns: 1fr !important; }"
