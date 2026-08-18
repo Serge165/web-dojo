@@ -1,7 +1,6 @@
 """Pure-function tests for the SQLite Motor-compat shim, against a
 temp-file DB per test — no mocking, matches this codebase's existing
 pytest style."""
-import asyncio
 import os
 import tempfile
 
@@ -37,6 +36,22 @@ async def test_update_one_set(db):
     got = await db.things.find_one({"id": "a1"})
     assert got["count"] == 2
     assert got["name"] == "Alpha"
+
+
+@pytest.mark.asyncio
+async def test_update_one_upsert_inserts_when_no_match(db):
+    await db.templates.update_one({"id": "t1"}, {"$set": {"id": "t1", "name": "Starter"}}, upsert=True)
+    got = await db.templates.find_one({"id": "t1"})
+    assert got == {"id": "t1", "name": "Starter"}
+
+
+@pytest.mark.asyncio
+async def test_update_one_upsert_updates_when_match_exists(db):
+    await db.templates.insert_one({"id": "t1", "name": "Old"})
+    await db.templates.update_one({"id": "t1"}, {"$set": {"name": "New"}}, upsert=True)
+    got = await db.templates.find_one({"id": "t1"})
+    assert got == {"id": "t1", "name": "New"}
+    assert await db.templates.count_documents({}) == 1
 
 
 @pytest.mark.asyncio

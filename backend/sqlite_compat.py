@@ -125,7 +125,7 @@ class SqliteCollection:
             await conn.commit()
         return doc
 
-    async def update_one(self, filt: dict, update: dict):
+    async def update_one(self, filt: dict, update: dict, upsert: bool = False):
         patch = update.get("$set", {})
         async with aiosqlite.connect(self._db_path) as conn:
             await self._ensure_table(conn)
@@ -137,6 +137,21 @@ class SqliteCollection:
                     await conn.execute(f'UPDATE "{self._name}" SET doc = ? WHERE id = ?', (json.dumps(doc, default=str), row_id))
                     await conn.commit()
                     return
+            if upsert:
+                # No match: insert a new doc from the filter's equality
+                # fields plus the $set patch, mirroring Mongo's upsert
+                # behavior. The patch normally already carries every
+                # field the filter matched on (e.g. update_one({"id": x},
+                # {"$set": {"id": x, ...}}, upsert=True)), so this is
+                # mostly patch-wins-on-conflict for the general case.
+                new_doc = {**filt, **patch}
+                if "id" not in new_doc:
+                    raise ValueError("sqlite_compat upsert requires an 'id' field to key the new row")
+                await conn.execute(
+                    f'INSERT INTO "{self._name}" (id, doc) VALUES (?, ?)',
+                    (new_doc["id"], json.dumps(new_doc, default=str)),
+                )
+                await conn.commit()
         return
 
     async def delete_one(self, filt: dict):
