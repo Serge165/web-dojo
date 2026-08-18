@@ -1031,6 +1031,8 @@ async def create_submission(request: Request):
 
 @api_router.get("/submissions", response_model=List[Submission])
 async def list_submissions(project_id: Optional[str] = None, form_name: Optional[str] = None):
+    if not project_id and not form_name:
+        raise HTTPException(status_code=400, detail="project_id or form_name is required")
     query: dict = {}
     if project_id:
         query["project_id"] = project_id
@@ -1050,8 +1052,14 @@ async def delete_submission(submission_id: str):
 
 
 @api_router.delete("/submissions")
-async def clear_submissions(form_name: Optional[str] = None):
-    query = {"form_name": form_name} if form_name else {}
+async def clear_submissions(form_name: Optional[str] = None, project_id: Optional[str] = None):
+    if not form_name and not project_id:
+        raise HTTPException(status_code=400, detail="project_id or form_name is required")
+    query: dict = {}
+    if project_id:
+        query["project_id"] = project_id
+    if form_name:
+        query["form_name"] = form_name
     res = await db.submissions.delete_many(query)
     return {"ok": True, "deleted": res.deleted_count}
 

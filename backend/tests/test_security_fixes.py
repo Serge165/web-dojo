@@ -171,7 +171,10 @@ class TestPublicCORSOverride:
                 return FakeCursor()
 
         monkeypatch.setattr(server.db, "submissions", FakeCollection())
-        r = client.get("/api/submissions", headers={"Origin": "https://evil.example"})
+        # Round 2 (task 1) requires a project_id/form_name filter on this
+        # endpoint; supply one so this test still reaches a 200 and keeps
+        # verifying its actual concern — no CORS header leak to a foreign origin.
+        r = client.get("/api/submissions", params={"project_id": "abc"}, headers={"Origin": "https://evil.example"})
         assert r.status_code == 200
         assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
 

@@ -8,21 +8,22 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Lightweight form-backend inbox. Every form built in Web Dojo posts here, so
 // deployed/previewed demo sites capture real submissions the user can read.
-export const SubmissionsModal = ({ open, onClose }) => {
+export const SubmissionsModal = ({ open, onClose, projectId }) => {
   const [subs, setSubs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [group, setGroup] = useState("__all__");
 
   const load = async () => {
+    if (!projectId) { setSubs([]); return; }
     setLoading(true);
     try {
-      const r = await axios.get(`${API}/submissions`);
+      const r = await axios.get(`${API}/submissions`, { params: { project_id: projectId } });
       setSubs(r.data || []);
     } catch { toast.error("Failed to load submissions"); }
     setLoading(false);
   };
 
-  useEffect(() => { if (open) { load(); setGroup("__all__"); } }, [open]);
+  useEffect(() => { if (open) { load(); setGroup("__all__"); } }, [open, projectId]);
 
   const groups = useMemo(() => {
     const m = new Map();
@@ -122,9 +123,11 @@ export const SubmissionsModal = ({ open, onClose }) => {
             {!loading && visible.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center py-16" data-testid="submissions-empty">
                 <Inbox size={40} className="text-gray-700 mb-3" />
-                <div className="text-sm text-gray-300 font-medium">No submissions yet</div>
+                <div className="text-sm text-gray-300 font-medium">{projectId ? "No submissions yet" : "Save this project first"}</div>
                 <div className="text-xs text-gray-500 mt-1 max-w-sm leading-relaxed">
-                  Build a form (Forms tab → Open form builder) and insert it. When visitors submit it on your published or previewed site, entries land here.
+                  {projectId
+                    ? "Build a form (Forms tab → Open form builder) and insert it. When visitors submit it on your published or previewed site, entries land here."
+                    : "The inbox shows submissions for this project. Save it once, then submissions will appear here."}
                 </div>
               </div>
             )}

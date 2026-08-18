@@ -827,6 +827,7 @@ export default function Builder() {
       <SubmissionsModal
         open={submissionsOpen}
         onClose={() => setSubmissionsOpen(false)}
+        projectId={projectId}
       />
 
       <OnboardingTour key={tourForce} force={tourForce > 0} />
