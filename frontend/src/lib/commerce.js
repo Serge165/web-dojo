@@ -1,4 +1,4 @@
-import { escAttr, escText } from "./escapeHtml.js";
+import { escAttr, escText, escJsScript } from "./escapeHtml.js";
 
 // Payment button + ecommerce block builders. Output is portable HTML that runs
 // fully client-side on exported/published static pages.
@@ -32,7 +32,7 @@ export const paypalButtonHtml = ({ clientId, amount, currency = "USD", label = "
         window.paypal.Buttons({
           style:{layout:'vertical',color:'gold',shape:'pill',label:'paypal'},
           createOrder:function(data,actions){
-            return actions.order.create({purchase_units:[{amount:{value:'${Number(amount).toFixed(2)}',currency_code:'${cur}'},description:${JSON.stringify(label)}}]});
+            return actions.order.create({purchase_units:[{amount:{value:'${Number(amount).toFixed(2)}',currency_code:'${cur}'},description:${escJsScript(label)}}]});
           },
           onApprove:function(data,actions){
             return actions.order.capture().then(function(details){

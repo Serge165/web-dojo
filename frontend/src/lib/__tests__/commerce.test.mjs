@@ -23,3 +23,11 @@ test("paypalButtonHtml escapes clientId in the script src attribute", () => {
   assert.ok(!html.includes('client-id="><script>alert(1)</script>'), "clientId must not break out of src attribute");
   assert.ok(html.includes("&quot;&gt;&lt;script&gt;"), "clientId must be escaped");
 });
+
+test("paypalButtonHtml prevents </script> breakout via label", () => {
+  const html = paypalButtonHtml({ clientId: "abc", amount: 10, currency: "USD", label: "</script><script>alert(1)</script>" });
+  const scriptBlocks = html.match(/<script[^>]*>[\s\S]*?<\/script>/g) || [];
+  // Only the two legitimate <script> tags (SDK src tag + the inline handler) should exist —
+  // if the label broke out, there would be a third, attacker-injected one.
+  assert.equal(scriptBlocks.length, 2);
+});

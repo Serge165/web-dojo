@@ -1,5 +1,5 @@
 import React from "react";
-import { escAttr, escText } from "@/lib/escapeHtml";
+import { escAttr, escText, unescapeHtml } from "@/lib/escapeHtml";
 
 // ============================================================
 // Small string helpers that let us edit a raw HTML fragment via
@@ -58,10 +58,12 @@ export const parseNum = (v, fallback = 0) => {
 };
 
 // Read a specific HTML attribute value from the first tag that has it.
+// Unescapes what setAttr escaped, so editing an already-set value (e.g. a
+// URL containing &) round-trips instead of re-escaping on every keystroke.
 export const readAttr = (html, attr) => {
   const re = new RegExp(`${attr}="([^"]*)"`);
   const m = html && html.match(re);
-  return m ? m[1] : "";
+  return m ? unescapeHtml(m[1]) : "";
 };
 
 // Replace or add an attribute on the first tag of the fragment. If the
@@ -91,7 +93,7 @@ export const readInnerText = (html, tag) => {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i");
   const m = html && html.match(re);
   if (!m) return "";
-  return m[1].replace(/<[^>]+>/g, "").trim();
+  return unescapeHtml(m[1].replace(/<[^>]+>/g, "").trim());
 };
 
 // Rough detection: what kind of element is the user editing?
