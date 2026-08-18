@@ -129,3 +129,28 @@ class TestPublishFilenameTraversal:
             "html_filename": "index.html", "css_filename": "styles.css",
         })
         assert r.status_code != 400
+
+
+class TestSubmissionBodySizeLimit:
+    def test_oversized_submission_rejected(self, client):
+        huge_value = "x" * 1_100_000
+        r = client.post(
+            "/api/submissions",
+            json={"message": huge_value},
+            headers={"Accept": "application/json"},
+        )
+        assert r.status_code == 413
+
+    def test_normal_sized_submission_not_rejected(self, client, monkeypatch):
+        class FakeCollection:
+            async def insert_one(self, *a, **kw):
+                return None
+
+        monkeypatch.setattr(server.db, "submissions", FakeCollection())
+        r = client.post(
+            "/api/submissions",
+            json={"name": "Jane", "message": "hello"},
+            headers={"Accept": "application/json"},
+        )
+        assert r.status_code == 200
+        assert r.json()["ok"] is True

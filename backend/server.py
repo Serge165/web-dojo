@@ -979,8 +979,32 @@ class Submission(BaseModel):
 
 _RESERVED_SUB_KEYS = {"_wd_form", "_wd_form_id", "_wd_page", "_wd_title", "_wd_project"}
 
+_MAX_SUBMISSION_BYTES = 1_000_000  # 1 MB — generous for a form submission, small enough to bound memory
+
+
+async def _cap_request_body(request: Request, max_bytes: int) -> None:
+    """Read the request body once, aborting as soon as it exceeds max_bytes
+    (bounds memory even without a truthful Content-Length header), and
+    cache it on the request so the later request.json()/request.form()
+    calls reuse it instead of re-reading the now-exhausted ASGI stream —
+    this is the same caching Starlette's own Request.body() does
+    internally (see starlette/requests.py: stream() yields self._body
+    directly when it's already set)."""
+    content_length = request.headers.get("content-length")
+    if content_length and content_length.isdigit() and int(content_length) > max_bytes:
+        raise HTTPException(status_code=413, detail="Submission too large")
+    chunks = []
+    total = 0
+    async for chunk in request.stream():
+        total += len(chunk)
+        if total > max_bytes:
+            raise HTTPException(status_code=413, detail="Submission too large")
+        chunks.append(chunk)
+    request._body = b"".join(chunks)
+
 
 async def _extract_submission(request: Request) -> Submission:
+    await _cap_request_body(request, _MAX_SUBMISSION_BYTES)
     ctype = (request.headers.get("content-type") or "").lower()
     meta: dict = {}
     data: dict = {}
@@ -1032,6 +1056,8 @@ _THANK_YOU_HTML = (
 async def create_submission(request: Request):
     try:
         sub = await _extract_submission(request)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not read form data: {type(e).__name__}")
     if not sub.data:
