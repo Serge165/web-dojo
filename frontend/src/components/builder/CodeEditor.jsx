@@ -15,12 +15,20 @@ let emmetRegistered = false;
 
 export const CodeEditor = ({ value, onChange, language = "html", readOnly = false, height = "100%", testId, onSave }) => {
   const editorRef = useRef(null);
+  // onMount fires exactly once per editor instance (@monaco-editor/react
+  // semantics), so the Ctrl+S command it registers below must not close
+  // over `onSave` directly — that would freeze whatever save-callback
+  // happened to exist at mount time forever, even though CodeView
+  // recreates handleSave (closing over fresh elements/htmlText/cssText)
+  // on every render. Route through a ref that's kept current instead.
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
 
   const handleMount = (editor, monaco) => {
     editorRef.current = editor;
-    if (onSave) {
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, onSave);
-    }
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      onSaveRef.current && onSaveRef.current();
+    });
     if (!emmetRegistered) {
       // Register emmet abbreviation expansion (Tab) for HTML, CSS, and
       // JS/TS. JS/TS use the dedicated emmetJSX engine (className=, JSX

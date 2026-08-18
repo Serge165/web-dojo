@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CodeEditor } from "./CodeEditor";
 import { buildStandaloneHtml, stripInlineStyles } from "@/lib/exportHtml";
 import { reconcileElementsFromCss } from "@/lib/cssPaneSync";
@@ -44,6 +44,12 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
   useEffect(() => {
     if (elements === lastAppliedElementsRef.current) return;
     lastAppliedElementsRef.current = elements;
+    // A genuine external change (undo/redo, page switch, Design-mode
+    // canvas edit) invalidates any pending debounced pane edit — it was
+    // going to reconcile against the OLD base and, if left armed, would
+    // later fire and stomp this new external state with stale data.
+    clearTimeout(htmlDebounceRef.current); htmlDebounceRef.current = null;
+    clearTimeout(cssDebounceRef.current); cssDebounceRef.current = null;
     setHtmlText(joinElementsHtml(elements));
     setCssText(stripInlineStyles(elements).css);
   }, [elements]);
@@ -62,7 +68,13 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
     setHtmlText(value);
     clearTimeout(htmlDebounceRef.current);
     htmlDebounceRef.current = setTimeout(() => {
-      commitElements(reconcileElementsFromHtml(elements, parseTopLevelNodes(value), uidForNewBlocks));
+      htmlDebounceRef.current = null;
+      // Reconcile against lastAppliedElementsRef.current (the latest
+      // committed base), not the `elements` prop closed over when this
+      // callback was created — if the CSS pane committed a change while
+      // this timer was pending, `elements` here is stale and reconciling
+      // against it would silently discard that CSS commit.
+      commitElements(reconcileElementsFromHtml(lastAppliedElementsRef.current, parseTopLevelNodes(value), uidForNewBlocks));
     }, SYNC_DEBOUNCE_MS);
   };
 
@@ -70,7 +82,8 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
     setCssText(value);
     clearTimeout(cssDebounceRef.current);
     cssDebounceRef.current = setTimeout(() => {
-      commitElements(reconcileElementsFromCss(elements, value));
+      cssDebounceRef.current = null;
+      commitElements(reconcileElementsFromCss(lastAppliedElementsRef.current, value));
     }, SYNC_DEBOUNCE_MS);
   };
 
@@ -80,12 +93,12 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
     if (htmlDebounceRef.current) {
       clearTimeout(htmlDebounceRef.current);
       htmlDebounceRef.current = null;
-      commitElements(reconcileElementsFromHtml(elements, parseTopLevelNodes(htmlText), uidForNewBlocks));
+      commitElements(reconcileElementsFromHtml(lastAppliedElementsRef.current, parseTopLevelNodes(htmlText), uidForNewBlocks));
     }
     if (cssDebounceRef.current) {
       clearTimeout(cssDebounceRef.current);
       cssDebounceRef.current = null;
-      commitElements(reconcileElementsFromCss(elements, cssText));
+      commitElements(reconcileElementsFromCss(lastAppliedElementsRef.current, cssText));
     }
   };
   const handleSave = () => { flushPending(); onSave && onSave(); };
