@@ -2,6 +2,8 @@
 // Output is a self-contained block (scoped <style> + inline SVG icons + a tiny
 // script that points share links at the current page). Summer-2026 platform set.
 
+import { escAttr } from "./escapeHtml.js";
+
 const P = (id, name, color, share, placeholder, icon) => ({ id, name, color, share, placeholder, icon });
 
 // share === null => follow-only (no page-share endpoint).
@@ -67,7 +69,7 @@ export const buildSocialHtml = (cfg) => {
     const label = labels ? `<span>${p.name}</span>` : "";
     if (mode === "follow") {
       const href = (it.url || p.placeholder);
-      return `<a class="${id}-i" style="--c:${p.color};" href="${href}" target="_blank" rel="noopener" aria-label="${p.name}">${svg(p.icon)}${label}</a>`;
+      return `<a class="${id}-i" style="--c:${p.color};" href="${escAttr(href)}" target="_blank" rel="noopener" aria-label="${p.name}">${svg(p.icon)}${label}</a>`;
     }
     if (!p.share) return "";
     const tmpl = p.share;
