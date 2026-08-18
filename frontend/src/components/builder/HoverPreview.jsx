@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ComponentThumbnail } from "./ComponentThumbnail";
 
 // Shared animated hover-preview for any draggable HTML block card (Library,
@@ -7,6 +7,19 @@ import { ComponentThumbnail } from "./ComponentThumbnail";
 // preview always matches actual output instead of a hand-built mockup.
 export const useHoverPreview = () => {
   const [preview, setPreview] = useState(null);
+
+  // The preview popover's own pointer-events:none doesn't reliably keep it
+  // out of the way of an HTML5 drag-and-drop operation — iframes (used
+  // here for the live thumbnail) can still intercept dragover/drop hit
+  // testing in some browsers regardless of that CSS, since they have
+  // their own separate rendering/input context. Drop the preview the
+  // instant ANY drag starts anywhere on the page, so it's gone from the
+  // DOM before the user drags over the canvas to drop.
+  useEffect(() => {
+    const onDragStart = () => setPreview(null);
+    document.addEventListener("dragstart", onDragStart);
+    return () => document.removeEventListener("dragstart", onDragStart);
+  }, []);
 
   const previewProps = (html) => ({
     onMouseEnter: (e) => {
