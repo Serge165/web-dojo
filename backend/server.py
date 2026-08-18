@@ -27,9 +27,14 @@ from urllib.parse import urlsplit, urljoin
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+if os.environ.get("DB_BACKEND") == "sqlite":
+    from sqlite_compat import SqliteClient
+    client = SqliteClient(os.environ["SQLITE_PATH"])
+    db = client[os.environ.get("DB_NAME", "webdojo")]
+else:
+    mongo_url = os.environ['MONGO_URL']
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[os.environ['DB_NAME']]
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
