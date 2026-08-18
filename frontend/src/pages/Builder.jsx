@@ -146,6 +146,7 @@ export default function Builder() {
   const activePage = useMemo(() => pages.find((p) => p.id === activePageId) || pages[0], [pages, activePageId]);
 
   const project = {
+    id: projectId,
     name: projectName,
     // legacy top-level fields mirror the active page for backward compat
     elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files,

@@ -14,6 +14,7 @@ import ftplib
 import ssl
 from pathlib import Path
 import uuid
+import json
 from datetime import datetime, timezone
 from cryptography.fernet import Fernet
 import stripe
@@ -357,6 +358,7 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
         "<meta charset=\"utf-8\" />\n"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
         f"<title>{title}</title>\n"
+        f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
         f"{fonts_link}\n{seo_head}\n{head_extra}\n"
         f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
         "</head>\n<body>\n"
@@ -607,6 +609,7 @@ def _build_project_bundle(doc: dict, html_filename: str, css_filename: str):
         "<meta charset=\"utf-8\" />\n"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
         f"<title>{name}</title>\n"
+        f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
         f"{fonts_link}\n{head_extra}\n"
         f'<link rel="stylesheet" href="{css_filename}" />\n'
         "</head>\n<body>\n"

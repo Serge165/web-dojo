@@ -154,3 +154,38 @@ class TestSubmissionBodySizeLimit:
         )
         assert r.status_code == 200
         assert r.json()["ok"] is True
+
+    def test_oversized_multipart_submission_rejected(self, client):
+        huge_value = "x" * 1_100_000
+        r = client.post(
+            "/api/submissions",
+            files={"message": (None, huge_value)},
+            headers={"Accept": "application/json"},
+        )
+        assert r.status_code == 413
+
+    def test_normal_multipart_submission_not_rejected(self, client, monkeypatch):
+        class FakeCollection:
+            async def insert_one(self, *a, **kw):
+                return None
+
+        monkeypatch.setattr(server.db, "submissions", FakeCollection())
+        r = client.post(
+            "/api/submissions",
+            files={"name": (None, "Jane"), "message": (None, "hello")},
+            headers={"Accept": "application/json"},
+        )
+        assert r.status_code == 200
+        assert r.json()["ok"] is True
+
+
+class TestProjectIdInjection:
+    def test_project_to_html_injects_project_id(self):
+        doc = {"id": "proj-123", "name": "Test", "elements": [], "fonts": [], "pages": []}
+        html = server._project_to_html(doc)
+        assert '<script>window.__WD_PROJECT_ID="proj-123";</script>' in html
+
+    def test_build_project_bundle_injects_project_id(self):
+        doc = {"id": "proj-456", "name": "Test", "elements": [], "fonts": []}
+        html, _css = server._build_project_bundle(doc, "index.html", "styles.css")
+        assert '<script>window.__WD_PROJECT_ID="proj-456";</script>' in html

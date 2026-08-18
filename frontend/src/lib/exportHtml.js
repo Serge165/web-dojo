@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { escAttr, escText } from "./escapeHtml";
+import { escAttr, escText } from "./escapeHtml.js";
 
 const buildFontLinks = (fonts) => {
   if (!fonts || fonts.length === 0) return "";
@@ -56,6 +56,7 @@ export const buildStandaloneHtml = (project) => {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escText(pageTitle(project))}</title>
+<script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
 ${seoMeta}
 ${fonts}
 ${project.head_html || ""}
@@ -106,6 +107,7 @@ export const buildCleanExport = (project) => {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escText(pageTitle(project))}</title>
+<script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
 ${seoMeta}
 ${fonts}
 ${project.head_html || ""}
