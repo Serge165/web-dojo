@@ -227,3 +227,11 @@ class SqliteClient:
 
     def __getitem__(self, db_name: str) -> SqliteDatabase:
         return SqliteDatabase(self._path)
+
+    def close(self):
+        # Motor's AsyncIOMotorClient.close() tears down its connection
+        # pool; this shim opens/closes a connection per call (see module
+        # docstring), so there's nothing persistent to release here.
+        # Only exists so server.py's shutdown handler can call it
+        # unconditionally regardless of which client backend is active.
+        pass
