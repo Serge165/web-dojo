@@ -1,4 +1,5 @@
 import React from "react";
+import { escAttr, escText } from "@/lib/escapeHtml";
 
 // ============================================================
 // Small string helpers that let us edit a raw HTML fragment via
@@ -65,18 +66,25 @@ export const readAttr = (html, attr) => {
 
 // Replace or add an attribute on the first tag of the fragment. If the
 // attribute already exists anywhere, only the first occurrence changes.
+// `value` is escaped, and passed to String.replace as a replacer
+// FUNCTION (not a raw string) — a raw-string second argument to
+// String.replace interprets sequences like $&, $', $1 as replacement
+// patterns rather than literal text, silently corrupting output if the
+// user's value happens to contain one.
 export const setAttr = (html, attr, value) => {
+  const safe = escAttr(value);
   const re = new RegExp(`(<[a-zA-Z][^>]*?\\s)${attr}="[^"]*"`);
-  if (re.test(html)) return html.replace(re, `$1${attr}="${value}"`);
+  if (re.test(html)) return html.replace(re, (_match, prefix) => `${prefix}${attr}="${safe}"`);
   // Inject the attribute right after the opening tag name.
-  return html.replace(/<([a-zA-Z][a-zA-Z0-9]*)/, `<$1 ${attr}="${value}"`);
+  return html.replace(/<([a-zA-Z][a-zA-Z0-9]*)/, (_match, tag) => `<${tag} ${attr}="${safe}"`);
 };
 
 // Replace the inner text between the first matching open/close tag.
 export const setInnerText = (html, tag, text) => {
+  const safe = escText(text);
   const re = new RegExp(`(<${tag}[^>]*>)([\\s\\S]*?)(</${tag}>)`, "i");
   if (!re.test(html)) return html;
-  return html.replace(re, `$1${text}$3`);
+  return html.replace(re, (_match, open, _mid, close) => `${open}${safe}${close}`);
 };
 
 export const readInnerText = (html, tag) => {
