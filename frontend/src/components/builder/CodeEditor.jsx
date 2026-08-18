@@ -13,11 +13,14 @@ loader.config({ monaco });
 
 let emmetRegistered = false;
 
-export const CodeEditor = ({ value, onChange, language = "html", readOnly = false, height = "100%", testId }) => {
+export const CodeEditor = ({ value, onChange, language = "html", readOnly = false, height = "100%", testId, onSave }) => {
   const editorRef = useRef(null);
 
   const handleMount = (editor, monaco) => {
     editorRef.current = editor;
+    if (onSave) {
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, onSave);
+    }
     if (!emmetRegistered) {
       // Register emmet abbreviation expansion (Tab) for HTML, CSS, and
       // JS/TS. JS/TS use the dedicated emmetJSX engine (className=, JSX
