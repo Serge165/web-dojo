@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
+import { useHoverPreview } from "./HoverPreview";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -34,6 +35,8 @@ export const SnippetsTab = ({ onInsertHtml, selectedHtml }) => {
     } catch { toast.error("Delete failed"); }
   };
 
+  const { previewProps, previewNode } = useHoverPreview();
+
   const captureFromSelection = () => {
     if (!selectedHtml) { toast.error("Select an element on the canvas first"); return; }
     setContent(selectedHtml);
@@ -64,6 +67,7 @@ export const SnippetsTab = ({ onInsertHtml, selectedHtml }) => {
             draggable
             onDragStart={(e) => { e.dataTransfer.setData("text/html-block", s.content); e.dataTransfer.effectAllowed = "copy"; }}
             onDoubleClick={() => onInsertHtml(s.content)}
+            {...(s.language === "html" ? previewProps(s.content) : {})}
             className="rounded border border-[#2B2B2B] bg-[#1F1F1F] hover:border-blue-500/60 cursor-grab group"
             data-testid={`snippet-${s.id}`}
             title="Drag onto canvas or double-click"
@@ -79,6 +83,7 @@ export const SnippetsTab = ({ onInsertHtml, selectedHtml }) => {
           </div>
         ))}
       </div>
+      {previewNode}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { CreditCard, ShoppingBag, ShoppingCart, Plus } from "lucide-react";
 import { COMMERCE_BLOCKS } from "@/lib/commerce";
 import { buildCartRuntimeHtml, buildAddToCartButton } from "@/lib/cart";
+import { useHoverPreview } from "./HoverPreview";
 
 const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-emerald-500";
 const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
@@ -17,6 +18,7 @@ export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog })
   const [pImg, setPImg] = useState("");
 
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
+  const { previewProps, previewNode } = useHoverPreview();
 
   const addCart = () => {
     onAddBlock(buildCartRuntimeHtml({ accent, currency: cur, paypalClientId: paypal.trim() }));
@@ -76,7 +78,7 @@ export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog })
         <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-2 flex items-center gap-1.5"><ShoppingBag size={12} /> Store blocks</div>
         <div className="space-y-1.5">
           {COMMERCE_BLOCKS.map((b) => (
-            <div key={b.id} draggable onDragStart={(e) => onDragStart(e, b.html)} onDoubleClick={() => onAddBlock(b.html)} className="rounded bg-[#1F1F1F] border border-[#2B2B2B] p-2 flex items-center gap-2 cursor-grab hover:border-emerald-500/60 hover:bg-[#232323] transition-colors" data-testid={`commerce-block-${b.id}`} title="Drag to canvas or double-click to insert">
+            <div key={b.id} draggable onDragStart={(e) => onDragStart(e, b.html)} onDoubleClick={() => onAddBlock(b.html)} {...previewProps(b.html)} className="rounded bg-[#1F1F1F] border border-[#2B2B2B] p-2 flex items-center gap-2 cursor-grab hover:border-emerald-500/60 hover:bg-[#232323] transition-colors" data-testid={`commerce-block-${b.id}`} title="Drag to canvas or double-click to insert">
               <div className="w-1 h-4 bg-emerald-500/60 rounded-full" />
               <span className="text-xs text-gray-200 flex-1 truncate">{b.label}</span>
               <Plus size={12} className="text-gray-500" />
@@ -85,6 +87,7 @@ export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog })
         </div>
         <p className="text-[11px] text-gray-500 mt-3 leading-relaxed">Want full shop pages? Open <b className="text-gray-300">+ Page → Shop</b> for catalog, product & working-cart layouts.</p>
       </div>
+      {previewNode}
     </div>
   );
 };

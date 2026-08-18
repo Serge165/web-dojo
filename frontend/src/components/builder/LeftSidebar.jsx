@@ -8,6 +8,7 @@ import { SnippetsTab } from "./SnippetsTab";
 import { FormsTab } from "./FormsTab";
 import { CommerceTab } from "./CommerceTab";
 import { cdnComponentGroups } from "@/lib/cdnComponents";
+import { useHoverPreview } from "./HoverPreview";
 
 export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
@@ -43,12 +44,14 @@ export const LeftSidebar = ({
 
   const toggle = (k) => setOpen((s) => ({ ...s, [k]: !s[k] }));
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
+  const { previewProps, previewNode } = useHoverPreview();
 
   const BlockItem = ({ label, html, testId, onDelete }) => (
     <div
       draggable
       onDragStart={(e) => onDragStart(e, html)}
       onDoubleClick={() => onAddBlock(html)}
+      {...previewProps(html)}
       className="rounded bg-[#1F1F1F] border border-[#2B2B2B] p-2 flex items-center gap-2 cursor-grab hover:border-blue-500/60 hover:bg-[#232323] transition-colors group"
       data-testid={testId}
       title="Drag to canvas or double-click to insert"
@@ -280,6 +283,7 @@ export const LeftSidebar = ({
           ))}
         </div>
       )}
+      {previewNode}
     </aside>
   );
 };
