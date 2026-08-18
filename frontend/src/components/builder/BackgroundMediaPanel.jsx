@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Music } from "lucide-react";
 import { toast } from "sonner";
+import { escAttr, escText } from "@/lib/escapeHtml";
 
 const SIZE_OPTIONS = [
   { label: "cover", value: "cover" },
@@ -27,14 +28,14 @@ const buildMusicHtml = ({ type, url, label, accent, corner, autoplay, loop }) =>
   if (type === "midi") {
     return `<div data-webdojo-music="midi" style="position:fixed;${pos}z-index:99999;background:#0f0f16;padding:10px 12px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35);font-family:system-ui,-apple-system,sans-serif;">
   <script src="${MIDI_CDN}"></script>
-  <midi-player src="${url}" sound-font ${loop ? "loop " : ""}style="width:260px;display:block;"></midi-player>
+  <midi-player src="${escAttr(url)}" sound-font ${loop ? "loop " : ""}style="width:260px;display:block;"></midi-player>
 </div>`;
   }
   const aid = "wdm" + Math.random().toString(36).slice(2, 7);
   return `<div data-webdojo-music="audio" style="position:fixed;${pos}z-index:99999;font-family:system-ui,-apple-system,sans-serif;">
-  <audio id="${aid}" src="${url}" ${loop ? "loop " : ""}${autoplay ? "autoplay " : ""}preload="auto"></audio>
-  <button type="button" onclick="var a=document.getElementById('${aid}');var s=this.querySelector('span');if(a.paused){a.play();s.textContent='Pause';}else{a.pause();s.textContent=${JSON.stringify(label)};}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:999px;background:${accent};color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.3);">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>${label}</span>
+  <audio id="${aid}" src="${escAttr(url)}" ${loop ? "loop " : ""}${autoplay ? "autoplay " : ""}preload="auto"></audio>
+  <button type="button" onclick="var a=document.getElementById('${aid}');var s=this.querySelector('span');if(a.paused){a.play();s.textContent='Pause';}else{a.pause();s.textContent=${JSON.stringify(label)};}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:999px;background:${escAttr(accent)};color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.3);">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><span>${escText(label)}</span>
   </button>
 </div>`;
 };
@@ -70,7 +71,7 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
     const inner = selected.html;
     const wrapped = `<div data-forge-video-bg style="position:relative;overflow:hidden;">
   <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
-    <source src="${videoUrl.trim()}" />
+    <source src="${escAttr(videoUrl.trim())}" />
   </video>
   <div style="position:relative;z-index:1;">${inner}</div>
 </div>`;
