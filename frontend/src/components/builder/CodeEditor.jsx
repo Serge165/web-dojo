@@ -1,6 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import Editor, { loader } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
 import { emmetHTML, emmetCSS, emmetJSX } from "emmet-monaco-es";
+
+// Use the npm-bundled monaco-editor instead of @monaco-editor/react's
+// default of fetching the whole editor from a CDN (cdn.jsdelivr.net) at
+// runtime — required for the app to work offline and for the Tauri
+// desktop build, which can't depend on a network fetch for its core
+// editor. Must run once, before any <Editor> mounts, so it lives at
+// module scope rather than inside the component.
+loader.config({ monaco });
 
 let emmetRegistered = false;
 

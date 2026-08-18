@@ -15,6 +15,9 @@ node_modules/
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+# This project pins deps via exact versions in package.json rather than a
+# committed lockfile; don't let a locally-generated npm lockfile slip in.
+package-lock.json
 
 # Testing
 /coverage
