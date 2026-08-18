@@ -1,53 +1,162 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { CodeEditor } from "./CodeEditor";
-import { buildStandaloneHtml, buildCleanExport } from "@/lib/exportHtml";
+import { buildStandaloneHtml, stripInlineStyles } from "@/lib/exportHtml";
+import { reconcileElementsFromCss } from "@/lib/cssPaneSync";
+import { reconcileElementsFromHtml } from "@/lib/htmlPaneSync";
 import { MONACO_LANGUAGES } from "@/lib/monacoLanguages";
 
-// Monaco-powered code view: left panel switches between clean HTML, a clean
-// CSS3 stylesheet (auto-extracted), or the inline standalone file; right panel
-// edits <head> with Emmet + user-selectable syntax highlighting.
-export const CodeView = ({ project, headHtml, onHeadHtmlChange }) => {
-  const [view, setView] = useState("html"); // html | css | inline
-  const [outLang, setOutLang] = useState("html");
+const SYNC_DEBOUNCE_MS = 400;
+
+const uidForNewBlocks = () => "el_" + Math.random().toString(36).slice(2, 10);
+
+// Browser-only HTML parsing (DOMParser) — deliberately not a pure/tested
+// module, see htmlPaneSync.js's header comment for why. Produces the
+// {id, outerHTML} shape reconcileElementsFromHtml expects.
+const parseTopLevelNodes = (html) => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return Array.from(doc.body.children).map((el) => ({ id: el.id || null, outerHTML: el.outerHTML }));
+};
+
+const joinElementsHtml = (elements) => elements.map((e) => e.html).join("\n");
+
+// Monaco-powered CodePen-style editor: four live-synced tabs (HTML, CSS,
+// JS, Head) on the left, a live preview iframe on the right. Editing the
+// HTML or CSS tab writes straight back into the project's elements array
+// (debounced); editing JS edits the page's custom_js field; editing Head
+// edits head_html exactly as it always has.
+export const CodeView = ({ project, elements, onElementsChange, headHtml, onHeadHtmlChange, customJs, onCustomJsChange, onSave }) => {
+  const [tab, setTab] = useState("html"); // html | css | js | head
   const [headLang, setHeadLang] = useState("html");
 
-  const clean = useMemo(() => buildCleanExport(project), [project]);
-  const inline = useMemo(() => buildStandaloneHtml(project), [project]);
-  const outContent = view === "css" ? clean.css : view === "inline" ? inline : clean.html;
-  const outLangEff = view === "css" ? "css" : outLang;
-  const filename = view === "css" ? "styles.css" : "index.html";
+  const [htmlText, setHtmlText] = useState(() => joinElementsHtml(elements));
+  const [cssText, setCssText] = useState(() => stripInlineStyles(elements).css);
 
-  const ViewTab = ({ id, label }) => (
+  // Tracks the last `elements` value THIS component itself produced, so
+  // the sync effect below can tell "an external change happened elsewhere
+  // (Design-mode canvas edit, undo/redo, page switch) — regenerate the
+  // pane text" apart from "this is our own debounced write echoing back
+  // through props — don't regenerate, or we'd clobber in-progress typing
+  // in the other pane."
+  const lastAppliedElementsRef = useRef(elements);
+  const htmlDebounceRef = useRef(null);
+  const cssDebounceRef = useRef(null);
+
+  useEffect(() => {
+    if (elements === lastAppliedElementsRef.current) return;
+    lastAppliedElementsRef.current = elements;
+    setHtmlText(joinElementsHtml(elements));
+    setCssText(stripInlineStyles(elements).css);
+  }, [elements]);
+
+  useEffect(() => () => {
+    clearTimeout(htmlDebounceRef.current);
+    clearTimeout(cssDebounceRef.current);
+  }, []);
+
+  const commitElements = (next) => {
+    lastAppliedElementsRef.current = next;
+    onElementsChange(next);
+  };
+
+  const onHtmlChange = (value) => {
+    setHtmlText(value);
+    clearTimeout(htmlDebounceRef.current);
+    htmlDebounceRef.current = setTimeout(() => {
+      commitElements(reconcileElementsFromHtml(elements, parseTopLevelNodes(value), uidForNewBlocks));
+    }, SYNC_DEBOUNCE_MS);
+  };
+
+  const onCssChange = (value) => {
+    setCssText(value);
+    clearTimeout(cssDebounceRef.current);
+    cssDebounceRef.current = setTimeout(() => {
+      commitElements(reconcileElementsFromCss(elements, value));
+    }, SYNC_DEBOUNCE_MS);
+  };
+
+  // Flushes any pending debounced pane edit immediately, so Ctrl+S can't
+  // race a still-pending sync and save stale elements.
+  const flushPending = () => {
+    if (htmlDebounceRef.current) {
+      clearTimeout(htmlDebounceRef.current);
+      htmlDebounceRef.current = null;
+      commitElements(reconcileElementsFromHtml(elements, parseTopLevelNodes(htmlText), uidForNewBlocks));
+    }
+    if (cssDebounceRef.current) {
+      clearTimeout(cssDebounceRef.current);
+      cssDebounceRef.current = null;
+      commitElements(reconcileElementsFromCss(elements, cssText));
+    }
+  };
+  const handleSave = () => { flushPending(); onSave && onSave(); };
+
+  // Live preview, debounced on the same cycle regardless of which tab
+  // changed (including Head/JS, which aren't behind the HTML/CSS
+  // debounces above) so typing doesn't thrash an iframe reload.
+  const [previewSrcDoc, setPreviewSrcDoc] = useState(() =>
+    buildStandaloneHtml({ ...project, elements, head_html: headHtml, custom_js: customJs })
+  );
+  const previewDebounceRef = useRef(null);
+  useEffect(() => {
+    clearTimeout(previewDebounceRef.current);
+    previewDebounceRef.current = setTimeout(() => {
+      setPreviewSrcDoc(buildStandaloneHtml({ ...project, elements, head_html: headHtml, custom_js: customJs }));
+    }, SYNC_DEBOUNCE_MS);
+    return () => clearTimeout(previewDebounceRef.current);
+  }, [project, elements, headHtml, customJs]);
+
+  const Tab = ({ id, label }) => (
     <button
-      onClick={() => setView(id)}
-      className={`px-2 py-0.5 rounded text-[10px] border ${view === id ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`}
-      data-testid={`codeview-${id}`}
+      onClick={() => setTab(id)}
+      className={`px-2.5 py-1 rounded text-[11px] border ${tab === id ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`}
+      data-testid={`codeview-tab-${id}`}
     >{label}</button>
   );
 
   return (
     <div className="flex-1 bg-[#050505] overflow-hidden flex" data-testid="code-view">
       <div className="w-1/2 border-r border-[#2B2B2B] flex flex-col">
-        <div className="px-3 py-2 border-b border-[#2B2B2B] text-[11px] uppercase tracking-wider text-gray-400 flex items-center justify-between gap-2">
+        <div className="px-3 py-2 border-b border-[#2B2B2B] flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
-            <ViewTab id="html" label="HTML" />
-            <ViewTab id="css" label="CSS" />
-            <ViewTab id="inline" label="Inline" />
-            <span className="text-gray-600 normal-case tracking-normal">· {filename}</span>
+            <Tab id="html" label="HTML" />
+            <Tab id="css" label="CSS" />
+            <Tab id="js" label="JS" />
+            <Tab id="head" label="Head" />
           </div>
-          {view !== "css" && <LangSelector value={outLang} onChange={setOutLang} testId="output-lang" />}
+          {tab === "head" && <LangSelector value={headLang} onChange={setHeadLang} testId="head-lang" />}
         </div>
         <div className="flex-1 min-h-0">
-          <CodeEditor value={outContent} language={outLangEff} readOnly testId="code-output-editor" />
+          {tab === "html" && (
+            <CodeEditor value={htmlText} onChange={onHtmlChange} language="html" onSave={handleSave} testId="code-html-editor" />
+          )}
+          {tab === "css" && (
+            <CodeEditor value={cssText} onChange={onCssChange} language="css" onSave={handleSave} testId="code-css-editor" />
+          )}
+          {tab === "js" && (
+            <CodeEditor value={customJs} onChange={onCustomJsChange} language="javascript" onSave={handleSave} testId="code-js-editor" />
+          )}
+          {tab === "head" && (
+            <CodeEditor value={headHtml} onChange={onHeadHtmlChange} language={headLang} onSave={handleSave} testId="head-html-editor" />
+          )}
         </div>
       </div>
       <div className="w-1/2 flex flex-col">
-        <div className="px-3 py-2 border-b border-[#2B2B2B] text-[11px] uppercase tracking-wider text-gray-400 flex items-center justify-between gap-2">
-          <span>&lt;head&gt; · Emmet + syntax</span>
-          <LangSelector value={headLang} onChange={setHeadLang} testId="head-lang" />
-        </div>
-        <div className="flex-1 min-h-0">
-          <CodeEditor value={headHtml} onChange={onHeadHtmlChange} language={headLang} testId="head-html-editor" />
+        <div className="px-3 py-2 border-b border-[#2B2B2B] text-[11px] uppercase tracking-wider text-gray-400">Preview</div>
+        <div className="flex-1 min-h-0 bg-white">
+          {/* allow-same-origin is intentionally NOT set here — same
+              rationale as Builder.jsx's live-preview iframe: combined
+              with allow-scripts it would give this srcDoc content the
+              app's real origin instead of an opaque one, letting
+              custom_js reach back into the builder's DOM/localStorage
+              via window.parent. allow-scripts alone keeps the origin
+              opaque. */}
+          <iframe
+            title="code-preview"
+            srcDoc={previewSrcDoc}
+            sandbox="allow-forms allow-scripts"
+            style={{ width: "100%", height: "100%", border: 0 }}
+            data-testid="code-preview-iframe"
+          />
         </div>
       </div>
     </div>
