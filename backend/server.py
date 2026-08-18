@@ -767,10 +767,22 @@ class PaymentLinkCreate(BaseModel):
     quantity: int = 1
 
 
+ZERO_DECIMAL_CURRENCIES = {"jpy"}  # Stripe treats these as smallest-unit-is-1; extend if `currencies` below grows to include more.
+
+
+def _to_unit_amount(amount: float, currency: str) -> int:
+    """Convert a decimal amount to Stripe's smallest-currency-unit integer,
+    honoring zero-decimal currencies (e.g. JPY) which must be passed as-is,
+    not multiplied by 100."""
+    if (currency or "usd").lower() in ZERO_DECIMAL_CURRENCIES:
+        return int(round(amount))
+    return int(round(round(amount, 2) * 100))
+
+
 def _create_payment_link(name: str, amount: float, currency: str, quantity: int) -> dict:
     price = stripe.Price.create(
         currency=(currency or "usd").lower(),
-        unit_amount=int(round(round(amount, 2) * 100)),
+        unit_amount=_to_unit_amount(amount, currency),
         product_data={"name": name},
     )
     link = stripe.PaymentLink.create(
@@ -829,7 +841,7 @@ def _create_checkout_session(items, success_url, cancel_url):
         line_items.append({
             "price_data": {
                 "currency": (it.currency or "usd").lower(),
-                "unit_amount": int(round(round(it.amount, 2) * 100)),
+                "unit_amount": _to_unit_amount(it.amount, it.currency),
                 "product_data": {"name": (it.name.strip()[:250] or "Item")},
             },
             "quantity": max(1, min(999, int(it.quantity or 1))),

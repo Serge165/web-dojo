@@ -70,3 +70,17 @@ class TestSubmissionsScoping:
         monkeypatch.setattr(server.db, "submissions", FakeCollection())
         r = client.delete("/api/submissions", params={"project_id": "abc"})
         assert r.status_code == 200
+
+
+class TestZeroDecimalCurrency:
+    def test_usd_multiplies_by_100(self):
+        assert server._to_unit_amount(9.99, "usd") == 999
+
+    def test_jpy_no_multiplication(self):
+        assert server._to_unit_amount(500, "jpy") == 500
+
+    def test_jpy_case_insensitive(self):
+        assert server._to_unit_amount(500, "JPY") == 500
+
+    def test_jpy_rounds_to_whole_yen(self):
+        assert server._to_unit_amount(500.7, "jpy") == 501
