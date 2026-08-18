@@ -39,3 +39,16 @@ export const escJsAttr = (value) => escAttr(JSON.stringify(String(value ?? "")))
 // it finds, regardless of JS string/quote context — so this escapes '<'
 // as a JS unicode escape to guarantee that substring can never appear.
 export const escJsScript = (value) => JSON.stringify(String(value ?? "")).replace(/</g, "\\u003C");
+
+// Safe to splice raw (non-JSON-stringified) JS source into a literal
+// <script>...</script> block — used for the project's custom_js field,
+// which is executable code, not a string value (escJsScript above is for
+// splicing a *string value* via JSON.stringify, which would just turn a
+// whole JS program into an inert string literal). HTML's script-content
+// parsing rule is purely textual — it ends the block at the first literal
+// "</script" substring it finds, even inside a JS string, comment, or
+// template literal — so this defuses that substring without changing
+// what the code does (a backslash before "/" is a no-op escape in those
+// contexts). Mirrored in backend/server.py's _esc_raw_script — keep both
+// in sync.
+export const escRawScript = (code) => String(code ?? "").replace(/<\/script/gi, "<\\/script");

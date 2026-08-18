@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { escAttr, escText } from "./escapeHtml.js";
+import { escAttr, escText, escRawScript } from "./escapeHtml.js";
 import { RESPONSIVE_CSS } from "./responsiveCss.js";
 
 const buildFontLinks = (fonts) => {
@@ -58,6 +58,7 @@ export const buildStandaloneHtml = (project) => {
   const body = project.elements.map((e) => e.html).join("\n");
   const fonts = buildFontLinks(project.fonts);
   const seoMeta = buildSeoMeta(project.seo);
+  const customJsTag = (project.custom_js || "").trim() ? `<script>${escRawScript(project.custom_js)}</script>\n` : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -73,7 +74,7 @@ ${project.head_html || ""}
 </head>
 <body>
 ${body}
-</body>
+${customJsTag}</body>
 </html>`;
 };
 
@@ -110,6 +111,7 @@ export const buildCleanExport = (project) => {
   const { html: cleaned, css } = stripInlineStyles(body);
   const fonts = buildFontLinks(project.fonts);
   const seoMeta = buildSeoMeta(project.seo);
+  const customJsTag = (project.custom_js || "").trim() ? `<script>${escRawScript(project.custom_js)}</script>\n` : "";
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -125,7 +127,7 @@ ${project.head_html || ""}
 </head>
 <body>
 ${cleaned}
-</body>
+${customJsTag}</body>
 </html>`;
   const styles = `body{margin:0;background:${project.canvas_bg || "#ffffff"};}\n${css}`;
   return { html, css: styles };

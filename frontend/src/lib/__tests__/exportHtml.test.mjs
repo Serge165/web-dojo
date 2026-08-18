@@ -42,3 +42,32 @@ test("stripInlineStyles pattern skips the override for non-grid elements", () =>
   }
   assert.equal(rules.length, 1);
 });
+
+test("custom_js script-tag pattern is injected before </body> when non-empty", () => {
+  const customJs = "console.log('hi');";
+  const bodyTag = customJs.trim() ? `<script>${customJs}</script>\n` : "";
+  const assembled = `<body>\n<div>content</div>\n${bodyTag}</body>`;
+  assert.ok(assembled.includes("console.log('hi');"));
+  assert.ok(assembled.indexOf("console.log") < assembled.indexOf("</body>"));
+});
+
+test("custom_js script-tag pattern is omitted when custom_js is empty", () => {
+  const customJs = "";
+  const bodyTag = customJs.trim() ? `<script>${customJs}</script>\n` : "";
+  const assembled = `<body>\n<div>content</div>\n${bodyTag}</body>`;
+  assert.ok(!assembled.includes("<script></script>"));
+});
+
+test("escRawScript neutralizes an embedded </script> so it can't close the wrapping tag", async () => {
+  const { escRawScript } = await import("../escapeHtml.js");
+  const raw = "var x = '</script>';";
+  const escaped = escRawScript(raw);
+  assert.ok(!escaped.includes("</script>"));
+  assert.equal(escaped, "var x = '<\\/script>';");
+});
+
+test("escRawScript is case-insensitive and leaves ordinary code untouched", async () => {
+  const { escRawScript } = await import("../escapeHtml.js");
+  assert.equal(escRawScript("var x = 1 + 2;"), "var x = 1 + 2;");
+  assert.ok(!escRawScript("'</SCRIPT>'").includes("</SCRIPT>"));
+});
