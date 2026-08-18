@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { escAttr, escText } from "./escapeHtml.js";
+import { RESPONSIVE_CSS } from "./responsiveCss.js";
 
 const buildFontLinks = (fonts) => {
   if (!fonts || fonts.length === 0) return "";
@@ -57,6 +58,7 @@ export const buildStandaloneHtml = (project) => {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escText(pageTitle(project))}</title>
 <script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
+${RESPONSIVE_CSS}
 ${seoMeta}
 ${fonts}
 ${project.head_html || ""}
@@ -108,6 +110,7 @@ export const buildCleanExport = (project) => {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escText(pageTitle(project))}</title>
 <script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
+${RESPONSIVE_CSS}
 ${seoMeta}
 ${fonts}
 ${project.head_html || ""}
