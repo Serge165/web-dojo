@@ -17,7 +17,20 @@ const parseTopLevelNodes = (html) => {
   return Array.from(doc.body.children).map((el) => ({ id: el.id || null, outerHTML: el.outerHTML }));
 };
 
-const joinElementsHtml = (elements) => elements.map((e) => e.html).join("\n");
+// Stamps each element's id onto its own HTML's root tag before showing it
+// in the HTML pane. parseTopLevelNodes reads ids back off the parsed DOM,
+// and this is the only producer of that pane text, so the id must live
+// inside el.html, not just in the array's .id field — otherwise every
+// pane edit looks like brand-new markup on the way back in.
+const withRootId = (html, id) => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const root = doc.body.firstElementChild;
+  if (!root) return html;
+  root.setAttribute("id", id); // el.id is the source of truth — overwrite, don't merge
+  return doc.body.innerHTML;
+};
+
+const joinElementsHtml = (elements) => elements.map((e) => withRootId(e.html, e.id)).join("\n");
 
 // Monaco-powered CodePen-style editor: four live-synced tabs (HTML, CSS,
 // JS, Head) on the left, a live preview iframe on the right. Editing the
