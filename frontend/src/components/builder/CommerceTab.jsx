@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import { CreditCard, ShoppingBag, ShoppingCart, Plus } from "lucide-react";
 import { COMMERCE_BLOCKS } from "@/lib/commerce";
-import { buildCartRuntimeHtml, buildAddToCartButton } from "@/lib/cart";
+import { buildAddToCartButton } from "@/lib/cart";
 import { useHoverPreview } from "./HoverPreview";
 
 const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-emerald-500";
 const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
 
 // "Shop" tab: payment button builder, a working cart system, and store blocks.
-export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog }) => {
+export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog, onAddCart }) => {
   const [cur, setCur] = useState("usd");
   const [accent, setAccent] = useState("#4f46e5");
   const [paypal, setPaypal] = useState("");
@@ -20,10 +20,7 @@ export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog })
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
   const { previewProps, previewNode } = useHoverPreview();
 
-  const addCart = () => {
-    onAddBlock(buildCartRuntimeHtml({ accent, currency: cur, paypalClientId: paypal.trim() }));
-    toast.success("Cart + checkout added — a floating cart button now lives on this page");
-  };
+  const addCart = () => onAddCart({ accent, currency: cur, paypalClientId: paypal.trim() });
   const addBtn = () => {
     if (!pName.trim() || !(Number(pPrice) > 0)) { toast.error("Enter a product name and price"); return; }
     onAddBlock(buildAddToCartButton({ id: "p-" + pName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-"), name: pName.trim(), amount: Number(pPrice), currency: cur, image: pImg.trim(), accent }));

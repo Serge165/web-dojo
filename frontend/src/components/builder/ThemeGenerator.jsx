@@ -58,6 +58,7 @@ const MiniThemePreview = ({ t }) => {
 export const ThemeGenerator = ({ onApplyTheme }) => {
   const [tab, setTab] = useState("presets");
   const [preview, setPreview] = useState(null);
+  const [allPages, setAllPages] = useState(true);
   const [custom, setCustom] = useState({
     primary: "#2563eb",
     accent: "#f59e0b",
@@ -86,12 +87,22 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
         >Custom</button>
       </div>
 
+      <label className="flex items-center gap-2 text-[11px] text-gray-400 select-none px-0.5" data-testid="theme-scope-toggle">
+        <input
+          type="checkbox"
+          checked={allPages}
+          onChange={(e) => setAllPages(e.target.checked)}
+          className="accent-blue-600 w-3.5 h-3.5"
+        />
+        Apply to all pages
+      </label>
+
       {tab === "presets" && (
         <div className="grid grid-cols-1 gap-2">
           {THEMES.map((t) => (
             <button
               key={t.id}
-              onClick={() => { onApplyTheme({ headHtml: themeHeadHtml(t), canvasBg: t.canvas_bg, googleFont: t.google_font }); toast.success(`Applied ${t.name}`); }}
+              onClick={() => { onApplyTheme({ headHtml: themeHeadHtml(t), canvasBg: t.canvas_bg, googleFont: t.google_font, allPages }); toast.success(allPages ? `Applied ${t.name} to all pages` : `Applied ${t.name}`); }}
               onMouseEnter={(e) => {
                 ensureFont(t.google_font);
                 const r = e.currentTarget.getBoundingClientRect();
@@ -160,7 +171,7 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
               data-testid="theme-custom-copy"
             ><Copy size={12} /> Copy CSS</button>
             <button
-              onClick={() => { onApplyTheme({ headHtml: customCss, canvasBg: custom.bg, googleFont: custom.googleFont }); toast.success("Theme applied"); }}
+              onClick={() => { onApplyTheme({ headHtml: customCss, canvasBg: custom.bg, googleFont: custom.googleFont, allPages }); toast.success(allPages ? "Theme applied to all pages" : "Theme applied"); }}
               className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white"
               data-testid="theme-custom-apply"
             >Apply theme</button>

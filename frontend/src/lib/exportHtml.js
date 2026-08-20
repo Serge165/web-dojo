@@ -2,6 +2,9 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { escAttr, escText, escRawScript } from "./escapeHtml.js";
 import { RESPONSIVE_CSS } from "./responsiveCss.js";
+import { stripInlineStyles } from "./stripInlineStyles.js";
+
+export { stripInlineStyles };
 
 const buildFontLinks = (fonts) => {
   if (!fonts || fonts.length === 0) return "";
@@ -34,34 +37,6 @@ const buildSeoMeta = (seo) => {
 };
 
 const pageTitle = (project) => (project.seo && project.seo.title) || project.name || "Untitled";
-
-export const stripInlineStyles = (elements) => {
-  // Extract style attributes into deduplicated CSS classes, one stable
-  // class per source element (mirrors backend/server.py's
-  // _strip_inline_styles — keep both in sync). An element's root
-  // style="..." becomes .el-<id>; any additional style="..." attributes
-  // nested inside that same element's HTML become .el-<id>__1,
-  // .el-<id>__2, ... in encounter order. A rule that sets
-  // grid-template-columns also gets a companion responsive override —
-  // RESPONSIVE_CSS's generic [style*="grid-template-columns"] selector
-  // can't match here since the style attribute this function removes is
-  // exactly what it targets.
-  const rules = [];
-  const outParts = elements.map((el) => {
-    const elId = el.id || "";
-    let n = 0;
-    return (el.html || "").replace(/style="([^"]*)"/g, (_, styles) => {
-      const cls = n === 0 ? `el-${elId}` : `el-${elId}__${n}`;
-      n++;
-      rules.push(`.${cls} { ${styles} }`);
-      if (styles.includes("grid-template-columns")) {
-        rules.push(`@media (max-width: 768px) { .${cls} { grid-template-columns: 1fr !important; } }`);
-      }
-      return `class="${cls}"`;
-    });
-  });
-  return { html: outParts.join("\n"), css: rules.join("\n") };
-};
 
 export const buildStandaloneHtml = (project) => {
   const body = project.elements.map((e) => e.html).join("\n");

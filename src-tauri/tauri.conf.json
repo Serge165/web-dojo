@@ -6,7 +6,7 @@
   "build": {
     "frontendDist": "../frontend/build",
     "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "cd frontend && npm start",
+    "beforeDevCommand": "cd frontend && REACT_APP_BACKEND_URL=http://127.0.0.1:8787 npm start",
     "beforeBuildCommand": "cd frontend && npm run build:tauri"
   },
   "app": {

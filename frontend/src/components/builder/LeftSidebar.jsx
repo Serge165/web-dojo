@@ -20,6 +20,7 @@ export const LeftSidebar = ({
   onOpenPaymentBuilder,
   onOpenSocialBuilder,
   onWireCatalog,
+  onAddCart,
   headHtml,
 }) => {
   const [tab, setTab] = useState("library");
@@ -241,7 +242,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "shop" && (
-        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} onWireCatalog={onWireCatalog} />
+        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} onWireCatalog={onWireCatalog} onAddCart={onAddCart} />
       )}
 
       {tab === "snippets" && (

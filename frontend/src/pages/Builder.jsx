@@ -7,13 +7,14 @@ import { RightSidebar } from "@/components/builder/RightSidebar";
 import { Canvas } from "@/components/builder/Canvas";
 import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, Eye, MousePointer2, Code2 } from "lucide-react";
+import { Trash2, Eye, MousePointer2, Code2, Columns2 } from "lucide-react";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
 import { PagesBar } from "@/components/builder/PagesBar";
 import { TemplateEditor } from "@/components/builder/TemplateEditor";
 import { SeoPanel } from "@/components/builder/SeoPanel";
 import { FindReplaceModal } from "@/components/builder/FindReplaceModal";
+import { FileEditorModal } from "@/components/builder/FileEditorModal";
 import { AssetsLibrary } from "@/components/builder/AssetsLibrary";
 import { AnalyticsModal } from "@/components/builder/AnalyticsModal";
 import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModal";
@@ -82,6 +83,7 @@ export default function Builder() {
   const [activePageId, setActivePageId] = useState("home");
   const [template, setTemplate] = useState({ header_html: "", footer_html: "", use_template: false });
   const [findOpen, setFindOpen] = useState(false);
+  const [editingFileId, setEditingFileId] = useState(null);
   const [assetsOpen, setAssetsOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
@@ -277,6 +279,9 @@ export default function Builder() {
   const removeEl = (id) => {
     setElements((els) => els.filter((e) => e.id !== id));
     if (selectedId === id) setSelectedId(null);
+    // Drop that element's animation keyframes too, or they linger in
+    // headHtml forever (dead CSS bloating every save/export).
+    setHeadHtml((h) => (h || "").replace(new RegExp(`<style data-forge-anim="${id}">[\\s\\S]*?<\\/style>\\n?`), ""));
   };
   const moveEl = (id, delta) => {
     setElements((els) => {
@@ -295,6 +300,9 @@ export default function Builder() {
   const setZIndex = (id, z) => setElements((els) => els.map((e) => e.id === id ? { ...e, zIndex: z } : e));
   const editHtml = (id, html) => setElements((els) => els.map((e) => e.id === id ? { ...e, html } : e));
   const replaceSelectedHtml = (html) => { if (!selected) return; editHtml(selected.id, html); };
+
+  const editingFile = useMemo(() => files.find((f) => f.id === editingFileId) || null, [files, editingFileId]);
+  const updateFileContent = (id, content) => setFiles((fs) => fs.map((f) => f.id === id ? { ...f, content } : f));
 
   // Wrap the currently selected element's HTML with a container div carrying
   // the provided CSS declarations (from the Layout builder's Grid/Flex tools).
@@ -337,15 +345,34 @@ export default function Builder() {
 
   const applyAnimation = ({ keyframes, shorthand }) => {
     if (!selected) return;
-    setHeadHtml((h) => `${h ? h + "\n" : ""}<style data-forge-anim="${selected.id}">\n${keyframes}\n</style>`);
+    setHeadHtml((h) => {
+      // Replace any prior animation block for this element instead of
+      // stacking a new one on every re-apply (re-picking a preset, tweaking
+      // duration/easing, etc. would otherwise accumulate dead @keyframes).
+      const stripped = (h || "").replace(new RegExp(`<style data-forge-anim="${selected.id}">[\\s\\S]*?<\\/style>\\n?`), "");
+      return `${stripped ? stripped + "\n" : ""}<style data-forge-anim="${selected.id}">\n${keyframes}\n</style>`;
+    });
     patchStyle({ animation: shorthand });
   };
 
-  const applyTheme = ({ headHtml: themeHead, canvasBg: themeBg, googleFont }) => {
+  const applyTheme = ({ headHtml: themeHead, canvasBg: themeBg, googleFont, allPages }) => {
     // Strip any prior forge-theme style block, then append new.
-    setHeadHtml((h) => (h || "").replace(/<link[^>]*fonts\.googleapis[^>]*>|<style data-forge-theme=[^>]*>[\s\S]*?<\/style>/g, "").trim() + (h ? "\n" : "") + themeHead);
+    const rethemeHead = (h) => (h || "").replace(/<link[^>]*fonts\.googleapis[^>]*>|<style data-forge-theme=[^>]*>[\s\S]*?<\/style>/g, "").trim() + (h ? "\n" : "") + themeHead;
+    setHeadHtml(rethemeHead);
     if (themeBg) setCanvasBg(themeBg);
     if (googleFont && !fonts.includes(googleFont)) setFonts((f) => [...f, googleFont]);
+
+    // Site-wide cascade: push the same head vars/canvas bg/font onto every
+    // other page too, not just the active one (the active page is already
+    // handled above via the live editor state + the elements-sync effect).
+    if (allPages) {
+      setPages((ps) => ps.map((p) => p.id === activePageId ? p : {
+        ...p,
+        head_html: rethemeHead(p.head_html),
+        canvas_bg: themeBg || p.canvas_bg,
+        fonts: googleFont && !(p.fonts || []).includes(googleFont) ? [...(p.fonts || []), googleFont] : p.fonts,
+      }));
+    }
   };
 
   const addFont = ({ family, google }) => {
@@ -367,6 +394,23 @@ export default function Builder() {
     setImportedSections(sections); setImportOpen(true);
   };
   const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
+
+  // The Shop tab's "Add cart + checkout" button used to call onAddBlock
+  // directly, so clicking it twice (e.g. after tweaking the accent/currency
+  // fields right above it) stacked a second full cart runtime — duplicate
+  // fixed-position buttons, duplicate non-unique DOM ids, duplicate
+  // <style>/<script> blocks. Guard it the same way wireCatalog already
+  // guards its own cart-runtime insert.
+  const addCartRuntime = (opts) => {
+    setElements((els) => {
+      if (els.some((e) => /data-webdojo-cart/.test(e.html))) {
+        setTimeout(() => toast.info("Cart already on this page"), 0);
+        return els;
+      }
+      setTimeout(() => toast.success("Cart + checkout added — a floating cart button now lives on this page"), 0);
+      return [...els, { id: uid(), html: buildCartRuntimeHtml(opts) }];
+    });
+  };
 
   // Best-effort: wire product "Add to cart / Buy" buttons on the page to the
   // live cart, and drop in the cart runtime if it isn't there yet.
@@ -615,7 +659,7 @@ export default function Builder() {
             fonts={fonts}
             files={files}
             onFilesChange={setFiles}
-            onFileClick={() => {}}
+            onFileClick={(node) => node.type !== "folder" && setEditingFileId(node.id)}
             savedComponents={savedComponents}
             onDeleteSavedComponent={deleteSavedComponent}
             onWrapSelection={wrapSelectionWithContainer}
@@ -625,6 +669,7 @@ export default function Builder() {
             onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
             onOpenSocialBuilder={() => setSocialBuilderOpen(true)}
             onWireCatalog={wireCatalog}
+            onAddCart={addCartRuntime}
             headHtml={headHtml}
           />
         )}
@@ -634,6 +679,7 @@ export default function Builder() {
             <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5">
               <button onClick={() => setMode("design")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "design" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-design"><MousePointer2 size={12} /> Design</button>
               <button onClick={() => setMode("code")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-code"><Code2 size={12} /> Code</button>
+              <button onClick={() => setMode("split")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "split" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-split"><Columns2 size={12} /> Split View</button>
               <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-preview"><Eye size={12} /> Preview</button>
             </div>
           </div>
@@ -654,7 +700,7 @@ export default function Builder() {
             viewport={viewport}
           />
         )}
-        {mode === "code" && (
+        {(mode === "code" || mode === "split") && (
           <CodeView
             project={project}
             elements={elements}
@@ -664,6 +710,7 @@ export default function Builder() {
             customJs={customJs}
             onCustomJsChange={setCustomJs}
             onSave={save}
+            showPreview={mode === "split"}
           />
         )}
         {mode === "preview" && (
@@ -787,6 +834,13 @@ export default function Builder() {
         seo={activePage?.seo}
         pageName={activePage?.name}
         onChange={setPageSeo}
+      />
+
+      <FileEditorModal
+        file={editingFile}
+        onClose={() => setEditingFileId(null)}
+        onChange={updateFileContent}
+        onSave={save}
       />
 
       <FindReplaceModal

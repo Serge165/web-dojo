@@ -616,37 +616,48 @@ class PublishRequest(BaseModel):
     css_filename: str = "styles.css"
 
 
+def _tag_name_at(s, offset):
+    """Given the full HTML string being scanned and the offset of a
+    style="..." match within it, find the tag name of the element that
+    attribute belongs to by walking back to the nearest preceding
+    (unclosed) "<". Attributes can appear on either side of style= in the
+    frontend's block templates (e.g. `<img src="..." style="...">` or
+    `<h2 data-aos="fade-up" style="...">`), so we can't assume a fixed
+    position — but style values never contain a literal ">", so the last
+    "<" before the match is always this tag's own opening bracket."""
+    lt_idx = s.rfind("<", 0, offset)
+    if lt_idx == -1:
+        return "el"
+    m = re.match(r"[a-zA-Z][a-zA-Z0-9]*", s[lt_idx + 1:])
+    return m.group(0).lower() if m else "el"
+
+
 def _strip_inline_styles(elements):
     """Extract inline style attributes into deduplicated CSS classes, one
-    stable class per source element. An element's root style="..." becomes
-    .el-<id>; any additional style="..." attributes nested inside that
-    same element's HTML (e.g. a hero block with several styled child divs)
-    become .el-<id>__1, .el-<id>__2, ... in encounter order. Stable,
-    id-based naming (rather than a global sequential counter) lets the
-    live CSS-pane editor round-trip an edit back onto the correct element
-    even after blocks are reordered, added, or removed.
+    class per style="..." occurrence (mirrors frontend/src/lib/exportHtml.js's
+    stripInlineStyles — keep both in sync). Classes are named semantically
+    from the owning tag name plus a running counter scoped to the whole
+    export (not per-element/per-parent): the first <section> anywhere
+    becomes .section-1, the second .section-2, the first <h2> becomes
+    .h2-1, etc., in document/encounter order.
     Returns (html_with_classes, css_string)."""
     rules = []
     out_html_parts = []
+    tag_counters = {}
 
-    def make_repl(el_id):
-        counter = {"n": 0}
-
-        def repl(match):
-            n = counter["n"]
-            counter["n"] += 1
-            cls = f"el-{el_id}" if n == 0 else f"el-{el_id}__{n}"
-            declarations = match.group(1)
-            rules.append(f".{cls} {{ {declarations} }}")
-            if "grid-template-columns" in declarations:
-                rules.append(f"@media (max-width: 768px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
-            return f'class="{cls}"'
-        return repl
+    def repl(match):
+        tag = _tag_name_at(match.string, match.start())
+        tag_counters[tag] = tag_counters.get(tag, 0) + 1
+        cls = f"{tag}-{tag_counters[tag]}"
+        declarations = match.group(1)
+        rules.append(f".{cls} {{ {declarations} }}")
+        if "grid-template-columns" in declarations:
+            rules.append(f"@media (max-width: 768px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
+        return f'class="{cls}"'
 
     for el in elements:
-        el_id = el.get("id") or ""
         html = el.get("html", "")
-        out_html_parts.append(re.sub(r'style="([^"]*)"', make_repl(el_id), html))
+        out_html_parts.append(re.sub(r'style="([^"]*)"', repl, html))
 
     return "\n".join(out_html_parts), "\n".join(rules)
 

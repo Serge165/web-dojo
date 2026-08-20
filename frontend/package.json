@@ -68,7 +68,7 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "build:tauri": "REACT_APP_BACKEND_URL=http://127.0.0.1:8787/api craco build",
+    "build:tauri": "REACT_APP_BACKEND_URL=http://127.0.0.1:8787 craco build",
     "test": "craco test"
   },
   "browserslist": {

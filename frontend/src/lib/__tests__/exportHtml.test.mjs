@@ -77,17 +77,26 @@ test("escRawScript is case-insensitive and leaves ordinary code untouched", asyn
 // not found" — a documented file-saver interop gap). Dynamic
 // import("../exportHtml.js") therefore throws in this test runner (see
 // Task 4 brief), so the tests below duplicate stripInlineStyles's
-// id-based-naming logic instead of importing the real implementation —
-// same approach as the "stripInlineStyles pattern adds/skips..." tests
-// above.
+// tag-name+running-counter naming logic instead of importing the real
+// implementation — same approach as the "stripInlineStyles pattern
+// adds/skips..." tests above. Keep this duplicate in sync with the real
+// stripInlineStyles in ../exportHtml.js (and its Python mirror,
+// _strip_inline_styles in backend/server.py).
+const patternTagNameAt = (str, offset) => {
+  const ltIdx = str.lastIndexOf("<", offset);
+  if (ltIdx === -1) return "el";
+  const m = /^<([a-zA-Z][a-zA-Z0-9]*)/.exec(str.slice(ltIdx));
+  return m ? m[1].toLowerCase() : "el";
+};
+
 const patternStripInlineStyles = (elements) => {
   const rules = [];
+  const tagCounters = {};
   const outParts = elements.map((el) => {
-    const elId = el.id || "";
-    let n = 0;
-    return (el.html || "").replace(/style="([^"]*)"/g, (_, styles) => {
-      const cls = n === 0 ? `el-${elId}` : `el-${elId}__${n}`;
-      n++;
+    return (el.html || "").replace(/style="([^"]*)"/g, (_, styles, offset, string) => {
+      const tag = patternTagNameAt(string, offset);
+      tagCounters[tag] = (tagCounters[tag] || 0) + 1;
+      const cls = `${tag}-${tagCounters[tag]}`;
       rules.push(`.${cls} { ${styles} }`);
       if (styles.includes("grid-template-columns")) {
         rules.push(`@media (max-width: 768px) { .${cls} { grid-template-columns: 1fr !important; } }`);
@@ -98,27 +107,67 @@ const patternStripInlineStyles = (elements) => {
   return { html: outParts.join("\n"), css: rules.join("\n") };
 };
 
-test("stripInlineStyles pattern emits a stable id-based root class", () => {
+test("stripInlineStyles pattern emits a semantic tag-name-plus-counter root class", () => {
   const elements = [{ id: "el_abc123", html: '<div style="color:red;">Hi</div>' }];
   const { html, css } = patternStripInlineStyles(elements);
-  assert.ok(html.includes('class="el-el_abc123"'));
-  assert.ok(css.includes(".el-el_abc123 { color:red; }"));
+  assert.ok(html.includes('class="div-1"'));
+  assert.ok(css.includes(".div-1 { color:red; }"));
 });
 
-test("stripInlineStyles pattern suffixes nested style attrs within the same element", () => {
+test("stripInlineStyles pattern numbers nested style attrs by their own tag name, not the parent", () => {
   const elements = [{ id: "el_1", html: '<section style="padding:20px;"><h1 style="color:blue;">Hi</h1></section>' }];
   const { html, css } = patternStripInlineStyles(elements);
-  assert.ok(html.includes('class="el-el_1"'));
-  assert.ok(html.includes('class="el-el_1__1"'));
-  assert.ok(css.includes(".el-el_1 { padding:20px; }"));
-  assert.ok(css.includes(".el-el_1__1 { color:blue; }"));
+  assert.ok(html.includes('class="section-1"'));
+  assert.ok(html.includes('class="h1-1"'));
+  assert.ok(css.includes(".section-1 { padding:20px; }"));
+  assert.ok(css.includes(".h1-1 { color:blue; }"));
 });
 
-test("stripInlineStyles pattern keeps ids stable across element reordering", () => {
+test("stripInlineStyles pattern keeps a running per-tag counter across elements, order-dependent", () => {
   const a = { id: "el_a", html: '<div style="color:red;">A</div>' };
   const b = { id: "el_b", html: '<div style="color:blue;">B</div>' };
   const ab = patternStripInlineStyles([a, b]);
   const ba = patternStripInlineStyles([b, a]);
-  assert.ok(ab.html.includes('class="el-el_a"') && ba.html.includes('class="el-el_a"'));
-  assert.ok(ab.html.includes('class="el-el_b"') && ba.html.includes('class="el-el_b"'));
+  // Same structure, different order -> counters assign in encounter order,
+  // so which content gets div-1 vs div-2 flips with the order (this
+  // replaces the old id-based "stable across reordering" guarantee).
+  assert.ok(ab.html.includes('class="div-1"') && ab.html.includes('class="div-2"'));
+  assert.ok(ab.css.includes(".div-1 { color:red; }") && ab.css.includes(".div-2 { color:blue; }"));
+  assert.ok(ba.html.includes('class="div-1"') && ba.html.includes('class="div-2"'));
+  assert.ok(ba.css.includes(".div-1 { color:blue; }") && ba.css.includes(".div-2 { color:red; }"));
+});
+
+test("stripInlineStyles pattern handles attributes before AND after style= on the same tag", () => {
+  const elements = [{
+    id: "el_img",
+    html: '<img src="a.jpg" style="width:100%;" alt="" /><h2 data-aos="fade-up" style="font-size:36px;">Title</h2>',
+  }];
+  const { html, css } = patternStripInlineStyles(elements);
+  assert.ok(html.includes('class="img-1"'));
+  assert.ok(html.includes('class="h2-1"'));
+  assert.ok(css.includes(".img-1 { width:100%; }"));
+  assert.ok(css.includes(".h2-1 { font-size:36px; }"));
+});
+
+test("stripInlineStyles pattern end-to-end: section > h2 + p produces matching class references and CSS selectors", () => {
+  const elements = [{
+    id: "el_card",
+    html: '<section style="padding:64px;"><h2 style="font-size:32px;">Heading</h2><p style="margin:0;">Body</p></section>',
+  }];
+  const { html, css } = patternStripInlineStyles(elements);
+
+  assert.ok(html.includes('<section class="section-1">'));
+  assert.ok(html.includes('<h2 class="h2-1">'));
+  assert.ok(html.includes('<p class="p-1">'));
+  assert.ok(!html.includes("style="));
+
+  assert.ok(css.includes(".section-1 { padding:64px; }"));
+  assert.ok(css.includes(".h2-1 { font-size:32px; }"));
+  assert.ok(css.includes(".p-1 { margin:0; }"));
+
+  // Every class referenced in the HTML has a matching CSS selector, and
+  // vice versa.
+  const htmlClasses = [...html.matchAll(/class="([^"]+)"/g)].map((m) => m[1]);
+  const cssSelectors = [...css.matchAll(/\.([a-z0-9-]+)\s*\{/g)].map((m) => m[1]);
+  assert.deepEqual(htmlClasses.sort(), cssSelectors.sort());
 });

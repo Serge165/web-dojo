@@ -33,11 +33,18 @@ const withRootId = (html, id) => {
 const joinElementsHtml = (elements) => elements.map((e) => withRootId(e.html, e.id)).join("\n");
 
 // Monaco-powered CodePen-style editor: four live-synced tabs (HTML, CSS,
-// JS, Head) on the left, a live preview iframe on the right. Editing the
-// HTML or CSS tab writes straight back into the project's elements array
-// (debounced); editing JS edits the page's custom_js field; editing Head
-// edits head_html exactly as it always has.
-export const CodeView = ({ project, elements, onElementsChange, headHtml, onHeadHtmlChange, customJs, onCustomJsChange, onSave }) => {
+// JS, Head) on the left. Editing the HTML or CSS tab writes straight back
+// into the project's elements array (debounced); editing JS edits the
+// page's custom_js field; editing Head edits head_html exactly as it
+// always has.
+//
+// showPreview controls whether the live preview iframe renders alongside
+// the editor: plain Code mode (showPreview=false) is editor-only and full
+// width; Split View mode (showPreview=true) is this same component with
+// the right-hand preview pane shown — one mechanism, not two competing
+// preview implementations (the standalone top-level Preview mode is a
+// separate, device-framed iframe using the same buildStandaloneHtml).
+export const CodeView = ({ project, elements, onElementsChange, headHtml, onHeadHtmlChange, customJs, onCustomJsChange, onSave, showPreview = true }) => {
   const [tab, setTab] = useState("html"); // html | css | js | head
   const [headLang, setHeadLang] = useState("html");
 
@@ -118,18 +125,21 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
 
   // Live preview, debounced on the same cycle regardless of which tab
   // changed (including Head/JS, which aren't behind the HTML/CSS
-  // debounces above) so typing doesn't thrash an iframe reload.
+  // debounces above) so typing doesn't thrash an iframe reload. Skipped
+  // entirely in plain Code mode (showPreview=false) — no point rebuilding
+  // a srcdoc string on every keystroke for a pane that isn't rendered.
   const [previewSrcDoc, setPreviewSrcDoc] = useState(() =>
-    buildStandaloneHtml({ ...project, elements, head_html: headHtml, custom_js: customJs })
+    showPreview ? buildStandaloneHtml({ ...project, elements, head_html: headHtml, custom_js: customJs }) : ""
   );
   const previewDebounceRef = useRef(null);
   useEffect(() => {
+    if (!showPreview) return;
     clearTimeout(previewDebounceRef.current);
     previewDebounceRef.current = setTimeout(() => {
       setPreviewSrcDoc(buildStandaloneHtml({ ...project, elements, head_html: headHtml, custom_js: customJs }));
     }, SYNC_DEBOUNCE_MS);
     return () => clearTimeout(previewDebounceRef.current);
-  }, [project, elements, headHtml, customJs]);
+  }, [showPreview, project, elements, headHtml, customJs]);
 
   const Tab = ({ id, label }) => (
     <button
@@ -141,7 +151,7 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
 
   return (
     <div className="flex-1 bg-[#050505] overflow-hidden flex" data-testid="code-view">
-      <div className="w-1/2 border-r border-[#2B2B2B] flex flex-col">
+      <div className={showPreview ? "w-1/2 border-r border-[#2B2B2B] flex flex-col" : "w-full flex flex-col"}>
         <div className="px-3 py-2 border-b border-[#2B2B2B] flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <Tab id="html" label="HTML" />
@@ -166,25 +176,27 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
           )}
         </div>
       </div>
-      <div className="w-1/2 flex flex-col">
-        <div className="px-3 py-2 border-b border-[#2B2B2B] text-[11px] uppercase tracking-wider text-gray-400">Preview</div>
-        <div className="flex-1 min-h-0 bg-white">
-          {/* allow-same-origin is intentionally NOT set here — same
-              rationale as Builder.jsx's live-preview iframe: combined
-              with allow-scripts it would give this srcDoc content the
-              app's real origin instead of an opaque one, letting
-              custom_js reach back into the builder's DOM/localStorage
-              via window.parent. allow-scripts alone keeps the origin
-              opaque. */}
-          <iframe
-            title="code-preview"
-            srcDoc={previewSrcDoc}
-            sandbox="allow-forms allow-scripts"
-            style={{ width: "100%", height: "100%", border: 0 }}
-            data-testid="code-preview-iframe"
-          />
+      {showPreview && (
+        <div className="w-1/2 flex flex-col">
+          <div className="px-3 py-2 border-b border-[#2B2B2B] text-[11px] uppercase tracking-wider text-gray-400">Preview</div>
+          <div className="flex-1 min-h-0 bg-white">
+            {/* allow-same-origin is intentionally NOT set here — same
+                rationale as Builder.jsx's live-preview iframe: combined
+                with allow-scripts it would give this srcDoc content the
+                app's real origin instead of an opaque one, letting
+                custom_js reach back into the builder's DOM/localStorage
+                via window.parent. allow-scripts alone keeps the origin
+                opaque. */}
+            <iframe
+              title="code-preview"
+              srcDoc={previewSrcDoc}
+              sandbox="allow-forms allow-scripts"
+              style={{ width: "100%", height: "100%", border: 0 }}
+              data-testid="code-preview-iframe"
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
