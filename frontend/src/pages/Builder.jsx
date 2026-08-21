@@ -14,6 +14,7 @@ import {
   Trash2, Eye, MousePointer2, Code2, Columns2, Presentation,
   FilePlus2, FolderOpen, Save, Download, Upload, Search, Palette, BarChart3, LayoutTemplate, Inbox, HelpCircle,
   Undo2, Redo2, Scissors, Copy, ClipboardPaste, ZoomIn, ZoomOut, RotateCcw, Monitor, Tablet, Smartphone,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { OutlineView } from "@/components/builder/OutlineView";
 import { PublishModal } from "@/components/builder/PublishModal";
@@ -112,6 +113,12 @@ export default function Builder() {
   const [submissionsOpen, setSubmissionsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
+  // Sidebar collapse — remembered per-browser (workspace preference, not
+  // project data, so it isn't part of the saved project or undo history).
+  const [leftCollapsed, setLeftCollapsed] = useState(() => { try { return localStorage.getItem("wd_left_collapsed") === "1"; } catch { return false; } });
+  const [rightCollapsed, setRightCollapsed] = useState(() => { try { return localStorage.getItem("wd_right_collapsed") === "1"; } catch { return false; } });
+  useEffect(() => { try { localStorage.setItem("wd_left_collapsed", leftCollapsed ? "1" : "0"); } catch {} }, [leftCollapsed]);
+  useEffect(() => { try { localStorage.setItem("wd_right_collapsed", rightCollapsed ? "1" : "0"); } catch {} }, [rightCollapsed]);
   const clipboardRef = useRef(null);
   const [outlineSlides, setOutlineSlides] = useState([]);
 
@@ -806,6 +813,8 @@ export default function Builder() {
         { id: "zoom-in", label: "Zoom in", icon: ZoomIn, onRun: zoomIn },
         { id: "zoom-out", label: "Zoom out", icon: ZoomOut, onRun: zoomOut },
         { id: "zoom-reset", label: `Reset zoom (${zoom}%)`, icon: RotateCcw, onRun: zoomReset },
+        { id: "toggle-left", label: leftCollapsed ? "Show library panel" : "Hide library panel", icon: leftCollapsed ? ChevronRight : ChevronLeft, onRun: () => setLeftCollapsed((v) => !v) },
+        { id: "toggle-right", label: rightCollapsed ? "Show inspector panel" : "Hide inspector panel", icon: rightCollapsed ? ChevronLeft : ChevronRight, onRun: () => setRightCollapsed((v) => !v) },
       ],
     },
     {
@@ -885,26 +894,43 @@ export default function Builder() {
 
       <div className="flex-1 flex overflow-hidden">
         {mode !== "preview" && mode !== "outline" && (
-          <LeftSidebar
-            onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
-            onAddFont={addFont}
-            fonts={fonts}
-            files={files}
-            onFilesChange={setFiles}
-            onFileClick={(node) => node.type !== "folder" && setEditingFileId(node.id)}
-            savedComponents={savedComponents}
-            onDeleteSavedComponent={deleteSavedComponent}
-            onWrapSelection={wrapSelectionWithContainer}
-            hasSelection={!!selected}
-            selectedHtml={selected?.html || ""}
-            onOpenFormBuilder={() => setFormBuilderOpen(true)}
-            onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
-            onOpenSocialBuilder={() => setSocialBuilderOpen(true)}
-            onOpenStreamEmbed={() => setStreamEmbedOpen(true)}
-            onWireCatalog={wireCatalog}
-            onAddCart={addCartRuntime}
-            headHtml={headHtml}
-          />
+          leftCollapsed ? (
+            <button
+              onClick={() => setLeftCollapsed(false)}
+              className="w-6 flex-none border-r border-[#2B2B2B] bg-[#141414] flex items-start justify-center pt-3 text-gray-500 hover:text-white hover:bg-[#1F1F1F]"
+              title="Expand library"
+              data-testid="left-sidebar-expand"
+            ><ChevronRight size={14} /></button>
+          ) : (
+            <div className="relative flex-none flex">
+              <LeftSidebar
+                onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
+                onAddFont={addFont}
+                fonts={fonts}
+                files={files}
+                onFilesChange={setFiles}
+                onFileClick={(node) => node.type !== "folder" && setEditingFileId(node.id)}
+                savedComponents={savedComponents}
+                onDeleteSavedComponent={deleteSavedComponent}
+                onWrapSelection={wrapSelectionWithContainer}
+                hasSelection={!!selected}
+                selectedHtml={selected?.html || ""}
+                onOpenFormBuilder={() => setFormBuilderOpen(true)}
+                onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
+                onOpenSocialBuilder={() => setSocialBuilderOpen(true)}
+                onOpenStreamEmbed={() => setStreamEmbedOpen(true)}
+                onWireCatalog={wireCatalog}
+                onAddCart={addCartRuntime}
+                headHtml={headHtml}
+              />
+              <button
+                onClick={() => setLeftCollapsed(true)}
+                className="absolute top-2 -right-3 z-10 w-6 h-6 rounded-full bg-[#1F1F1F] border border-[#2B2B2B] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#2B2B2B]"
+                title="Collapse library"
+                data-testid="left-sidebar-collapse"
+              ><ChevronLeft size={12} /></button>
+            </div>
+          )
         )}
 
         <div className="flex-1 flex flex-col overflow-hidden min-w-0" data-testid="center-pane">
@@ -981,33 +1007,50 @@ export default function Builder() {
         </div>
 
         {mode !== "preview" && mode !== "outline" && (
-          <RightSidebar
-            selected={selected}
-            onApplyBackground={applyBackground}
-            onApplyColor={applyColor}
-            onPatchStyle={patchStyle}
-            onApplyToken={applyExistingToken}
-            onCreateToken={createToken}
-            onReplaceHtml={replaceSelectedHtml}
-            onApplyAnimation={applyAnimation}
-            onApplyTheme={applyTheme}
-            canvasBg={canvasBg}
-            onCanvasBg={setCanvasBg}
-            headHtml={headHtml}
-            onHeadHtmlChange={setHeadHtml}
-            onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
-            elements={elements}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onMove={moveEl}
-            onDelete={removeEl}
-            onToggleVisible={toggleVisible}
-            onSetZIndex={setZIndex}
-            onApplyStyleToIds={applyStyleToIds}
-            viewport={viewport}
-            onPatchResponsive={patchResponsiveStyle}
-            onResetResponsive={resetResponsiveProperty}
-          />
+          rightCollapsed ? (
+            <button
+              onClick={() => setRightCollapsed(false)}
+              className="w-6 flex-none border-l border-[#2B2B2B] bg-[#141414] flex items-start justify-center pt-3 text-gray-500 hover:text-white hover:bg-[#1F1F1F]"
+              title="Expand inspector"
+              data-testid="right-sidebar-expand"
+            ><ChevronLeft size={14} /></button>
+          ) : (
+            <div className="relative flex-none flex">
+              <button
+                onClick={() => setRightCollapsed(true)}
+                className="absolute top-2 -left-3 z-10 w-6 h-6 rounded-full bg-[#1F1F1F] border border-[#2B2B2B] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#2B2B2B]"
+                title="Collapse inspector"
+                data-testid="right-sidebar-collapse"
+              ><ChevronRight size={12} /></button>
+              <RightSidebar
+                selected={selected}
+                onApplyBackground={applyBackground}
+                onApplyColor={applyColor}
+                onPatchStyle={patchStyle}
+                onApplyToken={applyExistingToken}
+                onCreateToken={createToken}
+                onReplaceHtml={replaceSelectedHtml}
+                onApplyAnimation={applyAnimation}
+                onApplyTheme={applyTheme}
+                canvasBg={canvasBg}
+                onCanvasBg={setCanvasBg}
+                headHtml={headHtml}
+                onHeadHtmlChange={setHeadHtml}
+                onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
+                elements={elements}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onMove={moveEl}
+                onDelete={removeEl}
+                onToggleVisible={toggleVisible}
+                onSetZIndex={setZIndex}
+                onApplyStyleToIds={applyStyleToIds}
+                viewport={viewport}
+                onPatchResponsive={patchResponsiveStyle}
+                onResetResponsive={resetResponsiveProperty}
+              />
+            </div>
+          )
         )}
       </div>
 
