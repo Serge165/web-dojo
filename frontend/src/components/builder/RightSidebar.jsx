@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ColorPicker } from "./ColorPicker";
+import { TokenSelector } from "./TokenSelector";
 import { GradientMixer } from "./GradientMixer";
 import { StyleInspector } from "./StyleInspector";
 import { LayersPanel } from "./LayersPanel";
@@ -15,6 +16,7 @@ import { Layers as LayersIcon, ChevronDown, ChevronRight } from "lucide-react";
 
 const TABS = [
   { id: "color", label: "Color" },
+  { id: "tokens", label: "Tokens" },
   { id: "gradient", label: "Gradient" },
   { id: "style", label: "Style" },
   { id: "shape", label: "Shape" },
@@ -49,6 +51,8 @@ export const RightSidebar = ({
   onToggleVisible,
   onSetZIndex,
   onApplyStyleToIds,
+  onApplyToken,
+  onCreateToken,
 }) => {
   const [tab, setTab] = useState("color");
   const [layersOpen, setLayersOpen] = useState(true);
@@ -98,6 +102,16 @@ export const RightSidebar = ({
             </div>
             {!selected && <div className="text-[11px] text-gray-500">Select an element on the canvas to apply.</div>}
           </div>
+        )}
+
+        {tab === "tokens" && (
+          <TokenSelector
+            headHtml={headHtml}
+            elements={elements}
+            selected={selected}
+            onApplyToken={onApplyToken}
+            onCreateToken={onCreateToken}
+          />
         )}
 
         {tab === "gradient" && (

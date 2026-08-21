@@ -4,6 +4,8 @@ import { buildStandaloneHtml, stripInlineStyles } from "@/lib/exportHtml";
 import { reconcileElementsFromCss } from "@/lib/cssPaneSync";
 import { reconcileElementsFromHtml } from "@/lib/htmlPaneSync";
 import { MONACO_LANGUAGES } from "@/lib/monacoLanguages";
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
 
 const SYNC_DEBOUNCE_MS = 400;
 
@@ -159,7 +161,19 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
             <Tab id="js" label="JS" />
             <Tab id="head" label="Head" />
           </div>
-          {tab === "head" && <LangSelector value={headLang} onChange={setHeadLang} testId="head-lang" />}
+          <div className="flex items-center gap-2">
+            {tab === "head" && <LangSelector value={headLang} onChange={setHeadLang} testId="head-lang" />}
+            <button
+              onClick={() => {
+                const text = { html: htmlText, css: cssText, js: customJs, head: headHtml }[tab] || "";
+                navigator.clipboard.writeText(text);
+                toast.success(`${tab.toUpperCase()} copied`);
+              }}
+              className="flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-[#2B2B2B] text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]"
+              title="Copy this tab's content"
+              data-testid="codeview-copy-btn"
+            ><Copy size={12} /> Copy</button>
+          </div>
         </div>
         <div className="flex-1 min-h-0">
           {tab === "html" && (

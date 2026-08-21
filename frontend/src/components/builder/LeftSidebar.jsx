@@ -10,6 +10,24 @@ import { CommerceTab } from "./CommerceTab";
 import { cdnComponentGroups } from "@/lib/cdnComponents";
 import { useHoverPreview } from "./HoverPreview";
 
+// Groups the flat CATEGORIES list into named super-sections for display.
+// Purely presentational — doesn't touch category/block ids or testids, so
+// existing references to them (tests, hover-preview, etc.) are unaffected.
+// E-commerce isn't listed: that need is already served by the separate
+// "Shop" tab (CommerceTab), which is a dynamic catalog/cart builder rather
+// than static block templates — no reason to duplicate it here.
+const GROUPS = [
+  { id: "navigation", label: "Navigation", categoryIds: ["navbars", "headers", "footers"] },
+  { id: "hero", label: "Hero", categoryIds: ["heroes"] },
+  { id: "content", label: "Content", categoryIds: ["components", "text", "toolbox", "containers", "testimonials", "faq"] },
+  { id: "features", label: "Features", categoryIds: ["sections", "services", "pricing", "team"] },
+  { id: "forms", label: "Forms", categoryIds: ["newsletter", "contact"] },
+  { id: "media", label: "Media", categoryIds: ["video", "portfolio"] },
+  { id: "layouts", label: "Layouts", categoryIds: ["layout", "timelines"] },
+  { id: "esports", label: "Esports", categoryIds: ["esports"] },
+  { id: "creator", label: "Creator", categoryIds: ["creator"] },
+];
+
 export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
   files, onFilesChange, onFileClick,
@@ -25,6 +43,7 @@ export const LeftSidebar = ({
 }) => {
   const [tab, setTab] = useState("library");
   const [open, setOpen] = useState({ components: true, navbars: true, heroes: true, sections: true });
+  const [groupOpen, setGroupOpen] = useState({ navigation: true, hero: true, content: true });
   const [cardCount, setCardCount] = useState(3);
   const [gFont, setGFont] = useState("Inter");
   const [q, setQ] = useState("");
@@ -36,6 +55,16 @@ export const LeftSidebar = ({
       .map((c) => ({ ...c, blocks: c.blocks.filter((b) => b.label.toLowerCase().includes(query)) }))
       .filter((c) => c.blocks.length > 0);
   }, [q]);
+
+  // Bucket the (already search-filtered) flat category list into GROUPS,
+  // in GROUPS' order, dropping any group left empty by the current search.
+  const groupedCategories = useMemo(() => {
+    const byId = new Map(filteredCategories.map((c) => [c.id, c]));
+    return GROUPS
+      .map((g) => ({ ...g, categories: g.categoryIds.map((id) => byId.get(id)).filter(Boolean) }))
+      .filter((g) => g.categories.length > 0);
+  }, [filteredCategories]);
+  const toggleGroup = (id) => setGroupOpen((s) => ({ ...s, [id]: !s[id] }));
 
   const filteredSaved = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -113,26 +142,38 @@ export const LeftSidebar = ({
               )}
             </div>
           </div>
-          {filteredCategories.map((cat) => (
-            <div key={cat.id} className="border-b border-[#2B2B2B]">
+          {groupedCategories.map((g) => (
+            <div key={g.id} data-testid={`group-${g.id}`}>
               <button
-                onClick={() => toggle(cat.id)}
-                className="w-full flex items-center justify-between px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 hover:bg-[#1F1F1F]"
-                data-testid={`cat-toggle-${cat.id}`}
+                onClick={() => toggleGroup(g.id)}
+                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 bg-[#0D0D0D] hover:text-gray-300 sticky top-[42px] z-[5]"
+                data-testid={`group-toggle-${g.id}`}
               >
-                <span>{cat.label} <span className="text-gray-500 normal-case">· {cat.blocks.length}</span></span>
-                {(open[cat.id] ?? true) || q ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                <span>{g.label}</span>
+                {(groupOpen[g.id] ?? true) || q ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               </button>
-              {((open[cat.id] ?? true) || q) && (
-                <div className="px-2 pb-2 space-y-1.5">
-                  {cat.blocks.map((b) => (
-                    <BlockItem key={b.id} label={b.label} html={b.html} testId={`block-${b.id}`} />
-                  ))}
+              {((groupOpen[g.id] ?? true) || q) && g.categories.map((cat) => (
+                <div key={cat.id} className="border-b border-[#2B2B2B]">
+                  <button
+                    onClick={() => toggle(cat.id)}
+                    className="w-full flex items-center justify-between px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 hover:bg-[#1F1F1F]"
+                    data-testid={`cat-toggle-${cat.id}`}
+                  >
+                    <span>{cat.label} <span className="text-gray-500 normal-case">· {cat.blocks.length}</span></span>
+                    {(open[cat.id] ?? true) || q ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  </button>
+                  {((open[cat.id] ?? true) || q) && (
+                    <div className="px-2 pb-2 space-y-1.5">
+                      {cat.blocks.map((b) => (
+                        <BlockItem key={b.id} label={b.label} html={b.html} testId={`block-${b.id}`} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
           ))}
-          {filteredCategories.length === 0 && (
+          {groupedCategories.length === 0 && (
             <div className="text-[11px] text-gray-500 p-4 text-center">No components match "{q}"</div>
           )}
 

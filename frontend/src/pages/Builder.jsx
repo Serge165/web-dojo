@@ -388,6 +388,10 @@ export default function Builder() {
     setHeadHtml((h) => upsertRootVar(h, name, value));
     patchStyle({ color: `var(${name})` });
   };
+  // Reuse an EXISTING token (from the Tokens panel) directly — no new
+  // variable, just point the block at it.
+  const applyExistingToken = (name, property) => patchStyle({ [property]: `var(${name})` });
+  const createToken = (name, value) => setHeadHtml((h) => upsertRootVar(h, name, value));
 
   // Paste a copied style (from lib/fxClipboard) onto many elements at once.
   const applyStyleToIds = useCallback((ids, clip) => {
@@ -853,6 +857,8 @@ export default function Builder() {
             onApplyBackground={applyBackground}
             onApplyColor={applyColor}
             onPatchStyle={patchStyle}
+            onApplyToken={applyExistingToken}
+            onCreateToken={createToken}
             onReplaceHtml={replaceSelectedHtml}
             onApplyAnimation={applyAnimation}
             onApplyTheme={applyTheme}
