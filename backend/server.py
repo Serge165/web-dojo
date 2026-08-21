@@ -355,11 +355,24 @@ def _active_page(doc: dict) -> dict:
 # HTML-assembly paths (backend preview/publish, frontend export) don't
 # share code, so this constant is intentionally duplicated. Keep both in
 # sync if you change this.
-RESPONSIVE_CSS = (
-    "<style>@media (max-width: 768px) {"
-    "[style*=\"grid-template-columns\"] { grid-template-columns: 1fr !important; }"
+#
+# Two tiers (tablet <=1024px, mobile <=767px) match responsiveOverrides.js.
+# Emitted as both @media (real visitors) and @container (Design-canvas
+# viewport toggle, which resizes a plain div rather than an iframe —
+# see the frontend copy's comment for the full explanation) rules with
+# identical bodies; @container rules are harmless no-ops wherever there's
+# no containment ancestor, which is every context this backend copy renders.
+_RESPONSIVE_TIER_RULES = (
+    "[style*=\"grid-template-columns\"] { grid-template-columns: 1fr !important; } "
     "[data-wd-stack] { flex-direction: column !important; }"
-    "}</style>"
+)
+RESPONSIVE_CSS = (
+    "<style>"
+    f"@media (max-width: 1024px) {{{_RESPONSIVE_TIER_RULES}}}"
+    f"@media (max-width: 767px) {{{_RESPONSIVE_TIER_RULES}}}"
+    f"@container (max-width: 1024px) {{{_RESPONSIVE_TIER_RULES}}}"
+    f"@container (max-width: 767px) {{{_RESPONSIVE_TIER_RULES}}}"
+    "</style>"
 )
 
 _SCRIPT_CLOSE_RE = re.compile(r'</script', re.IGNORECASE)

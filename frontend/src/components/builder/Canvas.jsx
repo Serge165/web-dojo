@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Trash2, ArrowUp, ArrowDown, Copy, Pencil, Save } from "lucide-react";
 import { InlineToolbar } from "./InlineToolbar";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
+import { RESPONSIVE_CSS_BODY } from "@/lib/responsiveCss.js";
 
 const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 
@@ -12,6 +13,19 @@ export const Canvas = ({
   const dropRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const editingRef = useRef(null);
+
+  // RESPONSIVE_CSS is otherwise only injected at export/publish/Preview
+  // time (exportHtml.js, server.py) — the live Design canvas never saw it,
+  // so the tablet/mobile viewport toggle never actually collapsed grids or
+  // stacked flex rows here even after the @container fix above. It's
+  // project-independent, so this runs once and stays for the component's
+  // lifetime rather than re-running per headHtml change.
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = RESPONSIVE_CSS_BODY;
+    document.head.appendChild(style);
+    return () => style.parentNode && style.parentNode.removeChild(style);
+  }, []);
 
   useEffect(() => {
     if (!headHtml) return;
@@ -40,7 +54,13 @@ export const Canvas = ({
 
   return (
     <div className="flex-1 bg-[#050505] overflow-auto" data-testid="canvas-area">
-      <div className="mx-auto my-6 transition-all duration-200" style={{ width: `min(${w}px, 96%)`, zoom: `${zoom}%` }}>
+      {/* container-type: inline-size makes this div itself the
+          containment context for @container rules injected via
+          headHtml (see responsiveCss.js) — without it, the grid-collapse
+          and flex-stack rules never fire in Design mode, since this
+          isn't an iframe and @media only sees the real browser window,
+          not this div's toggled width. */}
+      <div className="mx-auto my-6 transition-all duration-200" style={{ width: `min(${w}px, 96%)`, zoom: `${zoom}%`, containerType: "inline-size" }}>
         <div className="text-[10px] uppercase tracking-wider text-gray-500 px-1 pb-1 flex items-center justify-between">
           <span>Preview · {elements.length} block{elements.length === 1 ? "" : "s"} · {viewport}</span>
           <span className="font-mono">{w} × auto</span>
