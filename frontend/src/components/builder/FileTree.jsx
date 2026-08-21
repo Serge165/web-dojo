@@ -75,26 +75,41 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
 
   const toggle = (path) => setExpanded((e) => ({ ...e, [path]: !e[path] }));
 
-  const addAtRoot = (type) => {
-    const base = type === "folder" ? "new-folder" : "new-file.html";
-    const paths = new Set(files.map((f) => f.path));
-    let name = base;
+  // Files ask for a name up front (same prompt() TreeNode's rename-on-
+  // double-click already uses) instead of always hardcoding .html, so
+  // typing "styles.css" or "app.js" just creates that type — no separate
+  // HTML/CSS/JS picker needed. Folders keep their old auto-naming since
+  // "New folder" has no meaningful type choice to make.
+  const uniquePath = (candidate, paths) => {
+    if (!paths.has(candidate)) return candidate;
     let i = 1;
-    while (paths.has(name)) { name = base.replace(/(\.\w+)?$/, `-${i}$1`); i++; }
-    onChange([...files, { id: uid(), path: name, type, content: "" }]);
+    let next = candidate;
+    while (paths.has(next)) { next = candidate.replace(/(\.\w+)?$/, `-${i}$1`); i++; }
+    return next;
+  };
+
+  const addAtRoot = (type) => {
+    const paths = new Set(files.map((f) => f.path));
+    if (type === "folder") {
+      onChange([...files, { id: uid(), path: uniquePath("new-folder", paths), type, content: "" }]);
+      return;
+    }
+    const name = prompt("New file name (e.g. styles.css, script.js, page.html)", "untitled.html");
+    if (!name || !name.trim()) return;
+    onChange([...files, { id: uid(), path: uniquePath(name.trim(), paths), type, content: "" }]);
   };
 
   const addUnder = (folderPath, type) => {
-    const base = type === "folder" ? "folder" : "untitled.html";
     const paths = new Set(files.map((f) => f.path));
-    let candidate = folderPath ? `${folderPath}/${base}` : base;
-    let i = 1;
-    while (paths.has(candidate)) {
-      const b = base.replace(/(\.\w+)?$/, `-${i}$1`);
-      candidate = folderPath ? `${folderPath}/${b}` : b;
-      i++;
+    if (type === "folder") {
+      const candidate = folderPath ? `${folderPath}/folder` : "folder";
+      onChange([...files, { id: uid(), path: uniquePath(candidate, paths), type, content: "" }]);
+      return;
     }
-    onChange([...files, { id: uid(), path: candidate, type, content: "" }]);
+    const name = prompt("New file name (e.g. styles.css, script.js, page.html)", "untitled.html");
+    if (!name || !name.trim()) return;
+    const candidate = folderPath ? `${folderPath}/${name.trim()}` : name.trim();
+    onChange([...files, { id: uid(), path: uniquePath(candidate, paths), type, content: "" }]);
   };
 
   const remove = (path) => {
