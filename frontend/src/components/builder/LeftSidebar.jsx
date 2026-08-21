@@ -28,7 +28,7 @@ const GROUPS = [
   { id: "layouts", label: "Layouts", categoryIds: ["layout", "timelines"] },
   { id: "esports", label: "Esports", categoryIds: ["esports"] },
   { id: "creator", label: "Creator", categoryIds: ["creator"] },
-  { id: "retro", label: "Y2K / Retro Web", categoryIds: ["retro"] },
+  { id: "retro", label: "Moldy Oldies", categoryIds: ["retro"] },
 ];
 
 export const LeftSidebar = ({

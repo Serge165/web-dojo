@@ -701,7 +701,7 @@ export const EXTRA_CATEGORIES = [
     // scroll, a real client-side (localStorage) hit counter instead of a
     // server-side hit file, no autoplay audio (native <audio controls>).
     id: "retro",
-    label: "Y2K / Retro Web",
+    label: "Moldy Oldies",
     blocks: [
       {
         id: "retro-hitcounter",
@@ -852,6 +852,116 @@ export const EXTRA_CATEGORIES = [
       <div style="font-size:13px;color:#fff;font-weight:700;">profile-anthem.mp3</div>
     </div>
     <audio controls style="height:32px;"></audio>
+  </div>
+</div>`,
+      },
+      {
+        // 1998–2001 Geocities/Angelfire era: pages advertised which browser
+        // to view them in since rendering varied wildly. Refactored with
+        // flex-wrap so the row reflows on narrow screens instead of
+        // overflowing, the one thing the original fixed-width table version
+        // never had to handle.
+        id: "retro-browserbadges",
+        label: "Retro · Browser Badges",
+        html: `<div style="font-family:${F};display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:18px;background:var(--fc-bg, #c0c0c0);">
+  <div style="background:#000080;color:#fff;font-family:'Courier New',monospace;font-size:11px;font-weight:700;text-align:center;padding:6px 12px;border:2px outset #6666cc;">Best viewed in<br/>Netscape Navigator 4.0</div>
+  <div style="background:#000080;color:#fff;font-family:'Courier New',monospace;font-size:11px;font-weight:700;text-align:center;padding:6px 12px;border:2px outset #6666cc;">Optimized for<br/>Internet Explorer 5+</div>
+  <div style="background:#000080;color:#fff;font-family:'Courier New',monospace;font-size:11px;font-weight:700;text-align:center;padding:6px 12px;border:2px outset #6666cc;">800×600<br/>resolution</div>
+</div>`,
+      },
+      {
+        // 2005–2010's defining startup aesthetic — the glossy, reflective
+        // "Web 2.0" badge (think early Digg/del.icio.us/Skype-era logos).
+        // The reflection is CSS gradient over a positioned div rather than
+        // the period-original technique (a semi-transparent PNG overlay
+        // image), so it recolors correctly with the badge instead of
+        // needing a matching image asset per color.
+        id: "retro-web2badge",
+        label: "Retro · Web 2.0 Glossy Badge",
+        html: `<div style="font-family:${F};display:flex;justify-content:center;padding:32px;background:var(--fc-bg, #eef2f7);">
+  <div style="position:relative;display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:14px;background:linear-gradient(180deg,#8ec5fc 0%,#2e6fd9 100%);box-shadow:0 4px 0 #1c4a99,0 8px 16px rgba(0,0,0,.25);overflow:hidden;">
+    <div style="position:absolute;top:2px;left:6px;right:6px;height:45%;border-radius:12px 12px 50% 50% / 12px 12px 100% 100%;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0));pointer-events:none;"></div>
+    <span style="position:relative;font-size:20px;font-weight:800;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);letter-spacing:-0.02em;">myStartup</span>
+    <span style="position:relative;font-size:10px;font-weight:700;color:#e0edff;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;">beta</span>
+  </div>
+</div>`,
+      },
+      {
+        // 2003–2007: AIM/LiveJournal-style "who's online" buddy list —
+        // presence dots were the social proof of the era, before read
+        // receipts and "last active" timestamps existed.
+        id: "retro-buddyicons",
+        label: "Retro · Buddy List",
+        html: `<div style="font-family:${F};padding:18px;background:var(--fc-bg, #f0f4ff);">
+  <div style="font-size:11px;font-weight:700;color:#4a5a8a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Buddy List — ${AVA.length} online</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    ${AVA.map((src) => `<div style="position:relative;">
+      <img src="${src}" alt="" style="width:50px;height:50px;border-radius:4px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);object-fit:cover;" />
+      <span style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#4ade80;border:2px solid #fff;"></span>
+    </div>`).join("")}
+  </div>
+</div>`,
+      },
+      {
+        // 2003–2008: the Xanga/Neopets "shoutbox" — a lightweight public
+        // comment strip bolted onto the sidebar, distinct from a full
+        // guestbook (which this category already has) by being short,
+        // rapid-fire, and displayed inline rather than on its own page.
+        id: "retro-shoutbox",
+        label: "Retro · Shout Box",
+        html: `<div style="font-family:${F};max-width:420px;margin:0 auto;padding:18px;background:var(--fc-surface, #ffffff);border:2px solid #cbd5e1;border-radius:6px;">
+  <div style="font-size:13px;font-weight:800;color:var(--fc-text, #1e293b);border-bottom:2px dashed #cbd5e1;padding-bottom:8px;margin-bottom:10px;">💬 Shout Box</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
+    <div style="font-size:12px;background:#f1f5f9;padding:6px 8px;border-radius:4px;color:#1e293b;"><b style="color:#7c3aed;">xXcoolkidXx:</b> omg i love ur layout!!</div>
+    <div style="font-size:12px;background:#f1f5f9;padding:6px 8px;border-radius:4px;color:#1e293b;"><b style="color:#0ea5e9;">sk8ergrl:</b> add me back ✨</div>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <input placeholder="leave a shout..." style="flex:1;font-size:12px;padding:8px;border:1px solid #cbd5e1;border-radius:4px;" />
+    <button style="font-size:12px;font-weight:700;padding:8px 14px;border:0;border-radius:4px;background:#7c3aed;color:#fff;cursor:pointer;">Post</button>
+  </div>
+</div>`,
+      },
+      {
+        // 2000–2005: the DHTML mouse-sparkle-trail script every Neopets/
+        // Xanga customizer copy-pasted from a snippet site. Refactored:
+        // the original used document.onmousemove + setInterval leaking
+        // spans forever; this scopes the listener to its own root
+        // (matching the Hit Counter block's currentScript.closest
+        // pattern) and removes each sparkle after its fade completes.
+        id: "retro-sparkletrail",
+        label: "Retro · Cursor Sparkle Trail",
+        html: `<div data-wd-sparkletrail-root style="font-family:${F};position:relative;padding:48px 24px;text-align:center;background:var(--fc-bg, #0a0a1a);border-radius:8px;overflow:hidden;cursor:crosshair;">
+  <div style="font-size:13px;color:#c9b8ff;">✨ Move your mouse here for a sparkle trail ✨</div>
+  <script>(function(){
+    var root = document.currentScript.closest('[data-wd-sparkletrail-root]');
+    if (!root) return;
+    var chars = ['✦','✧','⋆','✩'];
+    root.addEventListener('mousemove', function(e){
+      var r = root.getBoundingClientRect();
+      var s = document.createElement('span');
+      s.textContent = chars[Math.floor(Math.random() * chars.length)];
+      s.style.cssText = 'position:absolute;left:' + (e.clientX - r.left) + 'px;top:' + (e.clientY - r.top) + 'px;color:#e0c8ff;font-size:14px;pointer-events:none;transition:opacity .6s,transform .6s;';
+      root.appendChild(s);
+      requestAnimationFrame(function(){ s.style.opacity = '0'; s.style.transform = 'translateY(-16px)'; });
+      setTimeout(function(){ s.remove(); }, 650);
+    });
+  })();</script>
+</div>`,
+      },
+      {
+        // 1999–2003: the auto-playing MIDI background-music embed —
+        // refactored into a native <audio controls> (no autoplay, so it
+        // doesn't ambush visitors the way <bgsound>/embedded MIDI did)
+        // styled to look like an old OS media-player chrome.
+        id: "retro-midiplayer",
+        label: "Retro · MIDI Player",
+        html: `<div style="font-family:${F};display:inline-flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(180deg,#e8e8e8,#c0c0c0);border:2px outset #ffffff;border-radius:4px;">
+  <div style="width:28px;height:28px;flex-shrink:0;border-radius:50%;background:radial-gradient(circle at 35% 35%,#555,#000);display:flex;align-items:center;justify-content:center;">
+    <div style="width:6px;height:6px;border-radius:50%;background:#888;"></div>
+  </div>
+  <div>
+    <div style="font-size:10px;font-family:'Courier New',monospace;color:#333;">♫ background_theme.mid</div>
+    <audio controls style="height:24px;width:180px;"></audio>
   </div>
 </div>`,
       },
