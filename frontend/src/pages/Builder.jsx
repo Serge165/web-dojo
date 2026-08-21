@@ -30,6 +30,7 @@ import { buildStandaloneHtml } from "@/lib/exportHtml";
 import { buildCartRuntimeHtml } from "@/lib/cart";
 import { scanHtml } from "@/lib/importHtml";
 import { escText } from "@/lib/escapeHtml";
+import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -313,9 +314,10 @@ export default function Builder() {
   const removeEl = (id) => {
     setElements((els) => els.filter((e) => e.id !== id));
     if (selectedId === id) setSelectedId(null);
-    // Drop that element's animation keyframes too, or they linger in
-    // headHtml forever (dead CSS bloating every save/export).
-    setHeadHtml((h) => (h || "").replace(new RegExp(`<style data-forge-anim="${id}">[\\s\\S]*?<\\/style>\\n?`), ""));
+    // Drop that element's animation keyframes and per-element color vars
+    // too, or they linger in headHtml forever (dead CSS bloating every
+    // save/export).
+    setHeadHtml((h) => removeRootVarsForElement((h || "").replace(new RegExp(`<style data-forge-anim="${id}">[\\s\\S]*?<\\/style>\\n?`), ""), id));
   };
   const moveEl = (id, delta) => {
     setElements((els) => {
@@ -370,8 +372,22 @@ export default function Builder() {
     if (!selected) return;
     setElements((els) => els.map((e) => e.id === selected.id ? { ...e, html: patchFirstStyle(e.html, patch) } : e));
   };
-  const applyBackground = (value) => patchStyle({ background: value });
-  const applyColor = (value) => patchStyle({ color: value });
+  // Picking a per-block color creates/updates a :root variable and points
+  // the element at var(...) instead of hardcoding the literal inline —
+  // otherwise every use of this picker silently converts a token-driven
+  // block back into a hardcoded one, undoing theming on that block.
+  const applyBackground = (value) => {
+    if (!selected) return;
+    const name = `--fc-${selected.id}-bg`;
+    setHeadHtml((h) => upsertRootVar(h, name, value));
+    patchStyle({ background: `var(${name})` });
+  };
+  const applyColor = (value) => {
+    if (!selected) return;
+    const name = `--fc-${selected.id}-text`;
+    setHeadHtml((h) => upsertRootVar(h, name, value));
+    patchStyle({ color: `var(${name})` });
+  };
 
   // Paste a copied style (from lib/fxClipboard) onto many elements at once.
   const applyStyleToIds = useCallback((ids, clip) => {

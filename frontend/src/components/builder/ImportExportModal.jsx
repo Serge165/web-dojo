@@ -84,7 +84,7 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
           {tab === "export" && (
             <>
               <Row icon={FileCode2} title="Standalone HTML" desc="One .html file with inline CSS" label=".html" action={() => downloadStandalone(project)} testId="exp-standalone" />
-              <Row icon={FileArchive} title="Clean HTML + CSS" desc="Separate index.html + styles.css" label=".zip" action={() => downloadZip(project)} testId="exp-zip" />
+              <Row icon={FileArchive} title="Clean HTML + CSS" desc="Separate index.html + globals.css" label=".zip" action={() => downloadZip(project)} testId="exp-zip" />
               <Row icon={Braces} title="Web Dojo project" desc="Full editable project — re-import anytime" label=".json" action={() => downloadProjectJson(project)} testId="exp-json" />
               <Row icon={Copy} title="Copy full HTML" desc="Copy the page markup to your clipboard" action={copyHtml} testId="exp-copy" />
               <div className="text-[10px] uppercase tracking-wider text-gray-500 pt-3 pb-1">Send to a design / hosting tool</div>

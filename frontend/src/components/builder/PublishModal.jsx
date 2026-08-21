@@ -17,7 +17,7 @@ const EMPTY = {
   remote_path: "/public_html",
   protocol: "ftp",
   html_filename: "index.html",
-  css_filename: "styles.css",
+  css_filename: "globals.css",
   include_zip: false,
 };
 
@@ -68,7 +68,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
       remote_path: preset.remote_path || "/",
       protocol: preset.protocol || "ftp",
       html_filename: preset.html_filename || "index.html",
-      css_filename: preset.css_filename || "styles.css",
+      css_filename: preset.css_filename || "globals.css",
       include_zip: !!preset.include_zip,
     });
     toast.success(`Loaded preset "${preset.name}"`);
@@ -105,7 +105,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
         remote_path: form.remote_path.trim() || "/",
         protocol: form.protocol,
         html_filename: form.html_filename.trim() || "index.html",
-        css_filename: form.css_filename.trim() || "styles.css",
+        css_filename: form.css_filename.trim() || "globals.css",
         include_zip: form.include_zip,
       };
       if (form.port) payload.port = Number(form.port);
@@ -140,7 +140,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
         remote_path: form.remote_path.trim() || "/",
         protocol: form.protocol,
         html_filename: form.html_filename.trim() || "index.html",
-        css_filename: form.css_filename.trim() || "styles.css",
+        css_filename: form.css_filename.trim() || "globals.css",
         include_zip: form.include_zip,
       };
       if (form.port) payload.port = Number(form.port);

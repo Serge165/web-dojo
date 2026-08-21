@@ -106,7 +106,7 @@ ${RESPONSIVE_CSS}
 ${seoMeta}
 ${fonts}
 ${project.head_html || ""}
-<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="globals.css" />
 </head>
 <body>
 ${cleaned}
@@ -120,7 +120,7 @@ export const downloadZip = async (project) => {
   const { html, css } = buildCleanExport(project);
   const zip = new JSZip();
   zip.file("index.html", html);
-  zip.file("styles.css", css);
+  zip.file("globals.css", css);
   const blob = await zip.generateAsync({ type: "blob" });
   saveAs(blob, `${(project.name || "site").replace(/\s+/g, "-").toLowerCase()}.zip`);
 };
