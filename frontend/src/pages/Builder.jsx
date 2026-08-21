@@ -3,12 +3,18 @@ import axios from "axios";
 import { toast } from "sonner";
 import { TopBar } from "@/components/builder/TopBar";
 import { MenuBar } from "@/components/builder/MenuBar";
+import { CommandPalette } from "@/components/builder/CommandPalette";
+import { StatusBar } from "@/components/builder/StatusBar";
 import { LeftSidebar } from "@/components/builder/LeftSidebar";
 import { RightSidebar } from "@/components/builder/RightSidebar";
 import { Canvas } from "@/components/builder/Canvas";
 import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, Eye, MousePointer2, Code2, Columns2, Presentation } from "lucide-react";
+import {
+  Trash2, Eye, MousePointer2, Code2, Columns2, Presentation,
+  FilePlus2, FolderOpen, Save, Download, Upload, Search, Palette, BarChart3, LayoutTemplate, Inbox, HelpCircle,
+  Undo2, Redo2, Scissors, Copy, ClipboardPaste, ZoomIn, ZoomOut, RotateCcw, Monitor, Tablet, Smartphone,
+} from "lucide-react";
 import { OutlineView } from "@/components/builder/OutlineView";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
@@ -26,7 +32,7 @@ import { PaymentButtonModal } from "@/components/builder/PaymentButtonModal";
 import { SocialShareModal } from "@/components/builder/SocialShareModal";
 import { ImportExportModal } from "@/components/builder/ImportExportModal";
 import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
-import { buildStandaloneHtml } from "@/lib/exportHtml";
+import { buildStandaloneHtml, downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { buildCartRuntimeHtml } from "@/lib/cart";
 import { scanHtml } from "@/lib/importHtml";
 import { escText } from "@/lib/escapeHtml";
@@ -99,6 +105,7 @@ export default function Builder() {
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
   const [submissionsOpen, setSubmissionsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
   const clipboardRef = useRef(null);
   const [outlineSlides, setOutlineSlides] = useState([]);
@@ -683,6 +690,7 @@ export default function Builder() {
       if (meta && (e.key.toLowerCase() === "z" && e.shiftKey || e.key.toLowerCase() === "y")) { e.preventDefault(); redo(); return; }
       if (meta && e.key.toLowerCase() === "s") { e.preventDefault(); save(); return; }
       if (meta && e.key.toLowerCase() === "f") { e.preventDefault(); setFindOpen(true); return; }
+      if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen((v) => !v); return; }
       // Block-level cut/copy/paste — only when a block is selected and no
       // text field/contenteditable is focused, so normal browser copy/paste
       // inside inputs (project name, inline text editing, etc.) still works.
@@ -698,6 +706,66 @@ export default function Builder() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }); // re-attach each render so closures use latest state
+
+  // Command palette actions — thin dispatch layer over handlers TopBar/
+  // MenuBar already call, so there's exactly one place each action lives.
+  const paletteGroups = useMemo(() => [
+    {
+      heading: "File", items: [
+        { id: "new", label: "New project", icon: FilePlus2, onRun: newProject },
+        { id: "open", label: "Open project…", icon: FolderOpen, onRun: openLoad },
+        { id: "save", label: "Save", shortcut: "Ctrl+S", icon: Save, onRun: save },
+        { id: "export-html", label: "Export standalone .html", icon: Download, onRun: () => downloadStandalone(project) },
+        { id: "export-zip", label: "Export HTML + CSS (.zip)", icon: Download, onRun: () => downloadZip(project) },
+        { id: "share", label: "Copy shareable preview URL", icon: Upload, onRun: share },
+        { id: "publish", label: "Publish…", icon: Upload, onRun: () => setPublishOpen(true) },
+      ],
+    },
+    {
+      heading: "Edit", items: [
+        { id: "undo", label: "Undo", shortcut: "Ctrl+Z", icon: Undo2, disabled: past.length === 0, onRun: undo },
+        { id: "redo", label: "Redo", shortcut: "Ctrl+Y", icon: Redo2, disabled: future.length === 0, onRun: redo },
+        { id: "cut", label: "Cut selection", shortcut: "Ctrl+X", icon: Scissors, disabled: !selected, onRun: cutEl },
+        { id: "copy", label: "Copy selection", shortcut: "Ctrl+C", icon: Copy, disabled: !selected, onRun: copyEl },
+        { id: "paste", label: "Paste", shortcut: "Ctrl+V", icon: ClipboardPaste, onRun: pasteEl },
+      ],
+    },
+    {
+      heading: "Find", items: [
+        { id: "search-blocks", label: "Search block library", icon: Search, onRun: focusLibrarySearch },
+        { id: "find-replace", label: "Find & Replace…", shortcut: "Ctrl+F", icon: Search, onRun: () => setFindOpen(true) },
+      ],
+    },
+    {
+      heading: "View", items: [
+        { id: "mode-design", label: "Switch to Design", icon: MousePointer2, onRun: () => setMode("design") },
+        { id: "mode-code", label: "Switch to Code", icon: Code2, onRun: () => setMode("code") },
+        { id: "mode-split", label: "Switch to Split View", icon: Columns2, onRun: () => setMode("split") },
+        { id: "mode-outline", label: "Switch to Outline", icon: Presentation, onRun: () => setMode("outline") },
+        { id: "mode-preview", label: "Switch to Preview", icon: Eye, onRun: () => setMode("preview") },
+        { id: "viewport-desktop", label: "Viewport: Desktop", icon: Monitor, onRun: () => setViewport("desktop") },
+        { id: "viewport-tablet", label: "Viewport: Tablet", icon: Tablet, onRun: () => setViewport("tablet") },
+        { id: "viewport-mobile", label: "Viewport: Mobile", icon: Smartphone, onRun: () => setViewport("mobile") },
+        { id: "zoom-in", label: "Zoom in", icon: ZoomIn, onRun: zoomIn },
+        { id: "zoom-out", label: "Zoom out", icon: ZoomOut, onRun: zoomOut },
+        { id: "zoom-reset", label: `Reset zoom (${zoom}%)`, icon: RotateCcw, onRun: zoomReset },
+      ],
+    },
+    {
+      heading: "Panels", items: [
+        { id: "assets", label: "Design tokens", icon: Palette, onRun: () => setAssetsOpen(true) },
+        { id: "analytics", label: "Analytics", icon: BarChart3, onRun: () => setAnalyticsOpen(true) },
+        { id: "templates", label: "Project templates", icon: LayoutTemplate, onRun: () => setTemplatesOpen(true) },
+        { id: "submissions", label: "Form submissions inbox", icon: Inbox, onRun: () => setSubmissionsOpen(true) },
+      ],
+    },
+    {
+      heading: "Help", items: [
+        { id: "tour", label: "Getting Started Tour", icon: HelpCircle, onRun: () => setTourForce((v) => v + 1) },
+      ],
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [project, past.length, future.length, selected, zoom]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-[#0D0D0D] text-white overflow-hidden text-sm" style={{ fontFamily: "Manrope, sans-serif" }} data-testid="builder-shell">
@@ -728,7 +796,10 @@ export default function Builder() {
         onSearchBlocks={focusLibrarySearch} onFindReplace={() => setFindOpen(true)}
         zoom={zoom} onZoomIn={zoomIn} onZoomOut={zoomOut} onZoomReset={zoomReset}
         onHelpTour={() => setTourForce((v) => v + 1)}
+        onOpenPalette={() => setPaletteOpen(true)}
       />
+
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} groups={paletteGroups} />
 
       <PagesBar
         pages={pages}
@@ -878,6 +949,15 @@ export default function Builder() {
           />
         )}
       </div>
+
+      <StatusBar
+        pageName={activePage?.name || projectName}
+        elementCount={elements.length}
+        mode={mode}
+        viewport={viewport}
+        zoom={zoom}
+        saveStatus={saveStatus}
+      />
 
       <Dialog open={loadOpen} onOpenChange={setLoadOpen}>
         <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white" data-testid="load-modal">
