@@ -115,6 +115,67 @@ class TestImportUrlRedirectRevalidation:
         assert captured_hosts == ["example.com", "example.com"]
 
 
+class TestImportUrlStylesheetInlining:
+    def test_linked_stylesheet_is_fetched_and_inlined_as_a_forge_marked_style_block(self, client, monkeypatch):
+        class FakeResponse:
+            def __init__(self, status_code, headers=None, text=""):
+                self.status_code = status_code
+                self.headers = headers or {}
+                self.text = text
+
+        requested = []
+
+        class FakeAsyncClient:
+            def __init__(self, *a, **kw):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                return False
+
+            async def get(self, url, headers=None, **kw):
+                requested.append(headers.get("Host") if headers else None)
+                if len(requested) == 1:
+                    return FakeResponse(200, text='<html><head><link rel="stylesheet" href="/styles.css"></head><body>hi</body></html>')
+                return FakeResponse(200, text="body{color:red}")
+
+        monkeypatch.setattr(server.httpx, "AsyncClient", FakeAsyncClient)
+        r = client.post("/api/import/url", json={"url": "https://example.com/page"})
+        assert r.status_code == 200
+        html = r.json()["html"]
+        assert '<style data-forge-imported-css>' in html
+        assert "body{color:red}" in html
+        # the stylesheet fetch went through the same SSRF-safe path (Host header set)
+        assert requested == ["example.com", "example.com"]
+
+    def test_a_page_with_no_stylesheets_is_returned_unchanged(self, client, monkeypatch):
+        class FakeResponse:
+            def __init__(self, status_code, headers=None, text=""):
+                self.status_code = status_code
+                self.headers = headers or {}
+                self.text = text
+
+        class FakeAsyncClient:
+            def __init__(self, *a, **kw):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                return False
+
+            async def get(self, url, headers=None, **kw):
+                return FakeResponse(200, text="<html><head></head><body>hi</body></html>")
+
+        monkeypatch.setattr(server.httpx, "AsyncClient", FakeAsyncClient)
+        r = client.post("/api/import/url", json={"url": "https://example.com/page"})
+        assert r.status_code == 200
+        assert "data-forge-imported-css" not in r.json()["html"]
+
+
 class TestCORS:
     def test_disallowed_origin_gets_no_cors_header(self, client):
         r = client.get("/api/", headers={"Origin": "http://evil.example"})

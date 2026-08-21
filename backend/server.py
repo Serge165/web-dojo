@@ -363,19 +363,29 @@ def _build_google_fonts_link(fonts):
 
 
 def _seo_head(seo: dict) -> str:
-    if not seo:
-        return ""
-    parts = []
+    """Mirrors frontend/src/lib/exportHtml.js's buildSeoMeta — same field
+    set, same og:title/description fallback-to-title/description, same
+    twitter:card default (summary_large_image when an og_image is set,
+    else summary), same twitter:title/description/image fallbacks to the
+    OG fields. These two builders drifted before; keep them in lockstep."""
+    seo = seo or {}
     def esc(v: str) -> str:
         return str(v).replace('"', "&quot;").replace("<", "&lt;")
+    parts = [f'<meta property="og:type" content="{esc(seo.get("og_type") or "website")}" />']
     if seo.get("description"): parts.append(f'<meta name="description" content="{esc(seo["description"])}" />')
     if seo.get("keywords"): parts.append(f'<meta name="keywords" content="{esc(seo["keywords"])}" />')
     if seo.get("canonical"): parts.append(f'<link rel="canonical" href="{esc(seo["canonical"])}" />')
     if seo.get("favicon"): parts.append(f'<link rel="icon" href="{esc(seo["favicon"])}" />')
-    if seo.get("og_title"): parts.append(f'<meta property="og:title" content="{esc(seo["og_title"])}" />')
-    if seo.get("og_description"): parts.append(f'<meta property="og:description" content="{esc(seo["og_description"])}" />')
+    og_title = seo.get("og_title") or seo.get("title")
+    og_desc = seo.get("og_description") or seo.get("description")
+    if og_title: parts.append(f'<meta property="og:title" content="{esc(og_title)}" />')
+    if og_desc: parts.append(f'<meta property="og:description" content="{esc(og_desc)}" />')
     if seo.get("og_image"): parts.append(f'<meta property="og:image" content="{esc(seo["og_image"])}" />')
-    if seo.get("twitter_card"): parts.append(f'<meta name="twitter:card" content="{esc(seo["twitter_card"])}" />')
+    card = seo.get("twitter_card") or ("summary_large_image" if seo.get("og_image") else "summary")
+    parts.append(f'<meta name="twitter:card" content="{esc(card)}" />')
+    if og_title: parts.append(f'<meta name="twitter:title" content="{esc(og_title)}" />')
+    if og_desc: parts.append(f'<meta name="twitter:description" content="{esc(og_desc)}" />')
+    if seo.get("og_image"): parts.append(f'<meta name="twitter:image" content="{esc(seo["og_image"])}" />')
     return "\n".join(parts)
 
 
@@ -762,9 +772,11 @@ def _inject_lazy_loading(html: str) -> str:
 
 
 def _build_json_ld(name: str, seo: dict) -> str:
-    """Minimal WebSite JSON-LD, mirrors frontend/src/lib/exportHtml.js's
-    buildJsonLd."""
-    data = {"@context": "https://schema.org", "@type": "WebSite", "name": name or "Untitled"}
+    """Minimal JSON-LD, mirrors frontend/src/lib/exportHtml.js's
+    buildJsonLd — seo.title wins over the plain page/project name, same
+    precedence as the <title> tag itself. Defaults @type to WebSite;
+    seo.schema_type (set by a template or manual edit) overrides it."""
+    data = {"@context": "https://schema.org", "@type": (seo or {}).get("schema_type") or "WebSite", "name": (seo or {}).get("title") or name or "Untitled"}
     if seo and seo.get("description"):
         data["description"] = seo["description"]
     if seo and seo.get("canonical"):
@@ -797,8 +809,10 @@ _THEME_RE = re.compile(r'<style data-forge-theme(?:="[^"]*")?>([\s\S]*?)</style>
 _VARS_RE = re.compile(r'<style data-forge-vars>([\s\S]*?)</style>\n?')
 _RESPONSIVE_OVERRIDES_RE = re.compile(r'<style data-forge-responsive-overrides>([\s\S]*?)</style>\n?')
 _ANIM_RE = re.compile(r'<style data-forge-anim="[^"]*">([\s\S]*?)</style>\n?')
+_IMPORTED_CSS_RE = re.compile(r'<style data-forge-imported-css>([\s\S]*?)</style>\n?')
 _ROOT_BLOCK_RE = re.compile(r':root\s*{[^}]*}')
 _DECL_RE = re.compile(r'(--[\w-]+)\s*:\s*([^;]+);')
+_JS_FILE_RE = re.compile(r'<script data-forge-js="([^"]+)">([\s\S]*?)</script>\n?')
 
 
 def _extract_forge_css(head_html: str) -> dict:
@@ -806,7 +820,7 @@ def _extract_forge_css(head_html: str) -> dict:
     buckets them by which globals.css section they belong in. Mirrors
     frontend/src/lib/exportHtml.js's extractForgeCss — keep both in sync."""
     remaining = head_html or ""
-    theme_vars, base, media_queries, animations = [], [], [], []
+    theme_vars, base, media_queries, animations, imported_css = [], [], [], [], []
 
     def theme_repl(m):
         body = m.group(1)
@@ -830,14 +844,35 @@ def _extract_forge_css(head_html: str) -> dict:
     remaining = _VARS_RE.sub(collect_repl(theme_vars), remaining)
     remaining = _RESPONSIVE_OVERRIDES_RE.sub(collect_repl(media_queries), remaining)
     remaining = _ANIM_RE.sub(collect_repl(animations), remaining)
+    remaining = _IMPORTED_CSS_RE.sub(collect_repl(imported_css), remaining)
 
     return {
         "remaining_head": remaining.strip(),
         "theme_vars": theme_vars,
         "base": base,
         "media_queries": media_queries,
+        "imported_css": imported_css,
         "animations": animations,
     }
+
+
+def _extract_forge_js(html: str) -> dict:
+    """Pulls <script data-forge-js="name.js">...</script> blocks out of a
+    page's head_html or element markup and replaces each with
+    <script src="js/name.js"></script>, so the multi-page bundle writes one
+    real file per name instead of repeating the script inline everywhere
+    it's used. First occurrence of a given filename wins. Mirrors
+    frontend/src/lib/exportHtml.js's extractForgeJs — keep both in sync."""
+    files: dict = {}
+
+    def repl(m):
+        filename, code = m.group(1), m.group(2).strip()
+        if filename not in files:
+            files[filename] = code
+        return f'<script src="js/{filename}"></script>'
+
+    remaining = _JS_FILE_RE.sub(repl, html or "")
+    return {"remaining": remaining, "files": files}
 
 
 def _merge_root_blocks(blocks: list) -> str:
@@ -897,17 +932,30 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
     used = set()
     component_css_parts = []
     all_theme_vars, all_base, all_animations, all_media_queries = [], [], [], []
+    all_js_files: dict = {}
 
     for i, page in enumerate(pages):
         filename = _safe_page_filename(page.get("slug"), i, used)
         prefix = filename[:-5] + "-"  # strip ".html"
-        cleaned_body, component_css, media_css = _strip_inline_styles(page.get("elements") or [], prefix)
+        elements_with_js_extracted = []
+        for el in (page.get("elements") or []):
+            js_result = _extract_forge_js(el.get("html") or "")
+            for name, code in js_result["files"].items():
+                if name not in all_js_files:
+                    all_js_files[name] = code
+            elements_with_js_extracted.append({**el, "html": js_result["remaining"]})
+        cleaned_body, component_css, media_css = _strip_inline_styles(elements_with_js_extracted, prefix)
         body = "\n".join(p for p in [header, cleaned_body, footer] if p)
         body = _inject_lazy_loading(body)
         seo = page.get("seo") or {}
         title = seo.get("title") or page.get("name") or doc.get("name") or "Untitled"
         fonts_link = _build_google_fonts_link(page.get("fonts") or doc.get("fonts") or [])
         forge = _extract_forge_css(page.get("head_html") or "")
+        head_js_result = _extract_forge_js(forge["remaining_head"])
+        for name, code in head_js_result["files"].items():
+            if name not in all_js_files:
+                all_js_files[name] = code
+        remaining_head = head_js_result["remaining"]
         canvas_bg = page.get("canvas_bg") or "#ffffff"
         custom_js = page.get("custom_js") or ""
         custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
@@ -918,7 +966,7 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
             f"<title>{_esc_text(title)}</title>\n"
             f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
             f"{_seo_head(seo)}\n{_build_json_ld(page.get('name') or doc.get('name'), seo)}\n"
-            f"{fonts_link}\n{forge['remaining_head']}\n"
+            f"{fonts_link}\n{remaining_head}\n"
             f'<link rel="stylesheet" href="{css_filename}" />\n'
             f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
             "</head>\n<body>\n"
@@ -928,6 +976,7 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
         )
         files[filename] = html
         component_css_parts.append(component_css)
+        component_css_parts.extend(forge["imported_css"])
         all_theme_vars.extend(forge["theme_vars"])
         all_base.extend(forge["base"])
         all_animations.extend(forge["animations"])
@@ -938,6 +987,8 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
         "\n".join(p for p in component_css_parts if p),
         all_animations, all_media_queries,
     )
+    for name, code in all_js_files.items():
+        files[f"js/{name}"] = code
     return files
 
 
@@ -1253,34 +1304,85 @@ def _validate_import_url(url: str):
     return pinned_url, parts.hostname
 
 
+async def _safe_fetch_url(client: "httpx.AsyncClient", url: str, max_redirects: int = 5):
+    """Fetch `url` through the same SSRF-safe path as the main page fetch
+    below (every hop re-validated and IP-pinned via _validate_import_url).
+    Returns (final_url, text, status). Shared by import_url (the page
+    itself) and the stylesheet-inlining pass, so a <link rel="stylesheet">
+    a page points at gets the identical protection as the page URL a user
+    typed in — an attacker-controlled page couldn't otherwise use its own
+    CSS links as an SSRF side door."""
+    current_url = url
+    for _ in range(max_redirects):
+        pinned_url, host = _validate_import_url(current_url)
+        r = await client.get(pinned_url, headers={"Host": host}, extensions={"sni_hostname": host})
+        if r.status_code in (301, 302, 303, 307, 308) and "location" in r.headers:
+            current_url = urljoin(current_url, r.headers["location"])
+            continue
+        return current_url, r.text, r.status_code
+    raise HTTPException(status_code=502, detail="Too many redirects")
+
+
+_STYLESHEET_LINK_RE = re.compile(
+    r'<link\b[^>]*\brel=["\']stylesheet["\'][^>]*\bhref=["\']([^"\']+)["\'][^>]*>'
+    r'|<link\b[^>]*\bhref=["\']([^"\']+)["\'][^>]*\brel=["\']stylesheet["\'][^>]*>',
+    re.IGNORECASE,
+)
+_HEAD_CLOSE_RE = re.compile(r'</head>', re.IGNORECASE)
+
+
+async def _inline_external_stylesheets(client: "httpx.AsyncClient", html: str, base_url: str, max_sheets: int = 8) -> str:
+    """Best-effort: fetch every <link rel="stylesheet"> a page references
+    (through the same SSRF-safe fetch as the page itself) and splice their
+    CSS into <head> as inline <style data-forge-imported-css> blocks, so
+    an imported template's real styling travels with it instead of
+    silently depending on a live link the export won't control. A
+    stylesheet that fails to fetch (CORS is a non-issue server-side, but
+    the host can still be down/blocking) is skipped, not fatal — partial
+    styling beats no import."""
+    urls = []
+    for m in _STYLESHEET_LINK_RE.finditer(html):
+        href = m.group(1) or m.group(2)
+        if href:
+            urls.append(urljoin(base_url, href))
+    urls = urls[:max_sheets]
+    css_parts = []
+    for sheet_url in urls:
+        try:
+            _, css_text, status = await _safe_fetch_url(client, sheet_url)
+            if status == 200 and css_text.strip():
+                css_parts.append(css_text)
+        except Exception:
+            continue
+    if not css_parts:
+        return html
+    style_block = '<style data-forge-imported-css>\n' + "\n".join(css_parts) + '\n</style>'
+    if _HEAD_CLOSE_RE.search(html):
+        return _HEAD_CLOSE_RE.sub(style_block + '</head>', html, count=1)
+    return style_block + html
+
+
 @api_router.post("/import/url")
 async def import_url(payload: UrlImport):
-    """Fetch a public page's HTML so the builder can import its sections.
+    """Fetch a public page's HTML so the builder can import its sections,
+    plus its linked stylesheets (see _inline_external_stylesheets) so the
+    imported markup keeps its real styling instead of relying on a link
+    the export doesn't control.
 
     Every hop (initial URL and each redirect) is resolved and validated by
     _validate_import_url, and the actual connection is pinned to that
     validated IP (Host header + SNI set to the original hostname so
     name-based routing and TLS still work) so the HTTP client's own,
     separate DNS resolution can never be swapped to a private address
-    between our check and the real connection. current_url always carries
-    the real hostname (never the pinned IP) so that relative redirect
-    targets resolve against the correct base on every hop."""
+    between our check and the real connection."""
     url = (payload.url or "").strip()
     try:
-        current_url = url
         async with httpx.AsyncClient(follow_redirects=False, timeout=15.0, headers={"User-Agent": "Mozilla/5.0 (WebDojo importer)"}) as client:
-            for _ in range(5):
-                pinned_url, host = _validate_import_url(current_url)
-                r = await client.get(
-                    pinned_url,
-                    headers={"Host": host},
-                    extensions={"sni_hostname": host},
-                )
-                if r.status_code in (301, 302, 303, 307, 308) and "location" in r.headers:
-                    current_url = urljoin(current_url, r.headers["location"])
-                    continue
-                return {"html": r.text[:2_000_000], "status": r.status_code}
-        raise HTTPException(status_code=502, detail="Too many redirects")
+            final_url, html, status = await _safe_fetch_url(client, url)
+            html = html[:2_000_000]
+            if status == 200:
+                html = await _inline_external_stylesheets(client, html, final_url)
+            return {"html": html, "status": status}
     except HTTPException:
         raise
     except Exception as e:
