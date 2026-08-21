@@ -20,6 +20,7 @@ import { useHoverPreview } from "./HoverPreview";
 const GROUPS = [
   { id: "navigation", label: "Navigation", categoryIds: ["navbars", "headers", "footers"] },
   { id: "hero", label: "Hero", categoryIds: ["heroes"] },
+  { id: "parallax", label: "Parallax", categoryIds: ["parallax"] },
   { id: "content", label: "Content", categoryIds: ["components", "text", "toolbox", "containers", "testimonials", "faq"] },
   { id: "features", label: "Features", categoryIds: ["sections", "services", "pricing", "team"] },
   { id: "forms", label: "Forms", categoryIds: ["newsletter", "contact"] },

@@ -21,6 +21,22 @@ const PORT = [
   "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70",
 ];
 
+// background-attachment:fixed is the actual parallax mechanism for every
+// block below — it's the one native, zero-JS way to get a real depth
+// effect (background stays put in the viewport while foreground content
+// scrolls over it) that also renders correctly live in the Design canvas,
+// unlike a scroll-linked JS/transform approach, which — like every other
+// <script>-driven effect in this codebase — wouldn't execute in the
+// canvas's dangerouslySetInnerHTML rendering at all. Known platform
+// limitation: iOS Safari ignores background-attachment:fixed and treats
+// it as `scroll` instead, so these degrade to an ordinary (non-parallax,
+// still fully legible) background image there — not broken, just flat.
+const PARALLAX_MOUNTAIN = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&q=70";
+const PARALLAX_CITY = "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1600&q=70";
+const PARALLAX_OCEAN = "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1600&q=70";
+const PARALLAX_FOREST = "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=70";
+const PARALLAX_DESERT = "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1600&q=70";
+
 export const EXTRA_CATEGORIES = [
   {
     id: "navbars",
@@ -838,6 +854,88 @@ export const EXTRA_CATEGORIES = [
     <audio controls style="height:32px;"></audio>
   </div>
 </div>`,
+      },
+    ],
+  },
+  {
+    id: "parallax",
+    label: "Parallax",
+    blocks: [
+      {
+        id: "parallax-hero-fullbleed",
+        label: "Parallax Hero · Full Bleed",
+        html: `<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:32px;background-image:linear-gradient(rgba(10,15,20,.55),rgba(10,15,20,.55)),url(${PARALLAX_MOUNTAIN});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
+  <div style="max-width:720px;">
+    <div style="display:inline-block;padding:6px 14px;border:1px solid rgba(255,255,255,.35);border-radius:999px;font-size:12px;color:#fff;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;">Est. 2026</div>
+    <h1 style="font-size:64px;line-height:1.05;letter-spacing:-0.03em;margin:0 0 20px;color:#fff;">Where ambition meets altitude.</h1>
+    <p style="font-size:18px;color:rgba(255,255,255,.85);margin:0 0 32px;">A full-bleed statement hero — the background stays fixed while your content scrolls over it.</p>
+    <button style="background:#fff;color:#0a0f14;border:0;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Explore</button>
+  </div>
+</section>`,
+      },
+      {
+        id: "parallax-hero-split",
+        label: "Parallax Hero · Split Content",
+        html: `<section style="min-height:80vh;display:flex;align-items:center;padding:32px 64px;background-image:linear-gradient(90deg,rgba(8,12,10,.75) 0%,rgba(8,12,10,.25) 55%,rgba(8,12,10,0) 80%),url(${PARALLAX_FOREST});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
+  <div style="max-width:480px;">
+    <h1 style="font-size:48px;line-height:1.1;letter-spacing:-0.02em;margin:0 0 16px;color:#fff;">Grown, not manufactured.</h1>
+    <p style="font-size:16px;color:rgba(255,255,255,.85);margin:0 0 24px;">Content sits in a legible band on the left; the parallax background carries the mood on the right.</p>
+    <div style="display:flex;gap:12px;">
+      <button style="background:#fff;color:#0a0f14;border:0;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Get started</button>
+      <button style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);padding:12px 22px;border-radius:8px;font-size:14px;cursor:pointer;">Learn more</button>
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "parallax-section-quote",
+        label: "Parallax Section · Big Quote",
+        html: `<section style="padding:140px 32px;text-align:center;background-image:linear-gradient(rgba(6,10,20,.6),rgba(6,10,20,.6)),url(${PARALLAX_OCEAN});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
+  <div style="max-width:820px;margin:0 auto;">
+    <div style="font-size:64px;line-height:1;color:rgba(255,255,255,.35);font-family:Georgia,serif;margin-bottom:8px;">"</div>
+    <p style="font-size:34px;line-height:1.35;letter-spacing:-0.01em;color:#fff;margin:0 0 28px;font-weight:500;">The best interfaces disappear — you stop noticing the tool and start noticing the work.</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+      <img src="${AVA[0]}" alt="" style="width:44px;height:44px;border-radius:999px;object-fit:cover;border:2px solid rgba(255,255,255,.4);" />
+      <div style="text-align:left;">
+        <div style="font-size:14px;font-weight:600;color:#fff;">Nadia Osei</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);">Creative Director, Tidewater</div>
+      </div>
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "parallax-section-stats",
+        label: "Parallax Section · Stats Band",
+        html: `<section style="padding:88px 32px;background-image:linear-gradient(rgba(15,10,5,.6),rgba(15,10,5,.6)),url(${PARALLAX_DESERT});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
+  <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center;">
+    <div>
+      <div style="font-size:44px;font-weight:700;color:#fff;">14k+</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Sites shipped</div>
+    </div>
+    <div>
+      <div style="font-size:44px;font-weight:700;color:#fff;">99.9%</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Uptime</div>
+    </div>
+    <div>
+      <div style="font-size:44px;font-weight:700;color:#fff;">38</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Countries</div>
+    </div>
+    <div>
+      <div style="font-size:44px;font-weight:700;color:#fff;">4.9★</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Average rating</div>
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "parallax-section-cta",
+        label: "Parallax Section · CTA Banner",
+        html: `<section style="padding:96px 32px;text-align:center;background-image:linear-gradient(rgba(10,20,25,.65),rgba(10,20,25,.65)),url(${PARALLAX_CITY});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
+  <h2 style="font-size:38px;letter-spacing:-0.02em;margin:0 0 12px;color:#fff;">Ready when the skyline is.</h2>
+  <p style="font-size:16px;color:rgba(255,255,255,.85);margin:0 0 28px;">Start free — upgrade only once you're ready to publish.</p>
+  <button style="background:#fff;color:#0a1419;border:0;padding:14px 30px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Start building free</button>
+</section>`,
       },
     ],
   },
