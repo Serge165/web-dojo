@@ -288,6 +288,8 @@ git commit -m "Add per-project dashboard password set/unlock endpoints"
 
 - [ ] **Step 1: Write the failing tests**
 
+This is the first task in this file to need a raw database handle in a test (to count documents directly). Check whether a `db` pytest fixture already exists (search `backend/tests/` for `def db(`); if not, add one alongside the existing `client`/`project_id` fixtures (same fixture file/location they're defined in) returning `server.db`. Later tasks in this plan (6, 8) reuse this same fixture — do not redefine it.
+
 ```python
 import stripe as stripe_sdk
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -343,13 +345,12 @@ class TestStripeWebhook:
         assert order["customer_email"] == "buyer@example.com"
         assert order["line_items"][0]["name"] == "Aurora Bottle"
 
-    def test_the_same_event_delivered_twice_creates_only_one_order(self, client):
+    def test_the_same_event_delivered_twice_creates_only_one_order(self, client, db):
         with patch.object(stripe_sdk.Webhook, "construct_event", return_value=_fake_stripe_event()), \
              patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()):
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
-        count = client.get("/api/commerce/receipt/" + FAKE_SESSION_ID).json()
-        assert count["status"] == "completed"  # still resolvable, not duplicated — full duplicate check is in Task 7's list endpoint test
+        assert db.orders.count_documents({"provider_ref": FAKE_SESSION_ID}) == 1
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -481,6 +482,7 @@ class TestCheckoutSessionProjectId:
         assert r.status_code == 200
         assert captured["metadata"] == {"project_id": "proj-123"}
         assert captured["allow_promotion_codes"] is True
+        assert captured["billing_address_collection"] == "required"
         assert "shipping_address_collection" in captured
 ```
 
