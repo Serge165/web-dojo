@@ -38,10 +38,31 @@ const buildSeoMeta = (seo) => {
 
 const pageTitle = (project) => (project.seo && project.seo.title) || project.name || "Untitled";
 
+// Skips the first <img> (likely the hero/LCP image — eager-loading that
+// one is the actual best practice) and lazy-loads the rest.
+const injectLazyLoading = (html) => {
+  let first = true;
+  return html.replace(/<img(?![^>]*\bloading=)([^>]*)>/gi, (match, attrs) => {
+    if (first) { first = false; return match; }
+    return `<img${attrs} loading="lazy">`;
+  });
+};
+
+// Minimal WebSite JSON-LD — enough for search engines to associate the
+// page with its name/description without inventing a full schema editor.
+const buildJsonLd = (project) => {
+  const seo = project.seo || {};
+  const data = { "@context": "https://schema.org", "@type": "WebSite", name: seo.title || project.name || "Untitled" };
+  if (seo.description) data.description = seo.description;
+  if (seo.canonical) data.url = seo.canonical;
+  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+};
+
 export const buildStandaloneHtml = (project) => {
-  const body = project.elements.map((e) => e.html).join("\n");
+  const body = injectLazyLoading(project.elements.map((e) => e.html).join("\n"));
   const fonts = buildFontLinks(project.fonts);
   const seoMeta = buildSeoMeta(project.seo);
+  const jsonLd = buildJsonLd(project);
   const customJsTag = (project.custom_js || "").trim() ? `<script>${escRawScript(project.custom_js)}</script>\n` : "";
   return `<!doctype html>
 <html lang="en">
@@ -52,6 +73,7 @@ export const buildStandaloneHtml = (project) => {
 <script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
 ${RESPONSIVE_CSS}
 ${seoMeta}
+${jsonLd}
 ${fonts}
 ${project.head_html || ""}
 <style>body{margin:0;background:${project.canvas_bg || "#ffffff"};}</style>
@@ -91,9 +113,11 @@ export const downloadStandalone = (project) => {
 };
 
 export const buildCleanExport = (project) => {
-  const { html: cleaned, css } = stripInlineStyles(project.elements);
+  const { html: cleanedRaw, css } = stripInlineStyles(project.elements);
+  const cleaned = injectLazyLoading(cleanedRaw);
   const fonts = buildFontLinks(project.fonts);
   const seoMeta = buildSeoMeta(project.seo);
+  const jsonLd = buildJsonLd(project);
   const customJsTag = (project.custom_js || "").trim() ? `<script>${escRawScript(project.custom_js)}</script>\n` : "";
   const html = `<!doctype html>
 <html lang="en">
@@ -104,6 +128,7 @@ export const buildCleanExport = (project) => {
 <script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
 ${RESPONSIVE_CSS}
 ${seoMeta}
+${jsonLd}
 ${fonts}
 ${project.head_html || ""}
 <link rel="stylesheet" href="globals.css" />
