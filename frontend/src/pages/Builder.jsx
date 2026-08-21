@@ -145,10 +145,22 @@ export default function Builder() {
   // must not record its own transitions.
   const [saveStatus, setSaveStatus] = useState("idle"); // idle | unsaved | saving | saved | error
   const autosaveTimerRef = useRef(null);
-  const prevAutosaveDocRef = useRef(doc);
+  // Separate from `doc` on purpose: `doc` drives undo/redo history, which
+  // must stay narrow (page-structure changes like rename/SEO/template
+  // shouldn't be Ctrl+Z-able, and definitely shouldn't get clobbered by
+  // switching pages). But those same fields ARE part of what persist()
+  // actually saves — watching only `doc` here meant renaming the project,
+  // editing SEO, or changing the template never marked the project dirty,
+  // so autosave silently skipped them while the status bar kept saying
+  // "Saved" until the next manual Save.
+  const saveWatch = useMemo(
+    () => ({ elements, canvasBg, headHtml, fonts, files, customJs, projectName, pages, template, analytics }),
+    [elements, canvasBg, headHtml, fonts, files, customJs, projectName, pages, template, analytics]
+  );
+  const prevAutosaveDocRef = useRef(saveWatch);
   useEffect(() => {
-    if (prevAutosaveDocRef.current === doc) return;
-    prevAutosaveDocRef.current = doc;
+    if (prevAutosaveDocRef.current === saveWatch) return;
+    prevAutosaveDocRef.current = saveWatch;
     setSaveStatus("unsaved");
     clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(() => { persist(true); }, 2500);
@@ -157,7 +169,7 @@ export default function Builder() {
     // on every re-render (not just real edits) and the debounce would
     // never actually fire during active use.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doc]);
+  }, [saveWatch]);
   useEffect(() => () => clearTimeout(autosaveTimerRef.current), []);
 
   const undo = () => {

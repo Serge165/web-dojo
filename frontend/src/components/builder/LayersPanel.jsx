@@ -150,8 +150,13 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
                 data-testid={`layer-z-${el.id}`}
                 title="z-index"
               />
-              <button onClick={() => onMove(el.id, -1)} className="p-1 text-gray-400 hover:text-white" title="Move up" data-testid={`layer-up-${el.id}`}><ArrowUp size={12} /></button>
-              <button onClick={() => onMove(el.id, 1)} className="p-1 text-gray-400 hover:text-white" title="Move down" data-testid={`layer-down-${el.id}`}><ArrowDown size={12} /></button>
+              {/* This list is rendered in reverse (top of stack first, see
+                  `rev` above) — onMove's delta is an ARRAY index step, so
+                  "up" in this reversed list means +1 (later in the array,
+                  higher in the stack), the opposite of Canvas's own arrows
+                  which move +1/-1 against the unreversed document order. */}
+              <button onClick={() => onMove(el.id, 1)} className="p-1 text-gray-400 hover:text-white" title="Move up" data-testid={`layer-up-${el.id}`}><ArrowUp size={12} /></button>
+              <button onClick={() => onMove(el.id, -1)} className="p-1 text-gray-400 hover:text-white" title="Move down" data-testid={`layer-down-${el.id}`}><ArrowDown size={12} /></button>
               <button onClick={() => onDelete(el.id)} className="p-1 text-gray-400 hover:text-red-400" title="Delete" data-testid={`layer-del-${el.id}`}><Trash2 size={12} /></button>
             </div>
           );
