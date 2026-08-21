@@ -1,3 +1,4 @@
+import asyncio
 import atexit
 import os
 import tempfile
@@ -9,9 +10,14 @@ from unittest.mock import patch
 # to be the first to import it in a given pytest-xdist worker.
 os.environ.setdefault("MONGO_URL", "mongodb://localhost:27017")
 os.environ.setdefault("DB_NAME", "webdojo_test")
+# The webhook route just needs this non-empty to pass its "is Stripe
+# configured" guard — signature verification itself is mocked per-test.
+os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test_dummy")
 
 import pytest
+import stripe as stripe_sdk
 from starlette.testclient import TestClient
+from unittest.mock import MagicMock, patch
 
 import server
 from sqlite_compat import SqliteClient
@@ -40,6 +46,30 @@ def client():
 def project_id(client):
     r = client.post("/api/projects", json={"name": "Test Project"})
     return r.json()["id"]
+
+
+class _SyncCollection:
+    """Wraps a sqlite_compat collection so its async methods (find_one,
+    count_documents, ...) can be called synchronously from a plain (non-async)
+    test function, matching how the `db` fixture is used across this file."""
+
+    def __init__(self, collection):
+        self._collection = collection
+
+    def __getattr__(self, name):
+        attr = getattr(self._collection, name)
+        if asyncio.iscoroutinefunction(attr):
+            return lambda *a, **kw: asyncio.run(attr(*a, **kw))
+        return attr
+
+
+@pytest.fixture()
+def db():
+    class _SyncDb:
+        def __getattr__(self, name):
+            return _SyncCollection(getattr(server.db, name))
+
+    return _SyncDb()
 
 
 class TestPasswordHashing:
@@ -101,3 +131,61 @@ class TestDashboardSetPasswordAndUnlock:
         body = r.json()
         assert "dashboard_password_hash" not in body
         assert "paypal_secret_enc" not in body
+
+
+FAKE_SESSION_ID = "cs_test_abc123"
+
+
+def _fake_stripe_event():
+    return {
+        "type": "checkout.session.completed",
+        "data": {
+            "object": {
+                "id": FAKE_SESSION_ID,
+                "amount_total": 3800,
+                "currency": "usd",
+                "customer_details": {"email": "buyer@example.com", "name": "Ada Lovelace"},
+                "metadata": {"project_id": "proj-123"},
+            }
+        },
+    }
+
+
+def _fake_line_items():
+    item = MagicMock()
+    item.description = "Aurora Bottle"
+    item.quantity = 1
+    item.amount_total = 3800
+    item.currency = "usd"
+    result = MagicMock()
+    result.data = [item]
+    return result
+
+
+class TestStripeWebhook:
+    def test_a_request_with_no_signature_header_is_rejected(self, client):
+        r = client.post("/api/commerce/webhook", content=b"{}")
+        assert r.status_code == 400
+
+    def test_a_request_with_an_invalid_signature_is_rejected(self, client):
+        with patch.object(stripe_sdk.Webhook, "construct_event", side_effect=stripe_sdk.error.SignatureVerificationError("bad sig", "sig")):
+            r = client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "bad"})
+        assert r.status_code == 400
+
+    def test_a_valid_completed_session_event_creates_an_order(self, client):
+        with patch.object(stripe_sdk.Webhook, "construct_event", return_value=_fake_stripe_event()), \
+             patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()):
+            r = client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+        assert r.status_code == 200
+        order = client.get(f"/api/commerce/receipt/{FAKE_SESSION_ID}").json()
+        assert order["status"] == "completed"
+        assert order["project_id"] == "proj-123"
+        assert order["customer_email"] == "buyer@example.com"
+        assert order["line_items"][0]["name"] == "Aurora Bottle"
+
+    def test_the_same_event_delivered_twice_creates_only_one_order(self, client, db):
+        with patch.object(stripe_sdk.Webhook, "construct_event", return_value=_fake_stripe_event()), \
+             patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()):
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+        assert db.orders.count_documents({"provider_ref": FAKE_SESSION_ID}) == 1

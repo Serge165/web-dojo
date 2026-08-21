@@ -1318,6 +1318,64 @@ async def commerce_checkout_session(payload: CheckoutSessionCreate):
         raise HTTPException(status_code=502, detail=f"Stripe checkout failed: {detail}")
 
 
+async def _upsert_order(order: dict) -> None:
+    await db.orders.update_one(
+        {"provider_ref": order["provider_ref"]},
+        {"$set": order},
+        upsert=True,
+    )
+
+
+@api_router.post("/commerce/webhook")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+    if not sig_header or not webhook_secret:
+        raise HTTPException(status_code=400, detail="Missing signature")
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except (ValueError, stripe.error.SignatureVerificationError):
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        line_items_result = stripe.checkout.Session.list_line_items(session["id"])
+        line_items = [
+            {
+                "name": item.description,
+                "quantity": item.quantity,
+                "unit_amount": item.amount_total,
+                "currency": item.currency,
+            }
+            for item in line_items_result.data
+        ]
+        details = session.get("customer_details") or {}
+        await _upsert_order({
+            "id": str(uuid.uuid4()),
+            "project_id": (session.get("metadata") or {}).get("project_id", ""),
+            "provider": "stripe",
+            "provider_ref": session["id"],
+            "status": "completed",
+            "amount_total": session.get("amount_total", 0),
+            "currency": session.get("currency", "usd"),
+            "customer_email": details.get("email"),
+            "customer_name": details.get("name"),
+            "shipping_address": session.get("shipping_details"),
+            "line_items": line_items,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    return {"received": True}
+
+
+@api_router.get("/commerce/receipt/{provider_ref}")
+async def get_receipt(provider_ref: str):
+    order = await db.orders.find_one({"provider_ref": provider_ref}, {"_id": 0})
+    if not order:
+        return {"status": "processing"}
+    return order
+
+
 class UrlImport(BaseModel):
     url: str
 
