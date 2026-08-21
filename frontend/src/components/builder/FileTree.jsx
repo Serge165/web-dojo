@@ -5,6 +5,59 @@ import { TreeNode } from "./TreeNode";
 
 const uid = () => "f_" + Math.random().toString(36).slice(2, 10);
 
+const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|svg|bmp|ico|avif)$/i;
+const isImageFile = (file) => (file.type && file.type.startsWith("image/")) || IMAGE_EXT_RE.test(file.name || "");
+
+// Images need to survive as actual image bytes, not mangled text — read
+// them as a data URI instead of file.text() (which would silently
+// corrupt any binary content, since it's designed for source files).
+const readFileContent = (file) =>
+  new Promise((resolve) => {
+    if (isImageFile(file)) {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result || "");
+      reader.onerror = () => resolve("");
+      reader.readAsDataURL(file);
+    } else {
+      file.text().then(resolve).catch(() => resolve(""));
+    }
+  });
+
+// Every imported image lands in one shared imgs/ folder regardless of
+// where it was dropped from (a subfolder of a dragged-in project, etc.)
+// — mirrors how real asset libraries centralize images rather than
+// scattering them through arbitrary paths. Non-image files keep their
+// normal relative path.
+const importedPath = (file, prefix) => (isImageFile(file) ? `imgs/${file.name}` : `${prefix}${file.name}`);
+
+// Merges freshly-imported entries into the existing files array.
+// Non-image path collisions keep the pre-existing silent-skip behavior
+// (first import wins). Image collisions ask before overwriting — an
+// image landing in the shared imgs/ folder is far more likely to be a
+// genuine "replace this asset" intent than a same-named source file
+// dropped in twice by accident.
+const mergeImported = (collected, files) => {
+  let next = [...files];
+  const pathIndex = new Map(next.map((f, i) => [f.path, i]));
+  let imported = 0;
+  let skipped = 0;
+  for (const item of collected) {
+    const existingIdx = pathIndex.get(item.path);
+    if (existingIdx === undefined) {
+      pathIndex.set(item.path, next.length);
+      next.push(item);
+      imported++;
+      continue;
+    }
+    if (!item.isImage) { skipped++; continue; } // non-image collision: unchanged prior behavior
+    const overwrite = window.confirm(`"${item.path}" already exists in this project. Overwrite it with the new import?`);
+    if (!overwrite) { skipped++; continue; }
+    next[existingIdx] = item;
+    imported++;
+  }
+  return { next, imported, skipped };
+};
+
 const buildTree = (files) => {
   const root = { name: "", path: "", type: "folder", children: [], id: "__root" };
   const dirs = { "": root };
@@ -36,8 +89,8 @@ const readEntry = (entry, prefix = "") =>
   new Promise((resolve) => {
     if (entry.isFile) {
       entry.file(async (file) => {
-        const content = await file.text().catch(() => "");
-        resolve([{ id: uid(), path: `${prefix}${file.name}`, type: "file", content }]);
+        const content = await readFileContent(file);
+        resolve([{ id: uid(), path: importedPath(file, prefix), type: "file", content, isImage: isImageFile(file) }]);
       });
     } else if (entry.isDirectory) {
       const reader = entry.createReader();
@@ -139,27 +192,27 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
       } else {
         const f = it.getAsFile && it.getAsFile();
         if (f) {
-          const content = await f.text().catch(() => "");
-          collected.push({ id: uid(), path: f.name, type: "file", content });
+          const content = await readFileContent(f);
+          collected.push({ id: uid(), path: importedPath(f, ""), type: "file", content, isImage: isImageFile(f) });
         }
       }
     }
-    const existing = new Set(files.map((f) => f.path));
-    const merged = [...files, ...collected.filter((c) => !existing.has(c.path))];
-    onChange(merged);
-    toast.success(`Imported ${collected.length} entries`);
+    const { next, imported, skipped } = mergeImported(collected, files);
+    onChange(next);
+    toast.success(`Imported ${imported} entr${imported === 1 ? "y" : "ies"}${skipped ? `, skipped ${skipped}` : ""}`);
   };
 
   const onFilePick = async (e) => {
     const list = Array.from(e.target.files || []);
     const collected = [];
     for (const f of list) {
-      const rel = f.webkitRelativePath || f.name;
-      const content = await f.text().catch(() => "");
-      collected.push({ id: uid(), path: rel, type: "file", content });
+      const rel = isImageFile(f) ? `imgs/${f.name}` : (f.webkitRelativePath || f.name);
+      const content = await readFileContent(f);
+      collected.push({ id: uid(), path: rel, type: "file", content, isImage: isImageFile(f) });
     }
-    const existing = new Set(files.map((f) => f.path));
-    onChange([...files, ...collected.filter((c) => !existing.has(c.path))]);
+    const { next, imported, skipped } = mergeImported(collected, files);
+    onChange(next);
+    toast.success(`Imported ${imported} file${imported === 1 ? "" : "s"}${skipped ? `, skipped ${skipped}` : ""}`);
     e.target.value = "";
     toast.success(`Imported ${collected.length} files`);
   };

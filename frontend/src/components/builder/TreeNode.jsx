@@ -72,6 +72,7 @@ export function TreeNode(props) {
   }
 
   const isHtml = /\.html?$/i.test(node.path);
+  const isImage = !!node.isImage;
   const onDragStart = (e) => {
     if (isHtml) {
       e.dataTransfer.setData("text/html-block", node.content || "");
@@ -92,10 +93,17 @@ export function TreeNode(props) {
       data-testid={`tree-file-${node.path}`}
     >
       <span className="w-3" />
-      <FileText size={12} className={isHtml ? "text-emerald-400" : "text-gray-400"} />
+      {isImage ? (
+        <img src={node.content} alt="" style={{ width: 12, height: 12, objectFit: "cover", borderRadius: 2 }} />
+      ) : (
+        <FileText size={12} className={isHtml ? "text-emerald-400" : "text-gray-400"} />
+      )}
       <button
         onDoubleClick={onDbl}
-        onClick={() => onFileClick && onFileClick(node)}
+        // Images skip the code editor entirely — dumping a data: URI's
+        // raw base64 into Monaco isn't useful; the thumbnail above is
+        // the preview.
+        onClick={() => !isImage && onFileClick && onFileClick(node)}
         className="flex-1 truncate text-left"
       >
         {node.name}
