@@ -8,7 +8,8 @@ import { RightSidebar } from "@/components/builder/RightSidebar";
 import { Canvas } from "@/components/builder/Canvas";
 import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, Eye, MousePointer2, Code2, Columns2 } from "lucide-react";
+import { Trash2, Eye, MousePointer2, Code2, Columns2, Presentation } from "lucide-react";
+import { OutlineView } from "@/components/builder/OutlineView";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
 import { PagesBar } from "@/components/builder/PagesBar";
@@ -28,6 +29,7 @@ import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
 import { buildStandaloneHtml } from "@/lib/exportHtml";
 import { buildCartRuntimeHtml } from "@/lib/cart";
 import { scanHtml } from "@/lib/importHtml";
+import { escText } from "@/lib/escapeHtml";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -98,6 +100,7 @@ export default function Builder() {
   const [submissionsOpen, setSubmissionsOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
   const clipboardRef = useRef(null);
+  const [outlineSlides, setOutlineSlides] = useState([]);
 
   // Undo/Redo history stack for the doc state.
   const [past, setPast] = useState([]);
@@ -227,6 +230,34 @@ export default function Builder() {
     setCustomJs("");
     setSelectedId(null);
     toast.success(`Added "${layout.label}" page`);
+  };
+  // Outline "slide" -> real page, one h1(+p) page per slide, mirroring
+  // addPageFromLayout but batched into a single setPages call.
+  const generatePagesFromOutline = (slides) => {
+    if (!slides || slides.length === 0) return;
+    const newPages = slides.map((s) => {
+      const title = s.title || "Untitled";
+      const els = [{ id: uid(), html: `<h1 style="font-family:Manrope,sans-serif;font-size:48px;letter-spacing:-0.02em;margin:24px 32px;color:var(--fc-text, #0f172a);">${escText(title)}</h1>` }];
+      if (s.body && s.body.trim()) {
+        els.push({ id: uid(), html: `<p style="font-family:Manrope,sans-serif;font-size:16px;color:var(--fc-muted, #475569);margin:12px 32px;max-width:700px;line-height:1.6;">${escText(s.body)}</p>` });
+      }
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || uid();
+      return { id: uid(), name: title, slug, status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" };
+    });
+    setPages((ps) => {
+      const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
+      return [...persisted, ...newPages];
+    });
+    const first = newPages[0];
+    setActivePageId(first.id);
+    setElements(first.elements);
+    setHeadHtml("");
+    setCanvasBg("#ffffff");
+    setFonts([]);
+    setCustomJs("");
+    setSelectedId(null);
+    setMode("design");
+    toast.success(`Generated ${newPages.length} page${newPages.length === 1 ? "" : "s"}`);
   };
   const removePage = (id) => {
     if (pages.length <= 1) { toast.error("Keep at least one page"); return; }
@@ -700,11 +731,12 @@ export default function Builder() {
           <button onClick={() => setMode("code")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-code"><Code2 size={12} /> Code</button>
           <button onClick={() => setMode("split")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "split" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-split"><Columns2 size={12} /> Split View</button>
           <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-preview"><Eye size={12} /> Preview</button>
+          <button onClick={() => setMode("outline")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "outline" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-outline"><Presentation size={12} /> Outline</button>
         </div>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {mode !== "preview" && (
+        {mode !== "preview" && mode !== "outline" && (
           <LeftSidebar
             onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
             onAddFont={addFont}
@@ -789,10 +821,17 @@ export default function Builder() {
             </div>
           </div>
         )}
+        {mode === "outline" && (
+          <OutlineView
+            slides={outlineSlides}
+            onChange={setOutlineSlides}
+            onGenerate={generatePagesFromOutline}
+          />
+        )}
           </div>
         </div>
 
-        {mode !== "preview" && (
+        {mode !== "preview" && mode !== "outline" && (
           <RightSidebar
             selected={selected}
             onApplyBackground={applyBackground}
