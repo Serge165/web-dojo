@@ -39,6 +39,7 @@ import { scanHtml } from "@/lib/importHtml";
 import { escText } from "@/lib/escapeHtml";
 import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
 import { upsertResponsiveOverridesCss } from "@/lib/responsiveOverrides";
+import { upsertAnalyticsHead } from "@/lib/analyticsSnippets";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -94,6 +95,7 @@ export default function Builder() {
   const [pages, setPages] = useState(() => [{ id: "home", name: "Home", slug: "index", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" }]);
   const [activePageId, setActivePageId] = useState("home");
   const [template, setTemplate] = useState({ header_html: "", footer_html: "", use_template: false });
+  const [analytics, setAnalytics] = useState({});
   const [findOpen, setFindOpen] = useState(false);
   const [editingFileId, setEditingFileId] = useState(null);
   const [assetsOpen, setAssetsOpen] = useState(false);
@@ -192,7 +194,7 @@ export default function Builder() {
     // legacy top-level fields mirror the active page for backward compat
     elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files, custom_js: customJs,
     seo: activePage?.seo || {},
-    pages, active_page_id: activePageId, template,
+    pages, active_page_id: activePageId, template, analytics,
   };
 
   // ------------- Page ops -------------
@@ -486,6 +488,16 @@ export default function Builder() {
     }
   };
 
+  // Tracking snippets are always site-wide (unlike theme, no allPages
+  // toggle needed — a GA4/Pixel/etc. tag on only one page isn't a real
+  // use case), so this always cascades to every page.
+  const applyAnalytics = (config) => {
+    setAnalytics(config);
+    setHeadHtml((h) => upsertAnalyticsHead(h, config));
+    setPages((ps) => ps.map((p) => p.id === activePageId ? p : { ...p, head_html: upsertAnalyticsHead(p.head_html, config) }));
+    toast.success("Tracking snippets applied to all pages");
+  };
+
   const addFont = ({ family, google }) => {
     const label = family.split(",")[0].replace(/['"]/g, "").trim();
     if (fonts.includes(label)) { toast.info("Font already added"); return; }
@@ -643,6 +655,7 @@ export default function Builder() {
       setFonts(active.fonts || []);
       setCustomJs(active.custom_js || "");
       setTemplate(p.template || { header_html: "", footer_html: "", use_template: false });
+      setAnalytics(p.analytics || {});
       setFiles(p.files || []);
       setSelectedId(null); setLoadOpen(false); setPast([]); setFuture([]);
       toast.success(`Loaded ${p.name}`);
@@ -668,6 +681,7 @@ export default function Builder() {
     setFonts(nextPages[0].fonts || []);
     setCustomJs(nextPages[0].custom_js || "");
     setTemplate(data.template || { header_html: "", footer_html: "", use_template: false });
+    setAnalytics(data.analytics || {});
     setFiles(data.files || []);
     setSelectedId(null); setPast([]); setFuture([]);
     toast.success(`Started new project from “${tpl.name}”`);
@@ -1105,6 +1119,8 @@ export default function Builder() {
         onClose={() => setAnalyticsOpen(false)}
         projectId={projectId}
         projectName={projectName}
+        analytics={analytics}
+        onApplyAnalytics={applyAnalytics}
       />
 
       <ProjectTemplatesModal

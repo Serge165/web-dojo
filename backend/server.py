@@ -56,6 +56,7 @@ class Project(BaseModel):
     pages: List[Any] = Field(default_factory=list)
     active_page_id: Optional[str] = None
     template: Optional[Any] = None  # { header_html, footer_html, use_template }
+    analytics: Optional[Any] = None  # { ga4, fathom, plausible_domain, hotjar, fb_pixel }
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -71,6 +72,7 @@ class ProjectCreate(BaseModel):
     pages: List[Any] = []
     active_page_id: Optional[str] = None
     template: Optional[Any] = None
+    analytics: Optional[Any] = None
 
 
 class ProjectUpdate(BaseModel):
@@ -84,6 +86,7 @@ class ProjectUpdate(BaseModel):
     pages: Optional[List[Any]] = None
     active_page_id: Optional[str] = None
     template: Optional[Any] = None
+    analytics: Optional[Any] = None
 
 
 class ProjectSummary(BaseModel):

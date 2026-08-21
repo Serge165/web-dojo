@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Eye, UploadCloud } from "lucide-react";
+import { ANALYTICS_FIELDS } from "@/lib/analyticsSnippets";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2.5 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500";
 
-export const AnalyticsModal = ({ open, onClose, projectId, projectName }) => {
+export const AnalyticsModal = ({ open, onClose, projectId, projectName, analytics, onApplyAnalytics }) => {
+  const [tab, setTab] = useState("overview");
   const [data, setData] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [draft, setDraft] = useState(analytics || {});
+
+  useEffect(() => { if (open) setDraft(analytics || {}); }, [open, analytics]);
 
   useEffect(() => {
     if (!open || !projectId) return;
@@ -20,10 +26,39 @@ export const AnalyticsModal = ({ open, onClose, projectId, projectName }) => {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-xl" data-testid="analytics-modal">
-        <DialogHeader><DialogTitle>Analytics · {projectName}</DialogTitle></DialogHeader>
-        {!projectId && <div className="text-xs text-gray-400">Save the project first to view analytics.</div>}
-        {busy && <div className="text-xs text-gray-400">Loading…</div>}
-        {data && (
+        <DialogHeader>
+          <DialogTitle>Analytics · {projectName}</DialogTitle>
+          <DialogDescription className="sr-only">View pageview stats or configure tracking snippets</DialogDescription>
+        </DialogHeader>
+        <div className="flex bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5 text-xs">
+          <button onClick={() => setTab("overview")} className={`flex-1 py-1.5 rounded ${tab === "overview" ? "bg-[#1F1F1F] text-white" : "text-gray-400"}`} data-testid="analytics-tab-overview">Overview</button>
+          <button onClick={() => setTab("tracking")} className={`flex-1 py-1.5 rounded ${tab === "tracking" ? "bg-[#1F1F1F] text-white" : "text-gray-400"}`} data-testid="analytics-tab-tracking">Tracking snippets</button>
+        </div>
+        {tab === "tracking" && (
+          <div className="space-y-3" data-testid="analytics-tracking-panel">
+            <p className="text-[11px] text-gray-500">Paste your provider IDs below — the matching snippet gets injected into every page's &lt;head&gt;. No accounts are created here; get your ID from each provider's own dashboard.</p>
+            {ANALYTICS_FIELDS.map((f) => (
+              <div key={f.key}>
+                <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">{f.label}</label>
+                <input
+                  value={draft[f.key] || ""}
+                  onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
+                  placeholder={f.placeholder}
+                  className={inputCls}
+                  data-testid={`analytics-field-${f.key}`}
+                />
+              </div>
+            ))}
+            <button
+              onClick={() => { onApplyAnalytics(draft); onClose(); }}
+              className="w-full text-xs py-2 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium"
+              data-testid="analytics-apply"
+            >Apply to all pages</button>
+          </div>
+        )}
+        {!projectId && tab === "overview" && <div className="text-xs text-gray-400">Save the project first to view analytics.</div>}
+        {busy && tab === "overview" && <div className="text-xs text-gray-400">Loading…</div>}
+        {tab === "overview" && data && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded border border-[#2B2B2B] bg-[#0D0D0D]">
