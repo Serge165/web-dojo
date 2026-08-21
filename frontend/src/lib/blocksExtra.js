@@ -4,6 +4,23 @@ const F = "Manrope,system-ui,sans-serif";
 const VID = "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 const VPOSTER = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70";
 
+const AVA = [
+  "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75",
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75",
+  "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75",
+  "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75",
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=75",
+];
+const PORT = [
+  "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70",
+  "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70",
+  "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70",
+  "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70",
+  "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70",
+  "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70",
+];
+
 export const EXTRA_CATEGORIES = [
   {
     id: "navbars",
@@ -211,6 +228,20 @@ export const EXTRA_CATEGORIES = [
   </div>
 </footer>`,
       },
+      {
+        id: "ft-mega-multicol",
+        label: "Mega 5-column Footer",
+        html: `<footer style="font-family:${F};background:var(--fc-bg, #0b0b12);color:var(--fc-muted, #9ca3af);padding:60px 32px 32px;">
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1.2fr;gap:28px;">
+    <div><div style="font-weight:800;font-size:20px;color:var(--fc-text, #fff);margin-bottom:10px;">Brand</div><p style="font-size:13px;line-height:1.7;margin:0;max-width:220px;">Tools for teams who ship fast and design well.</p></div>
+    ${[["Product",["Features","Integrations","Changelog"]],["Solutions",["Agencies","Startups","Enterprise"]],["Resources",["Blog","Guides","API Docs"]],["Company",["About","Careers","Press"]]].map(([h,ls])=>`<div><div style="font-weight:600;color:var(--fc-text, #fff);font-size:13px;margin-bottom:12px;">${h}</div>${ls.map(l=>`<a href="#" style="display:block;color:var(--fc-muted, #9ca3af);text-decoration:none;font-size:13px;padding:4px 0;">${l}</a>`).join("")}</div>`).join("")}
+  </div>
+  <div style="max-width:1200px;margin:32px auto 0;padding-top:20px;border-top:1px solid var(--fc-border, #26263a);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--fc-muted, #6b7280);">
+    <span>© 2026 Brand. All rights reserved.</span>
+    <div style="display:flex;gap:16px;"><a href="#" style="color:inherit;text-decoration:none;">Privacy</a><a href="#" style="color:inherit;text-decoration:none;">Terms</a><a href="#" style="color:inherit;text-decoration:none;">Cookies</a></div>
+  </div>
+</footer>`,
+      },
     ],
   },
   {
@@ -254,6 +285,344 @@ export const EXTRA_CATEGORIES = [
   <div style="position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:0 32px;color:#fff;">
     <h2 style="font-size:36px;letter-spacing:-.02em;margin:0 0 8px;">Adventure awaits</h2>
     <p style="margin:0;opacity:.9;font-size:16px;">A compact full-bleed video banner for section breaks.</p>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "pricing",
+    label: "Pricing",
+    blocks: [
+      {
+        id: "pricing-toggle",
+        label: "Pricing · Monthly/Yearly Toggle",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
+  <div class="wd-pricing" style="max-width:1120px;margin:0 auto;text-align:center;">
+    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 8px;color:var(--fc-text, #0f172a);">Simple pricing</h2>
+    <p style="margin:0 0 28px;color:var(--fc-muted, #64748b);font-size:15px;">Switch between monthly and yearly billing.</p>
+    <input type="checkbox" id="wd-pt" class="wd-pt-toggle" style="display:none;" />
+    <label for="wd-pt" style="display:inline-flex;align-items:center;gap:10px;margin-bottom:36px;cursor:pointer;font-size:14px;color:var(--fc-muted, #64748b);">
+      <span>Monthly</span>
+      <span style="width:44px;height:24px;border-radius:999px;background:var(--fc-border, #e2e8f0);position:relative;display:inline-block;">
+        <span class="wd-pt-dot" style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:var(--fc-primary, #4f46e5);transition:transform .2s;"></span>
+      </span>
+      <span>Yearly <span style="color:#16a34a;font-weight:600;">(save 20%)</span></span>
+    </label>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:left;">
+      ${[["Starter","9","86"],["Growth","29","278"],["Scale","79","758"]].map(([n,m,y],i)=>`
+      <div style="padding:28px;border-radius:16px;border:1px solid var(--fc-border, #e2e8f0);${i===1?"box-shadow:0 20px 50px rgba(0,0,0,.08);border-color:var(--fc-primary, #4f46e5);":""}background:var(--fc-surface, #fff);">
+        <div style="font-weight:700;font-size:16px;color:var(--fc-text, #0f172a);margin-bottom:6px;">${n}</div>
+        <div style="font-size:38px;font-weight:800;color:var(--fc-text, #0f172a);margin-bottom:4px;"><span class="wd-price-m">$${m}</span><span class="wd-price-y">$${y}</span><span style="font-size:14px;font-weight:500;color:var(--fc-muted, #64748b);">/mo</span></div>
+        <ul style="list-style:none;padding:0;margin:18px 0 22px;font-size:13px;color:var(--fc-muted, #64748b);line-height:2;">
+          <li>✓ Full feature access</li><li>✓ Priority support</li><li>✓ Unlimited projects</li>
+        </ul>
+        <a href="#" style="display:block;text-align:center;padding:11px;border-radius:10px;background:${i===1?"var(--fc-primary, #4f46e5)":"transparent"};color:${i===1?"#fff":"var(--fc-text, #0f172a)"};border:1px solid var(--fc-border, #e2e8f0);text-decoration:none;font-weight:600;font-size:14px;">Choose ${n}</a>
+      </div>`).join("")}
+    </div>
+    <style>
+      .wd-pricing .wd-price-y{display:none;}
+      .wd-pricing .wd-pt-toggle:checked ~ label .wd-pt-dot{transform:translateX(20px);}
+      .wd-pricing .wd-pt-toggle:checked ~ div .wd-price-m{display:none;}
+      .wd-pricing .wd-pt-toggle:checked ~ div .wd-price-y{display:inline;}
+    </style>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "team",
+    label: "Team",
+    blocks: [
+      {
+        id: "team-cards",
+        label: "Team · Member Cards",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 32px;color:var(--fc-text, #0f172a);text-align:center;">Meet the team</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;">
+      ${[["Ava Chen","Product Lead"],["Marcus Reed","Engineering"],["Priya Nair","Design"],["Tom Vidal","Growth"]].map(([n,r],i)=>`
+      <div style="text-align:center;">
+        <img src="${AVA[i]}" style="width:100px;height:100px;border-radius:999px;object-fit:cover;margin:0 auto 14px;" alt="${n}" />
+        <div style="font-weight:700;font-size:15px;color:var(--fc-text, #0f172a);">${n}</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-bottom:10px;">${r}</div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <a href="#" style="color:var(--fc-muted, #94a3b8);" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" style="color:var(--fc-muted, #94a3b8);" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+        </div>
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "faq",
+    label: "FAQ",
+    blocks: [
+      {
+        id: "faq-accordion",
+        label: "FAQ · Accordion",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
+  <div class="wd-faq" style="max-width:760px;margin:0 auto;">
+    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #0f172a);text-align:center;">Frequently asked</h2>
+    ${[["Can I cancel anytime?","Yes, cancel from your account settings with no fees or lock-in period."],["Do you offer a free trial?","Every plan starts with a 14-day free trial, no card required."],["Is my data secure?","All data is encrypted in transit and at rest, with daily backups."],["Can I change plans later?","Upgrade or downgrade anytime — billing prorates automatically."]].map(([q,a])=>`
+    <details style="border-bottom:1px solid var(--fc-border, #e2e8f0);padding:18px 0;">
+      <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:15px;color:var(--fc-text, #0f172a);">
+        ${q}
+        <span class="wd-chev" style="transition:transform .2s;color:var(--fc-muted, #94a3b8);">⌄</span>
+      </summary>
+      <p style="margin:12px 0 0;font-size:14px;line-height:1.7;color:var(--fc-muted, #64748b);">${a}</p>
+    </details>`).join("")}
+    <style>.wd-faq details[open] .wd-chev{transform:rotate(180deg);} .wd-faq summary::-webkit-details-marker{display:none;}</style>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "newsletter",
+    label: "Newsletter",
+    blocks: [
+      {
+        id: "newsletter-signup",
+        label: "Newsletter · Signup + Validation",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #f8fafc);">
+  <form class="wd-nl" novalidate style="max-width:480px;margin:0 auto;text-align:center;">
+    <h2 style="font-size:28px;letter-spacing:-.02em;margin:0 0 8px;color:var(--fc-text, #0f172a);">Join the newsletter</h2>
+    <p style="margin:0 0 24px;font-size:14px;color:var(--fc-muted, #64748b);">Product updates and design notes, twice a month.</p>
+    <div style="display:flex;gap:8px;">
+      <input type="email" required placeholder="you@example.com" style="flex:1;padding:13px 16px;border-radius:10px;border:1px solid var(--fc-border, #cbd5e1);font-size:14px;outline:none;" />
+      <button type="submit" style="padding:13px 22px;background:var(--fc-primary, #0f172a);color:#fff;border:0;border-radius:10px;font-weight:600;cursor:pointer;">Subscribe</button>
+    </div>
+    <p class="wd-nl-err" style="display:none;color:#dc2626;font-size:12px;margin:8px 0 0;text-align:left;">Please enter a valid email address.</p>
+    <style>
+      .wd-nl:has(input:invalid:not(:placeholder-shown)) .wd-nl-err{display:block;}
+      .wd-nl:has(input:invalid:not(:placeholder-shown)) input{border-color:#dc2626;}
+    </style>
+  </form>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "portfolio",
+    label: "Portfolio",
+    blocks: [
+      {
+        id: "portfolio-filter",
+        label: "Portfolio · Filterable Gallery",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
+  <div class="wd-portfolio" style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 20px;color:var(--fc-text, #0f172a);text-align:center;">Selected work</h2>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;">
+      ${["all","branding","product","web"].map((c,i)=>`<input type="radio" name="wd-pf" id="wd-pf-${c}" ${i===0?"checked":""} style="display:none;" /><label for="wd-pf-${c}" style="cursor:pointer;padding:8px 18px;border-radius:999px;border:1px solid var(--fc-border, #e2e8f0);font-size:13px;color:var(--fc-muted, #64748b);text-transform:capitalize;">${c}</label>`).join("")}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+      ${[[PORT[0],"branding"],[PORT[1],"product"],[PORT[2],"web"],[PORT[3],"branding"],[PORT[4],"product"],[PORT[5],"web"]].map(([src,cat])=>`<div class="wd-pf-item" data-cat="${cat}" style="border-radius:12px;overflow:hidden;aspect-ratio:4/3;"><img src="${src}" style="width:100%;height:100%;object-fit:cover;" alt="" /></div>`).join("")}
+    </div>
+    <style>
+      ${["all","branding","product","web"].map(c=>`.wd-portfolio:has(#wd-pf-${c}:checked) label[for="wd-pf-${c}"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}`).join("\n      ")}
+      ${["branding","product","web"].map(c=>`.wd-portfolio:has(#wd-pf-${c}:checked) .wd-pf-item:not([data-cat="${c}"]){display:none;}`).join("\n      ")}
+    </style>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "layout",
+    label: "Layout",
+    blocks: [
+      {
+        id: "layout-bento",
+        label: "Bento Grid",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #0b0b12);">
+  <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:14px;">
+    <div style="grid-column:span 2;grid-row:span 2;border-radius:18px;padding:24px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);display:flex;flex-direction:column;justify-content:flex-end;"><div style="color:var(--fc-text, #fff);font-weight:700;font-size:20px;margin-bottom:6px;">Design system</div><div style="color:var(--fc-muted, #9ca3af);font-size:13px;">Tokens, components, and docs in one place.</div></div>
+    <div style="grid-column:span 2;border-radius:18px;padding:22px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;"><div style="font-weight:700;font-size:17px;">Ship faster</div></div>
+    <div style="border-radius:18px;padding:20px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);color:var(--fc-muted, #9ca3af);font-size:13px;display:flex;align-items:flex-end;">Analytics</div>
+    <div style="border-radius:18px;padding:20px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);color:var(--fc-muted, #9ca3af);font-size:13px;display:flex;align-items:flex-end;">Integrations</div>
+    <div style="grid-column:span 2;grid-row:span 2;border-radius:18px;overflow:hidden;"><img src="${PORT[0]}" style="width:100%;height:100%;object-fit:cover;" alt="" /></div>
+    <div style="grid-column:span 2;border-radius:18px;padding:22px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);color:var(--fc-text, #fff);font-weight:700;font-size:16px;display:flex;align-items:flex-end;">99.99% uptime</div>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "services",
+    label: "Services",
+    blocks: [
+      {
+        id: "services-icons",
+        label: "Services · Icon Grid",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 32px;color:var(--fc-text, #0f172a);text-align:center;">What we do</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+      ${[["Strategy","Positioning, research and roadmaps that align teams.","M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"],["Design","Interfaces and systems that feel effortless to use.","M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v6l4 2"],["Engineering","Reliable, scalable builds shipped on schedule.","M8 3L2 12l6 9M16 3l6 9-6 9"]].map(([t,d,p])=>`
+      <div style="padding:6px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:var(--fc-primary, #0f172a);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${p}"/></svg>
+        </div>
+        <div style="font-weight:700;font-size:17px;color:var(--fc-text, #0f172a);margin-bottom:8px;">${t}</div>
+        <p style="margin:0;font-size:14px;line-height:1.7;color:var(--fc-muted, #64748b);">${d}</p>
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "contact",
+    label: "Contact",
+    blocks: [
+      {
+        id: "contact-recaptcha",
+        label: "Contact Form · reCAPTCHA",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #f8fafc);">
+  <!-- reCAPTCHA: add <script src="https://www.google.com/recaptcha/api.js" async defer></script> to the page head and replace YOUR_SITE_KEY below -->
+  <form style="max-width:520px;margin:0 auto;background:var(--fc-surface, #fff);border:1px solid var(--fc-border, #e2e8f0);border-radius:16px;padding:32px;">
+    <h2 style="font-size:24px;margin:0 0 20px;color:var(--fc-text, #0f172a);">Get in touch</h2>
+    <label style="display:block;font-size:12px;color:var(--fc-muted, #64748b);margin-bottom:6px;">Name</label>
+    <input required style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);margin-bottom:14px;font-size:14px;" />
+    <label style="display:block;font-size:12px;color:var(--fc-muted, #64748b);margin-bottom:6px;">Email</label>
+    <input type="email" required style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);margin-bottom:14px;font-size:14px;" />
+    <label style="display:block;font-size:12px;color:var(--fc-muted, #64748b);margin-bottom:6px;">Message</label>
+    <textarea required rows="4" style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);margin-bottom:16px;font-size:14px;resize:vertical;"></textarea>
+    <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY" style="margin-bottom:16px;"></div>
+    <button type="submit" style="width:100%;padding:13px;background:var(--fc-primary, #0f172a);color:#fff;border:0;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">Send message</button>
+  </form>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "testimonials",
+    label: "Testimonials",
+    blocks: [
+      {
+        id: "testimonial-carousel",
+        label: "Testimonial · Carousel",
+        html: `<section style="font-family:${F};padding:64px 0;background:var(--fc-bg, #0f172a);">
+  <div style="max-width:1120px;margin:0 auto 24px;padding:0 32px;">
+    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0;color:var(--fc-text, #fff);">Loved by teams</h2>
+  </div>
+  <div style="display:flex;gap:16px;overflow-x:auto;padding:0 32px 12px;scroll-snap-type:x mandatory;">
+    ${[["This tool cut our build time in half.","Jordan Lee","VP Design, Nova"],["Support is fast and the product just works.","Sam Okafor","Founder, Loop"],["Our whole team switched in a week.","Rae Kim","Head of Product, Fera"]].map(([q,n,r],i)=>`
+    <div style="scroll-snap-align:start;min-width:380px;background:var(--fc-surface, #1e293b);border-radius:16px;padding:28px;color:var(--fc-text, #e2e8f0);">
+      <p style="font-size:16px;line-height:1.7;margin:0 0 20px;">"${q}"</p>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="${AVA[i]}" style="width:40px;height:40px;border-radius:999px;object-fit:cover;" alt="" />
+        <div><div style="font-weight:600;font-size:14px;">${n}</div><div style="font-size:12px;color:var(--fc-muted, #94a3b8);">${r}</div></div>
+      </div>
+    </div>`).join("")}
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "esports",
+    label: "Esports",
+    blocks: [
+      {
+        id: "esports-roster",
+        label: "Esports · Team Roster",
+        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 4px;color:var(--fc-text, #fff);">Roster</h2>
+    <p style="margin:0 0 28px;color:var(--fc-accent, #22d3ee);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Season 2026</p>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
+      ${[["Viper","IGL",AVA[0]],["Ashen","Duelist",AVA[1]],["Kudo","Support",AVA[2]],["Frost","Sentinel",AVA[3]],["Ronin","Flex",AVA[4]]].map(([n,role,img])=>`
+      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:14px;overflow:hidden;text-align:center;">
+        <img src="${img}" style="width:100%;height:140px;object-fit:cover;filter:grayscale(.2);" alt="${n}" />
+        <div style="padding:12px;"><div style="font-weight:800;color:var(--fc-text, #fff);font-size:14px;letter-spacing:.02em;">${n}</div><div style="font-size:11px;color:var(--fc-accent, #22d3ee);text-transform:uppercase;letter-spacing:.06em;">${role}</div></div>
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "esports-bracket",
+        label: "Esports · Tournament Bracket",
+        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);overflow-x:auto;">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 32px;color:var(--fc-text, #fff);">Bracket</h2>
+    <div style="display:flex;gap:48px;min-width:680px;">
+      ${[["Quarterfinals",[["Alpha","Ronin"],["Nova","Vertex"],["Kaze","Wraith"],["Onyx","Pulse"]]],["Semifinals",[["Alpha","Vertex"],["Kaze","Onyx"]]],["Final",[["Alpha","Kaze"]]]].map(([round,matches])=>`
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:20px;">
+        <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">${round}</div>
+        ${matches.map(([a,b])=>`
+        <div style="border:1px solid var(--fc-border, #22222e);border-radius:10px;overflow:hidden;">
+          <div style="padding:9px 12px;font-size:13px;color:var(--fc-text, #e5e7eb);background:var(--fc-surface, #101018);border-bottom:1px solid var(--fc-border, #22222e);">${a}</div>
+          <div style="padding:9px 12px;font-size:13px;color:var(--fc-muted, #6b7280);background:var(--fc-surface, #101018);">${b}</div>
+        </div>`).join("")}
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "esports-schedule",
+        label: "Esports · Stream Schedule",
+        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #fff);">Stream schedule</h2>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;">
+      ${[["Mon","7PM","Ranked grind"],["Tue","Off",""],["Wed","7PM","Scrims"],["Thu","7PM","Community night"],["Fri","8PM","Tournament"],["Sat","2PM","VOD review"],["Sun","Off",""]].map(([d,t,s])=>`
+      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:14px 10px;text-align:center;">
+        <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${d}</div>
+        <div style="font-weight:700;color:${t==="Off"?"var(--fc-muted, #4b5563)":"var(--fc-accent, #22d3ee)"};font-size:14px;margin-bottom:4px;">${t}</div>
+        <div style="font-size:11px;color:var(--fc-muted, #6b7280);">${s}</div>
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "esports-stats",
+        label: "Esports · Player Stat Cards",
+        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #fff);">Player stats</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+      ${[["Viper","1.34","78%"],["Ashen","1.21","71%"],["Kudo","0.98","65%"],["Frost","1.08","69%"]].map(([n,kd,hs])=>`
+      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:14px;padding:20px;">
+        <div style="font-weight:800;color:var(--fc-text, #fff);font-size:15px;margin-bottom:14px;">${n}</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--fc-muted, #6b7280);margin-bottom:6px;"><span>K/D</span><span style="color:var(--fc-accent, #22d3ee);font-weight:700;">${kd}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--fc-muted, #6b7280);"><span>Headshot %</span><span style="color:var(--fc-accent, #22d3ee);font-weight:700;">${hs}</span></div>
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "creator",
+    label: "Creator",
+    blocks: [
+      {
+        id: "creator-membership",
+        label: "Creator · Subscription Tiers",
+        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 8px;color:var(--fc-text, #0f172a);text-align:center;">Support the channel</h2>
+    <p style="margin:0 0 32px;color:var(--fc-muted, #64748b);font-size:15px;text-align:center;">Pick a membership tier and unlock perks.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+      ${[["Fan","5",["Member badge","Emotes","Shoutouts"]],["Supporter","15",["Everything in Fan","Discord access","Monthly Q&A"]],["VIP","40",["Everything in Supporter","1:1 game session","Name in credits"]]].map(([n,p,feats],i)=>`
+      <div style="padding:28px;border-radius:16px;border:1px solid var(--fc-border, #e2e8f0);${i===1?"border-color:var(--fc-primary, #7c3aed);box-shadow:0 20px 50px rgba(0,0,0,.08);":""}background:var(--fc-surface, #fff);">
+        <div style="font-weight:700;font-size:16px;color:var(--fc-text, #0f172a);margin-bottom:6px;">${n}</div>
+        <div style="font-size:32px;font-weight:800;color:var(--fc-text, #0f172a);margin-bottom:16px;">$${p}<span style="font-size:13px;font-weight:500;color:var(--fc-muted, #64748b);">/mo</span></div>
+        <ul style="list-style:none;padding:0;margin:0 0 22px;font-size:13px;color:var(--fc-muted, #64748b);line-height:2;">${feats.map(f=>`<li>✓ ${f}</li>`).join("")}</ul>
+        <a href="#" style="display:block;text-align:center;padding:11px;border-radius:10px;background:${i===1?"var(--fc-primary, #7c3aed)":"transparent"};color:${i===1?"#fff":"var(--fc-text, #0f172a)"};border:1px solid var(--fc-border, #e2e8f0);text-decoration:none;font-weight:600;font-size:14px;">Join ${n}</a>
+      </div>`).join("")}
+    </div>
   </div>
 </section>`,
       },
