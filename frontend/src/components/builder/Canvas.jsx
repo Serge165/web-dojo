@@ -88,7 +88,13 @@ export const Canvas = ({
                 <ContextMenuTrigger asChild>
                   <div
                     data-testid={`canvas-el-${el.id}`}
-                    data-forge-el-id={el.id}
+                    // Not data-forge-el-id: that attribute is now baked
+                    // directly into el.html's own root tag (see
+                    // Builder.jsx's addAttrToFirstTag/patchResponsiveStyle)
+                    // so [data-forge-el-id="..."] selectors match the same
+                    // element here, in Preview, and in real exports —
+                    // putting it on this wrapper too would double-match
+                    // it in the canvas alone.
                     className={`relative group ${selectedId === el.id ? "outline outline-2 outline-blue-500" : ""}`}
                     style={{ zIndex: el.zIndex || undefined, display: el.hidden ? "none" : undefined }}
                     onClick={(e) => { e.stopPropagation(); onSelect(el.id); }}

@@ -72,6 +72,18 @@ const addClassToFirstTag = (html, cls) => {
   return html.replace(full, `<${tag}${newAttrs}>`);
 };
 
+// Stamps a plain attribute onto the first/root tag if it isn't already
+// there (used to back-fill data-forge-el-id — see patchResponsiveStyle).
+// No-op if the attribute is already present, so it's safe to call every
+// time rather than tracking "have I stamped this element yet" separately.
+const addAttrToFirstTag = (html, attr, value) => {
+  const m = html.match(/^\s*<([a-zA-Z][\w-]*)([^>]*)>/);
+  if (!m) return html;
+  const [full, tag, attrs] = m;
+  if (new RegExp(`\\b${attr}=`).test(attrs)) return html;
+  return html.replace(full, `<${tag} ${attr}="${value}"${attrs}>`);
+};
+
 export default function Builder() {
   const [mode, setMode] = useState("design");
   const [viewport, setViewport] = useState("desktop");
@@ -434,8 +446,16 @@ export default function Builder() {
   // base style, edited via patchStyle/Style tab instead).
   const patchResponsiveStyle = (patch) => {
     if (!selected || viewport === "desktop") return;
+    // buildResponsiveOverridesCss targets [data-forge-el-id="..."] — that
+    // attribute is otherwise only a live React prop Canvas.jsx renders on
+    // its wrapper div, never part of el.html itself, so it wouldn't exist
+    // in any real export/publish output without stamping it in here too.
     const next = elements.map((e) => e.id === selected.id
-      ? { ...e, responsive: { ...(e.responsive || {}), [viewport]: { ...((e.responsive || {})[viewport] || {}), ...patch } } }
+      ? {
+          ...e,
+          html: addAttrToFirstTag(e.html, "data-forge-el-id", e.id),
+          responsive: { ...(e.responsive || {}), [viewport]: { ...((e.responsive || {})[viewport] || {}), ...patch } },
+        }
       : e);
     setElements(next);
     setHeadHtml((h) => upsertResponsiveOverridesCss(h, next));
