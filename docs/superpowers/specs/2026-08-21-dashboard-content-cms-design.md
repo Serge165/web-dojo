@@ -18,11 +18,12 @@ Web Dojo exports static HTML (no server-side routing), so this needs a different
 
 ## Goals
 
-1. A "Dashboard" authoring UI (separate from the canvas) with four tabs: Blog, Updates, Bento, Timeline.
+1. A "Dashboard" authoring UI (separate from the canvas), landing on an **Overview** tab, with **Blog, Updates, Bento, Timeline, and Ecommerce** as the other tabs (Ecommerce added per user request during Phase 1 review — see "Overview & Ecommerce Bolt-in" below).
 2. Blog: rich-text post editor → each save writes one dated JSON entry. At export/publish time, each entry becomes its own static page (`blog/<slug>.html`) plus a regenerated `blog/index.html` listing every post.
 3. Homepage widgets: an "Updates" card and a "Latest blog" card, each showing the 3 most recent entries, rolling automatically as new ones are added — draggable into the canvas like any other block, but their inner content is populated at build time from the dashboard data rather than hand-edited.
 4. Bento and Timeline blocks (already exist as static blocks in `blocksExtra.js`/`blocks.js`) get a CMS-bound variant editable from the dashboard, using the same data-in/HTML-out build step as the blog/updates widgets. The existing static/hand-edited versions remain available unchanged.
 5. A "Share" action on any saved Update or Blog post: takes the entry's heading text and its published URL, shortens the URL via TinyURL, and surfaces standard share-intent buttons (Twitter/X, Facebook, LinkedIn) pre-filled with heading + short link. No stored social API credentials, no auto-posting — the user clicks the icon, the platform's own share window opens, they post it themselves.
+6. The existing e-commerce builder (`CommerceTab.jsx`) gets its own Ecommerce tab inside the Dashboard, and a status summary on the Overview tab.
 
 ## Non-goals (explicitly deferred)
 
@@ -51,14 +52,24 @@ A new project-level field, `site_domain` (plain string, e.g. `https://example.co
 
 ## Dashboard Authoring UI
 
-A new entry point from `TopBar` (button, not another `LeftSidebar` tab — this is data CRUD, not block-dragging) opening a panel with four tabs:
+A new entry point from `TopBar` (button, not another `LeftSidebar` tab — this is data CRUD, not block-dragging) opening a panel with six tabs, landing on Overview:
 
+- **Overview** — landing tab; see "Overview & Ecommerce Bolt-in" below.
 - **Blog** — list (title/date/status) + "New Post" form: title, slug (auto-slugified from title, editable), rich-text body. No rich-text dependency exists in the repo today; build a minimal `contentEditable`-based toolbar (bold/italic/headings/link/list) rather than adding a new library — matches the zero-dependency style the rest of the block library already uses.
 - **Updates** — list + form: heading, body, and the Share action once saved.
 - **Bento** — list of tiles with add/edit/remove/reorder (icon/emoji, title, description, optional link).
 - **Timeline** — list of entries with add/edit/remove/reorder (date, title, description).
+- **Ecommerce** — see "Overview & Ecommerce Bolt-in" below.
 
 Saving in any tab writes/updates the corresponding `files["data/..."]` entry and marks the project unsaved, so it rides the existing autosave debounce — no new save-path code.
+
+## Overview & Ecommerce Bolt-in
+
+Added during Phase 1 review: the dashboard needs an Overview landing page, and the existing e-commerce builder needs to live inside the dashboard rather than only in `LeftSidebar`'s Shop tab.
+
+- **Ecommerce tab**: relocates the existing `CommerceTab.jsx` (cart currency/accent-color config, PayPal field, "add cart + checkout to page", add-to-cart button generator) into the Dashboard as its own page. `CommerceTab` today is a pure block-insertion/configuration tool — there is no backend order or product persistence (`server.py` only creates Stripe Payment Links and one-off Checkout Sessions; nothing records what happens after checkout). The relocated tab keeps that same scope; this is a move/reuse of existing functionality, not new backend work.
+- **Overview tab**: summary cards pulled from data that genuinely exists today — no fabricated numbers. Concretely: post count + latest post date (Blog), update count (Updates), tile/entry counts (Bento/Timeline), and an Ecommerce card showing Stripe connection status (`stripe_enabled` from the existing `/commerce/*` config), configured currency, and whether PayPal is set — each card links to its full tab.
+- **Explicitly out of scope here**: real sales figures (orders placed, revenue, conversion) — Web Dojo doesn't record what happens after a Stripe checkout at all today. That needs a Stripe webhook endpoint plus order storage, which is new backend infrastructure in its own right and a natural fit alongside the Phase 3 analytics/email-digest work rather than something to bolt on silently here.
 
 ## Build-Time Rendering (mirrored in both export paths)
 
@@ -93,7 +104,7 @@ No credentials stored, no auto-posting — clicking an icon opens that platform'
 ## Testing
 
 - Backend: `POST /dashboard/shorten` (success, TinyURL failure/timeout, SSRF-guard reuse verified same as `/import/url`'s existing tests); blog-page-generation given N JSON entries → correct `blog/<slug>.html` count, correct `blog/index.html` contents, correct newest-3 injection into `latest-blog`/`updates-feed` markers.
-- Frontend: `exportHtml.js` test mirroring the above generation logic; Bento/Timeline render-function tests (JSON in → HTML matches the existing static blocks' markup shape); dashboard form save → correct `files["data/..."]` entry shape.
+- Frontend: `exportHtml.js` test mirroring the above generation logic; Bento/Timeline render-function tests (JSON in → HTML matches the existing static blocks' markup shape); dashboard form save → correct `files["data/..."]` entry shape; Overview tab renders correct counts from a fixture set of `files["data/..."]` entries and reflects `stripe_enabled` correctly in both states.
 
 ## Assumptions made while writing this spec (flag if wrong)
 
