@@ -1,22 +1,34 @@
+import atexit
 import os
 import tempfile
 import time
 from unittest.mock import patch
 
-# Module-level temp-file SQLite DB (matches tests/test_sqlite_compat.py's
-# pattern) so project-touching tests below get real persistence across
-# calls — a literal ":memory:" path opens a fresh, empty DB on every
-# connection in sqlite_compat.py and would make writes invisible to reads.
-_fd, _sqlite_path = tempfile.mkstemp(suffix=".db")
-os.close(_fd)
-os.environ.setdefault("DB_BACKEND", "sqlite")
-os.environ.setdefault("SQLITE_PATH", _sqlite_path)
+# Matches test_security_fixes.py / test_audit_fixes.py: a default so `import
+# server` below doesn't crash on a missing MONGO_URL if this module happens
+# to be the first to import it in a given pytest-xdist worker.
+os.environ.setdefault("MONGO_URL", "mongodb://localhost:27017")
 os.environ.setdefault("DB_NAME", "webdojo_test")
 
 import pytest
 from starlette.testclient import TestClient
 
 import server
+from sqlite_compat import SqliteClient
+
+# server.db is whatever backend happened to be live when `server` was first
+# imported in this pytest-xdist worker (pytest.ini pins -n 2 --dist loadscope,
+# so another test module — possibly on Mongo — may have imported it first,
+# making env-var-before-import unreliable). Overwrite it directly with a
+# fresh temp-file SQLite client (matches tests/test_sqlite_compat.py's
+# pattern; a literal ":memory:" path opens a fresh, empty DB on every
+# connection in sqlite_compat.py and would make writes invisible to reads),
+# so project-touching tests below get real persistence regardless of import
+# order.
+_fd, _sqlite_path = tempfile.mkstemp(suffix=".db")
+os.close(_fd)
+atexit.register(lambda: os.path.exists(_sqlite_path) and os.unlink(_sqlite_path))
+server.db = SqliteClient(_sqlite_path)["webdojo_test"]
 
 
 @pytest.fixture(scope="module")
