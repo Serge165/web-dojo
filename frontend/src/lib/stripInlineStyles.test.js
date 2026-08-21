@@ -31,10 +31,13 @@ test("stripInlineStyles with different prefixes keeps two pages' identical tag s
   expect(combinedCss).toContain(".about-nav-1 { padding:16px }");
 });
 
-test("stripInlineStyles adds a responsive override for grid-template-columns rules", () => {
-  const { css } = stripInlineStyles([el("a", '<div style="display:grid;grid-template-columns:repeat(3,1fr)">Hi</div>')]);
-  expect(css).toContain("@media (max-width: 768px)");
-  expect(css).toContain("grid-template-columns: 1fr !important");
+test("stripInlineStyles adds tablet + mobile responsive overrides for grid-template-columns rules", () => {
+  const { css, componentCss, mediaCss } = stripInlineStyles([el("a", '<div style="display:grid;grid-template-columns:repeat(3,1fr)">Hi</div>')]);
+  expect(mediaCss).toContain("@media (max-width: 1024px)");
+  expect(mediaCss).toContain("@media (max-width: 767px)");
+  expect(mediaCss).toContain("grid-template-columns: 1fr !important");
+  expect(componentCss).not.toContain("@media");
+  expect(css).toBe(`${componentCss}\n${mediaCss}`);
 });
 
 test("stripInlineStyles returns a classMap keyed by class name", () => {

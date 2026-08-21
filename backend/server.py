@@ -366,14 +366,13 @@ _RESPONSIVE_TIER_RULES = (
     "[style*=\"grid-template-columns\"] { grid-template-columns: 1fr !important; } "
     "[data-wd-stack] { flex-direction: column !important; }"
 )
-RESPONSIVE_CSS = (
-    "<style>"
+RESPONSIVE_CSS_BODY = (
     f"@media (max-width: 1024px) {{{_RESPONSIVE_TIER_RULES}}}"
     f"@media (max-width: 767px) {{{_RESPONSIVE_TIER_RULES}}}"
     f"@container (max-width: 1024px) {{{_RESPONSIVE_TIER_RULES}}}"
     f"@container (max-width: 767px) {{{_RESPONSIVE_TIER_RULES}}}"
-    "</style>"
 )
+RESPONSIVE_CSS = f"<style>{RESPONSIVE_CSS_BODY}</style>"
 
 _SCRIPT_CLOSE_RE = re.compile(r'</script', re.IGNORECASE)
 
@@ -660,7 +659,12 @@ def _strip_inline_styles(elements, prefix=""):
     becomes .section-1, the second .section-2, the first <h2> becomes
     .h2-1, etc., in document/encounter order.
     Returns (html_with_classes, css_string)."""
-    rules = []
+    # component_rules and media_rules are tracked separately (both tiers,
+    # matching RESPONSIVE_CSS's tablet/mobile breakpoints) so callers that
+    # route CSS into labeled globals.css sections (_build_multi_page_bundle)
+    # can place each in the right one.
+    component_rules = []
+    media_rules = []
     out_html_parts = []
     tag_counters = {}
 
@@ -669,16 +673,17 @@ def _strip_inline_styles(elements, prefix=""):
         tag_counters[tag] = tag_counters.get(tag, 0) + 1
         cls = f"{prefix}{tag}-{tag_counters[tag]}"
         declarations = match.group(1)
-        rules.append(f".{cls} {{ {declarations} }}")
+        component_rules.append(f".{cls} {{ {declarations} }}")
         if "grid-template-columns" in declarations:
-            rules.append(f"@media (max-width: 768px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
+            media_rules.append(f"@media (max-width: 1024px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
+            media_rules.append(f"@media (max-width: 767px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
         return f'class="{cls}"'
 
     for el in elements:
         html = el.get("html", "")
         out_html_parts.append(re.sub(r'style="([^"]*)"', repl, html))
 
-    return "\n".join(out_html_parts), "\n".join(rules)
+    return "\n".join(out_html_parts), "\n".join(component_rules), "\n".join(media_rules)
 
 
 def _esc_text(v) -> str:
@@ -737,6 +742,89 @@ def _safe_page_filename(slug: str, index: int, used: set) -> str:
     return name
 
 
+_THEME_RE = re.compile(r'<style data-forge-theme(?:="[^"]*")?>([\s\S]*?)</style>\n?')
+_VARS_RE = re.compile(r'<style data-forge-vars>([\s\S]*?)</style>\n?')
+_RESPONSIVE_OVERRIDES_RE = re.compile(r'<style data-forge-responsive-overrides>([\s\S]*?)</style>\n?')
+_ANIM_RE = re.compile(r'<style data-forge-anim="[^"]*">([\s\S]*?)</style>\n?')
+_ROOT_BLOCK_RE = re.compile(r':root\s*{[^}]*}')
+_DECL_RE = re.compile(r'(--[\w-]+)\s*:\s*([^;]+);')
+
+
+def _extract_forge_css(head_html: str) -> dict:
+    """Pulls the data-forge-* <style> blocks out of a page's head_html and
+    buckets them by which globals.css section they belong in. Mirrors
+    frontend/src/lib/exportHtml.js's extractForgeCss — keep both in sync."""
+    remaining = head_html or ""
+    theme_vars, base, media_queries, animations = [], [], [], []
+
+    def theme_repl(m):
+        body = m.group(1)
+        root_match = _ROOT_BLOCK_RE.search(body)
+        if root_match:
+            theme_vars.append(root_match.group(0))
+        rest = _ROOT_BLOCK_RE.sub("", body).strip()
+        if rest:
+            base.append(rest)
+        return ""
+
+    def collect_repl(bucket):
+        def repl(m):
+            body = m.group(1).strip()
+            if body:
+                bucket.append(body)
+            return ""
+        return repl
+
+    remaining = _THEME_RE.sub(theme_repl, remaining)
+    remaining = _VARS_RE.sub(collect_repl(theme_vars), remaining)
+    remaining = _RESPONSIVE_OVERRIDES_RE.sub(collect_repl(media_queries), remaining)
+    remaining = _ANIM_RE.sub(collect_repl(animations), remaining)
+
+    return {
+        "remaining_head": remaining.strip(),
+        "theme_vars": theme_vars,
+        "base": base,
+        "media_queries": media_queries,
+        "animations": animations,
+    }
+
+
+def _merge_root_blocks(blocks: list) -> str:
+    """Merges however many `:root { --x: 1; }` block strings into one
+    deduped block (later blocks' declarations win on name collision)."""
+    decls = {}
+    for block in blocks:
+        for m in _DECL_RE.finditer(block):
+            decls[m.group(1)] = m.group(2).strip()
+    if not decls:
+        return ""
+    lines = "\n".join(f"  {k}: {v};" for k, v in decls.items())
+    return f":root {{\n{lines}\n}}"
+
+
+def _dedupe(items: list) -> list:
+    seen = []
+    for it in items:
+        if it and it not in seen:
+            seen.append(it)
+    return seen
+
+
+def _build_organized_stylesheet(theme_vars, base, component_css, animations, media_queries) -> str:
+    """Assembles one clearly labeled globals.css. Section order: Theme
+    Variables, Base, Components, Animations, Media Queries — matches the
+    order a page actually applies them in. Mirrors frontend/src/lib/
+    exportHtml.js's buildOrganizedStylesheet — keep both in sync."""
+    sections = [
+        ("Theme Variables", _merge_root_blocks(theme_vars)),
+        ("Base", "\n".join(_dedupe(base))),
+        ("Components", component_css or ""),
+        ("Animations", "\n\n".join(_dedupe(animations))),
+        ("Media Queries", "\n".join([RESPONSIVE_CSS_BODY, *_dedupe(media_queries)])),
+    ]
+    return "\n\n".join(f"/* ===== {label} ===== */\n{body or '/* none */'}" for label, body in sections)
+
+
 def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> dict:
     """Returns {filename: content} — one classed .html file per page
     sharing a single stylesheet, plus that stylesheet. Falls back to a
@@ -756,18 +844,19 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
 
     files = {}
     used = set()
-    css_parts = []
+    component_css_parts = []
+    all_theme_vars, all_base, all_animations, all_media_queries = [], [], [], []
 
     for i, page in enumerate(pages):
         filename = _safe_page_filename(page.get("slug"), i, used)
         prefix = filename[:-5] + "-"  # strip ".html"
-        cleaned_body, css_body = _strip_inline_styles(page.get("elements") or [], prefix)
+        cleaned_body, component_css, media_css = _strip_inline_styles(page.get("elements") or [], prefix)
         body = "\n".join(p for p in [header, cleaned_body, footer] if p)
         body = _inject_lazy_loading(body)
         seo = page.get("seo") or {}
         title = seo.get("title") or page.get("name") or doc.get("name") or "Untitled"
         fonts_link = _build_google_fonts_link(page.get("fonts") or doc.get("fonts") or [])
-        head_extra = page.get("head_html") or ""
+        forge = _extract_forge_css(page.get("head_html") or "")
         canvas_bg = page.get("canvas_bg") or "#ffffff"
         custom_js = page.get("custom_js") or ""
         custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
@@ -777,9 +866,8 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
             f"<title>{_esc_text(title)}</title>\n"
             f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
-            f"{RESPONSIVE_CSS}\n"
             f"{_seo_head(seo)}\n{_build_json_ld(page.get('name') or doc.get('name'), seo)}\n"
-            f"{fonts_link}\n{head_extra}\n"
+            f"{fonts_link}\n{forge['remaining_head']}\n"
             f'<link rel="stylesheet" href="{css_filename}" />\n'
             f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
             "</head>\n<body>\n"
@@ -788,9 +876,17 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
             "</body>\n</html>"
         )
         files[filename] = html
-        css_parts.append(css_body)
+        component_css_parts.append(component_css)
+        all_theme_vars.extend(forge["theme_vars"])
+        all_base.extend(forge["base"])
+        all_animations.extend(forge["animations"])
+        all_media_queries.extend([r for r in media_css.split("\n") if r] + forge["media_queries"])
 
-    files[css_filename] = "\n".join(css_parts)
+    files[css_filename] = _build_organized_stylesheet(
+        all_theme_vars, all_base,
+        "\n".join(p for p in component_css_parts if p),
+        all_animations, all_media_queries,
+    )
     return files
 
 

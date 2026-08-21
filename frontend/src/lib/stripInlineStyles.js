@@ -43,7 +43,16 @@ export const stripInlineStyles = (elements, prefix = "") => {
   // to map a semantic class back to "which element, which style="..."
   // occurrence within that element's own html" since the class name no
   // longer encodes the element id the way the old .el-<id> scheme did.
-  const rules = [];
+  //
+  // componentRules and mediaRules are tracked separately (both tiers,
+  // matching RESPONSIVE_CSS's tablet/mobile breakpoints) so callers that
+  // route CSS into labeled globals.css sections (exportHtml.js's
+  // buildMultiPageExport) can place each in the right one. `css` stays
+  // the combined string — same shape as before this split — so existing
+  // consumers (CodeView.jsx's live CSS pane, cssPaneSync.js's
+  // reconciliation) are unaffected.
+  const componentRules = [];
+  const mediaRules = [];
   const tagCounters = {};
   const classMap = new Map();
   const outParts = elements.map((el) => {
@@ -52,14 +61,23 @@ export const stripInlineStyles = (elements, prefix = "") => {
       const tag = tagNameAt(string, offset);
       tagCounters[tag] = (tagCounters[tag] || 0) + 1;
       const cls = `${prefix}${tag}-${tagCounters[tag]}`;
-      rules.push(`.${cls} { ${styles} }`);
+      componentRules.push(`.${cls} { ${styles} }`);
       if (styles.includes("grid-template-columns")) {
-        rules.push(`@media (max-width: 768px) { .${cls} { grid-template-columns: 1fr !important; } }`);
+        mediaRules.push(`@media (max-width: 1024px) { .${cls} { grid-template-columns: 1fr !important; } }`);
+        mediaRules.push(`@media (max-width: 767px) { .${cls} { grid-template-columns: 1fr !important; } }`);
       }
       classMap.set(cls, { elementId: el.id, occurrence: occurrence++ });
       return `class="${cls}"`;
     });
     return html;
   });
-  return { html: outParts.join("\n"), css: rules.join("\n"), classMap };
+  const componentCss = componentRules.join("\n");
+  const mediaCss = mediaRules.join("\n");
+  return {
+    html: outParts.join("\n"),
+    css: [componentCss, mediaCss].filter(Boolean).join("\n"),
+    componentCss,
+    mediaCss,
+    classMap,
+  };
 };

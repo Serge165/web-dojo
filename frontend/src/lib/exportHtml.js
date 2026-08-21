@@ -1,10 +1,92 @@
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { escAttr, escText, escRawScript } from "./escapeHtml.js";
-import { RESPONSIVE_CSS } from "./responsiveCss.js";
+import { RESPONSIVE_CSS, RESPONSIVE_CSS_BODY } from "./responsiveCss.js";
 import { stripInlineStyles } from "./stripInlineStyles.js";
 
 export { stripInlineStyles };
+
+// Pulls the data-forge-* <style> blocks Web Dojo injects into a page's
+// head_html (site theme, per-element color picks, per-element tablet/
+// mobile overrides, per-element animation keyframes — see ThemeGenerator,
+// rootVars.js, responsiveOverrides.js, and Builder.jsx's applyAnimation)
+// out of head_html and buckets them by which globals.css section they
+// belong in, so the multi-page export can assemble one clearly organized
+// stylesheet instead of leaving each page's generated CSS scattered
+// across per-page <head> tags. Whatever's left of head_html (CDN embeds,
+// analytics snippets, user-authored <style>/<link> tags — anything not
+// forge-managed) stays in `remainingHead` and is still injected per-page,
+// since none of that is meant to be shared/deduplicated across pages.
+const THEME_RE = /<style data-forge-theme(?:="[^"]*")?>([\s\S]*?)<\/style>\n?/g;
+const VARS_RE = /<style data-forge-vars>([\s\S]*?)<\/style>\n?/g;
+const RESPONSIVE_OVERRIDES_RE = /<style data-forge-responsive-overrides>([\s\S]*?)<\/style>\n?/g;
+const ANIM_RE = /<style data-forge-anim="[^"]*">([\s\S]*?)<\/style>\n?/g;
+const ROOT_BLOCK_RE = /:root\s*{[^}]*}/;
+
+const extractForgeCss = (headHtml) => {
+  let remaining = headHtml || "";
+  const themeVars = [];
+  const base = [];
+  const mediaQueries = [];
+  const animations = [];
+
+  remaining = remaining.replace(THEME_RE, (_, body) => {
+    const rootMatch = body.match(ROOT_BLOCK_RE);
+    if (rootMatch) themeVars.push(rootMatch[0]);
+    const rest = body.replace(ROOT_BLOCK_RE, "").trim();
+    if (rest) base.push(rest);
+    return "";
+  });
+  remaining = remaining.replace(VARS_RE, (_, body) => {
+    if (body.trim()) themeVars.push(body.trim());
+    return "";
+  });
+  remaining = remaining.replace(RESPONSIVE_OVERRIDES_RE, (_, body) => {
+    if (body.trim()) mediaQueries.push(body.trim());
+    return "";
+  });
+  remaining = remaining.replace(ANIM_RE, (_, body) => {
+    if (body.trim()) animations.push(body.trim());
+    return "";
+  });
+
+  return { remainingHead: remaining.trim(), themeVars, base, mediaQueries, animations };
+};
+
+// Merges however many `:root { --x: 1; }` block strings into one deduped
+// block (later blocks' declarations win on name collision) — multiple
+// pages sharing the same cascaded theme would otherwise repeat an
+// identical :root block once per page.
+const DECL_RE = /(--[\w-]+)\s*:\s*([^;]+);/g;
+const mergeRootBlocks = (blocks) => {
+  const decls = new Map();
+  blocks.forEach((block) => {
+    let m;
+    DECL_RE.lastIndex = 0;
+    while ((m = DECL_RE.exec(block))) decls.set(m[1], m[2].trim());
+  });
+  if (!decls.size) return "";
+  return `:root {\n${[...decls].map(([k, v]) => `  ${k}: ${v};`).join("\n")}\n}`;
+};
+
+const dedupe = (arr) => [...new Set(arr.filter(Boolean))];
+
+// Assembles one clearly labeled globals.css from every page's extracted
+// forge CSS plus the shared component CSS stripInlineStyles produced.
+// Section order: Theme Variables, Base, Components, Animations, Media
+// Queries — matches the order a page actually applies them in.
+const buildOrganizedStylesheet = ({ themeVars, base, componentCss, animations, mediaQueries }) => {
+  const sections = [
+    ["Theme Variables", mergeRootBlocks(themeVars)],
+    ["Base", dedupe(base).join("\n")],
+    ["Components", componentCss || ""],
+    ["Animations", dedupe(animations).join("\n\n")],
+    ["Media Queries", [RESPONSIVE_CSS_BODY, ...dedupe(mediaQueries)].join("\n")],
+  ];
+  return sections
+    .map(([label, body]) => `/* ===== ${label} ===== */\n${body || "/* none */"}`)
+    .join("\n\n");
+};
 
 const buildFontLinks = (fonts) => {
   if (!fonts || fonts.length === 0) return "";
@@ -177,18 +259,23 @@ export const buildMultiPageExport = (project) => {
 
   const files = {};
   const used = new Set();
-  const cssParts = [];
+  const componentCssParts = [];
+  const allThemeVars = [];
+  const allBase = [];
+  const allAnimations = [];
+  const allMediaQueries = [];
 
   pages.forEach((page, i) => {
     const filename = safePageFilename(page.slug, i, used);
     const prefix = `${filename.slice(0, -5)}-`; // strip ".html"
-    const { html: cleanedRaw, css } = stripInlineStyles(page.elements || [], prefix);
+    const { html: cleanedRaw, componentCss, mediaCss } = stripInlineStyles(page.elements || [], prefix);
     const cleaned = injectLazyLoading([header, cleanedRaw, footer].filter(Boolean).join("\n"));
     const seo = page.seo || {};
     const title = seo.title || page.name || project.name || "Untitled";
     const fonts = buildFontLinks((page.fonts && page.fonts.length) ? page.fonts : project.fonts);
     const customJs = page.custom_js || "";
     const customJsTag = customJs.trim() ? `<script>${escRawScript(customJs)}</script>\n` : "";
+    const { remainingHead, themeVars, base, mediaQueries, animations } = extractForgeCss(page.head_html);
     files[filename] = `<!doctype html>
 <html lang="en">
 <head>
@@ -196,11 +283,10 @@ export const buildMultiPageExport = (project) => {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escText(title)}</title>
 <script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
-${RESPONSIVE_CSS}
 ${buildSeoMeta(seo)}
 ${buildJsonLd({ seo, name: page.name || project.name })}
 ${fonts}
-${page.head_html || ""}
+${remainingHead}
 <link rel="stylesheet" href="globals.css" />
 <style>body{margin:0;background:${page.canvas_bg || "#ffffff"};}</style>
 </head>
@@ -208,10 +294,20 @@ ${page.head_html || ""}
 ${cleaned}
 ${customJsTag}</body>
 </html>`;
-    cssParts.push(css);
+    componentCssParts.push(componentCss);
+    allThemeVars.push(...themeVars);
+    allBase.push(...base);
+    allAnimations.push(...animations);
+    allMediaQueries.push(...mediaCss.split("\n").filter(Boolean), ...mediaQueries);
   });
 
-  files["globals.css"] = cssParts.join("\n");
+  files["globals.css"] = buildOrganizedStylesheet({
+    themeVars: allThemeVars,
+    base: allBase,
+    componentCss: componentCssParts.filter(Boolean).join("\n"),
+    animations: allAnimations,
+    mediaQueries: allMediaQueries,
+  });
   return { files };
 };
 
