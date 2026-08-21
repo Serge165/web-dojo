@@ -41,6 +41,7 @@ import { escText } from "@/lib/escapeHtml";
 import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
 import { upsertResponsiveOverridesCss } from "@/lib/responsiveOverrides";
 import { upsertAnalyticsHead } from "@/lib/analyticsSnippets";
+import { buildAppliedAnimation, buildOnScrollBootstrapScript, ONSCROLL_BOOTSTRAP_MARKER } from "@/lib/animations";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -82,6 +83,31 @@ const addAttrToFirstTag = (html, attr, value) => {
   const [full, tag, attrs] = m;
   if (new RegExp(`\\b${attr}=`).test(attrs)) return html;
   return html.replace(full, `<${tag} ${attr}="${value}"${attrs}>`);
+};
+
+// Removes a single attribute from the first/root tag, if present — used
+// when applying a regular (non-on-scroll) animation onto an element that
+// previously had an on-scroll one, so a stale data-wd-onscroll doesn't
+// leave the bootstrap script trying to hide-then-reveal an element that
+// no longer has a scroll-triggered animation to reveal it with.
+const removeAttrFromFirstTag = (html, attr) => {
+  const m = html.match(/^\s*<([a-zA-Z][\w-]*)([^>]*)>/);
+  if (!m) return html;
+  const [full, tag, attrs] = m;
+  return html.replace(full, `<${tag}${attrs.replace(new RegExp(`\\s*${attr}="[^"]*"`), "")}>`);
+};
+
+// Removes one declaration from the first inline style="…" attribute, if
+// present — used when applying an on-scroll animation onto an element
+// that previously had a regular one, so a stale inline `animation:`
+// (highest specificity) doesn't permanently block the .wd-inview class
+// rule from ever taking effect.
+const removeStyleProp = (html, prop) => {
+  if (!/style="([^"]*)"/.test(html)) return html;
+  return html.replace(/style="([^"]*)"/, (_, styles) => {
+    const kept = styles.split(";").map((s) => s.trim()).filter(Boolean).filter((p) => p.split(":")[0].trim() !== prop);
+    return `style="${kept.join("; ")}"`;
+  });
 };
 
 export default function Builder() {
@@ -495,17 +521,54 @@ export default function Builder() {
     }));
   }, [headHtml]);
 
-  const applyAnimation = ({ keyframes, shorthand }) => {
-    if (!selected) return;
-    setHeadHtml((h) => {
-      // Replace any prior animation block for this element instead of
-      // stacking a new one on every re-apply (re-picking a preset, tweaking
-      // duration/easing, etc. would otherwise accumulate dead @keyframes).
-      const stripped = (h || "").replace(new RegExp(`<style data-forge-anim="${selected.id}">[\\s\\S]*?<\\/style>\\n?`), "");
-      return `${stripped ? stripped + "\n" : ""}<style data-forge-anim="${selected.id}">\n${keyframes}\n</style>`;
-    });
-    patchStyle({ animation: shorthand });
+  // Replaces any prior animation block for this element instead of
+  // stacking a new one on every re-apply (re-picking a preset, tweaking
+  // duration/easing, etc. would otherwise accumulate dead @keyframes).
+  const upsertAnimStyleBlock = (h, elementId, styleBlock) => {
+    const stripped = (h || "").replace(new RegExp(`<style data-forge-anim="${elementId}">[\\s\\S]*?<\\/style>\\n?`), "");
+    return `${stripped ? stripped + "\n" : ""}<style data-forge-anim="${elementId}">\n${styleBlock}\n</style>`;
   };
+  const ensureOnScrollBootstrap = (h) => (h || "").includes(ONSCROLL_BOOTSTRAP_MARKER)
+    ? h
+    : `${h ? h + "\n" : ""}${buildOnScrollBootstrapScript()}`;
+
+  // Applies one already-built animation result onto one element's html —
+  // shared by both applyAnimation (single-select) and applyAnimationToIds
+  // (multi-select), so the on-scroll/regular branch is only written once.
+  const applyAnimationToHtml = (html, elementId, applied) => applied.onScroll
+    ? addAttrToFirstTag(addAttrToFirstTag(removeStyleProp(html, "animation"), "data-forge-el-id", elementId), "data-wd-onscroll", "1")
+    : patchFirstStyle(removeAttrFromFirstTag(html, "data-wd-onscroll"), { animation: applied.shorthand });
+
+  const applyAnimation = (config) => {
+    if (!selected) return;
+    const applied = buildAppliedAnimation({ elementId: selected.id, ...config });
+    setElements((els) => els.map((e) => e.id === selected.id
+      ? { ...e, html: applyAnimationToHtml(e.html, e.id, applied) }
+      : e));
+    setHeadHtml((h) => {
+      const next = upsertAnimStyleBlock(h, selected.id, applied.styleBlock);
+      return applied.onScroll ? ensureOnScrollBootstrap(next) : next;
+    });
+  };
+
+  // Multi-select batch apply — mirrors applyStyleToIds's shape/wiring but
+  // for animations (see LayersPanel's batch bar + lib/animClipboard.js).
+  // Each element gets its own fresh unique keyframes name (buildAppliedAnimation
+  // re-randomizes per call), so applying to many elements at once never
+  // collides.
+  const applyAnimationToIds = useCallback((ids, clip) => {
+    if (!ids || !ids.length || !clip) return;
+    let head = headHtml;
+    let usedOnScroll = false;
+    setElements((els) => els.map((e) => {
+      if (!ids.includes(e.id)) return e;
+      const applied = buildAppliedAnimation({ elementId: e.id, ...clip });
+      head = upsertAnimStyleBlock(head, e.id, applied.styleBlock);
+      usedOnScroll = usedOnScroll || applied.onScroll;
+      return { ...e, html: applyAnimationToHtml(e.html, e.id, applied) };
+    }));
+    setHeadHtml(usedOnScroll ? ensureOnScrollBootstrap(head) : head);
+  }, [headHtml]);
 
   const applyTheme = ({ headHtml: themeHead, canvasBg: themeBg, googleFont, allPages }) => {
     // Strip any prior forge-theme style block, then append new.
@@ -1065,6 +1128,7 @@ export default function Builder() {
                 onToggleVisible={toggleVisible}
                 onSetZIndex={setZIndex}
                 onApplyStyleToIds={applyStyleToIds}
+                onApplyAnimationToIds={applyAnimationToIds}
                 viewport={viewport}
                 onPatchResponsive={patchResponsiveStyle}
                 onResetResponsive={resetResponsiveProperty}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick, Filter, ClipboardPaste, CheckSquare } from "lucide-react";
+import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick, Filter, ClipboardPaste, CheckSquare, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { getFxClip, subscribeFxClip } from "@/lib/fxClipboard";
+import { getAnimClip, subscribeAnimClip } from "@/lib/animClipboard";
 
 // Extract a short label from raw HTML: first tag name + inner text preview.
 const labelFor = (html) => {
@@ -33,19 +34,28 @@ const fxOf = (html) => {
   };
 };
 
-export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, onToggleVisible, onSetZIndex, onApplyStyleToIds, hideHeader }) => {
+export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, onToggleVisible, onSetZIndex, onApplyStyleToIds, onApplyAnimationToIds, hideHeader }) => {
   // Rendered in reverse so the topmost item in the list == topmost on the page.
   const rev = [...elements].map((e, i) => ({ ...e, idx: i })).reverse();
   const [onlyFx, setOnlyFx] = useState(false);
   const [checked, setChecked] = useState(new Set());
   const [clipReady, setClipReady] = useState(!!getFxClip());
   useEffect(() => subscribeFxClip((v) => setClipReady(!!v)), []);
+  const [animClipReady, setAnimClipReady] = useState(!!getAnimClip());
+  useEffect(() => subscribeAnimClip((v) => setAnimClipReady(!!v)), []);
   const toggleCheck = (id) => setChecked((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const pasteMany = () => {
     const ids = [...checked].filter((id) => elements.some((e) => e.id === id));
     if (!ids.length || !onApplyStyleToIds) return;
     onApplyStyleToIds(ids, getFxClip());
     toast.success(`Style pasted onto ${ids.length} element${ids.length === 1 ? "" : "s"}`);
+  };
+  const applyAnimMany = () => {
+    const ids = [...checked].filter((id) => elements.some((e) => e.id === id));
+    if (!ids.length || !onApplyAnimationToIds) return;
+    const clip = getAnimClip();
+    onApplyAnimationToIds(ids, clip);
+    toast.success(`${clip.preset.label} applied to ${ids.length} element${ids.length === 1 ? "" : "s"}`);
   };
   const selectAll = () => setChecked(new Set(elements.map((e) => e.id)));
   const selectEffected = () => setChecked(new Set(elements.filter((e) => { const f = fxOf(e.html); return f.text || f.hover; }).map((e) => e.id)));
@@ -96,6 +106,13 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
             data-testid="layers-paste-many"
             title={clipReady ? "Paste the copied style onto all checked layers" : "Copy a style first (Text FX tab → Copy style)"}
           ><ClipboardPaste size={11} /> Paste to {checked.size}</button>
+          <button
+            onClick={applyAnimMany}
+            disabled={!animClipReady}
+            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            data-testid="layers-anim-many"
+            title={animClipReady ? "Apply the Motion tab's current animation to all checked layers" : "Dial in an animation first (Motion tab)"}
+          ><Wand2 size={11} /> Animate {checked.size}</button>
           <button onClick={() => setChecked(new Set())} className="text-[10px] px-2 py-1 rounded border border-[#2B2B2B] text-gray-300 hover:text-white" data-testid="layers-clear-select">Clear</button>
         </div>
       )}

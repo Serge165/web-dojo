@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ANIMATION_PRESETS, ANIMATION_CATEGORIES, buildKeyframes, buildAnimationShorthand } from "@/lib/animations";
+import { setAnimClip } from "@/lib/animClipboard";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
-
-const uid = () => "a" + Math.random().toString(36).slice(2, 8);
 
 export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
   const [preset, setPreset] = useState(ANIMATION_PRESETS[1]);
@@ -17,14 +16,15 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
   const shorthand = buildAnimationShorthand({ name, duration, timing, delay, iteration });
   const css = `${keyframes}\n\n.forge-anim { animation: ${shorthand}; }`;
 
+  // Keeps the Layers panel's multi-select "Apply to N" batch bar in sync
+  // with whatever's currently dialed in here — see lib/animClipboard.js.
+  useEffect(() => {
+    setAnimClip({ preset, duration, delay, timing, iteration });
+  }, [preset, duration, delay, timing, iteration]);
+
   const apply = () => {
     if (!selected) { toast.error("Select an element first"); return; }
-    // Give each application a unique keyframes name so multiple animations
-    // don't collide when re-applied with different params.
-    const unique = `${name}_${uid()}`;
-    const uniqueKF = buildKeyframes(unique, preset.frames);
-    const uniqueShort = buildAnimationShorthand({ name: unique, duration, timing, delay, iteration });
-    onApplyAnimation({ keyframes: uniqueKF, shorthand: uniqueShort });
+    onApplyAnimation({ preset, duration, delay, timing, iteration });
     toast.success(`Applied ${preset.label}`);
   };
 

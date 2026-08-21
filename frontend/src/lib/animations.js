@@ -211,12 +211,52 @@ export const ANIMATION_PRESETS = [
       "100%": { opacity: "0", transform: "translateY(60px) scale(0.5)" },
     },
   },
+  // "on-scroll" presets reuse familiar entrance-style motion, but the
+  // trigger is different: an entrance preset plays once, immediately, via
+  // a plain `animation:` shorthand baked into the element's own inline
+  // style. An on-scroll preset instead starts the element hidden and only
+  // plays once it scrolls into view — see buildOnScrollCss/
+  // buildOnScrollBootstrapScript below for how that's wired.
+  {
+    id: "onscroll-fade-in",
+    label: "Fade In",
+    category: "on-scroll",
+    frames: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+  },
+  {
+    id: "onscroll-slide-up",
+    label: "Slide Up",
+    category: "on-scroll",
+    frames: {
+      "0%": { opacity: "0", transform: "translateY(32px)" },
+      "100%": { opacity: "1", transform: "translateY(0)" },
+    },
+  },
+  {
+    id: "onscroll-slide-left",
+    label: "Slide In Left",
+    category: "on-scroll",
+    frames: {
+      "0%": { opacity: "0", transform: "translateX(-40px)" },
+      "100%": { opacity: "1", transform: "translateX(0)" },
+    },
+  },
+  {
+    id: "onscroll-zoom-in",
+    label: "Zoom In",
+    category: "on-scroll",
+    frames: {
+      "0%": { opacity: "0", transform: "scale(0.85)" },
+      "100%": { opacity: "1", transform: "scale(1)" },
+    },
+  },
 ];
 
 export const ANIMATION_CATEGORIES = [
   { id: "entrance", label: "Entrance" },
   { id: "emphasis", label: "Emphasis" },
   { id: "exit", label: "Exit" },
+  { id: "on-scroll", label: "On Scroll" },
 ];
 
 export const buildKeyframes = (name, frames) => {
@@ -228,3 +268,75 @@ export const buildKeyframes = (name, frames) => {
 
 export const buildAnimationShorthand = ({ name, duration, timing, delay, iteration }) =>
   `${name} ${duration}s ${timing} ${delay}s ${iteration === "infinite" ? "infinite" : iteration} both`;
+
+// On-scroll CSS for one element: the @keyframes (identical shape to a
+// regular preset's), a starting-state rule scoped to a .wd-onscroll-hidden
+// class (so the element renders normally — no flash-of-invisible — in any
+// context where the bootstrap script below never runs, e.g. the Design
+// canvas's dangerouslySetInnerHTML rendering, which doesn't execute
+// <script> tags at all, same documented limitation as this codebase's
+// other script-driven blocks), and a .wd-inview rule that actually plays
+// the animation once the bootstrap script adds that class on intersection.
+// Targets [data-forge-el-id="..."] — the caller must have already stamped
+// that attribute onto the element (addAttrToFirstTag in Builder.jsx).
+export const buildOnScrollCss = ({ name, elementId, frames, duration, timing, delay, iteration }) => {
+  const keyframes = buildKeyframes(name, frames);
+  const shorthand = buildAnimationShorthand({ name, duration, timing, delay, iteration });
+  const initial = frames["0%"] || {};
+  const initialDecls = Object.entries(initial).map(([p, v]) => `${p}: ${v};`).join(" ");
+  return `${keyframes}
+.wd-onscroll-hidden[data-forge-el-id="${elementId}"] { ${initialDecls} }
+.wd-inview[data-forge-el-id="${elementId}"] { animation: ${shorthand}; }`;
+};
+
+// One shared, content-identical script — injected once per page (callers
+// check ONSCROLL_BOOTSTRAP_MARKER before appending, not once per element)
+// regardless of how many on-scroll animations that page uses. Falls back
+// to revealing everything immediately if IntersectionObserver isn't
+// available, so a very old browser degrades to "always visible" rather
+// than "permanently hidden".
+export const ONSCROLL_BOOTSTRAP_MARKER = "data-forge-onscroll-script";
+export const buildOnScrollBootstrapScript = () => `<script ${ONSCROLL_BOOTSTRAP_MARKER}="1">
+document.addEventListener('DOMContentLoaded', function () {
+  var els = document.querySelectorAll('[data-wd-onscroll]');
+  if (!els.length) return;
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(function (el) { el.classList.add('wd-inview'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.remove('wd-onscroll-hidden');
+        entry.target.classList.add('wd-inview');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+  els.forEach(function (el) {
+    el.classList.add('wd-onscroll-hidden');
+    io.observe(el);
+  });
+});
+</script>`;
+
+// Builds everything needed to apply one animation config to one element —
+// the single source of truth Builder.jsx's applyAnimation (single-select)
+// and applyAnimationToIds (multi-select batch apply) both call, so the
+// on-scroll/regular branch only has to be written once. Each call gets a
+// fresh unique keyframes name so applying the same preset to many
+// elements (or re-applying to one) never collides.
+export const buildAppliedAnimation = ({ elementId, preset, duration, delay, timing, iteration }) => {
+  const uniqueName = `forge_${preset.id.replace(/-/g, "_")}_${Math.random().toString(36).slice(2, 8)}`;
+  if (preset.category === "on-scroll") {
+    return {
+      onScroll: true,
+      styleBlock: buildOnScrollCss({ name: uniqueName, elementId, frames: preset.frames, duration, timing, delay, iteration }),
+    };
+  }
+  return {
+    onScroll: false,
+    styleBlock: buildKeyframes(uniqueName, preset.frames),
+    shorthand: buildAnimationShorthand({ name: uniqueName, duration, timing, delay, iteration }),
+  };
+};

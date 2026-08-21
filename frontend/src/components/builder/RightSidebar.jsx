@@ -55,6 +55,7 @@ export const RightSidebar = ({
   onToggleVisible,
   onSetZIndex,
   onApplyStyleToIds,
+  onApplyAnimationToIds,
   onApplyToken,
   onCreateToken,
   viewport,
@@ -222,6 +223,7 @@ export const RightSidebar = ({
               onToggleVisible={onToggleVisible}
               onSetZIndex={onSetZIndex}
               onApplyStyleToIds={onApplyStyleToIds}
+              onApplyAnimationToIds={onApplyAnimationToIds}
               hideHeader
             />
           </div>
