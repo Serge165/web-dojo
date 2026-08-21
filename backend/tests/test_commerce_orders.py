@@ -189,3 +189,12 @@ class TestStripeWebhook:
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
         assert db.orders.count_documents({"provider_ref": FAKE_SESSION_ID}) == 1
+
+    def test_a_duplicate_delivery_does_not_change_the_order_id(self, client):
+        with patch.object(stripe_sdk.Webhook, "construct_event", return_value=_fake_stripe_event()), \
+             patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()):
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+            first_id = client.get(f"/api/commerce/receipt/{FAKE_SESSION_ID}").json()["id"]
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+            second_id = client.get(f"/api/commerce/receipt/{FAKE_SESSION_ID}").json()["id"]
+        assert first_id == second_id
