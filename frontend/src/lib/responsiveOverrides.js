@@ -41,8 +41,13 @@ export const buildResponsiveOverridesCss = (elements) => {
 // Regenerates the whole responsive-overrides block from the current
 // elements array and replaces it in head_html (removes it entirely once
 // no element has any override left).
+//
+// The strip pattern also eats one OPTIONAL LEADING newline: insertion
+// below joins onto prior content with a separating "\n" before the
+// block, so a plain trailing-\n? strip alone would leave that leading
+// separator dangling once the block itself is removed for good.
 export const upsertResponsiveOverridesCss = (headHtml, elements) => {
-  const stripped = (headHtml || "").replace(new RegExp(`<style ${STYLE_MARKER}>[\\s\\S]*?<\\/style>\\n?`), "");
+  const stripped = (headHtml || "").replace(new RegExp(`\\n?<style ${STYLE_MARKER}>[\\s\\S]*?<\\/style>\\n?`), "");
   const css = buildResponsiveOverridesCss(elements);
   return css ? `${stripped}${stripped ? "\n" : ""}${css}` : stripped;
 };

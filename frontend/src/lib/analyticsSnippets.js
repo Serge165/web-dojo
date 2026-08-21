@@ -35,8 +35,12 @@ export const buildAnalyticsHead = (config) => {
   return body ? `${START}\n${body}\n${END}` : "";
 };
 
+// Strip pattern also eats one optional LEADING newline — insertion below
+// joins onto prior content with a separating "\n" before the block, so a
+// plain trailing-\n? strip alone would leave that separator dangling once
+// the block itself is removed for good (see rootVars.js for the same fix).
 export const upsertAnalyticsHead = (headHtml, config) => {
-  const stripped = (headHtml || "").replace(new RegExp(`${START}[\\s\\S]*?${END}\\n?`), "");
+  const stripped = (headHtml || "").replace(new RegExp(`\\n?${START}[\\s\\S]*?${END}\\n?`), "");
   const block = buildAnalyticsHead(config);
   return block ? `${stripped}${stripped ? "\n" : ""}${block}` : stripped;
 };

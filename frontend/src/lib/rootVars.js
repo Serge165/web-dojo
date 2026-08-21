@@ -33,7 +33,11 @@ export const removeRootVarsForElement = (headHtml, elementId) => {
   let m;
   DECL_RE.lastIndex = 0;
   while ((m = DECL_RE.exec(existing[0]))) if (!m[1].startsWith(prefix)) decls.set(m[1], m[2].trim());
-  if (decls.size === 0) return h.replace(MARKER, "");
+  // Also eats one optional leading newline — upsertRootVar joins onto prior
+  // content with a separating "\n" before the block, so a plain MARKER
+  // strip alone (which only covers a trailing \n) leaves that separator
+  // dangling once the block is removed for good.
+  if (decls.size === 0) return h.replace(new RegExp(`\\n?${MARKER.source}`), "");
   const block = `<style data-forge-vars>\n:root {\n${[...decls].map(([k, v]) => `  ${k}: ${v};`).join("\n")}\n}\n</style>\n`;
   return h.replace(MARKER, block);
 };

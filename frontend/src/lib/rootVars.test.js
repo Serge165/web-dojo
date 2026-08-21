@@ -38,3 +38,9 @@ test("removeRootVarsForElement drops the whole block once it's empty", () => {
 test("removeRootVarsForElement is a no-op when there's no vars block", () => {
   expect(removeRootVarsForElement("<title>Hi</title>", "el1")).toBe("<title>Hi</title>");
 });
+
+test("removeRootVarsForElement drops the whole block cleanly when head_html had prior content", () => {
+  const h = upsertRootVar("<title>Hi</title>", "--fc-el1-bg", "#ff00ff");
+  const out = removeRootVarsForElement(h, "el1");
+  expect(out).toBe("<title>Hi</title>");
+});
