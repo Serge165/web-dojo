@@ -691,6 +691,18 @@ export default function Builder() {
         onOpenTemplate={() => setTemplateEditorOpen(true)}
       />
 
+      {/* Full-width like PagesBar, deliberately outside the sidebar/canvas
+          flex row below — LeftSidebar/RightSidebar mount and unmount based
+          on `mode`, and this bar must not shift position when they do. */}
+      <div className="h-9 flex-none border-b border-[#2B2B2B] bg-[#141414] flex items-center px-3" data-testid="mode-toggle">
+        <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5">
+          <button onClick={() => setMode("design")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "design" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-design"><MousePointer2 size={12} /> Design</button>
+          <button onClick={() => setMode("code")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-code"><Code2 size={12} /> Code</button>
+          <button onClick={() => setMode("split")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "split" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-split"><Columns2 size={12} /> Split View</button>
+          <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-preview"><Eye size={12} /> Preview</button>
+        </div>
+      </div>
+
       <div className="flex-1 flex overflow-hidden">
         {mode !== "preview" && (
           <LeftSidebar
@@ -715,14 +727,6 @@ export default function Builder() {
         )}
 
         <div className="flex-1 flex flex-col overflow-hidden min-w-0" data-testid="center-pane">
-          <div className="h-9 flex-none border-b border-[#2B2B2B] bg-[#141414] flex items-center px-3" data-testid="mode-toggle">
-            <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5">
-              <button onClick={() => setMode("design")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "design" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-design"><MousePointer2 size={12} /> Design</button>
-              <button onClick={() => setMode("code")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-code"><Code2 size={12} /> Code</button>
-              <button onClick={() => setMode("split")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "split" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-split"><Columns2 size={12} /> Split View</button>
-              <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-preview"><Eye size={12} /> Preview</button>
-            </div>
-          </div>
           <div className="flex-1 flex overflow-hidden">
         {mode === "design" && (
           <Canvas
