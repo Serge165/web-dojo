@@ -6,7 +6,7 @@ const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 
 export const Canvas = ({
   elements, selectedId, onSelect, onDrop, onDelete, onMove, onDuplicate,
-  onEditHtml, onSaveComponent, canvasBg, headHtml, viewport = "desktop",
+  onEditHtml, onSaveComponent, canvasBg, headHtml, viewport = "desktop", zoom = 100,
 }) => {
   const dropRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
@@ -39,7 +39,7 @@ export const Canvas = ({
 
   return (
     <div className="flex-1 bg-[#050505] overflow-auto" data-testid="canvas-area">
-      <div className="mx-auto my-6 transition-all duration-200" style={{ width: `min(${w}px, 96%)` }}>
+      <div className="mx-auto my-6 transition-all duration-200" style={{ width: `min(${w}px, 96%)`, zoom: `${zoom}%` }}>
         <div className="text-[10px] uppercase tracking-wider text-gray-500 px-1 pb-1 flex items-center justify-between">
           <span>Preview · {elements.length} block{elements.length === 1 ? "" : "s"} · {viewport}</span>
           <span className="font-mono">{w} × auto</span>

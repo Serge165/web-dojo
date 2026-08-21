@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import axios from "axios";
 import { toast } from "sonner";
 import { TopBar } from "@/components/builder/TopBar";
+import { MenuBar } from "@/components/builder/MenuBar";
 import { LeftSidebar } from "@/components/builder/LeftSidebar";
 import { RightSidebar } from "@/components/builder/RightSidebar";
 import { Canvas } from "@/components/builder/Canvas";
@@ -95,6 +96,8 @@ export default function Builder() {
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
   const [submissionsOpen, setSubmissionsOpen] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const clipboardRef = useRef(null);
 
   // Undo/Redo history stack for the doc state.
   const [past, setPast] = useState([]);
@@ -295,6 +298,25 @@ export default function Builder() {
       const i = els.findIndex((e) => e.id === id); if (i < 0) return els;
       const next = [...els]; next.splice(i + 1, 0, { ...els[i], id: uid() }); return next;
     });
+  };
+  const copyEl = () => { if (selected) clipboardRef.current = selected.html; };
+  const cutEl = () => { if (!selected) return; clipboardRef.current = selected.html; removeEl(selected.id); };
+  const pasteEl = () => {
+    if (!clipboardRef.current) return;
+    const idx = elements.findIndex((e) => e.id === selectedId);
+    addBlock(clipboardRef.current, idx >= 0 ? idx + 1 : undefined);
+  };
+  const zoomIn = () => setZoom((z) => Math.min(150, z + 10));
+  const zoomOut = () => setZoom((z) => Math.max(50, z - 10));
+  const zoomReset = () => setZoom(100);
+  const newProject = () => {
+    const hasUnsaved = saveStatus === "unsaved" || saveStatus === "error";
+    if (hasUnsaved && !window.confirm("Discard unsaved changes and start a new project?")) return;
+    window.location.reload();
+  };
+  const focusLibrarySearch = () => {
+    document.querySelector('[data-testid="left-tab-library"]')?.click();
+    setTimeout(() => document.querySelector('[data-testid="library-search"]')?.focus(), 0);
   };
   const toggleVisible = (id) => setElements((els) => els.map((e) => e.id === id ? { ...e, hidden: !e.hidden } : e));
   const setZIndex = (id, z) => setElements((els) => els.map((e) => e.id === id ? { ...e, zIndex: z } : e));
@@ -610,6 +632,14 @@ export default function Builder() {
       if (meta && (e.key.toLowerCase() === "z" && e.shiftKey || e.key.toLowerCase() === "y")) { e.preventDefault(); redo(); return; }
       if (meta && e.key.toLowerCase() === "s") { e.preventDefault(); save(); return; }
       if (meta && e.key.toLowerCase() === "f") { e.preventDefault(); setFindOpen(true); return; }
+      // Block-level cut/copy/paste — only when a block is selected and no
+      // text field/contenteditable is focused, so normal browser copy/paste
+      // inside inputs (project name, inline text editing, etc.) still works.
+      if (meta && document.activeElement === document.body) {
+        if (e.key.toLowerCase() === "c" && selectedId) { e.preventDefault(); copyEl(); return; }
+        if (e.key.toLowerCase() === "x" && selectedId) { e.preventDefault(); cutEl(); return; }
+        if (e.key.toLowerCase() === "v") { e.preventDefault(); pasteEl(); return; }
+      }
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId && document.activeElement === document.body) {
         e.preventDefault(); removeEl(selectedId);
       }
@@ -637,6 +667,16 @@ export default function Builder() {
         onUndo={undo} onRedo={redo}
         canUndo={past.length > 0} canRedo={future.length > 0}
         viewport={viewport} setViewport={setViewport}
+      />
+
+      <MenuBar
+        project={project}
+        onNew={newProject} onOpen={openLoad} onSave={save}
+        onUndo={undo} onRedo={redo} canUndo={past.length > 0} canRedo={future.length > 0}
+        onCut={cutEl} onCopy={copyEl} onPaste={pasteEl} hasSelection={!!selected}
+        onSearchBlocks={focusLibrarySearch} onFindReplace={() => setFindOpen(true)}
+        zoom={zoom} onZoomIn={zoomIn} onZoomOut={zoomOut} onZoomReset={zoomReset}
+        onHelpTour={() => setTourForce((v) => v + 1)}
       />
 
       <PagesBar
@@ -698,6 +738,7 @@ export default function Builder() {
             canvasBg={canvasBg}
             headHtml={headHtml}
             viewport={viewport}
+            zoom={zoom}
           />
         )}
         {(mode === "code" || mode === "split") && (
