@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library, Download, Upload, ChevronDown, ChevronRight, Folder, Filter } from "lucide-react";
+import { Type, Sparkles, MousePointerClick, Eraser, Gauge, Copy, ClipboardPaste, Save, X, Library, Download, Upload, ChevronDown, ChevronRight, Folder, Filter, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { getFxClip, setFxClip, subscribeFxClip } from "@/lib/fxClipboard";
 import { STARTER_STYLES } from "@/lib/starterStyles";
@@ -41,6 +41,9 @@ const STATIC_FX = [
   { id: "retro", label: "Retro 3D", patchFn: (i) => ({ color: "#ffd166", "-webkit-text-fill-color": "#ffd166", "text-shadow": `${rp(1 * i)}px ${rp(1 * i)}px 0 #ef476f,${rp(2 * i)}px ${rp(2 * i)}px 0 #ef476f,${rp(3 * i)}px ${rp(3 * i)}px 0 #06d6a0,${rp(4 * i)}px ${rp(4 * i)}px 0 #118ab2` }) },
   { id: "longshadow", label: "Long shadow", patchFn: (i) => { const steps = Math.max(2, rp(8 * i)); return { color: "#111827", "-webkit-text-fill-color": "#111827", "text-shadow": Array.from({ length: steps }, (_, k) => `${k + 1}px ${k + 1}px #cbd5e1`).join(",") }; } },
   { id: "glow", label: "Soft glow", patchFn: (i) => ({ color: "#a78bfa", "-webkit-text-fill-color": "#a78bfa", "text-shadow": `0 0 ${rp(22 * i)}px rgba(167,139,250,${op(0.9 * i)})` }) },
+  { id: "stripes", label: "Stripes", patch: { ...grad("repeating-linear-gradient(45deg,#0f172a,#0f172a 6px,#f59e0b 6px,#f59e0b 12px)") } },
+  { id: "dots-pat", label: "Dots", patch: { ...grad("radial-gradient(#f59e0b 30%,#0f172a 31%)"), "background-size": "10px 10px" } },
+  { id: "checker", label: "Checkerboard", patch: { ...grad("conic-gradient(#0f172a 90deg,#f59e0b 90deg 180deg,#0f172a 180deg 270deg,#f59e0b 270deg)"), "background-size": "16px 16px" } },
 ];
 
 // Animated effects — inject keyframes + inline animation. `keyframesFn(n,i)` = intensity-aware.
@@ -144,6 +147,15 @@ const FxChip = ({ testid, onClick, previewHtml, label, animated }) => (
 
 export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplaceHtml, headHtml, onHeadHtmlChange }) => {
   const [intensity, setIntensity] = useState(1);
+  const [outlineColor, setOutlineColor] = useState("#f59e0b");
+  const [outlineThickness, setOutlineThickness] = useState(2);
+  const [shadowAngle, setShadowAngle] = useState(45);
+  const [shadowDistance, setShadowDistance] = useState(6);
+  const [shadowBlur, setShadowBlur] = useState(4);
+  const [shadowColor, setShadowColor] = useState("#000000");
+  const [tiltDepth, setTiltDepth] = useState(30);
+  const [reflectDistance, setReflectDistance] = useState(4);
+  const [reflectOpacity, setReflectOpacity] = useState(0.3);
   const [clip, setClip] = useState(getFxClip());
   useEffect(() => subscribeFxClip(setClip), []);
   const [library, setLibrary] = useState(() => {
@@ -213,6 +225,30 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       "background-size": "auto", animation: "none", "letter-spacing": "normal", transform: "none", color: "inherit",
     });
     toast.success("Text FX cleared");
+  };
+
+  const applyOutline = () => {
+    if (needSel()) return;
+    onPatch({ "-webkit-text-stroke": `${outlineThickness}px ${outlineColor}`, color: "transparent", "-webkit-text-fill-color": "transparent", "paint-order": "stroke fill" });
+    toast.success("Outline applied");
+  };
+  const applyDirectionalShadow = () => {
+    if (needSel()) return;
+    const rad = (shadowAngle * Math.PI) / 180;
+    const x = Math.round(Math.cos(rad) * shadowDistance);
+    const y = Math.round(Math.sin(rad) * shadowDistance);
+    onPatch({ "text-shadow": `${x}px ${y}px ${shadowBlur}px ${shadowColor}` });
+    toast.success("Shadow applied");
+  };
+  const applyTilt = () => {
+    if (needSel()) return;
+    onPatch({ transform: `perspective(500px) rotateX(${tiltDepth}deg)`, "transform-origin": "center bottom" });
+    toast.success("3D tilt applied");
+  };
+  const applyReflection = () => {
+    if (needSel()) return;
+    onPatch({ "-webkit-box-reflect": `below ${reflectDistance}px linear-gradient(transparent, rgba(255,255,255,${reflectOpacity}))` });
+    toast.success("Reflection applied");
   };
 
   const applyClipToSelected = (theClip) => {
@@ -375,6 +411,67 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
         </div>
         <button onClick={stripHover} disabled={!hasHover} className="w-full flex items-center justify-center gap-1.5 text-[11px] py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed mt-1" data-testid="textfx-hover-clear"><Eraser size={11} /> Remove hover from element</button>
         <p className="text-[10px] text-gray-500">Hover effects run on your published/previewed site. Preview them in the Preview tab.</p>
+      </div>
+
+      {/* Custom: outline color/thickness, directional shadow, 3D tilt, reflection */}
+      <div className="space-y-2 pt-3 border-t border-[#2B2B2B]">
+        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><SlidersHorizontal size={12} /> Custom</div>
+
+        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
+          <div className="text-[10px] text-gray-400">Outline</div>
+          <div className="flex items-center gap-2">
+            <input type="color" value={outlineColor} onChange={(e) => setOutlineColor(e.target.value)} className="w-8 h-7 bg-transparent border border-[#2B2B2B] rounded" data-testid="textfx-outline-color" />
+            <input type="range" min={1} max={8} step={0.5} value={outlineThickness} onChange={(e) => setOutlineThickness(Number(e.target.value))} className="flex-1" data-testid="textfx-outline-thickness" />
+            <span className="w-9 text-right text-[10px] font-mono text-gray-300">{outlineThickness}px</span>
+            <button onClick={applyOutline} disabled={!selected} className="text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-outline-apply">Apply</button>
+          </div>
+        </div>
+
+        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
+          <div className="text-[10px] text-gray-400">Directional shadow</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            <div>
+              <label className="text-[9px] text-gray-500 block">Angle ({shadowAngle}°)</label>
+              <input type="range" min={0} max={360} value={shadowAngle} onChange={(e) => setShadowAngle(Number(e.target.value))} className="w-full" data-testid="textfx-shadow-angle" />
+            </div>
+            <div>
+              <label className="text-[9px] text-gray-500 block">Distance ({shadowDistance})</label>
+              <input type="range" min={0} max={30} value={shadowDistance} onChange={(e) => setShadowDistance(Number(e.target.value))} className="w-full" data-testid="textfx-shadow-distance" />
+            </div>
+            <div>
+              <label className="text-[9px] text-gray-500 block">Blur ({shadowBlur})</label>
+              <input type="range" min={0} max={20} value={shadowBlur} onChange={(e) => setShadowBlur(Number(e.target.value))} className="w-full" data-testid="textfx-shadow-blur" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="color" value={shadowColor} onChange={(e) => setShadowColor(e.target.value)} className="w-8 h-7 bg-transparent border border-[#2B2B2B] rounded" data-testid="textfx-shadow-color" />
+            <button onClick={applyDirectionalShadow} disabled={!selected} className="flex-1 text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-shadow-apply">Apply</button>
+          </div>
+        </div>
+
+        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
+          <div className="text-[10px] text-gray-400">3D tilt</div>
+          <div className="flex items-center gap-2">
+            <input type="range" min={-60} max={60} value={tiltDepth} onChange={(e) => setTiltDepth(Number(e.target.value))} className="flex-1" data-testid="textfx-tilt-depth" />
+            <span className="w-9 text-right text-[10px] font-mono text-gray-300">{tiltDepth}°</span>
+            <button onClick={applyTilt} disabled={!selected} className="text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-tilt-apply">Apply</button>
+          </div>
+        </div>
+
+        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
+          <div className="text-[10px] text-gray-400">Reflection</div>
+          <div className="grid grid-cols-2 gap-1.5">
+            <div>
+              <label className="text-[9px] text-gray-500 block">Distance ({reflectDistance})</label>
+              <input type="range" min={0} max={20} value={reflectDistance} onChange={(e) => setReflectDistance(Number(e.target.value))} className="w-full" data-testid="textfx-reflect-distance" />
+            </div>
+            <div>
+              <label className="text-[9px] text-gray-500 block">Opacity ({reflectOpacity})</label>
+              <input type="range" min={0} max={1} step={0.05} value={reflectOpacity} onChange={(e) => setReflectOpacity(Number(e.target.value))} className="w-full" data-testid="textfx-reflect-opacity" />
+            </div>
+          </div>
+          <button onClick={applyReflection} disabled={!selected} className="w-full text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-reflect-apply">Apply</button>
+        </div>
       </div>
 
       <div className="pt-3 border-t border-[#2B2B2B] grid grid-cols-2 gap-2">
