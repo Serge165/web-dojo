@@ -47,7 +47,7 @@ const joinElementsHtml = (elements) => elements.map((e) => withRootId(e.html, e.
 // preview implementations (the standalone top-level Preview mode is a
 // separate, device-framed iframe using the same buildStandaloneHtml).
 export const CodeView = ({ project, elements, onElementsChange, headHtml, onHeadHtmlChange, customJs, onCustomJsChange, onSave, showPreview = true }) => {
-  const [tab, setTab] = useState("html"); // html | css | js | head
+  const [tab, setTab] = useState("css"); // html | css | js | head — CSS first: it's the generated globals.css-equivalent, the thing most worth seeing by default
   const [headLang, setHeadLang] = useState("html");
 
   const [htmlText, setHtmlText] = useState(() => joinElementsHtml(elements));
