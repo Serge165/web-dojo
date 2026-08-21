@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Header
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any
@@ -57,6 +57,10 @@ class Project(BaseModel):
     canvas_bg: str = "#ffffff"
     fonts: List[str] = Field(default_factory=list)
     files: List[Any] = Field(default_factory=list)
+    # Excluded from serialization so these never leak into any API response
+    # that uses this model, regardless of which DB query populated them.
+    dashboard_password_hash: Optional[str] = Field(default=None, exclude=True)
+    paypal_secret_enc: Optional[str] = Field(default=None, exclude=True)
     # Multi-page + template system
     pages: List[Any] = Field(default_factory=list)
     active_page_id: Optional[str] = None
@@ -74,6 +78,8 @@ class ProjectCreate(BaseModel):
     canvas_bg: str = "#ffffff"
     fonts: List[str] = []
     files: List[Any] = []
+    dashboard_password_hash: Optional[str] = None
+    paypal_secret_enc: Optional[str] = None
     pages: List[Any] = []
     active_page_id: Optional[str] = None
     template: Optional[Any] = None
@@ -88,6 +94,8 @@ class ProjectUpdate(BaseModel):
     canvas_bg: Optional[str] = None
     fonts: Optional[List[str]] = None
     files: Optional[List[Any]] = None
+    dashboard_password_hash: Optional[str] = None
+    paypal_secret_enc: Optional[str] = None
     pages: Optional[List[Any]] = None
     active_page_id: Optional[str] = None
     template: Optional[Any] = None
@@ -321,7 +329,10 @@ async def list_projects():
 
 @api_router.get("/projects/{project_id}", response_model=Project)
 async def get_project(project_id: str):
-    doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    doc = await db.projects.find_one(
+        {"id": project_id},
+        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0},
+    )
     if not doc:
         raise HTTPException(status_code=404, detail="Project not found")
     doc = _deserialize(doc)
@@ -338,7 +349,10 @@ async def update_project(project_id: str, payload: ProjectUpdate):
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     await db.projects.update_one({"id": project_id}, {"$set": updates})
-    doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    doc = await db.projects.find_one(
+        {"id": project_id},
+        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0},
+    )
     doc = _deserialize(doc)
     return Project(**doc)
 
@@ -349,6 +363,39 @@ async def delete_project(project_id: str):
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Project not found")
     return {"ok": True}
+
+
+class DashboardPasswordRequest(BaseModel):
+    password: str
+
+
+@api_router.post("/dashboard/{project_id}/set-password")
+async def set_dashboard_password(project_id: str, payload: DashboardPasswordRequest):
+    if not payload.password or len(payload.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    existing = await db.projects.find_one({"id": project_id}, {"_id": 0, "id": 1})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Project not found")
+    await db.projects.update_one(
+        {"id": project_id},
+        {"$set": {"dashboard_password_hash": _hash_password(payload.password)}},
+    )
+    return {"ok": True}
+
+
+@api_router.post("/dashboard/{project_id}/unlock")
+async def unlock_dashboard(project_id: str, payload: DashboardPasswordRequest):
+    project = await db.projects.find_one({"id": project_id})
+    if not project or not project.get("dashboard_password_hash"):
+        raise HTTPException(status_code=401, detail="Dashboard password not set for this project")
+    if not _verify_password(payload.password, project["dashboard_password_hash"]):
+        raise HTTPException(status_code=401, detail="Incorrect password")
+    return {"token": _issue_dashboard_token(project_id)}
+
+
+async def _require_dashboard_token(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)) -> None:
+    if not x_dashboard_token or not _verify_dashboard_token(x_dashboard_token, project_id):
+        raise HTTPException(status_code=401, detail="Missing or invalid dashboard token")
 
 
 def _build_google_fonts_link(fonts):
@@ -483,7 +530,10 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
 
 @api_router.get("/preview/{project_id}", response_class=HTMLResponse)
 async def preview_project(project_id: str, page_id: Optional[str] = None):
-    doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    doc = await db.projects.find_one(
+        {"id": project_id},
+        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0},
+    )
     if not doc:
         raise HTTPException(status_code=404, detail="Project not found")
     page = None
@@ -1065,7 +1115,10 @@ def _sftp_upload(payload: PublishRequest, files: dict):
 
 @api_router.post("/projects/{project_id}/publish")
 async def publish_project(project_id: str, payload: PublishRequest):
-    doc = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    doc = await db.projects.find_one(
+        {"id": project_id},
+        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0},
+    )
     if not doc:
         raise HTTPException(status_code=404, detail="Project not found")
 
