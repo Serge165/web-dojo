@@ -37,6 +37,7 @@ import { buildCartRuntimeHtml } from "@/lib/cart";
 import { scanHtml } from "@/lib/importHtml";
 import { escText } from "@/lib/escapeHtml";
 import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
+import { upsertResponsiveOverridesCss } from "@/lib/responsiveOverrides";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -319,12 +320,16 @@ export default function Builder() {
   }, []);
 
   const removeEl = (id) => {
-    setElements((els) => els.filter((e) => e.id !== id));
+    const next = elements.filter((e) => e.id !== id);
+    setElements(next);
     if (selectedId === id) setSelectedId(null);
-    // Drop that element's animation keyframes and per-element color vars
-    // too, or they linger in headHtml forever (dead CSS bloating every
-    // save/export).
-    setHeadHtml((h) => removeRootVarsForElement((h || "").replace(new RegExp(`<style data-forge-anim="${id}">[\\s\\S]*?<\\/style>\\n?`), ""), id));
+    // Drop that element's animation keyframes, per-element color vars, and
+    // responsive overrides too, or they linger in headHtml forever (dead
+    // CSS bloating every save/export).
+    setHeadHtml((h) => upsertResponsiveOverridesCss(
+      removeRootVarsForElement((h || "").replace(new RegExp(`<style data-forge-anim="${id}">[\\s\\S]*?<\\/style>\\n?`), ""), id),
+      next
+    ));
   };
   const moveEl = (id, delta) => {
     setElements((els) => {
@@ -399,6 +404,30 @@ export default function Builder() {
   // variable, just point the block at it.
   const applyExistingToken = (name, property) => patchStyle({ [property]: `var(${name})` });
   const createToken = (name, value) => setHeadHtml((h) => upsertRootVar(h, name, value));
+
+  // Tablet/mobile overrides — keyed by the current top-bar viewport, so
+  // there's exactly one "which breakpoint am I editing" switch, not a
+  // second one that could disagree with it. No-ops on desktop (that's the
+  // base style, edited via patchStyle/Style tab instead).
+  const patchResponsiveStyle = (patch) => {
+    if (!selected || viewport === "desktop") return;
+    const next = elements.map((e) => e.id === selected.id
+      ? { ...e, responsive: { ...(e.responsive || {}), [viewport]: { ...((e.responsive || {})[viewport] || {}), ...patch } } }
+      : e);
+    setElements(next);
+    setHeadHtml((h) => upsertResponsiveOverridesCss(h, next));
+  };
+  const resetResponsiveProperty = (property) => {
+    if (!selected || viewport === "desktop") return;
+    const next = elements.map((e) => {
+      if (e.id !== selected.id || !e.responsive?.[viewport]) return e;
+      const tier = { ...e.responsive[viewport] };
+      delete tier[property];
+      return { ...e, responsive: { ...e.responsive, [viewport]: tier } };
+    });
+    setElements(next);
+    setHeadHtml((h) => upsertResponsiveOverridesCss(h, next));
+  };
 
   // Paste a copied style (from lib/fxClipboard) onto many elements at once.
   const applyStyleToIds = useCallback((ids, clip) => {
@@ -946,6 +975,9 @@ export default function Builder() {
             onToggleVisible={toggleVisible}
             onSetZIndex={setZIndex}
             onApplyStyleToIds={applyStyleToIds}
+            viewport={viewport}
+            onPatchResponsive={patchResponsiveStyle}
+            onResetResponsive={resetResponsiveProperty}
           />
         )}
       </div>

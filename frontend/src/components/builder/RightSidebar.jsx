@@ -3,6 +3,7 @@ import { ColorPicker } from "./ColorPicker";
 import { TokenSelector } from "./TokenSelector";
 import { GradientMixer } from "./GradientMixer";
 import { StyleInspector } from "./StyleInspector";
+import { ResponsivePanel } from "./ResponsivePanel";
 import { LayersPanel } from "./LayersPanel";
 import { ShapePanel } from "./ShapePanel";
 import { DividerPanel } from "./DividerPanel";
@@ -19,6 +20,7 @@ const TABS = [
   { id: "tokens", label: "Tokens" },
   { id: "gradient", label: "Gradient" },
   { id: "style", label: "Style" },
+  { id: "responsive", label: "Responsive" },
   { id: "shape", label: "Shape" },
   { id: "bg", label: "BG" },
   { id: "blend", label: "Blend" },
@@ -53,6 +55,9 @@ export const RightSidebar = ({
   onApplyStyleToIds,
   onApplyToken,
   onCreateToken,
+  viewport,
+  onPatchResponsive,
+  onResetResponsive,
 }) => {
   const [tab, setTab] = useState("color");
   const [layersOpen, setLayersOpen] = useState(true);
@@ -120,6 +125,10 @@ export const RightSidebar = ({
 
         {tab === "style" && (
           <StyleInspector selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
+        )}
+
+        {tab === "responsive" && (
+          <ResponsivePanel selected={selected} viewport={viewport} onPatch={onPatchResponsive} onReset={onResetResponsive} />
         )}
 
         {tab === "bg" && (
