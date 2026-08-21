@@ -22,6 +22,11 @@ import httpx
 import ipaddress
 import socket
 from urllib.parse import urlsplit, urljoin
+import time
+import hashlib
+import hmac
+import secrets
+import base64
 
 
 ROOT_DIR = Path(__file__).parent
@@ -221,6 +226,52 @@ def _encrypt(value: str) -> str:
 
 def _decrypt(token: str) -> str:
     return _get_fernet().decrypt(token.encode()).decode()
+
+
+def _hash_password(password: str) -> str:
+    salt = secrets.token_bytes(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 200_000)
+    return f"{salt.hex()}${digest.hex()}"
+
+
+def _verify_password(password: str, stored: str) -> bool:
+    try:
+        salt_hex, digest_hex = stored.split("$", 1)
+        salt = bytes.fromhex(salt_hex)
+        expected = bytes.fromhex(digest_hex)
+    except ValueError:
+        return False
+    actual = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 200_000)
+    return hmac.compare_digest(actual, expected)
+
+
+def _dashboard_token_secret() -> bytes:
+    base = os.environ.get("WEBDOJO_SECRET_KEY", "webdojo-dev-secret").encode("utf-8")
+    return hashlib.sha256(base + b":dashboard-token").digest()
+
+
+def _issue_dashboard_token(project_id: str, ttl_seconds: int = 604800) -> str:
+    expiry = int(time.time()) + ttl_seconds
+    payload = f"{project_id}:{expiry}".encode("utf-8")
+    sig = hmac.new(_dashboard_token_secret(), payload, hashlib.sha256).hexdigest()
+    raw = f"{project_id}:{expiry}:{sig}".encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii")
+
+
+def _verify_dashboard_token(token: str, project_id: str) -> bool:
+    try:
+        raw = base64.urlsafe_b64decode(token.encode("ascii")).decode("utf-8")
+        tok_project_id, expiry_str, sig = raw.split(":", 2)
+        expiry = int(expiry_str)
+    except (ValueError, TypeError):
+        return False
+    if tok_project_id != project_id:
+        return False
+    if time.time() > expiry:
+        return False
+    payload = f"{tok_project_id}:{expiry}".encode("utf-8")
+    expected_sig = hmac.new(_dashboard_token_secret(), payload, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(sig, expected_sig)
 
 
 def _serialize(doc: dict) -> dict:
