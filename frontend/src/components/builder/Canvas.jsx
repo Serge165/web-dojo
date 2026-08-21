@@ -83,7 +83,7 @@ export const Canvas = ({
                 ) : (
                   <div dangerouslySetInnerHTML={{ __html: el.html }} />
                 )}
-                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
+                <div className={`absolute top-1 right-1 transition-opacity flex gap-1 z-10 ${selectedId === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                   <IconBtn testId={`el-edit-${el.id}`} title="Edit text inline" onClick={(e) => { e.stopPropagation(); setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}><Pencil size={12} /></IconBtn>
                   <IconBtn testId={`el-save-${el.id}`} title="Save as component" onClick={(e) => { e.stopPropagation(); onSaveComponent && onSaveComponent(el); }}><Save size={12} /></IconBtn>
                   <IconBtn testId={`el-up-${el.id}`} title="Move up" onClick={(e) => { e.stopPropagation(); onMove(el.id, -1); }}><ArrowUp size={12} /></IconBtn>

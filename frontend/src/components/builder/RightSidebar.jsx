@@ -4,6 +4,7 @@ import { TokenSelector } from "./TokenSelector";
 import { GradientMixer } from "./GradientMixer";
 import { StyleInspector } from "./StyleInspector";
 import { ResponsivePanel } from "./ResponsivePanel";
+import { VariantPanel } from "./VariantPanel";
 import { LayersPanel } from "./LayersPanel";
 import { ShapePanel } from "./ShapePanel";
 import { DividerPanel } from "./DividerPanel";
@@ -21,6 +22,7 @@ const TABS = [
   { id: "gradient", label: "Gradient" },
   { id: "style", label: "Style" },
   { id: "responsive", label: "Responsive" },
+  { id: "variants", label: "Variants" },
   { id: "shape", label: "Shape" },
   { id: "bg", label: "BG" },
   { id: "blend", label: "Blend" },
@@ -129,6 +131,10 @@ export const RightSidebar = ({
 
         {tab === "responsive" && (
           <ResponsivePanel selected={selected} viewport={viewport} onPatch={onPatchResponsive} onReset={onResetResponsive} />
+        )}
+
+        {tab === "variants" && (
+          <VariantPanel selected={selected} onReplaceHtml={onReplaceHtml} />
         )}
 
         {tab === "bg" && (

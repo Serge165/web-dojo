@@ -8,6 +8,7 @@ import { SnippetsTab } from "./SnippetsTab";
 import { FormsTab } from "./FormsTab";
 import { CommerceTab } from "./CommerceTab";
 import { cdnComponentGroups } from "@/lib/cdnComponents";
+import { stampVariant } from "@/lib/variants";
 import { useHoverPreview } from "./HoverPreview";
 
 // Groups the flat CATEGORIES list into named super-sections for display.
@@ -76,12 +77,14 @@ export const LeftSidebar = ({
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
   const { previewProps, previewNode } = useHoverPreview();
 
-  const BlockItem = ({ label, html, testId, onDelete }) => (
+  const BlockItem = ({ label, html, testId, catId, blockId, onDelete }) => {
+    const stamped = catId && blockId ? stampVariant(html, catId, blockId) : html;
+    return (
     <div
       draggable
-      onDragStart={(e) => onDragStart(e, html)}
-      onDoubleClick={() => onAddBlock(html)}
-      {...previewProps(html)}
+      onDragStart={(e) => onDragStart(e, stamped)}
+      onDoubleClick={() => onAddBlock(stamped)}
+      {...previewProps(stamped)}
       className="rounded bg-[#1F1F1F] border border-[#2B2B2B] p-2 flex items-center gap-2 cursor-grab hover:border-blue-500/60 hover:bg-[#232323] transition-colors group"
       data-testid={testId}
       title="Drag to canvas or double-click to insert"
@@ -97,7 +100,8 @@ export const LeftSidebar = ({
         ><Trash2 size={11} /></button>
       )}
     </div>
-  );
+    );
+  };
 
   return (
     <aside className="w-64 flex-none border-r border-[#2B2B2B] bg-[#141414] flex flex-col overflow-hidden" data-testid="left-sidebar">
@@ -165,7 +169,7 @@ export const LeftSidebar = ({
                   {((open[cat.id] ?? true) || q) && (
                     <div className="px-2 pb-2 space-y-1.5">
                       {cat.blocks.map((b) => (
-                        <BlockItem key={b.id} label={b.label} html={b.html} testId={`block-${b.id}`} />
+                        <BlockItem key={b.id} label={b.label} html={b.html} catId={cat.id} blockId={b.id} testId={`block-${b.id}`} />
                       ))}
                     </div>
                   )}
@@ -208,7 +212,7 @@ export const LeftSidebar = ({
                     <div className="text-[10px] text-gray-500 mb-1.5">{g.label}</div>
                     <div className="space-y-1.5">
                       {g.blocks.map((b) => (
-                        <BlockItem key={b.id} label={b.label} html={b.html} testId={`cdn-block-${b.id}`} />
+                        <BlockItem key={b.id} label={b.label} html={b.html} catId={g.id} blockId={b.id} testId={`cdn-block-${b.id}`} />
                       ))}
                     </div>
                   </div>
