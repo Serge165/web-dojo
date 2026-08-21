@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Trash2, ArrowUp, ArrowDown, Copy, Pencil, Save } from "lucide-react";
 import { InlineToolbar } from "./InlineToolbar";
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
 
 const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 
@@ -63,35 +64,50 @@ export const Canvas = ({
           {elements.map((el, i) => (
             <React.Fragment key={el.id}>
               <DropSlot onDrop={(e) => handleDrop(e, i)} onDragOver={handleDragOver} index={i} />
-              <div
-                data-testid={`canvas-el-${el.id}`}
-                data-forge-el-id={el.id}
-                className={`relative group ${selectedId === el.id ? "outline outline-2 outline-blue-500" : ""}`}
-                style={{ zIndex: el.zIndex || undefined, display: el.hidden ? "none" : undefined }}
-                onClick={(e) => { e.stopPropagation(); onSelect(el.id); }}
-              >
-                {editingId === el.id ? (
+              <ContextMenu>
+                <ContextMenuTrigger asChild>
                   <div
-                    ref={editingRef}
-                    contentEditable
-                    suppressContentEditableWarning
-                    onBlur={(e) => { onEditHtml(el.id, e.currentTarget.innerHTML); setEditingId(null); }}
-                    dangerouslySetInnerHTML={{ __html: el.html }}
-                    className="focus:outline-none"
-                    data-testid={`inline-editor-${el.id}`}
-                  />
-                ) : (
-                  <div dangerouslySetInnerHTML={{ __html: el.html }} />
-                )}
-                <div className={`absolute top-1 right-1 transition-opacity flex gap-1 z-10 ${selectedId === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                  <IconBtn testId={`el-edit-${el.id}`} title="Edit text inline" onClick={(e) => { e.stopPropagation(); setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}><Pencil size={12} /></IconBtn>
-                  <IconBtn testId={`el-save-${el.id}`} title="Save as component" onClick={(e) => { e.stopPropagation(); onSaveComponent && onSaveComponent(el); }}><Save size={12} /></IconBtn>
-                  <IconBtn testId={`el-up-${el.id}`} title="Move up" onClick={(e) => { e.stopPropagation(); onMove(el.id, -1); }}><ArrowUp size={12} /></IconBtn>
-                  <IconBtn testId={`el-down-${el.id}`} title="Move down" onClick={(e) => { e.stopPropagation(); onMove(el.id, 1); }}><ArrowDown size={12} /></IconBtn>
-                  <IconBtn testId={`el-dup-${el.id}`} title="Duplicate" onClick={(e) => { e.stopPropagation(); onDuplicate(el.id); }}><Copy size={12} /></IconBtn>
-                  <IconBtn testId={`el-del-${el.id}`} title="Delete" danger onClick={(e) => { e.stopPropagation(); onDelete(el.id); }}><Trash2 size={12} /></IconBtn>
-                </div>
-              </div>
+                    data-testid={`canvas-el-${el.id}`}
+                    data-forge-el-id={el.id}
+                    className={`relative group ${selectedId === el.id ? "outline outline-2 outline-blue-500" : ""}`}
+                    style={{ zIndex: el.zIndex || undefined, display: el.hidden ? "none" : undefined }}
+                    onClick={(e) => { e.stopPropagation(); onSelect(el.id); }}
+                    onContextMenu={() => onSelect(el.id)}
+                  >
+                    {editingId === el.id ? (
+                      <div
+                        ref={editingRef}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => { onEditHtml(el.id, e.currentTarget.innerHTML); setEditingId(null); }}
+                        dangerouslySetInnerHTML={{ __html: el.html }}
+                        className="focus:outline-none"
+                        data-testid={`inline-editor-${el.id}`}
+                      />
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: el.html }} />
+                    )}
+                    <div className={`absolute top-1 right-1 transition-opacity flex gap-1 z-10 ${selectedId === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                      <IconBtn testId={`el-edit-${el.id}`} title="Edit text inline" onClick={(e) => { e.stopPropagation(); setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}><Pencil size={12} /></IconBtn>
+                      <IconBtn testId={`el-save-${el.id}`} title="Save as component" onClick={(e) => { e.stopPropagation(); onSaveComponent && onSaveComponent(el); }}><Save size={12} /></IconBtn>
+                      <IconBtn testId={`el-up-${el.id}`} title="Move up" onClick={(e) => { e.stopPropagation(); onMove(el.id, -1); }}><ArrowUp size={12} /></IconBtn>
+                      <IconBtn testId={`el-down-${el.id}`} title="Move down" onClick={(e) => { e.stopPropagation(); onMove(el.id, 1); }}><ArrowDown size={12} /></IconBtn>
+                      <IconBtn testId={`el-dup-${el.id}`} title="Duplicate" onClick={(e) => { e.stopPropagation(); onDuplicate(el.id); }}><Copy size={12} /></IconBtn>
+                      <IconBtn testId={`el-del-${el.id}`} title="Delete" danger onClick={(e) => { e.stopPropagation(); onDelete(el.id); }}><Trash2 size={12} /></IconBtn>
+                    </div>
+                  </div>
+                </ContextMenuTrigger>
+                <ContextMenuContent className="bg-[#141414] border-[#2B2B2B] text-gray-200" data-testid={`el-ctxmenu-${el.id}`}>
+                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-edit-${el.id}`} onSelect={() => { setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}>Edit text inline</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-save-${el.id}`} onSelect={() => onSaveComponent && onSaveComponent(el)}>Save as component</ContextMenuItem>
+                  <ContextMenuSeparator className="bg-[#2B2B2B]" />
+                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-up-${el.id}`} onSelect={() => onMove(el.id, -1)}>Move up</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-down-${el.id}`} onSelect={() => onMove(el.id, 1)}>Move down</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-dup-${el.id}`} onSelect={() => onDuplicate(el.id)}>Duplicate</ContextMenuItem>
+                  <ContextMenuSeparator className="bg-[#2B2B2B]" />
+                  <ContextMenuItem className="text-xs text-red-400 focus:bg-[#1F1F1F] focus:text-red-400" data-testid={`ctx-del-${el.id}`} onSelect={() => onDelete(el.id)}>Delete</ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             </React.Fragment>
           ))}
           <DropSlot onDrop={(e) => handleDrop(e, elements.length)} onDragOver={handleDragOver} index={elements.length} tail />
