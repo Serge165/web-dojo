@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { CATEGORIES, cardTemplate, WEB_SAFE_FONTS } from "@/lib/blocks";
-import { ChevronDown, ChevronRight, Type, Plus, Trash2, Search, X, Share2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Type, Plus, Trash2, Search, X, Share2, Radio } from "lucide-react";
 import { FileTree } from "./FileTree";
 import { ComponentThumbnail } from "./ComponentThumbnail";
 import { LayoutBuilder } from "./LayoutBuilder";
@@ -38,6 +38,7 @@ export const LeftSidebar = ({
   onOpenFormBuilder,
   onOpenPaymentBuilder,
   onOpenSocialBuilder,
+  onOpenStreamEmbed,
   onWireCatalog,
   onAddCart,
   headHtml,
@@ -231,6 +232,19 @@ export const LeftSidebar = ({
                 data-testid="open-social-builder"
               ><Share2 size={12} /> Open social builder</button>
               <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed">Share bar or profile links — pick platforms, shape, style & hover animation.</p>
+            </div>
+          </div>
+
+          {/* Stream / community embeds */}
+          <div className="border-b border-[#2B2B2B]">
+            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 flex items-center gap-1.5"><Radio size={12} /> Live stream / community</div>
+            <div className="px-3 pb-3">
+              <button
+                onClick={onOpenStreamEmbed}
+                className="w-full text-xs py-2 rounded bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white flex items-center justify-center gap-1.5 font-medium"
+                data-testid="open-stream-embed-builder"
+              ><Radio size={12} /> Add Twitch / YouTube / Discord embed</button>
+              <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed">Real, working embeds — no API keys needed.</p>
             </div>
           </div>
 

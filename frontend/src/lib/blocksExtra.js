@@ -601,6 +601,55 @@ export const EXTRA_CATEGORIES = [
   </div>
 </section>`,
       },
+      {
+        id: "esports-leaderboard",
+        label: "Esports · Leaderboard",
+        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #fff);">Leaderboard</h2>
+    <div style="border:1px solid var(--fc-border, #22222e);border-radius:14px;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:56px 1fr 100px 100px;padding:12px 16px;background:var(--fc-surface, #101018);font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;">
+        <div>#</div><div>Team</div><div>Wins</div><div>Points</div>
+      </div>
+      ${[["1","Alpha Esports","14","842"],["2","Vertex GG","12","790"],["3","Kaze Nation","11","755"],["4","Onyx Squad","9","680"],["5","Pulse Collective","8","611"]].map(([r,team,w,pts],i)=>`
+      <div style="display:grid;grid-template-columns:56px 1fr 100px 100px;padding:12px 16px;align-items:center;background:${i%2===0?"var(--fc-bg, #05050a)":"var(--fc-surface, #101018)"};border-top:1px solid var(--fc-border, #22222e);">
+        <div style="font-weight:800;color:${i===0?"var(--fc-accent, #22d3ee)":"var(--fc-muted, #6b7280)"};">${r}</div>
+        <div style="color:var(--fc-text, #e5e7eb);font-weight:600;font-size:14px;">${team}</div>
+        <div style="color:var(--fc-muted, #6b7280);font-size:13px;">${w}</div>
+        <div style="color:var(--fc-accent, #22d3ee);font-weight:700;font-size:13px;">${pts}</div>
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "esports-org-hub",
+        label: "Esports · Organization Hub",
+        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
+  <div style="max-width:1120px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:36px;flex-wrap:wrap;">
+      <div>
+        <h2 style="font-size:36px;letter-spacing:-.02em;margin:0 0 6px;color:var(--fc-text, #fff);">Alpha Esports</h2>
+        <p style="margin:0;color:var(--fc-muted, #6b7280);font-size:14px;max-width:520px;">Competing across Valorant, CS2 and League — est. 2021. Follow the journey, catch the streams, join the community.</p>
+      </div>
+      <a href="#" style="background:var(--fc-accent, #22d3ee);color:#05050a;font-weight:800;font-size:13px;padding:12px 22px;border-radius:999px;text-decoration:none;white-space:nowrap;">Join the community</a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:36px;">
+      ${[["Est.","2021"],["Titles","3 games"],["Followers","210K+"]].map(([l,v])=>`
+      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:18px;text-align:center;">
+        <div style="font-size:22px;font-weight:800;color:var(--fc-accent, #22d3ee);">${v}</div>
+        <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;">${l}</div>
+      </div>`).join("")}
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Backed by</div>
+      <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap;opacity:.7;">
+        ${["SPONSOR ONE","SPONSOR TWO","SPONSOR THREE","SPONSOR FOUR"].map((s)=>`<div style="font-weight:800;letter-spacing:.04em;color:var(--fc-muted, #6b7280);font-size:14px;">${s}</div>`).join("")}
+      </div>
+    </div>
+  </div>
+</section>`,
+      },
     ],
   },
   {

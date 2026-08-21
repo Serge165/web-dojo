@@ -29,6 +29,7 @@ import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModa
 import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
 import { AddPageModal } from "@/components/builder/AddPageModal";
 import { PaymentButtonModal } from "@/components/builder/PaymentButtonModal";
+import { StreamEmbedModal } from "@/components/builder/StreamEmbedModal";
 import { SocialShareModal } from "@/components/builder/SocialShareModal";
 import { ImportExportModal } from "@/components/builder/ImportExportModal";
 import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
@@ -102,6 +103,7 @@ export default function Builder() {
   const [addPageOpen, setAddPageOpen] = useState(false);
   const [paymentBuilderOpen, setPaymentBuilderOpen] = useState(false);
   const [socialBuilderOpen, setSocialBuilderOpen] = useState(false);
+  const [streamEmbedOpen, setStreamEmbedOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
@@ -872,6 +874,7 @@ export default function Builder() {
             onOpenFormBuilder={() => setFormBuilderOpen(true)}
             onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
             onOpenSocialBuilder={() => setSocialBuilderOpen(true)}
+            onOpenStreamEmbed={() => setStreamEmbedOpen(true)}
             onWireCatalog={wireCatalog}
             onAddCart={addCartRuntime}
             headHtml={headHtml}
@@ -1139,6 +1142,12 @@ export default function Builder() {
       <SocialShareModal
         open={socialBuilderOpen}
         onClose={() => setSocialBuilderOpen(false)}
+        onInsert={(html) => addBlock(html)}
+      />
+
+      <StreamEmbedModal
+        open={streamEmbedOpen}
+        onClose={() => setStreamEmbedOpen(false)}
         onInsert={(html) => addBlock(html)}
       />
 
