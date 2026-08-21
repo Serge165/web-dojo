@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ANIMATION_PRESETS, buildKeyframes, buildAnimationShorthand } from "@/lib/animations";
+import { ANIMATION_PRESETS, ANIMATION_CATEGORIES, buildKeyframes, buildAnimationShorthand } from "@/lib/animations";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,18 +30,22 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
 
   return (
     <div className="space-y-3" data-testid="animation-generator">
-      <div>
-        <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Preset</label>
-        <div className="grid grid-cols-3 gap-1.5">
-          {ANIMATION_PRESETS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setPreset(p)}
-              className={`text-[11px] py-1.5 rounded border ${preset.id === p.id ? "border-blue-500 bg-[#111623] text-white" : "border-[#2B2B2B] bg-[#1F1F1F] text-gray-200 hover:bg-[#2B2B2B]"}`}
-              data-testid={`anim-preset-${p.id}`}
-            >{p.label}</button>
-          ))}
-        </div>
+      <div className="space-y-2.5">
+        {ANIMATION_CATEGORIES.map((cat) => (
+          <div key={cat.id}>
+            <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">{cat.label}</label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {ANIMATION_PRESETS.filter((p) => p.category === cat.id).map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPreset(p)}
+                  className={`text-[11px] py-1.5 rounded border ${preset.id === p.id ? "border-blue-500 bg-[#111623] text-white" : "border-[#2B2B2B] bg-[#1F1F1F] text-gray-200 hover:bg-[#2B2B2B]"}`}
+                  data-testid={`anim-preset-${p.id}`}
+                >{p.label}</button>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
