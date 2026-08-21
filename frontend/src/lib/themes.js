@@ -360,6 +360,69 @@ export const THEMES = [
     },
     swatch: ["#f3f6ef", "#7d9b76", "#4a7c59", "#232b1f"],
   },
+  {
+    id: "neumorphism",
+    name: "Neumorphism",
+    canvas_bg: "#e0e5ec",
+    google_font: "Plus Jakarta Sans",
+    font: "'Plus Jakarta Sans', ui-sans-serif, sans-serif",
+    colors: {
+      // The defining neumorphic trait: surfaces are (near-)identical to
+      // the background — elements read as "extruded" from the same slab
+      // of material, distinguished only by the soft dual-direction shadow
+      // below, never by a contrasting fill color the way every other
+      // theme here uses --fc-surface.
+      "--fc-bg": "#e0e5ec",
+      "--fc-surface": "#e0e5ec",
+      "--fc-text": "#3d4451",
+      "--fc-muted": "#8b95a5",
+      "--fc-primary": "#5b7fdb",
+      "--fc-accent": "#8b7fdb",
+      "--fc-border": "#c8cdd6",
+      "--fc-shadow": "8px 8px 16px #b8bec7, -8px -8px 16px #ffffff",
+      "--fc-shadow-inset": "inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff",
+    },
+    swatch: ["#e0e5ec", "#5b7fdb", "#8b7fdb", "#3d4451"],
+    // Every block that already opts into the surface color (background:
+    // var(--fc-surface...)) picks up the soft-extruded shadow generically,
+    // with no per-block changes needed — box-shadow is additive so it
+    // layers on cleanly (unlike border-radius/border, which a block's own
+    // inline style would always win over at equal specificity, so this
+    // deliberately doesn't try to override those). Known limitation
+    // shared with RESPONSIVE_CSS's own [style*=...] rules: this attribute
+    // selector only matches while style="..." is still an inline
+    // attribute, so it has no effect once stripInlineStyles classes it
+    // for the multi-page ZIP/publish export — it still applies correctly
+    // in the Design canvas, Preview mode, and the standalone single-file
+    // export (none of which strip inline styles).
+    extraCss: `[style*="var(--fc-surface"] { box-shadow: var(--fc-shadow); }`,
+  },
+  {
+    id: "skeuomorphism",
+    name: "Skeuomorphism",
+    canvas_bg: "linear-gradient(180deg,#d7c4a3 0%,#b89b72 100%)",
+    google_font: "Libre Baskerville",
+    font: "'Libre Baskerville', Georgia, serif",
+    colors: {
+      "--fc-bg": "#c9ad84",
+      // A gradient, not a flat fill — every block library usage of
+      // --fc-surface is a background: declaration (checked across the
+      // whole block library before choosing this), so a gradient value
+      // substitutes in cleanly and reads as a lit, embossed material
+      // instead of a flat color swatch.
+      "--fc-surface": "linear-gradient(180deg,#fdf6e8 0%,#e8dcc0 100%)",
+      "--fc-text": "#3a2a18",
+      "--fc-muted": "#7a6248",
+      "--fc-primary": "#8b5a2b",
+      "--fc-accent": "#c0392b",
+      "--fc-border": "#a68a5c",
+      "--fc-shadow": "0 4px 8px rgba(58,42,24,0.4), inset 0 1px 0 rgba(255,255,255,0.6)",
+    },
+    swatch: ["#c9ad84", "#8b5a2b", "#c0392b", "#3a2a18"],
+    // Same generic, no-per-block-changes mechanism and limitation as
+    // Neumorphism above — see its comment for the full explanation.
+    extraCss: `[style*="var(--fc-surface"] { box-shadow: var(--fc-shadow); } [style*="var(--fc-primary"] { box-shadow: 0 2px 4px rgba(0,0,0,0.35); }`,
+  },
 ];
 
 export const themeHeadHtml = (theme) => {
@@ -375,6 +438,7 @@ export const themeHeadHtml = (theme) => {
 ${vars}
 }
 body { font-family: ${theme.font}; color: var(--fc-text); }
+${theme.extraCss || ""}
 </style>`;
 };
 
