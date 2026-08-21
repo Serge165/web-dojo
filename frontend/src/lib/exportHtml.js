@@ -141,11 +141,84 @@ ${customJsTag}</body>
   return { html, css: styles };
 };
 
+// Sanitizes a page slug into a safe filename and de-dupes against
+// siblings — slugs are auto-generated once at page-creation time and
+// never user-edited directly, but this is about to become a real
+// filename on someone's FTP server or inside a zip, so it gets
+// re-validated here regardless of how trustworthy the source looks.
+const safePageFilename = (slug, index, used) => {
+  let base = String(slug || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+  if (!base) base = index === 0 ? "index" : `page-${index + 1}`;
+  let name = `${base}.html`;
+  let n = 2;
+  while (used.has(name)) { name = `${base}-${n}.html`; n++; }
+  used.add(name);
+  return name;
+};
+
+// Multi-page clean export: one classed .html file per page, sharing a
+// single globals.css. Classes are prefixed per-page (see
+// stripInlineStyles's `prefix` param) so e.g. page A's first <nav> and
+// page B's first <nav> don't collide under the same .nav-1 rule despite
+// each page's tag counter starting fresh. Falls back to a single
+// synthetic "index" page built from the legacy top-level project fields
+// for projects saved before the multi-page model existed (project.pages
+// empty/missing) — same shape buildCleanExport already assumed.
+export const buildMultiPageExport = (project) => {
+  const pages = (project.pages && project.pages.length) ? project.pages : [{
+    id: project.id, name: project.name, slug: "index", seo: project.seo,
+    elements: project.elements, head_html: project.head_html, canvas_bg: project.canvas_bg,
+    fonts: project.fonts, custom_js: project.custom_js,
+  }];
+  const template = project.template || {};
+  const useTpl = !!template.use_template;
+  const header = useTpl ? (template.header_html || "") : "";
+  const footer = useTpl ? (template.footer_html || "") : "";
+
+  const files = {};
+  const used = new Set();
+  const cssParts = [];
+
+  pages.forEach((page, i) => {
+    const filename = safePageFilename(page.slug, i, used);
+    const prefix = `${filename.slice(0, -5)}-`; // strip ".html"
+    const { html: cleanedRaw, css } = stripInlineStyles(page.elements || [], prefix);
+    const cleaned = injectLazyLoading([header, cleanedRaw, footer].filter(Boolean).join("\n"));
+    const seo = page.seo || {};
+    const title = seo.title || page.name || project.name || "Untitled";
+    const fonts = buildFontLinks((page.fonts && page.fonts.length) ? page.fonts : project.fonts);
+    const customJs = page.custom_js || "";
+    const customJsTag = customJs.trim() ? `<script>${escRawScript(customJs)}</script>\n` : "";
+    files[filename] = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escText(title)}</title>
+<script>window.__WD_PROJECT_ID=${JSON.stringify(project.id || "")};</script>
+${RESPONSIVE_CSS}
+${buildSeoMeta(seo)}
+${buildJsonLd({ seo, name: page.name || project.name })}
+${fonts}
+${page.head_html || ""}
+<link rel="stylesheet" href="globals.css" />
+<style>body{margin:0;background:${page.canvas_bg || "#ffffff"};}</style>
+</head>
+<body>
+${cleaned}
+${customJsTag}</body>
+</html>`;
+    cssParts.push(css);
+  });
+
+  files["globals.css"] = cssParts.join("\n");
+  return { files };
+};
+
 export const downloadZip = async (project) => {
-  const { html, css } = buildCleanExport(project);
+  const { files } = buildMultiPageExport(project);
   const zip = new JSZip();
-  zip.file("index.html", html);
-  zip.file("globals.css", css);
+  Object.entries(files).forEach(([name, content]) => zip.file(name, content));
   const blob = await zip.generateAsync({ type: "blob" });
   saveAs(blob, `${(project.name || "site").replace(/\s+/g, "-").toLowerCase()}.zip`);
 };

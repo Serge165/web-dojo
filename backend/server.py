@@ -158,7 +158,7 @@ class PublishPresetPublic(BaseModel):
     remote_path: str = "/"
     protocol: str = "ftp"
     html_filename: str = "index.html"
-    css_filename: str = "styles.css"
+    css_filename: str = "globals.css"
     include_zip: bool = False
     has_password: bool = False
     created_at: datetime
@@ -174,7 +174,7 @@ class PublishPreset(BaseModel):
     remote_path: str = "/"
     protocol: str = "ftp"
     html_filename: str = "index.html"
-    css_filename: str = "styles.css"
+    css_filename: str = "globals.css"
     include_zip: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -189,7 +189,7 @@ class PublishPresetCreate(BaseModel):
     remote_path: str = "/"
     protocol: str = "ftp"
     html_filename: str = "index.html"
-    css_filename: str = "styles.css"
+    css_filename: str = "globals.css"
     include_zip: bool = False
 
 
@@ -616,7 +616,7 @@ class PublishRequest(BaseModel):
     protocol: str = "ftp"  # ftp | ftps | sftp
     include_zip: bool = False
     html_filename: str = "index.html"
-    css_filename: str = "styles.css"
+    css_filename: str = "globals.css"
 
 
 def _tag_name_at(s, offset):
@@ -635,10 +635,13 @@ def _tag_name_at(s, offset):
     return m.group(0).lower() if m else "el"
 
 
-def _strip_inline_styles(elements):
+def _strip_inline_styles(elements, prefix=""):
     """Extract inline style attributes into deduplicated CSS classes, one
     class per style="..." occurrence (mirrors frontend/src/lib/exportHtml.js's
-    stripInlineStyles — keep both in sync). Classes are named semantically
+    stripInlineStyles — keep both in sync). `prefix` (e.g. "about-") is only
+    for multi-page exports sharing one stylesheet — each page's classes
+    would otherwise collide by name despite the counter being page-local
+    either way. Classes are named semantically
     from the owning tag name plus a running counter scoped to the whole
     export (not per-element/per-parent): the first <section> anywhere
     becomes .section-1, the second .section-2, the first <h2> becomes
@@ -651,7 +654,7 @@ def _strip_inline_styles(elements):
     def repl(match):
         tag = _tag_name_at(match.string, match.start())
         tag_counters[tag] = tag_counters.get(tag, 0) + 1
-        cls = f"{tag}-{tag_counters[tag]}"
+        cls = f"{prefix}{tag}-{tag_counters[tag]}"
         declarations = match.group(1)
         rules.append(f".{cls} {{ {declarations} }}")
         if "grid-template-columns" in declarations:
@@ -665,31 +668,117 @@ def _strip_inline_styles(elements):
     return "\n".join(out_html_parts), "\n".join(rules)
 
 
-def _build_project_bundle(doc: dict, html_filename: str, css_filename: str):
-    """Return (index_html, styles_css) using the doc's data."""
-    cleaned_body, css_body = _strip_inline_styles(doc.get("elements") or [])
-    fonts_link = _build_google_fonts_link(doc.get("fonts") or [])
-    head_extra = doc.get("head_html") or ""
-    canvas_bg = doc.get("canvas_bg") or "#ffffff"
-    custom_js = doc.get("custom_js") or ""
-    custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
-    name = doc.get("name") or "Untitled"
-    styles = f"body{{margin:0;background:{canvas_bg};}}\n" + css_body
-    html = (
-        "<!doctype html>\n<html lang=\"en\">\n<head>\n"
-        "<meta charset=\"utf-8\" />\n"
-        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
-        f"<title>{name}</title>\n"
-        f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
-        f"{RESPONSIVE_CSS}\n"
-        f"{fonts_link}\n{head_extra}\n"
-        f'<link rel="stylesheet" href="{css_filename}" />\n'
-        "</head>\n<body>\n"
-        f"{cleaned_body}\n"
-        f"{custom_js_tag}"
-        "</body>\n</html>"
-    )
-    return html, styles
+def _esc_text(v) -> str:
+    """HTML-escape for a text node (e.g. <title>...</title>) — &, <, > only,
+    mirrors frontend/src/lib/escapeHtml.js's escText."""
+    return str(v or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+_IMG_RE = re.compile(r'<img(?![^>]*\bloading=)([^>]*)>', re.IGNORECASE)
+
+
+def _inject_lazy_loading(html: str) -> str:
+    """Skips the first <img> (likely the hero/LCP image — eager-loading
+    that one is the actual best practice) and lazy-loads the rest. Mirrors
+    frontend/src/lib/exportHtml.js's injectLazyLoading."""
+    state = {"first": True}
+
+    def repl(m):
+        if state["first"]:
+            state["first"] = False
+            return m.group(0)
+        return f'<img{m.group(1)} loading="lazy">'
+
+    return _IMG_RE.sub(repl, html)
+
+
+def _build_json_ld(name: str, seo: dict) -> str:
+    """Minimal WebSite JSON-LD, mirrors frontend/src/lib/exportHtml.js's
+    buildJsonLd."""
+    data = {"@context": "https://schema.org", "@type": "WebSite", "name": name or "Untitled"}
+    if seo and seo.get("description"):
+        data["description"] = seo["description"]
+    if seo and seo.get("canonical"):
+        data["url"] = seo["canonical"]
+    raw = json.dumps(data)
+    safe = _SCRIPT_CLOSE_RE.sub(r'<\\/script', raw)
+    return f'<script type="application/ld+json">{safe}</script>'
+
+
+def _safe_page_filename(slug: str, index: int, used: set) -> str:
+    """Sanitizes a page slug into a safe filename and de-dupes against
+    siblings — slugs are auto-generated once at page-creation time and
+    never user-edited directly, but this is about to become a real
+    filename on someone's FTP server or inside a zip, so it gets
+    re-validated here regardless of how trustworthy the source looks.
+    Mirrors frontend/src/lib/exportHtml.js's safePageFilename."""
+    base = re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9-]+", "-", (slug or "").lower()))
+    if not base:
+        base = "index" if index == 0 else f"page-{index + 1}"
+    name = f"{base}.html"
+    n = 2
+    while name in used:
+        name = f"{base}-{n}.html"
+        n += 1
+    used.add(name)
+    return name
+
+
+def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> dict:
+    """Returns {filename: content} — one classed .html file per page
+    sharing a single stylesheet, plus that stylesheet. Falls back to a
+    single synthetic "index" page built from the legacy top-level project
+    fields for projects saved before the multi-page model existed
+    (doc["pages"] empty/missing). Mirrors frontend/src/lib/exportHtml.js's
+    buildMultiPageExport — keep both in sync."""
+    pages = doc.get("pages") or [{
+        "id": doc.get("id"), "name": doc.get("name"), "slug": "index", "seo": doc.get("seo"),
+        "elements": doc.get("elements"), "head_html": doc.get("head_html"), "canvas_bg": doc.get("canvas_bg"),
+        "fonts": doc.get("fonts"), "custom_js": doc.get("custom_js"),
+    }]
+    template = doc.get("template") or {}
+    use_tpl = bool(template.get("use_template"))
+    header = template.get("header_html", "") if use_tpl else ""
+    footer = template.get("footer_html", "") if use_tpl else ""
+
+    files = {}
+    used = set()
+    css_parts = []
+
+    for i, page in enumerate(pages):
+        filename = _safe_page_filename(page.get("slug"), i, used)
+        prefix = filename[:-5] + "-"  # strip ".html"
+        cleaned_body, css_body = _strip_inline_styles(page.get("elements") or [], prefix)
+        body = "\n".join(p for p in [header, cleaned_body, footer] if p)
+        body = _inject_lazy_loading(body)
+        seo = page.get("seo") or {}
+        title = seo.get("title") or page.get("name") or doc.get("name") or "Untitled"
+        fonts_link = _build_google_fonts_link(page.get("fonts") or doc.get("fonts") or [])
+        head_extra = page.get("head_html") or ""
+        canvas_bg = page.get("canvas_bg") or "#ffffff"
+        custom_js = page.get("custom_js") or ""
+        custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
+        html = (
+            "<!doctype html>\n<html lang=\"en\">\n<head>\n"
+            "<meta charset=\"utf-8\" />\n"
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
+            f"<title>{_esc_text(title)}</title>\n"
+            f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
+            f"{RESPONSIVE_CSS}\n"
+            f"{_seo_head(seo)}\n{_build_json_ld(page.get('name') or doc.get('name'), seo)}\n"
+            f"{fonts_link}\n{head_extra}\n"
+            f'<link rel="stylesheet" href="{css_filename}" />\n'
+            f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
+            "</head>\n<body>\n"
+            f"{body}\n"
+            f"{custom_js_tag}"
+            "</body>\n</html>"
+        )
+        files[filename] = html
+        css_parts.append(css_body)
+
+    files[css_filename] = "\n".join(css_parts)
+    return files
 
 
 def _ftp_upload(payload: PublishRequest, files: dict):
@@ -775,21 +864,24 @@ async def publish_project(project_id: str, payload: PublishRequest):
     if not payload.host or not payload.username:
         raise HTTPException(status_code=400, detail="host and username are required")
 
-    html_name = payload.html_filename or "index.html"
-    css_name = payload.css_filename or "styles.css"
-    for fname in (html_name, css_name):
-        if "/" in fname or "\\" in fname or fname.startswith("."):
-            raise HTTPException(status_code=400, detail="Filenames must be a plain name with no path separators")
-    index_html, styles_css = _build_project_bundle(doc, html_name, css_name)
-    files = {html_name: index_html, css_name: styles_css}
+    # html_filename is accepted for backward compat with previously-saved
+    # publish presets but is no longer meaningful: each page now gets its
+    # own filename from its slug (the home page's slug is "index" by
+    # construction, so single-page projects still publish as index.html
+    # exactly as before). Only css_filename remains a real choice — it's
+    # the one shared stylesheet name across every page.
+    css_name = payload.css_filename or "globals.css"
+    if "/" in css_name or "\\" in css_name or css_name.startswith("."):
+        raise HTTPException(status_code=400, detail="Filenames must be a plain name with no path separators")
+    files = _build_multi_page_bundle(doc, css_name)
 
     if payload.include_zip:
         try:
             import zipfile
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-                zf.writestr(html_name, index_html)
-                zf.writestr(css_name, styles_css)
+                for fname, content in files.items():
+                    zf.writestr(fname, content)
             files["site.zip"] = buf.getvalue()
         except Exception:
             pass
