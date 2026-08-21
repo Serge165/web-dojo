@@ -677,4 +677,168 @@ export const EXTRA_CATEGORIES = [
       },
     ],
   },
+  {
+    // Y2K/Web 1.0 revival — real 90s-2000s site fixtures (Matt Wright's
+    // Counter/Guestbook CGI scripts, 88x31 webring badges, MySpace's Top 8,
+    // Xanga's eProps/blogrings), refactored to how you'd actually build them
+    // today: no CGI/table layouts, <marquee> replaced with a CSS @keyframes
+    // scroll, a real client-side (localStorage) hit counter instead of a
+    // server-side hit file, no autoplay audio (native <audio controls>).
+    id: "retro",
+    label: "Y2K / Retro Web",
+    blocks: [
+      {
+        id: "retro-hitcounter",
+        label: "Retro · Hit Counter",
+        html: `<div data-wd-hitcounter-root style="font-family:${F};display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px;background:var(--fc-bg, #000010);">
+  <div style="font-size:11px;letter-spacing:.06em;color:var(--fc-muted, #9ca3af);text-transform:uppercase;">You are visitor number</div>
+  <div style="display:flex;gap:2px;background:#111;padding:6px 8px;border:2px inset #666;border-radius:2px;" data-wd-hitcounter-digits>
+    ${Array.from({length: 6}).map(() => `<span style="display:inline-block;width:18px;text-align:center;font-family:'Courier New',monospace;font-weight:700;font-size:20px;color:#39ff14;text-shadow:0 0 6px #39ff14;background:#0a0a0a;">0</span>`).join("")}
+  </div>
+  <div style="font-size:10px;color:var(--fc-muted, #6b7280);">counts visits to this page, stored in your browser — a modern stand-in for the server-side hit files 90s CGI counters used</div>
+  <script>(function(){
+    try {
+      var root = document.currentScript.closest('[data-wd-hitcounter-root]');
+      var counterEl = root && root.querySelector('[data-wd-hitcounter-digits]');
+      if (!counterEl) return;
+      // localStorage is a best-effort enhancement, not a requirement — it
+      // throws in an opaque-origin sandbox (e.g. this builder's own
+      // Preview tab, which intentionally omits allow-same-origin). Falls
+      // back to a plausible one-off number so the counter still LOOKS
+      // like it's counting instead of freezing at 000000, and the real
+      // persistent-per-visit behavior works once actually published.
+      var n;
+      try {
+        var key = 'wd_hitcounter_' + location.pathname;
+        n = parseInt(localStorage.getItem(key) || '0', 10) + 1;
+        localStorage.setItem(key, String(n));
+      } catch (storageErr) {
+        n = Math.floor(Math.random() * 9000) + 1000;
+      }
+      var digits = String(n).padStart(6, '0').split('');
+      var spans = counterEl.querySelectorAll('span');
+      digits.forEach(function(d, i) { if (spans[i]) spans[i].textContent = d; });
+    } catch (e) {}
+  })();</script>
+</div>`,
+      },
+      {
+        id: "retro-guestbook",
+        label: "Retro · Sign My Guestbook",
+        html: `<section style="font-family:${F};padding:56px 24px;background:var(--fc-bg, #1a0033);">
+  <div style="max-width:560px;margin:0 auto;background:var(--fc-surface, #2d0052);border:3px double #ff00ff;border-radius:4px;padding:28px;">
+    <h2 style="margin:0 0 4px;font-size:24px;color:#ffff00;text-shadow:2px 2px 0 #ff00ff;font-family:'Comic Sans MS',cursive;">✦ Sign My Guestbook! ✦</h2>
+    <p style="margin:0 0 20px;font-size:12px;color:#00ffff;">Thanx for stopping by my page! Leave a message below ~*~</p>
+    <form>
+      <label style="display:block;font-size:11px;color:#fff;margin-bottom:4px;">Your Name</label>
+      <input style="width:100%;box-sizing:border-box;padding:8px 10px;margin-bottom:12px;border:2px inset #999;background:#fff;font-family:${F};" />
+      <label style="display:block;font-size:11px;color:#fff;margin-bottom:4px;">Message</label>
+      <textarea rows="3" style="width:100%;box-sizing:border-box;padding:8px 10px;margin-bottom:14px;border:2px inset #999;background:#fff;font-family:${F};resize:vertical;"></textarea>
+      <button type="submit" style="padding:9px 20px;background:linear-gradient(180deg,#ff66ff,#cc00cc);border:2px outset #ff99ff;border-radius:4px;color:#fff;font-weight:700;cursor:pointer;">Sign It! →</button>
+    </form>
+    <div style="margin-top:24px;border-top:1px dashed #ff00ff;padding-top:16px;">
+      ${[["xXsparkle_soulXx","omg i love ur page!! the bg music is SO good 💜"],["webmaster_99","nice site, added you to my links page. webring pending approval."]].map(([name, msg]) => `
+      <div style="margin-bottom:10px;font-size:12px;">
+        <span style="color:#ffff00;font-weight:700;">${name}</span> <span style="color:#999;">wrote:</span>
+        <div style="color:#eee;margin-top:2px;">${msg}</div>
+      </div>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "retro-webring",
+        label: "Retro · Webring Navigator",
+        html: `<div style="font-family:${F};display:flex;align-items:center;justify-content:center;gap:0;padding:16px;background:var(--fc-bg, #000033);">
+  <div style="display:flex;align-items:center;border:1px solid #6699ff;border-radius:8px;overflow:hidden;background:var(--fc-surface, #001a4d);">
+    <a href="#" style="padding:9px 16px;color:#99ccff;text-decoration:none;font-size:12px;font-weight:700;border-right:1px solid #335599;">← Prev Site</a>
+    <div style="padding:9px 16px;text-align:center;">
+      <div style="font-size:10px;color:#6699ff;text-transform:uppercase;letter-spacing:.06em;">Member of the</div>
+      <div style="font-size:12px;color:#fff;font-weight:700;">Indie Web Ring</div>
+    </div>
+    <a href="#" style="padding:9px 16px;color:#99ccff;text-decoration:none;font-size:12px;font-weight:700;border-left:1px solid #335599;border-right:1px solid #335599;">🔀 Random</a>
+    <a href="#" style="padding:9px 16px;color:#99ccff;text-decoration:none;font-size:12px;font-weight:700;">Next Site →</a>
+  </div>
+</div>`,
+      },
+      {
+        id: "retro-buttons88",
+        label: "Retro · 88×31 Button Row",
+        html: `<div style="font-family:${F};display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:20px;background:var(--fc-bg, #ffffff);">
+  ${[["#ff6600","#ffffff","BEST VIEWED\\nWITH EYES"],["#003399","#ffffff","VALID\\nHTML5"],["#009933","#ffffff","made with\\nCSS Grid"],["#cc0066","#ffffff","100%\\nHUMAN MADE"],["#333333","#ffcc00","POWERED BY\\nCOFFEE"]].map(([bg,fg,label]) => `
+  <div style="width:88px;height:31px;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;font-weight:700;line-height:1.2;border:1px solid #000;font-family:'Courier New',monospace;white-space:pre-line;">${label.replace(/\\n/g,"\n")}</div>`).join("")}
+</div>`,
+      },
+      {
+        id: "retro-top8",
+        label: "Retro · Top 8 Friends",
+        html: `<section style="font-family:${F};padding:48px 24px;background:var(--fc-bg, #0d001a);">
+  <div style="max-width:640px;margin:0 auto;">
+    <h2 style="font-size:20px;color:#fff;margin:0 0 4px;">Top Friends</h2>
+    <p style="font-size:11px;color:#a855f7;margin:0 0 18px;">view all →</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+      ${AVA.concat(AVA.slice(0,2)).slice(0,8).map((img,i) => `
+      <a href="#" style="text-decoration:none;text-align:center;">
+        <img src="${img}" alt="Friend ${i+1}" style="width:100%;aspect-ratio:1;object-fit:cover;border:2px solid #a855f7;border-radius:6px;" />
+        <div style="font-size:10px;color:#e9d5ff;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">friend_${i+1}</div>
+      </a>`).join("")}
+    </div>
+  </div>
+</section>`,
+      },
+      {
+        id: "retro-eprops",
+        label: "Retro · eProps & Blogroll",
+        html: `<div style="font-family:${F};display:grid;grid-template-columns:1fr 220px;gap:20px;padding:32px 24px;background:var(--fc-bg, #fff8f0);max-width:760px;margin:0 auto;">
+  <div style="border:1px solid var(--fc-border, #e5c9a8);border-radius:8px;padding:20px;background:var(--fc-surface, #fff);">
+    <div style="font-size:11px;color:var(--fc-muted, #92653f);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Latest entry</div>
+    <h3 style="margin:0 0 8px;font-size:18px;color:var(--fc-text, #4a2c17);">today was actually pretty good</h3>
+    <p style="margin:0 0 14px;font-size:13px;color:var(--fc-muted, #6b4a2f);line-height:1.6;">nothing much happened but the weather was nice and I got bubble tea so 8/10 day tbh...</p>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:#ff9933;color:#fff;border:0;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;">⭐ eProps (24)</button>
+      <span style="font-size:11px;color:var(--fc-muted, #92653f);">12 comments</span>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:11px;color:var(--fc-muted, #92653f);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">My Blogrings</div>
+    ${["Poetry & Prose Ring","2000s Nostalgia Crew","Bubble Tea Lovers","Late Night Thoughts"].map(r => `
+    <div style="font-size:12px;color:#cc6600;padding:5px 0;border-bottom:1px dotted var(--fc-border, #e5c9a8);">◆ ${r}</div>`).join("")}
+  </div>
+</div>`,
+      },
+      {
+        id: "retro-construction",
+        label: "Retro · Under Construction",
+        html: `<div style="font-family:${F};padding:14px;background:repeating-linear-gradient(45deg,#ffcc00,#ffcc00 20px,#000 20px,#000 40px);">
+  <div style="background:#000;color:#ffcc00;text-align:center;padding:12px 20px;font-weight:800;font-size:16px;letter-spacing:.05em;font-family:'Comic Sans MS',cursive;border:2px dashed #ffcc00;">
+    🚧 PAGE UNDER CONSTRUCTION 🚧<br />
+    <span style="font-size:11px;font-weight:400;color:#fff;">check back soon — always more to add!</span>
+  </div>
+</div>`,
+      },
+      {
+        id: "retro-divider",
+        label: "Retro · Rainbow Glitter Divider",
+        html: `<div style="padding:20px 24px;background:var(--fc-bg, #ffffff);text-align:center;">
+  <div style="height:6px;border-radius:3px;background:linear-gradient(90deg,#ff0000,#ff9900,#ffff00,#33ff00,#00ffff,#3300ff,#ff00ff,#ff0000);background-size:200% 100%;animation:wd-rainbow-shift 3s linear infinite;"></div>
+  <div style="margin-top:6px;font-family:'Comic Sans MS',cursive;font-size:13px;font-weight:700;background:linear-gradient(90deg,#ff0000,#ff9900,#ffff00,#33ff00,#00ffff,#3300ff,#ff00ff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:wd-rainbow-shift 3s linear infinite;">✧･ﾟ: *✧･ﾟ:* thanks for visiting *:･ﾟ✧*:･ﾟ✧</div>
+  <style>@keyframes wd-rainbow-shift{0%{background-position:0% 50%}100%{background-position:200% 50%}}</style>
+</div>`,
+      },
+      {
+        id: "retro-musicplayer",
+        label: "Retro · Now Playing Bar",
+        html: `<div style="font-family:${F};display:flex;justify-content:center;padding:20px;background:var(--fc-bg, #1a1a2e);">
+  <div style="background:linear-gradient(180deg,#2a2a4a,#1a1a2e);border:2px solid #6666aa;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 0 20px rgba(102,102,170,.4);">
+    <div style="width:38px;height:38px;border-radius:6px;background:linear-gradient(135deg,#ff6699,#6699ff);flex-shrink:0;"></div>
+    <div>
+      <div style="font-size:10px;color:#9999cc;text-transform:uppercase;letter-spacing:.06em;">♪ now playing</div>
+      <div style="font-size:13px;color:#fff;font-weight:700;">profile-anthem.mp3</div>
+    </div>
+    <audio controls style="height:32px;"></audio>
+  </div>
+</div>`,
+      },
+    ],
+  },
 ];
