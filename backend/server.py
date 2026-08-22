@@ -1265,12 +1265,13 @@ class CheckoutItem(BaseModel):
 
 class CheckoutSessionCreate(BaseModel):
     items: List[CheckoutItem]
+    project_id: str
     origin_url: Optional[str] = None
     success_url: Optional[str] = None
     cancel_url: Optional[str] = None
 
 
-def _create_checkout_session(items, success_url, cancel_url):
+def _create_checkout_session(items, success_url, cancel_url, project_id):
     line_items = []
     for it in items:
         line_items.append({
@@ -1286,6 +1287,12 @@ def _create_checkout_session(items, success_url, cancel_url):
         line_items=line_items,
         success_url=success_url,
         cancel_url=cancel_url,
+        metadata={"project_id": project_id},
+        allow_promotion_codes=True,
+        billing_address_collection="required",
+        shipping_address_collection={"allowed_countries": [
+            "US", "CA", "GB", "AU", "NZ", "DE", "FR", "ES", "IT", "NL", "IE", "SE", "NO", "DK", "FI",
+        ]},
     )
     return {"url": session.url, "id": session.id}
 
@@ -1308,11 +1315,11 @@ async def commerce_checkout_session(payload: CheckoutSessionCreate):
     origin = (payload.origin_url or "").strip().rstrip("/")
     if not (origin.startswith("http://") or origin.startswith("https://")):
         origin = ""
-    success_url = payload.success_url or (f"{origin}/?wd_checkout=success" if origin else "https://example.com/?wd_checkout=success")
+    success_url = payload.success_url or (f"{origin}/?wd_checkout=success&session_id={{CHECKOUT_SESSION_ID}}" if origin else "https://example.com/?wd_checkout=success&session_id={CHECKOUT_SESSION_ID}")
     cancel_url = payload.cancel_url or (f"{origin}/?wd_checkout=cancel" if origin else "https://example.com/?wd_checkout=cancel")
     try:
         loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, _create_checkout_session, payload.items, success_url, cancel_url)
+        return await loop.run_in_executor(None, _create_checkout_session, payload.items, success_url, cancel_url, payload.project_id)
     except Exception as e:
         detail = getattr(e, "user_message", None) or f"{type(e).__name__}: {e}"
         raise HTTPException(status_code=502, detail=f"Stripe checkout failed: {detail}")

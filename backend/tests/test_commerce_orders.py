@@ -36,6 +36,14 @@ os.close(_fd)
 atexit.register(lambda: os.path.exists(_sqlite_path) and os.unlink(_sqlite_path))
 server.db = SqliteClient(_sqlite_path)["webdojo_test"]
 
+# Same reasoning as server.db above: STRIPE_SECRET_KEY is read into a module
+# global at import time, so an env-var-before-import default is unreliable
+# once another test module has already imported `server` first in this
+# xdist worker. Overwrite the global directly instead — checkout-session's
+# "is Stripe configured" guard just needs it non-empty; the actual Stripe
+# SDK call is mocked per-test.
+server.STRIPE_SECRET_KEY = "sk_test_dummy"
+
 
 @pytest.fixture(scope="module")
 def client():
@@ -198,3 +206,32 @@ class TestStripeWebhook:
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
             second_id = client.get(f"/api/commerce/receipt/{FAKE_SESSION_ID}").json()["id"]
         assert first_id == second_id
+
+
+class TestCheckoutSessionProjectId:
+    def test_checkout_session_without_project_id_is_rejected(self, client):
+        r = client.post("/api/commerce/checkout-session", json={
+            "items": [{"name": "Aurora Bottle", "amount": 3800, "currency": "usd", "quantity": 1}],
+        })
+        assert r.status_code == 422  # Pydantic validation error — project_id is required
+
+    def test_checkout_session_passes_project_id_through_as_stripe_metadata(self, client):
+        captured = {}
+
+        def fake_create(**kwargs):
+            captured.update(kwargs)
+            result = MagicMock()
+            result.url = "https://checkout.stripe.com/fake"
+            result.id = "cs_test_xyz"
+            return result
+
+        with patch.object(stripe_sdk.checkout.Session, "create", side_effect=fake_create):
+            r = client.post("/api/commerce/checkout-session", json={
+                "items": [{"name": "Aurora Bottle", "amount": 3800, "currency": "usd", "quantity": 1}],
+                "project_id": "proj-123",
+            })
+        assert r.status_code == 200
+        assert captured["metadata"] == {"project_id": "proj-123"}
+        assert captured["allow_promotion_codes"] is True
+        assert captured["billing_address_collection"] == "required"
+        assert "shipping_address_collection" in captured
