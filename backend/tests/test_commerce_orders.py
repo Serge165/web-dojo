@@ -17,7 +17,7 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test_dummy")
 import pytest
 import stripe as stripe_sdk
 from starlette.testclient import TestClient
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import server
 from sqlite_compat import SqliteClient
@@ -235,3 +235,23 @@ class TestCheckoutSessionProjectId:
         assert captured["allow_promotion_codes"] is True
         assert captured["billing_address_collection"] == "required"
         assert "shipping_address_collection" in captured
+
+
+class TestPaypalHelpers:
+    @pytest.mark.asyncio
+    async def test_get_access_token_posts_client_credentials_and_returns_the_token(self):
+        fake_response = MagicMock()
+        fake_response.json.return_value = {"access_token": "fake-token-abc"}
+        fake_response.raise_for_status = MagicMock()
+        with patch("httpx.AsyncClient.post", new=AsyncMock(return_value=fake_response)):
+            token = await server._paypal_get_access_token("client-id", "secret")
+        assert token == "fake-token-abc"
+
+    @pytest.mark.asyncio
+    async def test_get_order_returns_the_parsed_order_json(self):
+        fake_response = MagicMock()
+        fake_response.json.return_value = {"id": "PAYPAL-ORDER-1", "status": "COMPLETED"}
+        fake_response.raise_for_status = MagicMock()
+        with patch("httpx.AsyncClient.get", new=AsyncMock(return_value=fake_response)):
+            order = await server._paypal_get_order("PAYPAL-ORDER-1", "fake-token-abc")
+        assert order["status"] == "COMPLETED"

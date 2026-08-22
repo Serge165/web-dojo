@@ -300,6 +300,32 @@ def _deserialize(doc: dict) -> dict:
     return doc
 
 
+def _paypal_api_base() -> str:
+    mode = os.environ.get("PAYPAL_MODE", "sandbox")
+    return "https://api-m.paypal.com" if mode == "live" else "https://api-m.sandbox.paypal.com"
+
+
+async def _paypal_get_access_token(client_id: str, secret: str) -> str:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.post(
+            f"{_paypal_api_base()}/v1/oauth2/token",
+            auth=(client_id, secret),
+            data={"grant_type": "client_credentials"},
+        )
+        resp.raise_for_status()
+        return resp.json()["access_token"]
+
+
+async def _paypal_get_order(order_id: str, access_token: str) -> dict:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.get(
+            f"{_paypal_api_base()}/v2/checkout/orders/{order_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
 # ---------- Routes ----------
 
 @api_router.get("/")
