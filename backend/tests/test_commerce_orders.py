@@ -243,15 +243,28 @@ class TestPaypalHelpers:
         fake_response = MagicMock()
         fake_response.json.return_value = {"access_token": "fake-token-abc"}
         fake_response.raise_for_status = MagicMock()
-        with patch("httpx.AsyncClient.post", new=AsyncMock(return_value=fake_response)):
+        mock_post = AsyncMock(return_value=fake_response)
+        with patch("httpx.AsyncClient.post", new=mock_post):
             token = await server._paypal_get_access_token("client-id", "secret")
         assert token == "fake-token-abc"
+        # Verify the request was formed correctly
+        mock_post.assert_called_once()
+        call_args = mock_post.call_args
+        assert call_args[0][0] == "https://api-m.sandbox.paypal.com/v1/oauth2/token"
+        assert call_args[1]["auth"] == ("client-id", "secret")
+        assert call_args[1]["data"] == {"grant_type": "client_credentials"}
 
     @pytest.mark.asyncio
     async def test_get_order_returns_the_parsed_order_json(self):
         fake_response = MagicMock()
         fake_response.json.return_value = {"id": "PAYPAL-ORDER-1", "status": "COMPLETED"}
         fake_response.raise_for_status = MagicMock()
-        with patch("httpx.AsyncClient.get", new=AsyncMock(return_value=fake_response)):
+        mock_get = AsyncMock(return_value=fake_response)
+        with patch("httpx.AsyncClient.get", new=mock_get):
             order = await server._paypal_get_order("PAYPAL-ORDER-1", "fake-token-abc")
         assert order["status"] == "COMPLETED"
+        # Verify the request was formed correctly
+        mock_get.assert_called_once()
+        call_args = mock_get.call_args
+        assert call_args[0][0] == "https://api-m.sandbox.paypal.com/v2/checkout/orders/PAYPAL-ORDER-1"
+        assert call_args[1]["headers"] == {"Authorization": "Bearer fake-token-abc"}
