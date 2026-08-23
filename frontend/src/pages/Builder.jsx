@@ -633,7 +633,7 @@ export default function Builder() {
         return els;
       }
       setTimeout(() => toast.success("Cart + checkout added — a floating cart button now lives on this page"), 0);
-      return [...els, { id: uid(), html: buildCartRuntimeHtml(opts) }];
+      return [...els, { id: uid(), html: buildCartRuntimeHtml({ ...opts, projectId }) }];
     });
   };
 
@@ -654,7 +654,7 @@ export default function Builder() {
         return { ...el, html };
       });
       const hasCart = next.some((e) => /data-webdojo-cart/.test(e.html));
-      const out = hasCart ? next : [...next, { id: uid(), html: buildCartRuntimeHtml({ accent: "#4f46e5", currency: "usd" }) }];
+      const out = hasCart ? next : [...next, { id: uid(), html: buildCartRuntimeHtml({ accent: "#4f46e5", currency: "usd", projectId }) }];
       setTimeout(() => toast.success(converted ? `Wired ${converted} button${converted === 1 ? "" : "s"} to the cart${hasCart ? "" : " + added a live cart"}` : (hasCart ? "Cart already on this page" : "Live cart added — use add-to-cart buttons to fill it")), 0);
       return out;
     });

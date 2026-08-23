@@ -16,7 +16,7 @@ export const buildAddToCartButton = ({ id, name, amount, currency = "usd", image
 </button>`;
 
 // currency + accent + optional paypalClientId configure the whole store.
-export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", paypalClientId = "" } = {}) => {
+export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", paypalClientId = "", projectId = "" } = {}) => {
   const cfg = JSON.stringify({ api: BACKEND, accent, currency: (currency || "usd").toLowerCase(), paypal: paypalClientId || "" });
   return `<div data-webdojo-cart>
 <style>
@@ -109,7 +109,7 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     if(!items.length) return;
     var origin=(location.origin&&location.origin!=="null")?(location.origin+location.pathname):"";
     var btn=$("wdc-checkout"); btn.disabled=true; btn.textContent="Redirecting…";
-    fetch(CFG.api+"/api/commerce/checkout-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:items, origin_url:origin})})
+    fetch(CFG.api+"/api/commerce/checkout-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:items, origin_url:origin, project_id: "${projectId}"})})
       .then(function(r){ return r.json(); })
       .then(function(d){ if(d && d.url){ location.href=d.url; } else { alert((d&&d.detail)||"Could not start checkout"); btn.disabled=false; btn.textContent="Checkout with Stripe"; } })
       .catch(function(){ alert("Checkout failed — please try again."); btn.disabled=false; btn.textContent="Checkout with Stripe"; });
@@ -132,7 +132,7 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     window.paypal.Buttons({
       style:{layout:"horizontal",color:"gold",shape:"pill",height:40,tagline:false},
       createOrder:function(data,actions){ return actions.order.create({purchase_units:[{amount:{value:total().toFixed(2),currency_code:CFG.currency.toUpperCase()}}]}); },
-      onApprove:function(data,actions){ return actions.order.capture().then(function(){ WDCart.clear(); alert("Payment complete — thank you!"); }); }
+      onApprove:function(data,actions){ return actions.order.capture().then(function(){ fetch(CFG.api+"/api/commerce/paypal/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_id: "${projectId}", order_id:data.orderID})}).then(function(){ WDCart.clear(); alert("Payment complete — thank you!"); }); }); }
     }).render("#wdc-paypal");
   }
   document.addEventListener("click", function(e){
