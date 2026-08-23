@@ -598,6 +598,44 @@ class TestPaypalVerify:
         assert db.orders.find_one({"provider_ref": ref})["amount_total"] == expected_cents
 
 
+class TestConfirmationEmailFiresOnNewOrder:
+    def test_a_new_completed_stripe_order_triggers_one_confirmation_email(self, client, db):
+        db.projects.insert_one({"id": "proj-conf-new", "name": "Aurora Shop"})
+        event = _fake_stripe_event()
+        event["data"]["object"]["id"] = "cs_conf_new_1"
+        event["data"]["object"]["metadata"] = {"project_id": "proj-conf-new"}
+        with patch.object(stripe_sdk.Webhook, "construct_event", return_value=event), \
+             patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()), \
+             patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+        mock_send.assert_called_once()
+        args = mock_send.call_args[0]
+        assert args[0] == "proj-conf-new"
+        assert args[1] == "buyer@example.com"
+        assert "Aurora Shop" in args[2]  # subject
+
+    def test_the_same_stripe_event_delivered_twice_sends_only_one_email(self, client, db):
+        db.projects.insert_one({"id": "proj-conf-dup", "name": "Aurora Shop"})
+        event = _fake_stripe_event()
+        event["data"]["object"]["id"] = "cs_conf_dup_1"
+        event["data"]["object"]["metadata"] = {"project_id": "proj-conf-dup"}
+        with patch.object(stripe_sdk.Webhook, "construct_event", return_value=event), \
+             patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()), \
+             patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+        assert mock_send.call_count == 1
+
+    def test_a_new_completed_paypal_order_triggers_one_confirmation_email(self, client, paypal_project_id, db):
+        db.projects.update_one({"id": paypal_project_id}, {"$set": {"name": "Aurora Shop"}})
+        with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \
+             patch.object(server, "_paypal_get_order", new=AsyncMock(return_value=_fake_paypal_order("PP-EMAIL-CONF-1"))), \
+             patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            client.post("/api/commerce/paypal/verify", json={"project_id": paypal_project_id, "order_id": "PP-EMAIL-CONF-1"})
+        mock_send.assert_called_once()
+        assert mock_send.call_args[0][1] == "buyer@example.com"
+
+
 def _minimal_order(provider_ref, project_id="proj-upsert-test"):
     return {
         "id": str(provider_ref) + "-id",

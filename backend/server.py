@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Header, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any
@@ -1510,7 +1510,7 @@ async def _upsert_order(order: dict) -> bool:
 
 
 @api_router.post("/commerce/webhook")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(request: Request, background_tasks: BackgroundTasks):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
     webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
@@ -1537,7 +1537,7 @@ async def stripe_webhook(request: Request):
             for item in line_items_result.data
         ]
         details = session.get("customer_details") or {}
-        await _upsert_order({
+        order = {
             "id": str(uuid.uuid4()),
             "project_id": (session.get("metadata") or {}).get("project_id", ""),
             "provider": "stripe",
@@ -1551,7 +1551,13 @@ async def stripe_webhook(request: Request):
             "line_items": line_items,
             "fulfillment_status": "processing",
             "created_at": datetime.now(timezone.utc).isoformat(),
-        })
+        }
+        is_new = await _upsert_order(order)
+        if is_new and order["customer_email"]:
+            project = await db.projects.find_one({"id": order["project_id"]}, {"_id": 0, "name": 1})
+            project_name = (project or {}).get("name") or "Your store"
+            subject, body = _email_confirmation(project_name, order)
+            background_tasks.add_task(_send_email, order["project_id"], order["customer_email"], subject, body)
     return {"received": True}
 
 
@@ -1640,7 +1646,7 @@ class PaypalVerifyRequest(BaseModel):
 
 
 @api_router.post("/commerce/paypal/verify")
-async def paypal_verify(payload: PaypalVerifyRequest):
+async def paypal_verify(payload: PaypalVerifyRequest, background_tasks: BackgroundTasks):
     project = await db.projects.find_one({"id": payload.project_id})
     if not project:
         raise HTTPException(status_code=400, detail="Unknown project_id")
@@ -1670,7 +1676,7 @@ async def paypal_verify(payload: PaypalVerifyRequest):
     except InvalidOperation:
         raise HTTPException(status_code=502, detail="PayPal returned an unreadable amount")
 
-    await _upsert_order({
+    order_record = {
         "id": str(uuid.uuid4()),
         "project_id": payload.project_id,
         "provider": "paypal",
@@ -1684,7 +1690,12 @@ async def paypal_verify(payload: PaypalVerifyRequest):
         "line_items": [],
         "fulfillment_status": "processing",
         "created_at": datetime.now(timezone.utc).isoformat(),
-    })
+    }
+    is_new = await _upsert_order(order_record)
+    if is_new and order_record["customer_email"]:
+        project_name = (project or {}).get("name") or "Your store"
+        subject, body = _email_confirmation(project_name, order_record)
+        background_tasks.add_task(_send_email, payload.project_id, order_record["customer_email"], subject, body)
     return {"ok": True}
 
 
