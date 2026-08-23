@@ -235,6 +235,40 @@ export default function EcommerceOrdersPanel({ projectId }) {
               ))}
             </div>
           </div>
+
+          <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg p-4">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-3">Customers · last 30 days</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div data-testid="breakdown-new">
+                <div className="text-xl font-semibold text-[#F1EDE2]">{analytics.customer_breakdown.new_customers}</div>
+                <div className="text-[10px] uppercase tracking-wider text-[#948C79]">New · {(analytics.customer_breakdown.new_revenue / 100).toFixed(2)}</div>
+              </div>
+              <div data-testid="breakdown-returning">
+                <div className="text-xl font-semibold text-[#F1EDE2]">{analytics.customer_breakdown.returning_customers}</div>
+                <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Returning · {(analytics.customer_breakdown.returning_revenue / 100).toFixed(2)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg p-4">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-3">Top products · last 30 days</div>
+            {analytics.top_products.length === 0 ? (
+              <div className="text-[11px] text-[#948C79]">No product sales in this window yet.</div>
+            ) : (
+              <table className="w-full border-collapse">
+                <tbody>
+                  {analytics.top_products.map((p, i) => (
+                    <tr key={p.name}>
+                      <td className="text-[11px] text-[#948C79] py-1 pr-2 w-6">{i + 1}</td>
+                      <td className="text-sm text-[#E4DECE] py-1">{p.name}</td>
+                      <td className="text-sm text-[#948C79] py-1 text-right font-mono">{p.quantity}</td>
+                      <td className="text-sm text-[#D9BC55] py-1 pl-3 text-right font-mono">{(p.revenue / 100).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -116,3 +116,31 @@ test("the Analytics tab loads and displays fulfillment funnel counts", async () 
   expect(screen.getByTestId("funnel-processing")).toHaveTextContent("3");
   expect(screen.getByTestId("funnel-delivered")).toHaveTextContent("2");
 });
+
+test("the Analytics tab displays customer breakdown and top products", async () => {
+  global.fetch
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ token: "tok-abc" }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ orders: [], total: 0, page: 1, page_size: 20 }) })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        window: { start: "2026-07-25", end: "2026-08-23", days: 30 },
+        revenue_trend: [{ date: "2026-08-23", order_count: 1, revenue: 3800 }],
+        fulfillment_funnel: { processing: 1, shipped: 0, delivered: 0 },
+        customer_breakdown: { new_customers: 5, returning_customers: 2, new_revenue: 19000, returning_revenue: 8000 },
+        top_products: [{ name: "Aurora Bottle", quantity: 3, revenue: 11400 }],
+      }),
+    });
+
+  render(<EcommerceOrdersPanel projectId="proj-123" />);
+  fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: "hunter22" } });
+  fireEvent.click(screen.getByText(/unlock/i));
+  await waitFor(() => expect(screen.getByRole("button", { name: /analytics/i })).toBeInTheDocument());
+
+  fireEvent.click(screen.getByRole("button", { name: /analytics/i }));
+
+  await waitFor(() => expect(screen.getByTestId("breakdown-new")).toHaveTextContent("5"));
+  expect(screen.getByTestId("breakdown-returning")).toHaveTextContent("2");
+  expect(screen.getByText(/aurora bottle/i)).toBeInTheDocument();
+  expect(screen.getByText(/114\.00/)).toBeInTheDocument();
+});
