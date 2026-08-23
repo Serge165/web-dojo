@@ -429,7 +429,7 @@ async def list_orders(project_id: str, page: int = 1, page_size: int = 20, x_das
     await _require_dashboard_token(project_id, x_dashboard_token)
     skip = max(page - 1, 0) * page_size
     cursor = db.orders.find({"project_id": project_id}, {"_id": 0}).sort("created_at", -1)
-    all_orders = await cursor.to_list(length=None)
+    all_orders = await cursor.to_list(length=skip + page_size)
     orders = all_orders[skip:skip + page_size]
     total = await db.orders.count_documents({"project_id": project_id})
     return {"orders": orders, "total": total, "page": page, "page_size": page_size}

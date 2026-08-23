@@ -21,7 +21,7 @@ from starlette.testclient import TestClient
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import server
-from sqlite_compat import SqliteClient
+from sqlite_compat import SqliteClient, SqliteCursor
 
 # server.db is whatever backend happened to be live when `server` was first
 # imported in this pytest-xdist worker (pytest.ini pins -n 2 --dist loadscope,
@@ -317,6 +317,33 @@ class TestOrdersListEndpoint:
         body = r.json()
         assert len(body["orders"]) == 1
         assert body["orders"][0]["provider_ref"] == "cs_1"
+
+    def test_listing_bounds_the_fetch_to_skip_plus_page_size(self, client, project_id, db):
+        for i in range(3):
+            db.orders.insert_one({
+                "id": f"bounds-o{i}", "project_id": project_id, "provider": "stripe", "provider_ref": f"bounds-cs-{i}",
+                "status": "completed", "amount_total": 1000, "currency": "usd",
+                "customer_email": "a@example.com", "customer_name": None, "shipping_address": None,
+                "line_items": [], "created_at": f"2026-08-21T0{i}:00:00Z",
+            })
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        token = client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+        original_to_list = SqliteCursor.to_list
+        seen_lengths = []
+
+        async def spying_to_list(self, length=None):
+            seen_lengths.append(length)
+            return await original_to_list(self, length)
+
+        with patch.object(SqliteCursor, "to_list", spying_to_list):
+            r = client.get(f"/api/dashboard/{project_id}/orders", headers={"X-Dashboard-Token": token}, params={"page_size": 2})
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["orders"]) == 2
+        assert body["total"] == 3
+        # Bounded to skip+page_size (2), not an unbounded fetch of the whole collection.
+        assert seen_lengths == [2]
 
 
 class TestPaypalVerify:
