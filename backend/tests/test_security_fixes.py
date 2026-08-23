@@ -211,6 +211,7 @@ class TestPublicCORSOverride:
         # fix) before touching the db — but the CORS header must still be set.
         r = client.post("/api/commerce/checkout-session", json={
             "items": [{"name": "Test", "amount": 9.99, "currency": "usd", "quantity": 1}],
+            "project_id": "proj-cors-test",
         }, headers={"Origin": "https://another-published-site.example"})
         assert r.status_code == 503
         assert r.headers.get("access-control-allow-origin") == "*"
@@ -250,6 +251,7 @@ class TestStripeNotConfigured:
     def test_checkout_session_503_when_unconfigured(self, client):
         r = client.post("/api/commerce/checkout-session", json={
             "items": [{"name": "Test Item", "amount": 9.99, "currency": "usd", "quantity": 1}],
+            "project_id": "proj-unconfigured-test",
         })
         assert r.status_code == 503
 

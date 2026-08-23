@@ -37,13 +37,20 @@ os.close(_fd)
 atexit.register(lambda: os.path.exists(_sqlite_path) and os.unlink(_sqlite_path))
 server.db = SqliteClient(_sqlite_path)["webdojo_test"]
 
-# Same reasoning as server.db above: STRIPE_SECRET_KEY is read into a module
-# global at import time, so an env-var-before-import default is unreliable
-# once another test module has already imported `server` first in this
-# xdist worker. Overwrite the global directly instead — checkout-session's
-# "is Stripe configured" guard just needs it non-empty; the actual Stripe
-# SDK call is mocked per-test.
-server.STRIPE_SECRET_KEY = "sk_test_dummy"
+# Same import-order problem as server.db above, but unlike server.db (every
+# test file wants a working DB, so a permanent overwrite is harmless), other
+# modules have the OPPOSITE requirement here: test_security_fixes.py's
+# TestStripeNotConfigured class specifically needs STRIPE_SECRET_KEY empty to
+# exercise its "unconfigured" 503 path. A bare permanent assignment would
+# leak across files sharing an xdist worker and break that class. Scope the
+# override to just this module's test run instead, restoring the original
+# value afterward.
+@pytest.fixture(scope="module", autouse=True)
+def _stripe_configured_for_this_module():
+    original = server.STRIPE_SECRET_KEY
+    server.STRIPE_SECRET_KEY = "sk_test_dummy"
+    yield
+    server.STRIPE_SECRET_KEY = original
 
 
 @pytest.fixture(scope="module")
