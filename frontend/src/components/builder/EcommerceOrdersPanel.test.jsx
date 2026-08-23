@@ -144,3 +144,75 @@ test("the Analytics tab displays customer breakdown and top products", async () 
   expect(screen.getByText(/aurora bottle/i)).toBeInTheDocument();
   expect(screen.getByText(/114\.00/)).toBeInTheDocument();
 });
+
+test("Export CSV on the Orders tab downloads a CSV with order rows", async () => {
+  global.fetch
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ token: "tok-abc" }) })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        orders: [{ id: "o1", provider: "stripe", provider_ref: "cs_1", amount_total: 3800, currency: "usd", customer_email: "buyer@example.com", created_at: "2026-08-23T00:00:00Z", fulfillment_status: "shipped" }],
+        total: 1, page: 1, page_size: 20,
+      }),
+    });
+
+  const originalBlob = global.Blob;
+  const blobSpy = jest.fn().mockImplementation((parts, opts) => new originalBlob(parts, opts));
+  global.Blob = blobSpy;
+  global.URL.createObjectURL = jest.fn(() => "blob:mock-url");
+  global.URL.revokeObjectURL = jest.fn();
+  const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+  render(<EcommerceOrdersPanel projectId="proj-123" />);
+  fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: "hunter22" } });
+  fireEvent.click(screen.getByText(/unlock/i));
+  await waitFor(() => expect(screen.getByTestId("export-orders-csv")).toBeInTheDocument());
+
+  fireEvent.click(screen.getByTestId("export-orders-csv"));
+
+  expect(clickSpy).toHaveBeenCalled();
+  const csvContent = blobSpy.mock.calls[0][0][0];
+  expect(csvContent).toContain("buyer@example.com");
+  expect(csvContent).toContain("38.00");
+  expect(csvContent).toContain("shipped");
+
+  global.Blob = originalBlob;
+  clickSpy.mockRestore();
+});
+
+test("Export CSV on the Customers tab downloads a CSV with customer rows", async () => {
+  global.fetch
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ token: "tok-abc" }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ orders: [], total: 0, page: 1, page_size: 20 }) })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        customers: [{ email: "buyer@example.com", name: "Ada Lovelace", order_count: 2, ltv: 5800, last_order_at: "2026-08-22T00:00:00Z" }],
+        total: 1, page: 1, page_size: 20,
+      }),
+    });
+
+  const originalBlob = global.Blob;
+  const blobSpy = jest.fn().mockImplementation((parts, opts) => new originalBlob(parts, opts));
+  global.Blob = blobSpy;
+  global.URL.createObjectURL = jest.fn(() => "blob:mock-url");
+  global.URL.revokeObjectURL = jest.fn();
+  const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+
+  render(<EcommerceOrdersPanel projectId="proj-123" />);
+  fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: "hunter22" } });
+  fireEvent.click(screen.getByText(/unlock/i));
+  await waitFor(() => expect(screen.getByRole("button", { name: /customers/i })).toBeInTheDocument());
+  fireEvent.click(screen.getByRole("button", { name: /customers/i }));
+  await waitFor(() => expect(screen.getByTestId("export-customers-csv")).toBeInTheDocument());
+
+  fireEvent.click(screen.getByTestId("export-customers-csv"));
+
+  expect(clickSpy).toHaveBeenCalled();
+  const csvContent = blobSpy.mock.calls[0][0][0];
+  expect(csvContent.toLowerCase()).toContain("ada lovelace");
+  expect(csvContent).toContain("58.00");
+
+  global.Blob = originalBlob;
+  clickSpy.mockRestore();
+});

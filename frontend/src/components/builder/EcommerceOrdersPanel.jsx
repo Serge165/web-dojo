@@ -13,7 +13,7 @@ export default function EcommerceOrdersPanel({ projectId }) {
   const [token, setToken] = useState(null);
   const [error, setError] = useState("");
   const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState(null);
   const [analytics, setAnalytics] = useState(null);
   const [view, setView] = useState("orders");
   const [loading, setLoading] = useState(false);
@@ -73,6 +73,51 @@ export default function EcommerceOrdersPanel({ projectId }) {
     } catch {
       setError("Couldn't load analytics. Please try again.");
     }
+  };
+
+  const toCsv = (rows, columns) => {
+    const escape = (v) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = columns.map((c) => c.label).join(",");
+    const body = rows.map((r) => columns.map((c) => escape(c.value(r))).join(",")).join("\n");
+    return `${header}\n${body}`;
+  };
+
+  const downloadCsv = (filename, csv) => {
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const exportOrdersCsv = () => {
+    const columns = [
+      { label: "provider", value: (o) => o.provider },
+      { label: "customer_email", value: (o) => o.customer_email },
+      { label: "amount", value: (o) => (o.amount_total / 100).toFixed(2) },
+      { label: "currency", value: (o) => (o.currency || "").toUpperCase() },
+      { label: "fulfillment_status", value: (o) => o.fulfillment_status || "processing" },
+      { label: "created_at", value: (o) => o.created_at },
+    ];
+    downloadCsv("orders.csv", toCsv(orders, columns));
+  };
+
+  const exportCustomersCsv = () => {
+    const columns = [
+      { label: "email", value: (c) => c.email },
+      { label: "name", value: (c) => c.name },
+      { label: "order_count", value: (c) => c.order_count },
+      { label: "ltv", value: (c) => (c.ltv / 100).toFixed(2) },
+      { label: "last_order_at", value: (c) => c.last_order_at },
+    ];
+    downloadCsv("customers.csv", toCsv(customers, columns));
   };
 
   const updateFulfillment = async (order, nextStatus) => {
@@ -135,6 +180,11 @@ export default function EcommerceOrdersPanel({ projectId }) {
       </div>
       {view === "orders" && (
         <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg overflow-hidden">
+          <button
+            onClick={exportOrdersCsv}
+            data-testid="export-orders-csv"
+            className="text-xs px-3 py-1.5 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2] mb-3"
+          >Export CSV</button>
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -169,8 +219,13 @@ export default function EcommerceOrdersPanel({ projectId }) {
           </table>
         </div>
       )}
-      {view === "customers" && (
+      {view === "customers" && customers && (
         <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg overflow-hidden">
+          <button
+            onClick={exportCustomersCsv}
+            data-testid="export-customers-csv"
+            className="text-xs px-3 py-1.5 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2] mb-3"
+          >Export CSV</button>
           <table className="w-full border-collapse">
             <thead>
               <tr>
