@@ -1127,3 +1127,67 @@ class TestAnalyticsCustomerBreakdown:
         body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
         assert body["customer_breakdown"]["new_customers"] == 0
         assert body["customer_breakdown"]["returning_customers"] == 0
+
+
+class TestAnalyticsTopProducts:
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    def _order_with_items(self, order_id, project_id, created_at, line_items):
+        return {
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed", "amount_total": sum(i["quantity"] * i["unit_amount"] for i in line_items),
+            "currency": "usd", "customer_email": "buyer@example.com", "customer_name": None,
+            "shipping_address": None, "line_items": line_items, "fulfillment_status": "processing",
+            "created_at": created_at,
+        }
+
+    def test_two_orders_for_the_same_product_sum_quantity_and_revenue(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order_with_items(
+            "an-tp-1", project_id, f"{today_str}T00:00:00Z",
+            [{"name": "Aurora Bottle", "quantity": 2, "unit_amount": 3800, "currency": "usd"}],
+        ))
+        db.orders.insert_one(self._order_with_items(
+            "an-tp-2", project_id, f"{today_str}T00:00:00Z",
+            [{"name": "Aurora Bottle", "quantity": 1, "unit_amount": 3800, "currency": "usd"}],
+        ))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert len(body["top_products"]) == 1
+        assert body["top_products"][0] == {"name": "Aurora Bottle", "quantity": 3, "revenue": 11400}
+
+    def test_products_are_sorted_by_revenue_descending(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order_with_items(
+            "an-tp-sort-1", project_id, f"{today_str}T00:00:00Z",
+            [{"name": "Cheap Sticker", "quantity": 10, "unit_amount": 100, "currency": "usd"}],
+        ))
+        db.orders.insert_one(self._order_with_items(
+            "an-tp-sort-2", project_id, f"{today_str}T00:00:00Z",
+            [{"name": "Expensive Vase", "quantity": 1, "unit_amount": 50000, "currency": "usd"}],
+        ))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert [p["name"] for p in body["top_products"]] == ["Expensive Vase", "Cheap Sticker"]
+
+    def test_more_than_ten_products_only_returns_the_top_ten(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        items = [{"name": f"Product {i}", "quantity": 1, "unit_amount": (i + 1) * 100, "currency": "usd"} for i in range(11)]
+        db.orders.insert_one(self._order_with_items("an-tp-many-1", project_id, f"{today_str}T00:00:00Z", items))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert len(body["top_products"]) == 10
+        assert body["top_products"][0]["name"] == "Product 10"
+
+    def test_orders_outside_the_window_do_not_contribute_to_top_products(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        old_str = (today - timedelta(days=40)).isoformat()
+        db.orders.insert_one(self._order_with_items(
+            "an-tp-old-1", project_id, f"{old_str}T00:00:00Z",
+            [{"name": "Old Product", "quantity": 5, "unit_amount": 1000, "currency": "usd"}],
+        ))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["top_products"] == []

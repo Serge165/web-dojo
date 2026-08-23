@@ -696,6 +696,22 @@ def _compute_customer_breakdown(window_orders: list, first_order_dates: dict, wi
     }
 
 
+def _compute_top_products(window_orders: list, limit: int = 10) -> list:
+    grouped: dict = {}
+    for o in window_orders:
+        for item in (o.get("line_items") or []):
+            name = (item.get("name") or "").strip()
+            if not name:
+                continue
+            bucket = grouped.setdefault(name, {"name": name, "quantity": 0, "revenue": 0})
+            qty = item.get("quantity", 0) or 0
+            unit_amount = item.get("unit_amount", 0) or 0
+            bucket["quantity"] += qty
+            bucket["revenue"] += qty * unit_amount
+    products = sorted(grouped.values(), key=lambda p: p["revenue"], reverse=True)
+    return products[:limit]
+
+
 @api_router.get("/dashboard/{project_id}/analytics")
 async def get_analytics(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
     await _require_dashboard_token(project_id, x_dashboard_token)
@@ -714,6 +730,7 @@ async def get_analytics(project_id: str, x_dashboard_token: Optional[str] = Head
         "revenue_trend": _compute_revenue_trend(window_orders, dates),
         "fulfillment_funnel": _compute_fulfillment_funnel(window_orders),
         "customer_breakdown": _compute_customer_breakdown(window_orders, first_order_dates, window_start),
+        "top_products": _compute_top_products(window_orders),
     }
 
 
