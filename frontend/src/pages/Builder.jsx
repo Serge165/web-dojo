@@ -285,7 +285,7 @@ export default function Builder() {
   };
   const addPageFromLayout = (layout) => {
     const id = uid();
-    const els = (layout.blocks || []).map((html) => ({ id: uid(), html }));
+    const els = (layout.blocks || []).map((html) => ({ id: uid(), html: html.replaceAll('project_id: ""', `project_id: "${projectId || ""}"`) }));
     const bg = layout.canvasBg || "#ffffff";
     const fnts = layout.fonts || [];
     setPages((ps) => {
