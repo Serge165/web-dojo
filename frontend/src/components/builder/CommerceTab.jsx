@@ -9,16 +9,23 @@ const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.
 const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
 
 // "Shop" tab: payment button builder, a working cart system, and store blocks.
-export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog, onAddCart }) => {
+export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog, onAddCart, onSavePaypalSecret }) => {
   const [cur, setCur] = useState("usd");
   const [accent, setAccent] = useState("#4f46e5");
   const [paypal, setPaypal] = useState("");
+  const [paypalSecret, setPaypalSecret] = useState("");
   const [pName, setPName] = useState("Aurora Bottle");
   const [pPrice, setPPrice] = useState("38");
   const [pImg, setPImg] = useState("");
 
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
   const { previewProps, previewNode } = useHoverPreview();
+
+  const savePaypal = () => {
+    if (!paypal || !paypalSecret) { toast.error("Enter both Client ID and Secret"); return; }
+    onSavePaypalSecret(paypal, paypalSecret);
+    setPaypalSecret("");
+  };
 
   const addCart = () => onAddCart({ accent, currency: cur, paypalClientId: paypal.trim() });
   const addBtn = () => {
@@ -55,6 +62,11 @@ export const CommerceTab = ({ onAddBlock, onOpenPaymentBuilder, onWireCatalog, o
           <label className={labelCls}>PayPal Client ID <span className="normal-case text-gray-600">(optional)</span></label>
           <input value={paypal} onChange={(e) => setPaypal(e.target.value)} placeholder="adds a PayPal option in the cart" className={inputCls + " font-mono"} data-testid="cart-paypal" />
         </div>
+        <div>
+          <label className={labelCls}>PayPal Secret <span className="normal-case text-gray-600">(optional)</span></label>
+          <input type="password" value={paypalSecret} onChange={(e) => setPaypalSecret(e.target.value)} placeholder="secret key for server-side verification" className={inputCls + " font-mono"} data-testid="cart-paypal-secret" />
+        </div>
+        <button onClick={savePaypal} className="w-full text-xs py-2 rounded bg-[#1F1F1F] border border-[#2B2B2B] hover:bg-[#2B2B2B] text-gray-100 font-medium" data-testid="save-paypal-btn">Save PayPal credentials</button>
         <button onClick={addCart} className="w-full text-xs py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium" data-testid="add-cart-btn">Add cart + checkout to page</button>
         <p className="text-[10px] text-gray-500 leading-relaxed">Adds a floating cart + slide-out drawer. Checkout hands off to real Stripe (or PayPal) checkout.</p>
       </div>

@@ -661,6 +661,15 @@ export default function Builder() {
     setSelectedId(null);
   };
 
+  const savePaypalSecret = async (clientId, secret) => {
+    try {
+      await axios.post(`${API}/commerce/paypal-secret`, { project_id: projectId, client_id: clientId, secret });
+      toast.success("PayPal credentials saved");
+    } catch {
+      toast.error("Failed to save PayPal credentials");
+    }
+  };
+
   const onLoadProjectData = (data) => {
     if (!data || !data._webdojo) { toast.error("That file isn't a Web Dojo project"); return; }
     setProjectId(null);
@@ -1004,6 +1013,7 @@ export default function Builder() {
                 onOpenStreamEmbed={() => setStreamEmbedOpen(true)}
                 onWireCatalog={wireCatalog}
                 onAddCart={addCartRuntime}
+                onSavePaypalSecret={savePaypalSecret}
                 headHtml={headHtml}
               />
               <button

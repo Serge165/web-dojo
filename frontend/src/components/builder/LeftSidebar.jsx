@@ -21,13 +21,13 @@ const GROUPS = [
   { id: "navigation", label: "Navigation", categoryIds: ["navbars", "headers", "footers"] },
   { id: "hero", label: "Hero", categoryIds: ["heroes"] },
   { id: "parallax", label: "Parallax", categoryIds: ["parallax"] },
-  { id: "content", label: "Content", categoryIds: ["components", "text", "toolbox", "containers", "testimonials", "faq"] },
+  { id: "content", label: "Content", categoryIds: ["components", "text", "toolbox", "containers", "testimonials", "faq", "comments"] },
   { id: "features", label: "Features", categoryIds: ["sections", "services", "pricing", "team"] },
   { id: "forms", label: "Forms", categoryIds: ["newsletter", "contact"] },
   { id: "media", label: "Media", categoryIds: ["video", "portfolio"] },
   { id: "layouts", label: "Layouts", categoryIds: ["layout", "timelines"] },
   { id: "esports", label: "Esports", categoryIds: ["esports"] },
-  { id: "creator", label: "Creator", categoryIds: ["creator"] },
+  { id: "creator", label: "Creator", categoryIds: ["creator", "social"] },
   { id: "retro", label: "Moldy Oldies", categoryIds: ["retro"] },
 ];
 
@@ -43,6 +43,7 @@ export const LeftSidebar = ({
   onOpenStreamEmbed,
   onWireCatalog,
   onAddCart,
+  onSavePaypalSecret,
   headHtml,
 }) => {
   const [tab, setTab] = useState("library");
@@ -303,7 +304,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "shop" && (
-        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} onWireCatalog={onWireCatalog} onAddCart={onAddCart} />
+        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} onWireCatalog={onWireCatalog} onAddCart={onAddCart} onSavePaypalSecret={onSavePaypalSecret} />
       )}
 
       {tab === "snippets" && (
