@@ -291,6 +291,34 @@ class TestPaypalSecretEndpoint:
         assert "plaintext-secret" not in json.dumps(body)
 
 
+class TestOrdersListEndpoint:
+    def test_listing_without_a_token_is_rejected(self, client, project_id):
+        r = client.get(f"/api/dashboard/{project_id}/orders")
+        assert r.status_code == 401
+
+    def test_listing_with_a_valid_token_returns_that_projects_orders_only(self, client, project_id, db):
+        db.orders.insert_one({
+            "id": "o1", "project_id": project_id, "provider": "stripe", "provider_ref": "cs_1",
+            "status": "completed", "amount_total": 1000, "currency": "usd",
+            "customer_email": "a@example.com", "customer_name": None, "shipping_address": None,
+            "line_items": [], "created_at": "2026-08-21T00:00:00Z",
+        })
+        db.orders.insert_one({
+            "id": "o2", "project_id": "some-other-project", "provider": "stripe", "provider_ref": "cs_2",
+            "status": "completed", "amount_total": 2000, "currency": "usd",
+            "customer_email": "b@example.com", "customer_name": None, "shipping_address": None,
+            "line_items": [], "created_at": "2026-08-21T00:00:00Z",
+        })
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        token = client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+        r = client.get(f"/api/dashboard/{project_id}/orders", headers={"X-Dashboard-Token": token})
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["orders"]) == 1
+        assert body["orders"][0]["provider_ref"] == "cs_1"
+
+
 class TestPaypalVerify:
     def test_an_order_that_is_not_completed_is_rejected(self, client):
         with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \

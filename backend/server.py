@@ -424,6 +424,17 @@ async def _require_dashboard_token(project_id: str, x_dashboard_token: Optional[
         raise HTTPException(status_code=401, detail="Missing or invalid dashboard token")
 
 
+@api_router.get("/dashboard/{project_id}/orders")
+async def list_orders(project_id: str, page: int = 1, page_size: int = 20, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    skip = max(page - 1, 0) * page_size
+    cursor = db.orders.find({"project_id": project_id}, {"_id": 0}).sort("created_at", -1)
+    all_orders = await cursor.to_list(length=None)
+    orders = all_orders[skip:skip + page_size]
+    total = await db.orders.count_documents({"project_id": project_id})
+    return {"orders": orders, "total": total, "page": page, "page_size": page_size}
+
+
 def _build_google_fonts_link(fonts):
     if not fonts:
         return ""
