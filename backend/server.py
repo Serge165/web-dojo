@@ -600,6 +600,38 @@ async def update_order_fulfillment(
     return order
 
 
+@api_router.get("/dashboard/{project_id}/customers")
+async def list_customers(project_id: str, page: int = 1, page_size: int = 20, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    page = max(page, 1)
+    page_size = min(max(page_size, 1), 100)
+
+    cursor = db.orders.find(
+        {"project_id": project_id, "status": "completed"},
+        {"_id": 0, "customer_email": 1, "customer_name": 1, "amount_total": 1, "created_at": 1},
+    )
+    all_orders = await cursor.to_list(length=None)
+
+    grouped: dict = {}
+    for o in all_orders:
+        email = (o.get("customer_email") or "").strip().lower()
+        if not email:
+            continue
+        bucket = grouped.setdefault(email, {"email": email, "name": None, "order_count": 0, "ltv": 0, "last_order_at": None})
+        bucket["order_count"] += 1
+        bucket["ltv"] += o.get("amount_total", 0)
+        created = o.get("created_at") or ""
+        if bucket["last_order_at"] is None or created >= bucket["last_order_at"]:
+            bucket["last_order_at"] = created
+            if o.get("customer_name"):
+                bucket["name"] = o["customer_name"]
+
+    customers = sorted(grouped.values(), key=lambda c: c["ltv"], reverse=True)
+    total = len(customers)
+    skip = (page - 1) * page_size
+    return {"customers": customers[skip:skip + page_size], "total": total, "page": page, "page_size": page_size}
+
+
 def _build_google_fonts_link(fonts):
     if not fonts:
         return ""

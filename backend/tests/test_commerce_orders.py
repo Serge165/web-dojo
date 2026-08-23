@@ -940,3 +940,60 @@ class TestFulfillmentStatusEndpoint:
             )
         assert r.status_code == 200
         mock_send.assert_not_called()
+
+
+class TestCustomersEndpoint:
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    def _order(self, order_id, project_id, email, amount, created_at, name=None):
+        return {
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed", "amount_total": amount, "currency": "usd",
+            "customer_email": email, "customer_name": name, "shipping_address": None,
+            "line_items": [], "fulfillment_status": "processing", "created_at": created_at,
+        }
+
+    def test_without_a_token_is_rejected(self, client, project_id):
+        r = client.get(f"/api/dashboard/{project_id}/customers")
+        assert r.status_code == 401
+
+    def test_two_orders_same_email_collapse_into_one_customer_with_summed_ltv(self, client, project_id, db):
+        db.orders.insert_one(self._order("c-o1", project_id, "Buyer@Example.com", 1000, "2026-08-20T00:00:00Z", "Ada"))
+        db.orders.insert_one(self._order("c-o2", project_id, "buyer@example.com", 2500, "2026-08-22T00:00:00Z", "Ada Lovelace"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/customers", headers={"X-Dashboard-Token": token}).json()
+        assert len(body["customers"]) == 1
+        c = body["customers"][0]
+        assert c["email"] == "buyer@example.com"
+        assert c["order_count"] == 2
+        assert c["ltv"] == 3500
+        assert c["name"] == "Ada Lovelace"
+        assert c["last_order_at"] == "2026-08-22T00:00:00Z"
+
+    def test_different_emails_stay_as_separate_customers(self, client, project_id, db):
+        db.orders.insert_one(self._order("sep-o1", project_id, "a@example.com", 1000, "2026-08-21T00:00:00Z"))
+        db.orders.insert_one(self._order("sep-o2", project_id, "b@example.com", 1000, "2026-08-21T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/customers", headers={"X-Dashboard-Token": token}).json()
+        assert len(body["customers"]) == 2
+
+    def test_an_order_with_no_customer_email_is_excluded_but_still_in_the_orders_list(self, client, project_id, db):
+        db.orders.insert_one(self._order("no-email-o1", project_id, None, 1000, "2026-08-21T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        assert client.get(f"/api/dashboard/{project_id}/customers", headers={"X-Dashboard-Token": token}).json()["customers"] == []
+        orders_body = client.get(f"/api/dashboard/{project_id}/orders", headers={"X-Dashboard-Token": token}).json()
+        assert len(orders_body["orders"]) == 1
+
+    def test_customers_from_other_projects_are_excluded(self, client, project_id, db):
+        db.orders.insert_one(self._order("other-o1", "some-other-project", "x@example.com", 1000, "2026-08-21T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        assert client.get(f"/api/dashboard/{project_id}/customers", headers={"X-Dashboard-Token": token}).json()["customers"] == []
+
+    def test_customers_are_sorted_by_ltv_descending_by_default(self, client, project_id, db):
+        db.orders.insert_one(self._order("ltv-o1", project_id, "low@example.com", 500, "2026-08-21T00:00:00Z"))
+        db.orders.insert_one(self._order("ltv-o2", project_id, "high@example.com", 5000, "2026-08-21T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/customers", headers={"X-Dashboard-Token": token}).json()
+        assert [c["email"] for c in body["customers"]] == ["high@example.com", "low@example.com"]
