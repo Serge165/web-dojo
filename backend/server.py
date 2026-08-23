@@ -559,6 +559,47 @@ async def list_orders(project_id: str, page: int = 1, page_size: int = 20, x_das
     return {"orders": orders, "total": total, "page": page, "page_size": page_size}
 
 
+class FulfillmentUpdateRequest(BaseModel):
+    fulfillment_status: str
+
+
+_FULFILLMENT_SEQUENCE = ["processing", "shipped", "delivered"]
+
+
+@api_router.patch("/dashboard/{project_id}/orders/{order_id}/fulfillment")
+async def update_order_fulfillment(
+    project_id: str,
+    order_id: str,
+    payload: FulfillmentUpdateRequest,
+    background_tasks: BackgroundTasks,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    order = await db.orders.find_one({"id": order_id, "project_id": project_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    current = order.get("fulfillment_status", "processing")
+    new_status = payload.fulfillment_status
+    if new_status not in _FULFILLMENT_SEQUENCE:
+        raise HTTPException(status_code=400, detail="Invalid fulfillment status")
+    if _FULFILLMENT_SEQUENCE.index(new_status) != _FULFILLMENT_SEQUENCE.index(current) + 1:
+        raise HTTPException(status_code=400, detail=f"Cannot move fulfillment status from {current} to {new_status}")
+
+    await db.orders.update_one({"id": order_id, "project_id": project_id}, {"$set": {"fulfillment_status": new_status}})
+    order["fulfillment_status"] = new_status
+
+    to_addr = order.get("customer_email")
+    if to_addr:
+        project = await db.projects.find_one({"id": project_id}, {"_id": 0, "name": 1})
+        project_name = (project or {}).get("name") or "Your store"
+        template = _email_shipped if new_status == "shipped" else _email_delivered
+        subject, body = template(project_name, order)
+        background_tasks.add_task(_send_email, project_id, to_addr, subject, body)
+
+    return order
+
+
 def _build_google_fonts_link(fonts):
     if not fonts:
         return ""

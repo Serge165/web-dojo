@@ -855,3 +855,88 @@ class TestSendEmail:
         with patch("smtplib.SMTP") as mock_smtp:
             await server._send_email(project_id, "", "Subject", "<p>hi</p>")
         mock_smtp.assert_not_called()
+
+
+class TestFulfillmentStatusEndpoint:
+    def _seed_order(self, db, project_id, order_id, customer_email="buyer@example.com", fulfillment_status="processing"):
+        db.orders.insert_one({
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed", "amount_total": 3800, "currency": "usd",
+            "customer_email": customer_email, "customer_name": "Ada Lovelace",
+            "shipping_address": {"line1": "221B Baker Street"},
+            "line_items": [{"name": "Aurora Bottle", "quantity": 1}],
+            "fulfillment_status": fulfillment_status,
+            "created_at": "2026-08-23T00:00:00Z",
+        })
+
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    def test_without_a_token_is_rejected(self, client, project_id, db):
+        self._seed_order(db, project_id, "ord-no-token")
+        r = client.patch(f"/api/dashboard/{project_id}/orders/ord-no-token/fulfillment", json={"fulfillment_status": "shipped"})
+        assert r.status_code == 401
+
+    def test_processing_to_shipped_updates_status_and_sends_one_email(self, client, project_id, db):
+        self._seed_order(db, project_id, "ord-proc-ship")
+        token = self._unlocked_token(client, project_id)
+        with patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            r = client.patch(
+                f"/api/dashboard/{project_id}/orders/ord-proc-ship/fulfillment",
+                json={"fulfillment_status": "shipped"},
+                headers={"X-Dashboard-Token": token},
+            )
+        assert r.status_code == 200
+        assert r.json()["fulfillment_status"] == "shipped"
+        assert db.orders.find_one({"id": "ord-proc-ship"})["fulfillment_status"] == "shipped"
+        mock_send.assert_called_once()
+        assert "shipped" in mock_send.call_args[0][2].lower()
+
+    def test_shipped_to_delivered_sends_the_delivered_email(self, client, project_id, db):
+        self._seed_order(db, project_id, "ord-ship-del", fulfillment_status="shipped")
+        token = self._unlocked_token(client, project_id)
+        with patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            r = client.patch(
+                f"/api/dashboard/{project_id}/orders/ord-ship-del/fulfillment",
+                json={"fulfillment_status": "delivered"},
+                headers={"X-Dashboard-Token": token},
+            )
+        assert r.status_code == 200
+        assert "delivered" in mock_send.call_args[0][2].lower()
+
+    @pytest.mark.parametrize("current,requested", [("processing", "processing"), ("processing", "delivered"), ("delivered", "shipped")])
+    def test_invalid_transitions_are_rejected_and_send_no_email(self, client, project_id, db, current, requested):
+        order_id = f"ord-invalid-{current}-{requested}"
+        self._seed_order(db, project_id, order_id, fulfillment_status=current)
+        token = self._unlocked_token(client, project_id)
+        with patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            r = client.patch(
+                f"/api/dashboard/{project_id}/orders/{order_id}/fulfillment",
+                json={"fulfillment_status": requested},
+                headers={"X-Dashboard-Token": token},
+            )
+        assert r.status_code == 400
+        mock_send.assert_not_called()
+
+    def test_an_order_belonging_to_a_different_project_returns_404(self, client, project_id, db):
+        self._seed_order(db, "some-other-project", "ord-foreign")
+        token = self._unlocked_token(client, project_id)
+        r = client.patch(
+            f"/api/dashboard/{project_id}/orders/ord-foreign/fulfillment",
+            json={"fulfillment_status": "shipped"},
+            headers={"X-Dashboard-Token": token},
+        )
+        assert r.status_code == 404
+
+    def test_an_order_with_no_customer_email_sends_no_email_but_still_updates(self, client, project_id, db):
+        self._seed_order(db, project_id, "ord-no-email", customer_email=None)
+        token = self._unlocked_token(client, project_id)
+        with patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            r = client.patch(
+                f"/api/dashboard/{project_id}/orders/ord-no-email/fulfillment",
+                json={"fulfillment_status": "shipped"},
+                headers={"X-Dashboard-Token": token},
+            )
+        assert r.status_code == 200
+        mock_send.assert_not_called()
