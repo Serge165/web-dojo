@@ -660,6 +660,42 @@ def _compute_fulfillment_funnel(window_orders: list) -> dict:
     return funnel
 
 
+def _customer_first_order_dates(all_orders: list) -> dict:
+    first_dates: dict = {}
+    for o in all_orders:
+        email = (o.get("customer_email") or "").strip().lower()
+        if not email:
+            continue
+        day = (o.get("created_at") or "")[:10]
+        if email not in first_dates or day < first_dates[email]:
+            first_dates[email] = day
+    return first_dates
+
+
+def _compute_customer_breakdown(window_orders: list, first_order_dates: dict, window_start: str) -> dict:
+    new_customers = set()
+    returning_customers = set()
+    new_revenue = 0
+    returning_revenue = 0
+    for o in window_orders:
+        email = (o.get("customer_email") or "").strip().lower()
+        if not email:
+            continue
+        first_date = first_order_dates.get(email)
+        if first_date is not None and first_date >= window_start:
+            new_customers.add(email)
+            new_revenue += o.get("amount_total", 0)
+        else:
+            returning_customers.add(email)
+            returning_revenue += o.get("amount_total", 0)
+    return {
+        "new_customers": len(new_customers),
+        "returning_customers": len(returning_customers),
+        "new_revenue": new_revenue,
+        "returning_revenue": returning_revenue,
+    }
+
+
 @api_router.get("/dashboard/{project_id}/analytics")
 async def get_analytics(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
     await _require_dashboard_token(project_id, x_dashboard_token)
@@ -671,11 +707,13 @@ async def get_analytics(project_id: str, x_dashboard_token: Optional[str] = Head
         o for o in all_orders
         if window_start <= (o.get("created_at") or "")[:10] <= window_end
     ]
+    first_order_dates = _customer_first_order_dates(all_orders)
 
     return {
         "window": {"start": window_start, "end": window_end, "days": 30},
         "revenue_trend": _compute_revenue_trend(window_orders, dates),
         "fulfillment_funnel": _compute_fulfillment_funnel(window_orders),
+        "customer_breakdown": _compute_customer_breakdown(window_orders, first_order_dates, window_start),
     }
 
 

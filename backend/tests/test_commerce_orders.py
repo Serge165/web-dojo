@@ -1066,3 +1066,64 @@ class TestAnalyticsRevenueAndFunnel:
         token = self._unlocked_token(client, project_id)
         body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
         assert sum(d["order_count"] for d in body["revenue_trend"]) == 0
+
+
+class TestAnalyticsCustomerBreakdown:
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    def _order(self, order_id, project_id, email, amount, created_at):
+        return {
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed", "amount_total": amount, "currency": "usd",
+            "customer_email": email, "customer_name": None, "shipping_address": None,
+            "line_items": [], "fulfillment_status": "processing", "created_at": created_at,
+        }
+
+    def test_customer_whose_first_ever_order_is_in_the_window_is_new(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order("an-cb-new-1", project_id, "new@example.com", 1000, f"{today_str}T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["customer_breakdown"]["new_customers"] == 1
+        assert body["customer_breakdown"]["returning_customers"] == 0
+        assert body["customer_breakdown"]["new_revenue"] == 1000
+
+    def test_customer_with_an_order_before_the_window_who_orders_again_inside_it_is_returning(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        today_str = today.isoformat()
+        old_str = (today - timedelta(days=40)).isoformat()
+        db.orders.insert_one(self._order("an-cb-ret-old-1", project_id, "returning@example.com", 500, f"{old_str}T00:00:00Z"))
+        db.orders.insert_one(self._order("an-cb-ret-new-1", project_id, "returning@example.com", 1500, f"{today_str}T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["customer_breakdown"]["returning_customers"] == 1
+        assert body["customer_breakdown"]["new_customers"] == 0
+        assert body["customer_breakdown"]["returning_revenue"] == 1500
+
+    def test_a_customer_who_only_ordered_before_the_window_does_not_appear_at_all(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        old_str = (today - timedelta(days=40)).isoformat()
+        db.orders.insert_one(self._order("an-cb-onlyold-1", project_id, "onlyold@example.com", 700, f"{old_str}T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["customer_breakdown"]["new_customers"] == 0
+        assert body["customer_breakdown"]["returning_customers"] == 0
+
+    def test_revenue_splits_sum_correctly_across_multiple_new_customers(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order("an-cb-sum-1", project_id, "sumnew1@example.com", 1000, f"{today_str}T00:00:00Z"))
+        db.orders.insert_one(self._order("an-cb-sum-2", project_id, "sumnew2@example.com", 2000, f"{today_str}T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["customer_breakdown"]["new_customers"] == 2
+        assert body["customer_breakdown"]["new_revenue"] == 3000
+
+    def test_orders_with_no_customer_email_are_excluded_from_breakdown(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order("an-cb-noemail-1", project_id, None, 1000, f"{today_str}T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["customer_breakdown"]["new_customers"] == 0
+        assert body["customer_breakdown"]["returning_customers"] == 0
