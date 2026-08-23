@@ -216,3 +216,61 @@ test("Export CSV on the Customers tab downloads a CSV with customer rows", async
   global.Blob = originalBlob;
   clickSpy.mockRestore();
 });
+
+test("the Insights tab loads and displays alert cards", async () => {
+  global.fetch
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ token: "tok-abc" }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ orders: [], total: 0, page: 1, page_size: 20 }) })
+    .mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        alerts: [
+          { id: "revenue_drop", severity: "warning", title: "Revenue is down", detail: "Revenue this week is down 34% from last week.", data: {} },
+          { id: "stale_products", severity: "info", title: "Products haven't sold recently", detail: "2 products sold in the prior 30 days but haven't sold in the last 30.", data: {} },
+        ],
+      }),
+    });
+
+  render(<EcommerceOrdersPanel projectId="proj-123" />);
+  fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: "hunter22" } });
+  fireEvent.click(screen.getByText(/unlock/i));
+  await waitFor(() => expect(screen.getByRole("button", { name: /insights/i })).toBeInTheDocument());
+
+  fireEvent.click(screen.getByRole("button", { name: /insights/i }));
+
+  await waitFor(() => expect(screen.getByTestId("insight-revenue_drop")).toBeInTheDocument());
+  expect(screen.getByText(/revenue is down/i)).toBeInTheDocument();
+  expect(screen.getByTestId("insight-stale_products")).toBeInTheDocument();
+});
+
+test("the Insights tab shows an all-clear state when there are no alerts", async () => {
+  global.fetch
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ token: "tok-abc" }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ orders: [], total: 0, page: 1, page_size: 20 }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ alerts: [] }) });
+
+  render(<EcommerceOrdersPanel projectId="proj-123" />);
+  fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: "hunter22" } });
+  fireEvent.click(screen.getByText(/unlock/i));
+  await waitFor(() => expect(screen.getByRole("button", { name: /insights/i })).toBeInTheDocument());
+
+  fireEvent.click(screen.getByRole("button", { name: /insights/i }));
+
+  await waitFor(() => expect(screen.getByTestId("insights-empty")).toBeInTheDocument());
+});
+
+test("the Insights tab shows an error message when the fetch response is not ok", async () => {
+  global.fetch
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ token: "tok-abc" }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ orders: [], total: 0, page: 1, page_size: 20 }) })
+    .mockResolvedValueOnce({ ok: false, json: async () => ({ detail: "Server error" }) });
+
+  render(<EcommerceOrdersPanel projectId="proj-123" />);
+  fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: "hunter22" } });
+  fireEvent.click(screen.getByText(/unlock/i));
+  await waitFor(() => expect(screen.getByRole("button", { name: /insights/i })).toBeInTheDocument());
+
+  fireEvent.click(screen.getByRole("button", { name: /insights/i }));
+
+  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(/couldn't load insights/i));
+});

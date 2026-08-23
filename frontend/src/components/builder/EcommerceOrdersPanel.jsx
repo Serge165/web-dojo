@@ -15,6 +15,7 @@ export default function EcommerceOrdersPanel({ projectId }) {
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [insights, setInsights] = useState(null);
   const [view, setView] = useState("orders");
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +81,23 @@ export default function EcommerceOrdersPanel({ projectId }) {
       setAnalytics(body);
     } catch {
       setError("Couldn't load analytics. Please try again.");
+    }
+  };
+
+  const showInsights = async () => {
+    setView("insights");
+    try {
+      const res = await fetch(`${API}/api/dashboard/${projectId}/insights`, {
+        headers: { "X-Dashboard-Token": token },
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setError("Couldn't load insights. Please try again.");
+        return;
+      }
+      setInsights(body.alerts || []);
+    } catch {
+      setError("Couldn't load insights. Please try again.");
     }
   };
 
@@ -185,6 +203,10 @@ export default function EcommerceOrdersPanel({ projectId }) {
           onClick={showAnalytics}
           className={`px-3 py-1.5 text-xs rounded ${view === "analytics" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
         >Analytics</button>
+        <button
+          onClick={showInsights}
+          className={`px-3 py-1.5 text-xs rounded ${view === "insights" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
+        >Insights</button>
       </div>
       {view === "orders" && (
         <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg overflow-hidden">
@@ -332,6 +354,26 @@ export default function EcommerceOrdersPanel({ projectId }) {
               </table>
             )}
           </div>
+        </div>
+      )}
+      {view === "insights" && insights && (
+        <div className="space-y-3">
+          {insights.length === 0 ? (
+            <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg p-4 text-sm text-[#948C79]" data-testid="insights-empty">
+              All clear — no issues detected.
+            </div>
+          ) : (
+            insights.map((alert) => (
+              <div
+                key={alert.id}
+                data-testid={`insight-${alert.id}`}
+                className={`bg-[#1C1A15] border border-[#332D22] border-l-4 rounded-lg p-4 ${alert.severity === "warning" ? "border-l-red-400" : "border-l-[#D9BC55]"}`}
+              >
+                <div className="text-sm font-semibold text-[#F1EDE2] mb-1">{alert.title}</div>
+                <div className="text-xs text-[#E4DECE]">{alert.detail}</div>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
