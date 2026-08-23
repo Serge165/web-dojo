@@ -598,6 +598,55 @@ class TestPaypalVerify:
         assert db.orders.find_one({"provider_ref": ref})["amount_total"] == expected_cents
 
 
+def _minimal_order(provider_ref, project_id="proj-upsert-test"):
+    return {
+        "id": str(provider_ref) + "-id",
+        "project_id": project_id,
+        "provider": "stripe",
+        "provider_ref": provider_ref,
+        "status": "completed",
+        "amount_total": 1000,
+        "currency": "usd",
+        "customer_email": "a@example.com",
+        "customer_name": None,
+        "shipping_address": None,
+        "line_items": [],
+        "fulfillment_status": "processing",
+        "created_at": "2026-08-23T00:00:00Z",
+    }
+
+
+class TestUpsertOrderReturnsWhetherItInserted:
+    @pytest.mark.asyncio
+    async def test_a_new_order_returns_true(self):
+        result = await server._upsert_order(_minimal_order("upsert-new-1"))
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_a_duplicate_provider_ref_returns_false_and_does_not_touch_the_row(self):
+        order = _minimal_order("upsert-dup-1")
+        first = await server._upsert_order(order)
+        second = await server._upsert_order({**order, "customer_email": "different@example.com"})
+        assert first is True
+        assert second is False
+        stored = await server.db.orders.find_one({"provider_ref": "upsert-dup-1"})
+        assert stored["customer_email"] == "a@example.com"
+
+
+class TestOrdersGetAFulfillmentStatusOnCreation:
+    def test_a_stripe_order_starts_as_processing(self, client, db):
+        with patch.object(stripe_sdk.Webhook, "construct_event", return_value=_fake_stripe_event()), \
+             patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()):
+            client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
+        assert db.orders.find_one({"provider_ref": FAKE_SESSION_ID})["fulfillment_status"] == "processing"
+
+    def test_a_paypal_order_starts_as_processing(self, client, paypal_project_id, db):
+        with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \
+             patch.object(server, "_paypal_get_order", new=AsyncMock(return_value=_fake_paypal_order("PP-FULFILL-1"))):
+            client.post("/api/commerce/paypal/verify", json={"project_id": paypal_project_id, "order_id": "PP-FULFILL-1"})
+        assert db.orders.find_one({"provider_ref": "PP-FULFILL-1"})["fulfillment_status"] == "processing"
+
+
 class TestReceiptEndpointDoesNotLeakPII:
     """I8: provider_ref travels in the published site's URL query string,
     where the merchant's own analytics scripts routinely log it."""
