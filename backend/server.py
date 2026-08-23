@@ -1407,6 +1407,27 @@ async def stripe_webhook(request: Request):
     return {"received": True}
 
 
+class PaypalSecretRequest(BaseModel):
+    project_id: str
+    client_id: str
+    secret: str
+
+
+@api_router.post("/commerce/paypal-secret")
+async def set_paypal_secret(payload: PaypalSecretRequest):
+    existing = await db.projects.find_one({"id": payload.project_id}, {"_id": 0, "id": 1})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Project not found")
+    await db.projects.update_one(
+        {"id": payload.project_id},
+        {"$set": {
+            "paypal_client_id": payload.client_id,
+            "paypal_secret_enc": _encrypt(payload.secret),
+        }},
+    )
+    return {"ok": True}
+
+
 class PaypalVerifyRequest(BaseModel):
     project_id: str
     order_id: str

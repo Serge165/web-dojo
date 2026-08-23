@@ -1,5 +1,6 @@
 import asyncio
 import atexit
+import json
 import os
 import tempfile
 import time
@@ -268,6 +269,26 @@ class TestPaypalHelpers:
         call_args = mock_get.call_args
         assert call_args[0][0] == "https://api-m.sandbox.paypal.com/v2/checkout/orders/PAYPAL-ORDER-1"
         assert call_args[1]["headers"] == {"Authorization": "Bearer fake-token-abc"}
+
+
+class TestPaypalSecretEndpoint:
+    def test_setting_the_secret_encrypts_it_at_rest(self, client, project_id, db):
+        r = client.post("/api/commerce/paypal-secret", json={
+            "project_id": project_id, "client_id": "client-abc", "secret": "plaintext-secret",
+        })
+        assert r.status_code == 200
+        stored = db.projects.find_one({"id": project_id})
+        assert stored["paypal_client_id"] == "client-abc"
+        assert stored["paypal_secret_enc"] != "plaintext-secret"
+        assert server._decrypt(stored["paypal_secret_enc"]) == "plaintext-secret"
+
+    def test_project_get_response_never_includes_the_raw_or_encrypted_secret(self, client, project_id):
+        client.post("/api/commerce/paypal-secret", json={
+            "project_id": project_id, "client_id": "client-abc", "secret": "plaintext-secret",
+        })
+        body = client.get(f"/api/projects/{project_id}").json()
+        assert "paypal_secret_enc" not in body
+        assert "plaintext-secret" not in json.dumps(body)
 
 
 class TestPaypalVerify:
