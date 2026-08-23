@@ -268,3 +268,31 @@ class TestPaypalHelpers:
         call_args = mock_get.call_args
         assert call_args[0][0] == "https://api-m.sandbox.paypal.com/v2/checkout/orders/PAYPAL-ORDER-1"
         assert call_args[1]["headers"] == {"Authorization": "Bearer fake-token-abc"}
+
+
+class TestPaypalVerify:
+    def test_an_order_that_is_not_completed_is_rejected(self, client):
+        with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \
+             patch.object(server, "_paypal_get_order", new=AsyncMock(return_value={"id": "PP-1", "status": "CREATED"})):
+            r = client.post("/api/commerce/paypal/verify", json={"project_id": "proj-123", "order_id": "PP-1"})
+        assert r.status_code == 400
+
+    def test_a_completed_paypal_order_creates_a_record(self, client, project_id, db):
+        db.projects.update_one(
+            {"id": project_id},
+            {"$set": {"paypal_secret_enc": server._encrypt("shh-secret"), "paypal_client_id": "client-abc"}},
+        )
+        fake_order = {
+            "id": "PP-COMPLETE-1",
+            "status": "COMPLETED",
+            "purchase_units": [{"amount": {"value": "38.00", "currency_code": "USD"}}],
+            "payer": {"email_address": "buyer@example.com", "name": {"given_name": "Ada"}},
+        }
+        with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \
+             patch.object(server, "_paypal_get_order", new=AsyncMock(return_value=fake_order)):
+            r = client.post("/api/commerce/paypal/verify", json={"project_id": project_id, "order_id": "PP-COMPLETE-1"})
+        assert r.status_code == 200
+        receipt = client.get("/api/commerce/receipt/PP-COMPLETE-1").json()
+        assert receipt["status"] == "completed"
+        assert receipt["provider"] == "paypal"
+        assert receipt["customer_email"] == "buyer@example.com"

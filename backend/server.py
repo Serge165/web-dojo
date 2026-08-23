@@ -1407,6 +1407,47 @@ async def stripe_webhook(request: Request):
     return {"received": True}
 
 
+class PaypalVerifyRequest(BaseModel):
+    project_id: str
+    order_id: str
+
+
+@api_router.post("/commerce/paypal/verify")
+async def paypal_verify(payload: PaypalVerifyRequest):
+    project = await db.projects.find_one({"id": payload.project_id})
+    if not project or not project.get("paypal_secret_enc") or not project.get("paypal_client_id"):
+        raise HTTPException(status_code=400, detail="PayPal is not configured for this project")
+
+    secret = _decrypt(project["paypal_secret_enc"])
+    access_token = await _paypal_get_access_token(project["paypal_client_id"], secret)
+    order = await _paypal_get_order(payload.order_id, access_token)
+
+    if order.get("status") != "COMPLETED":
+        raise HTTPException(status_code=400, detail=f"PayPal order status is {order.get('status')}, not COMPLETED")
+
+    unit = (order.get("purchase_units") or [{}])[0]
+    amount = unit.get("amount", {})
+    payer = order.get("payer", {}) or {}
+    payer_name_obj = payer.get("name", {}) or {}
+    payer_name = " ".join(filter(None, [payer_name_obj.get("given_name"), payer_name_obj.get("surname")])) or None
+
+    await _upsert_order({
+        "id": str(uuid.uuid4()),
+        "project_id": payload.project_id,
+        "provider": "paypal",
+        "provider_ref": order["id"],
+        "status": "completed",
+        "amount_total": int(float(amount.get("value", "0")) * 100),
+        "currency": amount.get("currency_code", "usd").lower(),
+        "customer_email": payer.get("email_address"),
+        "customer_name": payer_name,
+        "shipping_address": None,
+        "line_items": [],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"ok": True}
+
+
 @api_router.get("/commerce/receipt/{provider_ref}")
 async def get_receipt(provider_ref: str):
     order = await db.orders.find_one({"provider_ref": provider_ref}, {"_id": 0})
