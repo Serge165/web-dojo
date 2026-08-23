@@ -15,7 +15,7 @@ import ssl
 from pathlib import Path
 import uuid
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from cryptography.fernet import Fernet
 import stripe
@@ -630,6 +630,53 @@ async def list_customers(project_id: str, page: int = 1, page_size: int = 20, x_
     total = len(customers)
     skip = (page - 1) * page_size
     return {"customers": customers[skip:skip + page_size], "total": total, "page": page, "page_size": page_size}
+
+
+def _analytics_window() -> tuple[str, str, list[str]]:
+    end = datetime.now(timezone.utc).date()
+    start = end - timedelta(days=29)
+    dates = [(start + timedelta(days=i)).isoformat() for i in range(30)]
+    return start.isoformat(), end.isoformat(), dates
+
+
+def _compute_revenue_trend(window_orders: list, dates: list) -> list:
+    buckets = {d: {"date": d, "order_count": 0, "revenue": 0} for d in dates}
+    for o in window_orders:
+        day = (o.get("created_at") or "")[:10]
+        bucket = buckets.get(day)
+        if bucket is None:
+            continue
+        bucket["order_count"] += 1
+        bucket["revenue"] += o.get("amount_total", 0)
+    return [buckets[d] for d in dates]
+
+
+def _compute_fulfillment_funnel(window_orders: list) -> dict:
+    funnel = {"processing": 0, "shipped": 0, "delivered": 0}
+    for o in window_orders:
+        status = o.get("fulfillment_status") or "processing"
+        if status in funnel:
+            funnel[status] += 1
+    return funnel
+
+
+@api_router.get("/dashboard/{project_id}/analytics")
+async def get_analytics(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    window_start, window_end, dates = _analytics_window()
+
+    cursor = db.orders.find({"project_id": project_id, "status": "completed"}, {"_id": 0})
+    all_orders = await cursor.to_list(length=None)
+    window_orders = [
+        o for o in all_orders
+        if window_start <= (o.get("created_at") or "")[:10] <= window_end
+    ]
+
+    return {
+        "window": {"start": window_start, "end": window_end, "days": 30},
+        "revenue_trend": _compute_revenue_trend(window_orders, dates),
+        "fulfillment_funnel": _compute_fulfillment_funnel(window_orders),
+    }
 
 
 def _build_google_fonts_link(fonts):

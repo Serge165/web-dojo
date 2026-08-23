@@ -6,6 +6,7 @@ import os
 import stat
 import tempfile
 import time
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 # Matches test_security_fixes.py / test_audit_fixes.py: a default so `import
@@ -997,3 +998,71 @@ class TestCustomersEndpoint:
         token = self._unlocked_token(client, project_id)
         body = client.get(f"/api/dashboard/{project_id}/customers", headers={"X-Dashboard-Token": token}).json()
         assert [c["email"] for c in body["customers"]] == ["high@example.com", "low@example.com"]
+
+
+class TestAnalyticsRevenueAndFunnel:
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    def _order(self, order_id, project_id, amount, created_at, fulfillment_status="processing", email="buyer@example.com"):
+        return {
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed", "amount_total": amount, "currency": "usd",
+            "customer_email": email, "customer_name": None, "shipping_address": None,
+            "line_items": [], "fulfillment_status": fulfillment_status, "created_at": created_at,
+        }
+
+    def test_without_a_token_is_rejected(self, client, project_id):
+        r = client.get(f"/api/dashboard/{project_id}/analytics")
+        assert r.status_code == 401
+
+    def test_revenue_trend_has_30_days_and_groups_same_day_orders(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order("an-rev-1", project_id, 1000, f"{today_str}T09:00:00Z"))
+        db.orders.insert_one(self._order("an-rev-2", project_id, 2500, f"{today_str}T15:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert len(body["revenue_trend"]) == 30
+        todays_bucket = next(d for d in body["revenue_trend"] if d["date"] == today_str)
+        assert todays_bucket["order_count"] == 2
+        assert todays_bucket["revenue"] == 3500
+
+    def test_a_day_with_no_orders_still_appears_with_zero_count(self, client, project_id, db):
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert all(d["order_count"] == 0 for d in body["revenue_trend"])
+
+    def test_orders_outside_the_30_day_window_are_excluded(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        old_date = (today - timedelta(days=40)).isoformat()
+        db.orders.insert_one(self._order("an-rev-old-1", project_id, 9999, f"{old_date}T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert sum(d["order_count"] for d in body["revenue_trend"]) == 0
+
+    def test_fulfillment_funnel_counts_orders_by_status(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order("an-fun-1", project_id, 1000, f"{today_str}T00:00:00Z", fulfillment_status="processing"))
+        db.orders.insert_one(self._order("an-fun-2", project_id, 1000, f"{today_str}T00:00:00Z", fulfillment_status="shipped"))
+        db.orders.insert_one(self._order("an-fun-3", project_id, 1000, f"{today_str}T00:00:00Z", fulfillment_status="delivered"))
+        db.orders.insert_one(self._order("an-fun-4", project_id, 1000, f"{today_str}T00:00:00Z", fulfillment_status="delivered"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["fulfillment_funnel"] == {"processing": 1, "shipped": 1, "delivered": 2}
+
+    def test_an_order_missing_fulfillment_status_defaults_to_processing(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        order = self._order("an-fun-legacy-1", project_id, 1000, f"{today_str}T00:00:00Z")
+        del order["fulfillment_status"]
+        db.orders.insert_one(order)
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert body["fulfillment_funnel"]["processing"] == 1
+
+    def test_orders_from_other_projects_are_excluded(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order("an-rev-other-1", "some-other-project", 9999, f"{today_str}T00:00:00Z"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
+        assert sum(d["order_count"] for d in body["revenue_trend"]) == 0
