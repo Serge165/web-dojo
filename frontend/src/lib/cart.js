@@ -147,6 +147,35 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
   });
   render();
   try{ if(/[?&]wd_checkout=success/.test(location.search)){ WDCart.clear(); var _t=document.createElement("div"); _t.setAttribute("data-wd-thanks",""); _t.style.cssText="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100001;background:#0f172a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);font-family:system-ui,sans-serif;font-size:14px;"; _t.textContent="\\u2713 Thank you! Your order is confirmed."; document.body.appendChild(_t); setTimeout(function(){_t.style.transition="opacity .5s";_t.style.opacity="0";setTimeout(function(){_t.remove();},600);},6000); } }catch(e){}
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var sessionId = params.get("session_id");
+    if (!sessionId) return;
+    var tries = 0;
+    function poll() {
+      fetch(CFG.api + "/api/commerce/receipt/" + sessionId).then(function (r) { return r.json(); }).then(function (order) {
+        if (order.status === "processing" && tries < 5) {
+          tries++;
+          setTimeout(poll, 2000);
+          return;
+        }
+        var box = document.createElement("div");
+        box.style.cssText = "max-width:480px;margin:60px auto;padding:32px;border:1px solid #e2e8f0;border-radius:12px;font-family:system-ui,sans-serif;";
+        if (order.status === "processing") {
+          box.innerHTML = "<h2>Thanks for your order</h2><p>Your payment was received. This receipt will update shortly — refresh in a moment.</p>";
+        } else {
+          var items = (order.line_items || []).map(function (li) {
+            return "<li>" + li.name + " × " + li.quantity + "</li>";
+          }).join("");
+          box.innerHTML = "<h2>Order confirmed</h2><p>Thanks, " + (order.customer_name || order.customer_email || "") + "!</p><ul>" + items + "</ul>" +
+            "<p><b>Total: " + (order.amount_total / 100).toFixed(2) + " " + (order.currency || "").toUpperCase() + "</b></p>" +
+            "<button onclick=\\"window.print()\\">Print / Save as PDF</button>";
+        }
+        document.body.insertBefore(box, document.body.firstChild);
+      });
+    }
+    poll();
+  })();
 })();
 </script>
 </div>`;
