@@ -56,6 +56,10 @@ export default function EcommerceOrdersPanel({ projectId }) {
         headers: { "X-Dashboard-Token": token },
       });
       const body = await res.json();
+      if (!res.ok) {
+        setError("Couldn't load customers. Please try again.");
+        return;
+      }
       setCustomers(body.customers || []);
     } catch {
       setError("Couldn't load customers. Please try again.");
@@ -69,6 +73,10 @@ export default function EcommerceOrdersPanel({ projectId }) {
         headers: { "X-Dashboard-Token": token },
       });
       const body = await res.json();
+      if (!res.ok) {
+        setError("Couldn't load analytics. Please try again.");
+        return;
+      }
       setAnalytics(body);
     } catch {
       setError("Couldn't load analytics. Please try again.");
@@ -282,7 +290,7 @@ export default function EcommerceOrdersPanel({ projectId }) {
           <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg p-4">
             <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-3">Fulfillment funnel · last 30 days</div>
             <div className="grid grid-cols-3 gap-3">
-              {["processing", "shipped", "delivered"].map((stage) => (
+              {FULFILLMENT_OPTIONS.map((stage) => (
                 <div key={stage} data-testid={`funnel-${stage}`}>
                   <div className="text-xl font-semibold text-[#F1EDE2]">{analytics.fulfillment_funnel[stage]}</div>
                   <div className="text-[10px] uppercase tracking-wider text-[#948C79] capitalize">{stage}</div>

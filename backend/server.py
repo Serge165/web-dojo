@@ -717,6 +717,11 @@ async def get_analytics(project_id: str, x_dashboard_token: Optional[str] = Head
     await _require_dashboard_token(project_id, x_dashboard_token)
     window_start, window_end, dates = _analytics_window()
 
+    # ponytail: single unprojected fetch over the project's full order history,
+    # reduced in Python — matches list_customers' established pattern at these
+    # order volumes. If a project's history grows large enough for this to
+    # matter, split into a windowed+projected query plus a separate all-time
+    # first-order-date query.
     cursor = db.orders.find({"project_id": project_id, "status": "completed"}, {"_id": 0})
     all_orders = await cursor.to_list(length=None)
     window_orders = [
