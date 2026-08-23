@@ -799,6 +799,74 @@ def _compute_revenue_drop(all_orders: list, today) -> Optional[dict]:
     }
 
 
+def _compute_stuck_fulfillment(all_orders: list, today) -> Optional[dict]:
+    threshold_date = (today - timedelta(days=7)).isoformat()
+    stuck = []
+    for o in all_orders:
+        status = o.get("fulfillment_status") or "processing"
+        if status not in ("processing", "shipped"):
+            continue
+        day = (o.get("created_at") or "")[:10]
+        if day and day < threshold_date:
+            stuck.append(o)
+    if not stuck:
+        return None
+    stuck.sort(key=lambda o: o.get("created_at") or "")
+    return {
+        "id": "stuck_fulfillment",
+        "severity": "warning",
+        "title": "Orders stuck in fulfillment",
+        "detail": f"{len(stuck)} order{'s' if len(stuck) != 1 else ''} have been processing or shipped for more than 7 days.",
+        "data": {"count": len(stuck), "order_refs": [o["id"] for o in stuck[:5]]},
+    }
+
+
+def _compute_returning_share_drop(all_orders: list, first_order_dates: dict, today) -> Optional[dict]:
+    current_start = (today - timedelta(days=29)).isoformat()
+    current_end = today.isoformat()
+    prior_start = (today - timedelta(days=59)).isoformat()
+    prior_end = (today - timedelta(days=30)).isoformat()
+
+    def share_for_window(start, end):
+        new_revenue = 0
+        returning_revenue = 0
+        for o in all_orders:
+            email = (o.get("customer_email") or "").strip().lower()
+            if not email:
+                continue
+            day = (o.get("created_at") or "")[:10]
+            if not (start <= day <= end):
+                continue
+            amount = o.get("amount_total", 0)
+            first_date = first_order_dates.get(email)
+            if first_date is not None and first_date >= start:
+                new_revenue += amount
+            else:
+                returning_revenue += amount
+        total = new_revenue + returning_revenue
+        if total <= 0:
+            return None
+        return returning_revenue / total
+
+    current_share = share_for_window(current_start, current_end)
+    prior_share = share_for_window(prior_start, prior_end)
+    if current_share is None or prior_share is None:
+        return None
+
+    current_pct = round(current_share * 100)
+    prior_pct = round(prior_share * 100)
+    if prior_pct - current_pct <= 15:
+        return None
+
+    return {
+        "id": "returning_share_drop",
+        "severity": "info",
+        "title": "Repeat business is down",
+        "detail": f"Returning customers made up {current_pct}% of revenue this month, down from {prior_pct}% last month.",
+        "data": {"current_share": current_pct, "prior_share": prior_pct},
+    }
+
+
 @api_router.get("/dashboard/{project_id}/insights")
 async def get_insights(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
     await _require_dashboard_token(project_id, x_dashboard_token)
@@ -806,9 +874,15 @@ async def get_insights(project_id: str, x_dashboard_token: Optional[str] = Heade
 
     cursor = db.orders.find({"project_id": project_id, "status": "completed"}, {"_id": 0})
     all_orders = await cursor.to_list(length=None)
+    first_order_dates = _customer_first_order_dates(all_orders)
 
     alerts = []
-    for alert in (_compute_stale_products(all_orders, today), _compute_revenue_drop(all_orders, today)):
+    for alert in (
+        _compute_stale_products(all_orders, today),
+        _compute_revenue_drop(all_orders, today),
+        _compute_stuck_fulfillment(all_orders, today),
+        _compute_returning_share_drop(all_orders, first_order_dates, today),
+    ):
         if alert is not None:
             alerts.append(alert)
 

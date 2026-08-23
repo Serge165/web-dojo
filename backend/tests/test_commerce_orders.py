@@ -1272,3 +1272,109 @@ class TestInsightsStaleProductsAndRevenueDrop:
         token = self._unlocked_token(client, project_id)
         body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
         assert not any(a["id"] == "revenue_drop" for a in body["alerts"])
+
+
+class TestInsightsStuckFulfillmentAndReturningShareDrop:
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    def _order(self, order_id, project_id, amount, created_at, fulfillment_status="processing", email="buyer@example.com"):
+        return {
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed", "amount_total": amount, "currency": "usd",
+            "customer_email": email, "customer_name": None, "shipping_address": None,
+            "line_items": [], "fulfillment_status": fulfillment_status, "created_at": created_at,
+        }
+
+    def _order_with_items(self, order_id, project_id, created_at, line_items, amount=None, email="buyer@example.com"):
+        return {
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed",
+            "amount_total": amount if amount is not None else sum(i["quantity"] * i["unit_amount"] for i in line_items),
+            "currency": "usd", "customer_email": email, "customer_name": None,
+            "shipping_address": None, "line_items": line_items, "fulfillment_status": "processing",
+            "created_at": created_at,
+        }
+
+    def test_order_processing_for_more_than_7_days_is_flagged(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        old_day = (today - timedelta(days=8)).isoformat()
+        db.orders.insert_one(self._order("ins-stuck-1", project_id, 1000, f"{old_day}T00:00:00Z", fulfillment_status="processing"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        alert = next(a for a in body["alerts"] if a["id"] == "stuck_fulfillment")
+        assert alert["severity"] == "warning"
+        assert alert["data"]["count"] == 1
+        assert "ins-stuck-1" in alert["data"]["order_refs"]
+
+    def test_order_processing_for_exactly_7_days_is_not_flagged(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        edge_day = (today - timedelta(days=7)).isoformat()
+        db.orders.insert_one(self._order("ins-stuck-notyet-1", project_id, 1000, f"{edge_day}T00:00:00Z", fulfillment_status="processing"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert not any(a["id"] == "stuck_fulfillment" for a in body["alerts"])
+
+    def test_delivered_order_is_never_flagged_regardless_of_age(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        old_day = (today - timedelta(days=30)).isoformat()
+        db.orders.insert_one(self._order("ins-stuck-delivered-1", project_id, 1000, f"{old_day}T00:00:00Z", fulfillment_status="delivered"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert not any(a["id"] == "stuck_fulfillment" for a in body["alerts"])
+
+    def test_returning_share_drop_flagged_when_share_falls_more_than_15_points(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        old_day = (today - timedelta(days=90)).isoformat()
+        prior_day = (today - timedelta(days=45)).isoformat()
+        current_day = today.isoformat()
+        db.orders.insert_one(self._order("ins-ret-oldorder-1", project_id, 500, f"{old_day}T00:00:00Z", email="returning@example.com"))
+        db.orders.insert_one(self._order("ins-ret-priorwindow-1", project_id, 1000, f"{prior_day}T00:00:00Z", email="returning@example.com"))
+        db.orders.insert_one(self._order("ins-ret-current-1", project_id, 1000, f"{current_day}T00:00:00Z", email="newcust@example.com"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        alert = next(a for a in body["alerts"] if a["id"] == "returning_share_drop")
+        assert alert["severity"] == "info"
+        assert alert["data"]["current_share"] == 0
+        assert alert["data"]["prior_share"] == 100
+
+    def test_returning_share_drop_not_flagged_when_share_is_steady(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        old_day = (today - timedelta(days=90)).isoformat()
+        prior_day = (today - timedelta(days=45)).isoformat()
+        current_day = today.isoformat()
+        db.orders.insert_one(self._order("ins-ret-steady-old-1", project_id, 500, f"{old_day}T00:00:00Z", email="steady@example.com"))
+        db.orders.insert_one(self._order("ins-ret-steady-prior-1", project_id, 1000, f"{prior_day}T00:00:00Z", email="steady@example.com"))
+        db.orders.insert_one(self._order("ins-ret-steady-current-1", project_id, 1000, f"{current_day}T00:00:00Z", email="steady@example.com"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert not any(a["id"] == "returning_share_drop" for a in body["alerts"])
+
+    def test_returning_share_drop_not_flagged_when_a_window_has_no_revenue(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order("ins-ret-onlycurrent-1", project_id, 500, f"{today_str}T00:00:00Z", email="onlycur@example.com"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert not any(a["id"] == "returning_share_drop" for a in body["alerts"])
+
+    def test_alerts_is_empty_when_nothing_triggers(self, client, project_id, db):
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert body["alerts"] == []
+
+    def test_multiple_alerts_can_appear_together(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        stale_day = (today - timedelta(days=45)).isoformat()
+        stuck_day = (today - timedelta(days=8)).isoformat()
+        db.orders.insert_one(self._order_with_items(
+            "ins-multi-stale-1", project_id, f"{stale_day}T00:00:00Z",
+            [{"name": "Dojo Tee", "quantity": 1, "unit_amount": 2200, "currency": "usd"}],
+            email="multi-stale@example.com",
+        ))
+        db.orders.insert_one(self._order("ins-multi-stuck-1", project_id, 1500, f"{stuck_day}T00:00:00Z", email="multi-stuck@example.com"))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        ids = {a["id"] for a in body["alerts"]}
+        assert "stale_products" in ids
+        assert "stuck_fulfillment" in ids
