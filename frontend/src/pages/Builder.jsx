@@ -670,6 +670,15 @@ export default function Builder() {
     }
   };
 
+  const saveSmtpConfig = async (host, port, username, password, fromAddress) => {
+    try {
+      await axios.post(`${API}/commerce/smtp-config`, { project_id: projectId, host, port, username, password, from_address: fromAddress });
+      toast.success("SMTP settings saved");
+    } catch {
+      toast.error("Failed to save SMTP settings");
+    }
+  };
+
   const onLoadProjectData = (data) => {
     if (!data || !data._webdojo) { toast.error("That file isn't a Web Dojo project"); return; }
     setProjectId(null);
@@ -1014,6 +1023,7 @@ export default function Builder() {
                 onWireCatalog={wireCatalog}
                 onAddCart={addCartRuntime}
                 onSavePaypalSecret={savePaypalSecret}
+                onSaveSmtpConfig={saveSmtpConfig}
                 headHtml={headHtml}
               />
               <button

@@ -44,6 +44,7 @@ export const LeftSidebar = ({
   onWireCatalog,
   onAddCart,
   onSavePaypalSecret,
+  onSaveSmtpConfig,
   headHtml,
 }) => {
   const [tab, setTab] = useState("library");
@@ -304,7 +305,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "shop" && (
-        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} onWireCatalog={onWireCatalog} onAddCart={onAddCart} onSavePaypalSecret={onSavePaypalSecret} />
+        <CommerceTab onAddBlock={onAddBlock} onOpenPaymentBuilder={onOpenPaymentBuilder} onWireCatalog={onWireCatalog} onAddCart={onAddCart} onSavePaypalSecret={onSavePaypalSecret} onSaveSmtpConfig={onSaveSmtpConfig} />
       )}
 
       {tab === "snippets" && (
