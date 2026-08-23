@@ -58,6 +58,7 @@ venv/
 
 # Secrets
 backend/.preset_key
+backend/.dashboard_key
 
 # Development tools
 chainlit.md
