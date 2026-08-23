@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const API = process.env.REACT_APP_BACKEND_URL || "";
 const FULFILLMENT_OPTIONS = ["processing", "shipped", "delivered"];
@@ -13,6 +14,7 @@ export default function EcommerceOrdersPanel({ projectId }) {
   const [error, setError] = useState("");
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [view, setView] = useState("orders");
   const [loading, setLoading] = useState(false);
 
@@ -57,6 +59,19 @@ export default function EcommerceOrdersPanel({ projectId }) {
       setCustomers(body.customers || []);
     } catch {
       setError("Couldn't load customers. Please try again.");
+    }
+  };
+
+  const showAnalytics = async () => {
+    setView("analytics");
+    try {
+      const res = await fetch(`${API}/api/dashboard/${projectId}/analytics`, {
+        headers: { "X-Dashboard-Token": token },
+      });
+      const body = await res.json();
+      setAnalytics(body);
+    } catch {
+      setError("Couldn't load analytics. Please try again.");
     }
   };
 
@@ -113,8 +128,12 @@ export default function EcommerceOrdersPanel({ projectId }) {
           onClick={showCustomers}
           className={`px-3 py-1.5 text-xs rounded ${view === "customers" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
         >Customers</button>
+        <button
+          onClick={showAnalytics}
+          className={`px-3 py-1.5 text-xs rounded ${view === "analytics" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
+        >Analytics</button>
       </div>
-      {view === "orders" ? (
+      {view === "orders" && (
         <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg overflow-hidden">
           <table className="w-full border-collapse">
             <thead>
@@ -149,7 +168,8 @@ export default function EcommerceOrdersPanel({ projectId }) {
             </tbody>
           </table>
         </div>
-      ) : (
+      )}
+      {view === "customers" && (
         <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg overflow-hidden">
           <table className="w-full border-collapse">
             <thead>
@@ -173,6 +193,48 @@ export default function EcommerceOrdersPanel({ projectId }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {view === "analytics" && analytics && (
+        <div className="space-y-4">
+          <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg p-4">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-3">Revenue · last 30 days</div>
+            <div className="flex gap-6 mb-4">
+              <div>
+                <div className="text-2xl font-semibold text-[#F1EDE2]">
+                  {(analytics.revenue_trend.reduce((s, d) => s + d.revenue, 0) / 100).toFixed(2)}
+                </div>
+                <div className="text-[10px] text-[#948C79]">Total revenue</div>
+              </div>
+              <div>
+                <div className="text-2xl font-semibold text-[#F1EDE2]">
+                  {analytics.revenue_trend.reduce((s, d) => s + d.order_count, 0)}
+                </div>
+                <div className="text-[10px] text-[#948C79]">Orders</div>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={analytics.revenue_trend}>
+                <CartesianGrid stroke="#332D22" strokeDasharray="3 3" />
+                <XAxis dataKey="date" tick={{ fill: "#948C79", fontSize: 10 }} tickFormatter={(d) => d.slice(5)} />
+                <YAxis tick={{ fill: "#948C79", fontSize: 10 }} tickFormatter={(v) => (v / 100).toFixed(0)} />
+                <Tooltip contentStyle={{ background: "#1C1A15", border: "1px solid #332D22", fontSize: 12 }} labelStyle={{ color: "#F1EDE2" }} formatter={(v) => (v / 100).toFixed(2)} />
+                <Line type="monotone" dataKey="revenue" stroke="#C9A227" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="bg-[#1C1A15] border border-[#332D22] rounded-lg p-4">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-3">Fulfillment funnel · last 30 days</div>
+            <div className="grid grid-cols-3 gap-3">
+              {["processing", "shipped", "delivered"].map((stage) => (
+                <div key={stage} data-testid={`funnel-${stage}`}>
+                  <div className="text-xl font-semibold text-[#F1EDE2]">{analytics.fulfillment_funnel[stage]}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-[#948C79] capitalize">{stage}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
