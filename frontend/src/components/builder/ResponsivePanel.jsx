@@ -18,9 +18,9 @@ const num = (v, fallback) => { const n = parseFloat(v); return Number.isFinite(n
 const Row = ({ label, overridden, onReset, children, testId }) => (
   <div>
     <div className="flex items-center justify-between mb-1">
-      <label className="text-[10px] uppercase tracking-wider text-gray-500">{label}</label>
+      <label className="text-[10px] uppercase tracking-wider text-[#948C79]">{label}</label>
       {overridden && (
-        <button onClick={onReset} className="text-[10px] text-blue-400 hover:text-blue-300 normal-case" data-testid={testId}>Reset</button>
+        <button onClick={onReset} className="text-[10px] text-[#D9BC55] hover:text-blue-300 normal-case" data-testid={testId}>Reset</button>
       )}
     </div>
     {children}
@@ -30,7 +30,7 @@ const Row = ({ label, overridden, onReset, children, testId }) => (
 const Slider = ({ min, max, value, onChange, unit, testId }) => (
   <div className="flex items-center gap-2">
     <input type="range" min={min} max={max} value={value} onChange={(e) => onChange(Number(e.target.value))} className="flex-1 h-1.5" data-testid={testId} />
-    <span className="w-12 text-right text-[11px] font-mono text-gray-300">{value}{unit}</span>
+    <span className="w-12 text-right text-[11px] font-mono text-[#E4DECE]">{value}{unit}</span>
   </div>
 );
 
@@ -43,7 +43,7 @@ const SLIDER_PROPS = [
 export const ResponsivePanel = ({ selected, viewport, onPatch, onReset }) => {
   if (viewport === "desktop") {
     return (
-      <div className="text-[11px] text-gray-500 space-y-2" data-testid="responsive-panel-desktop-hint">
+      <div className="text-[11px] text-[#948C79] space-y-2" data-testid="responsive-panel-desktop-hint">
         <p>Desktop is the base style — edit it from the Style tab.</p>
         <p>Switch the viewport toggle (top bar) to Tablet or Mobile to add breakpoint-specific overrides here.</p>
       </div>
@@ -51,14 +51,14 @@ export const ResponsivePanel = ({ selected, viewport, onPatch, onReset }) => {
   }
   const meta = BREAKPOINTS[viewport];
   if (!selected) {
-    return <div className="text-[11px] text-gray-500">Select an element on the canvas to edit its {meta.label.toLowerCase()} style.</div>;
+    return <div className="text-[11px] text-[#948C79]">Select an element on the canvas to edit its {meta.label.toLowerCase()} style.</div>;
   }
   const overrides = selected.responsive?.[viewport] || {};
   const hidden = overrides.display === "none";
   return (
     <div className="space-y-4" data-testid="responsive-panel">
-      <div className="text-[11px] text-gray-400">
-        Editing <span className="text-white font-medium">{meta.label}</span> ({meta.range}) overrides for this element.
+      <div className="text-[11px] text-[#A79C87]">
+        Editing <span className="text-[#F1EDE2] font-medium">{meta.label}</span> ({meta.range}) overrides for this element.
         Unset properties inherit from Desktop{viewport === "mobile" ? " (via Tablet, if set)" : ""}.
       </div>
       {SLIDER_PROPS.map(({ key, label, min, max, unit, fallback }) => {
@@ -71,7 +71,7 @@ export const ResponsivePanel = ({ selected, viewport, onPatch, onReset }) => {
         );
       })}
       <Row label="Visibility" overridden={"display" in overrides} onReset={() => onReset("display")} testId="responsive-reset-display">
-        <label className="flex items-center gap-2 text-[11px] text-gray-300">
+        <label className="flex items-center gap-2 text-[11px] text-[#E4DECE]">
           <input
             type="checkbox"
             checked={hidden}

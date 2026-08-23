@@ -57,11 +57,11 @@ export const CodeEditor = ({ value, onChange, language = "html", readOnly = fals
         { token: "keyword", foreground: "ff79c6" },
       ],
       colors: {
-        "editor.background": "#050505",
+        "editor.background": "#15130E",
         "editor.foreground": "#e5e7eb",
         "editor.lineHighlightBackground": "#0d0d0d",
         "editorLineNumber.foreground": "#3f3f46",
-        "editorGutter.background": "#050505",
+        "editorGutter.background": "#15130E",
         "editorCursor.foreground": "#60a5fa",
       },
     });

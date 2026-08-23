@@ -88,17 +88,17 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
     toast.success("Background music added to this page");
   };
 
-  const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500";
-  const selCls = "bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-1 text-[11px] text-white outline-none focus:border-blue-500";
+  const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]";
+  const selCls = "bg-[#15130E] border border-[#332D22] rounded px-1.5 py-1 text-[11px] text-[#F1EDE2] outline-none focus:border-[#C9A227]";
 
   return (
     <div className="space-y-4" data-testid="bg-media-panel">
       {/* Background music — page level */}
       <div className="space-y-2">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Music size={12} /> Background music</div>
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Music size={12} /> Background music</div>
         <div className="grid grid-cols-2 gap-1.5">
-          <button onClick={() => setMusicType("mp3")} className={`py-1.5 rounded text-[11px] border ${musicType === "mp3" ? "bg-indigo-600 border-indigo-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`} data-testid="music-type-mp3">MP3 / audio</button>
-          <button onClick={() => setMusicType("midi")} className={`py-1.5 rounded text-[11px] border ${musicType === "midi" ? "bg-indigo-600 border-indigo-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`} data-testid="music-type-midi">MIDI</button>
+          <button onClick={() => setMusicType("mp3")} className={`py-1.5 rounded text-[11px] border ${musicType === "mp3" ? "bg-indigo-600 border-indigo-500 text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid="music-type-mp3">MP3 / audio</button>
+          <button onClick={() => setMusicType("midi")} className={`py-1.5 rounded text-[11px] border ${musicType === "midi" ? "bg-indigo-600 border-indigo-500 text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid="music-type-midi">MIDI</button>
         </div>
         <input value={musicUrl} onChange={(e) => setMusicUrl(e.target.value)} placeholder={musicType === "midi" ? "https://…/song.mid" : "https://…/track.mp3"} className={inputCls} data-testid="music-url" />
         <div className="grid grid-cols-2 gap-1.5">
@@ -107,27 +107,27 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
           </select>
           {musicType === "mp3" ? (
             <div className="flex items-center gap-1.5">
-              <input type="color" value={musicAccent} onChange={(e) => setMusicAccent(e.target.value)} className="w-8 h-7 rounded bg-transparent border border-[#2B2B2B]" data-testid="music-accent" title="Button colour" />
-              <input value={musicLabel} onChange={(e) => setMusicLabel(e.target.value)} className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="music-label" placeholder="Button text" />
+              <input type="color" value={musicAccent} onChange={(e) => setMusicAccent(e.target.value)} className="w-8 h-7 rounded bg-transparent border border-[#332D22]" data-testid="music-accent" title="Button colour" />
+              <input value={musicLabel} onChange={(e) => setMusicLabel(e.target.value)} className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-[11px] text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="music-label" placeholder="Button text" />
             </div>
           ) : (
-            <div className="text-[10px] text-gray-500 flex items-center">Player has its own controls</div>
+            <div className="text-[10px] text-[#948C79] flex items-center">Player has its own controls</div>
           )}
         </div>
-        <div className="flex items-center gap-3 text-[11px] text-gray-300">
+        <div className="flex items-center gap-3 text-[11px] text-[#E4DECE]">
           <label className="flex items-center gap-1.5"><input type="checkbox" checked={musicLoop} onChange={(e) => setMusicLoop(e.target.checked)} data-testid="music-loop" /> Loop</label>
           {musicType === "mp3" && (
             <label className="flex items-center gap-1.5"><input type="checkbox" checked={musicAutoplay} onChange={(e) => setMusicAutoplay(e.target.checked)} data-testid="music-autoplay" /> Autoplay</label>
           )}
         </div>
-        <button onClick={addMusic} className="w-full text-xs py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white" data-testid="add-music-btn">Add to page</button>
-        <p className="text-[10px] text-gray-500 leading-relaxed">Adds a floating player fixed to the page corner. {musicType === "mp3" ? "Most browsers block silent autoplay, so the play button is the reliable option." : "MIDI plays via a small web player loaded from a CDN — host the .mid file somewhere that allows cross-origin (CORS) access, e.g. your own domain or a public CDN."}</p>
+        <button onClick={addMusic} className="w-full text-xs py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2]" data-testid="add-music-btn">Add to page</button>
+        <p className="text-[10px] text-[#948C79] leading-relaxed">Adds a floating player fixed to the page corner. {musicType === "mp3" ? "Most browsers block silent autoplay, so the play button is the reliable option." : "MIDI plays via a small web player loaded from a CDN — host the .mid file somewhere that allows cross-origin (CORS) access, e.g. your own domain or a public CDN."}</p>
       </div>
 
       {/* Background image — element level */}
-      <div className="pt-3 border-t border-[#2B2B2B] space-y-2">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500">Background image</div>
-        {!selected && <div className="text-[11px] text-gray-500">Select an element to apply an image or video background.</div>}
+      <div className="pt-3 border-t border-[#332D22] space-y-2">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Background image</div>
+        {!selected && <div className="text-[11px] text-[#948C79]">Select an element to apply an image or video background.</div>}
         <input value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} placeholder="https://…/photo.jpg" className={inputCls} data-testid="bg-image-url" disabled={!selected} />
         <div className="grid grid-cols-3 gap-1.5">
           <select value={size} onChange={(e) => setSize(e.target.value)} className={selCls} data-testid="bg-image-size">
@@ -141,17 +141,17 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
           </select>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <button onClick={applyImage} disabled={!selected} className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40" data-testid="apply-bg-image">Apply image</button>
-          <button onClick={clearBg} disabled={!selected} className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] disabled:opacity-40" data-testid="clear-bg">Clear</button>
+          <button onClick={applyImage} disabled={!selected} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40" data-testid="apply-bg-image">Apply image</button>
+          <button onClick={clearBg} disabled={!selected} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] disabled:opacity-40" data-testid="clear-bg">Clear</button>
         </div>
       </div>
 
       {/* Background video — element level */}
-      <div className="pt-3 border-t border-[#2B2B2B] space-y-2">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500">Background video</div>
+      <div className="pt-3 border-t border-[#332D22] space-y-2">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Background video</div>
         <input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://…/loop.mp4" className={inputCls} data-testid="bg-video-url" disabled={!selected} />
-        <p className="text-[10px] text-gray-500">Wraps the selected element so the video plays behind its content.</p>
-        <button onClick={applyVideo} disabled={!selected} className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40" data-testid="apply-bg-video">Wrap with looping video</button>
+        <p className="text-[10px] text-[#948C79]">Wraps the selected element so the video plays behind its content.</p>
+        <button onClick={applyVideo} disabled={!selected} className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40" data-testid="apply-bg-video">Wrap with looping video</button>
       </div>
     </div>
   );

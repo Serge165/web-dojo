@@ -53,7 +53,7 @@ export const Canvas = ({
   const w = VIEWPORT_WIDTHS[viewport] || VIEWPORT_WIDTHS.desktop;
 
   return (
-    <div className="flex-1 bg-[#050505] overflow-auto" data-testid="canvas-area">
+    <div className="flex-1 bg-[#15130E] dojo-grid overflow-auto" data-testid="canvas-area">
       {/* container-type: inline-size makes this div itself the
           containment context for @container rules injected via
           headHtml (see responsiveCss.js) — without it, the grid-collapse
@@ -61,13 +61,13 @@ export const Canvas = ({
           isn't an iframe and @media only sees the real browser window,
           not this div's toggled width. */}
       <div className="mx-auto my-6 transition-all duration-200" style={{ width: `min(${w}px, 96%)`, zoom: `${zoom}%`, containerType: "inline-size" }}>
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 px-1 pb-1 flex items-center justify-between">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] px-1 pb-1 flex items-center justify-between">
           <span>Preview · {elements.length} block{elements.length === 1 ? "" : "s"} · {viewport}</span>
           <span className="font-mono">{w} × auto</span>
         </div>
         <div
           ref={dropRef}
-          className="min-h-[600px] border border-[#2B2B2B] shadow-2xl"
+          className="min-h-[600px] border border-[#332D22] shadow-2xl"
           style={{ background: canvasBg }}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, elements.length)}
@@ -75,7 +75,7 @@ export const Canvas = ({
         >
           {elements.length === 0 && (
             <div className="p-16 text-center text-sm">
-              <div className="inline-block px-4 py-3 border border-dashed border-gray-300 rounded-md bg-white/40" style={{ color: "#334155" }}>
+              <div className="inline-block px-4 py-3 border border-dashed border-[#C9A227]/40 rounded-md bg-white/60" style={{ color: "#3A3424" }}>
                 Drag blocks here from the left library, or double-click any block.
               </div>
             </div>
@@ -95,7 +95,7 @@ export const Canvas = ({
                     // element here, in Preview, and in real exports —
                     // putting it on this wrapper too would double-match
                     // it in the canvas alone.
-                    className={`relative group ${selectedId === el.id ? "outline outline-2 outline-blue-500" : ""}`}
+                    className={`relative group ${selectedId === el.id ? "outline outline-2 outline-[#C9A227]" : ""}`}
                     style={{ zIndex: el.zIndex || undefined, display: el.hidden ? "none" : undefined }}
                     onClick={(e) => { e.stopPropagation(); onSelect(el.id); }}
                     onContextMenu={() => onSelect(el.id)}
@@ -123,15 +123,15 @@ export const Canvas = ({
                     </div>
                   </div>
                 </ContextMenuTrigger>
-                <ContextMenuContent className="bg-[#141414] border-[#2B2B2B] text-gray-200" data-testid={`el-ctxmenu-${el.id}`}>
-                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-edit-${el.id}`} onSelect={() => { setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}>Edit text inline</ContextMenuItem>
-                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-save-${el.id}`} onSelect={() => onSaveComponent && onSaveComponent(el)}>Save as component</ContextMenuItem>
-                  <ContextMenuSeparator className="bg-[#2B2B2B]" />
-                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-up-${el.id}`} onSelect={() => onMove(el.id, -1)}>Move up</ContextMenuItem>
-                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-down-${el.id}`} onSelect={() => onMove(el.id, 1)}>Move down</ContextMenuItem>
-                  <ContextMenuItem className="text-xs focus:bg-[#1F1F1F] focus:text-white" data-testid={`ctx-dup-${el.id}`} onSelect={() => onDuplicate(el.id)}>Duplicate</ContextMenuItem>
-                  <ContextMenuSeparator className="bg-[#2B2B2B]" />
-                  <ContextMenuItem className="text-xs text-red-400 focus:bg-[#1F1F1F] focus:text-red-400" data-testid={`ctx-del-${el.id}`} onSelect={() => onDelete(el.id)}>Delete</ContextMenuItem>
+                <ContextMenuContent className="bg-[#1C1A15] border-[#332D22] text-[#F1EDE2]" data-testid={`el-ctxmenu-${el.id}`}>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-edit-${el.id}`} onSelect={() => { setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}>Edit text inline</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-save-${el.id}`} onSelect={() => onSaveComponent && onSaveComponent(el)}>Save as component</ContextMenuItem>
+                  <ContextMenuSeparator className="bg-[#332D22]" />
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-up-${el.id}`} onSelect={() => onMove(el.id, -1)}>Move up</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-down-${el.id}`} onSelect={() => onMove(el.id, 1)}>Move down</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-dup-${el.id}`} onSelect={() => onDuplicate(el.id)}>Duplicate</ContextMenuItem>
+                  <ContextMenuSeparator className="bg-[#332D22]" />
+                  <ContextMenuItem className="text-xs text-red-400 focus:bg-[#242019] focus:text-red-400" data-testid={`ctx-del-${el.id}`} onSelect={() => onDelete(el.id)}>Delete</ContextMenuItem>
                 </ContextMenuContent>
               </ContextMenu>
             </React.Fragment>
@@ -149,7 +149,7 @@ const IconBtn = ({ children, onClick, title, danger, testId }) => (
     onClick={onClick}
     title={title}
     data-testid={testId}
-    className={`w-6 h-6 flex items-center justify-center rounded border border-[#2B2B2B] bg-[#141414]/95 text-gray-200 hover:${danger ? "text-red-400" : "text-white"} hover:bg-[#1F1F1F]`}
+    className={`w-6 h-6 flex items-center justify-center rounded border border-[#332D22] bg-[#1C1A15]/95 text-[#F1EDE2] hover:${danger ? "text-red-400" : "text-[#F1EDE2]"} hover:bg-[#242019]`}
   >{children}</button>
 );
 
@@ -160,7 +160,7 @@ const DropSlot = ({ onDrop, onDragOver, index, tail }) => {
       onDragOver={(e) => { onDragOver(e); setHover(true); }}
       onDragLeave={() => setHover(false)}
       onDrop={(e) => { setHover(false); onDrop(e); }}
-      className={`transition-all ${hover ? "h-8 bg-blue-500/20" : tail ? "h-4" : "h-1"}`}
+      className={`transition-all ${hover ? "h-8 bg-[#C9A227]/20" : tail ? "h-4" : "h-1"}`}
       data-testid={`drop-slot-${index}`}
     />
   );

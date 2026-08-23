@@ -6,8 +6,8 @@ import { CreditCard, Loader2, ExternalLink, Copy } from "lucide-react";
 import { stripeButtonHtml, paypalButtonHtml, CURRENCY_SYMBOL } from "@/lib/commerce";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2.5 py-2 text-sm text-white outline-none focus:border-indigo-500";
-const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
+const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2.5 py-2 text-sm text-[#F1EDE2] outline-none focus:border-indigo-500";
+const labelCls = "text-[10px] uppercase tracking-wider text-[#948C79] block mb-1";
 
 // Build a working "Buy" button for STATIC exported sites: Stripe Payment Link
 // (generated server-side) or PayPal Smart Buttons (client-side SDK).
@@ -58,18 +58,18 @@ export const PaymentButtonModal = ({ open, onClose, onInsert }) => {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-4xl w-[92vw] max-h-[90vh] overflow-hidden p-0" data-testid="payment-builder-modal">
-        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-4xl w-[92vw] max-h-[90vh] overflow-hidden p-0" data-testid="payment-builder-modal">
+        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#332D22]">
           <DialogTitle className="flex items-center gap-2 text-base"><CreditCard size={16} className="text-emerald-400" /> Add a payment button</DialogTitle>
           <DialogDescription className="sr-only">Generate a working Stripe or PayPal buy button for your site.</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-[1fr_1fr] max-h-[calc(90vh-58px)]">
           {/* Config */}
-          <div className="border-r border-[#2B2B2B] overflow-y-auto p-5 space-y-4">
+          <div className="border-r border-[#332D22] overflow-y-auto p-5 space-y-4">
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setProvider("stripe")} className={`py-2.5 rounded-lg text-sm font-medium border ${provider === "stripe" ? "bg-indigo-600 border-indigo-500 text-white" : "border-[#2B2B2B] text-gray-300 hover:border-indigo-500/50"}`} data-testid="pay-provider-stripe">Stripe</button>
-              <button onClick={() => setProvider("paypal")} className={`py-2.5 rounded-lg text-sm font-medium border ${provider === "paypal" ? "bg-[#0070ba] border-[#0070ba] text-white" : "border-[#2B2B2B] text-gray-300 hover:border-[#0070ba]/60"}`} data-testid="pay-provider-paypal">PayPal</button>
+              <button onClick={() => setProvider("stripe")} className={`py-2.5 rounded-lg text-sm font-medium border ${provider === "stripe" ? "bg-indigo-600 border-indigo-500 text-[#F1EDE2]" : "border-[#332D22] text-[#E4DECE] hover:border-indigo-500/50"}`} data-testid="pay-provider-stripe">Stripe</button>
+              <button onClick={() => setProvider("paypal")} className={`py-2.5 rounded-lg text-sm font-medium border ${provider === "paypal" ? "bg-[#0070ba] border-[#0070ba] text-[#F1EDE2]" : "border-[#332D22] text-[#E4DECE] hover:border-[#0070ba]/60"}`} data-testid="pay-provider-paypal">PayPal</button>
             </div>
 
             <div>
@@ -95,17 +95,17 @@ export const PaymentButtonModal = ({ open, onClose, onInsert }) => {
 
             {provider === "stripe" && (
               <div className="space-y-2 pt-1">
-                <button onClick={generateStripe} disabled={loading} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium disabled:opacity-50" data-testid="pay-stripe-generate">
+                <button onClick={generateStripe} disabled={loading} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2] text-sm font-medium disabled:opacity-50" data-testid="pay-stripe-generate">
                   {loading ? <><Loader2 size={14} className="animate-spin" /> Creating link…</> : "Generate Stripe payment link"}
                 </button>
                 {stripeLink && (
-                  <div className="text-[11px] bg-[#0D0D0D] border border-[#2B2B2B] rounded p-2 flex items-center gap-2" data-testid="pay-stripe-link">
+                  <div className="text-[11px] bg-[#15130E] border border-[#332D22] rounded p-2 flex items-center gap-2" data-testid="pay-stripe-link">
                     <a href={stripeLink} target="_blank" rel="noopener" className="text-indigo-400 truncate flex-1">{stripeLink}</a>
-                    <button onClick={() => { navigator.clipboard.writeText(stripeLink); toast.success("Link copied"); }} className="text-gray-400 hover:text-white"><Copy size={12} /></button>
-                    <a href={stripeLink} target="_blank" rel="noopener" className="text-gray-400 hover:text-white"><ExternalLink size={12} /></a>
+                    <button onClick={() => { navigator.clipboard.writeText(stripeLink); toast.success("Link copied"); }} className="text-[#A79C87] hover:text-[#F1EDE2]"><Copy size={12} /></button>
+                    <a href={stripeLink} target="_blank" rel="noopener" className="text-[#A79C87] hover:text-[#F1EDE2]"><ExternalLink size={12} /></a>
                   </div>
                 )}
-                <p className="text-[11px] text-gray-500">Test mode is active — use card <span className="font-mono text-gray-400">4242 4242 4242 4242</span> at checkout. Claim your account later to go live.</p>
+                <p className="text-[11px] text-[#948C79]">Test mode is active — use card <span className="font-mono text-[#A79C87]">4242 4242 4242 4242</span> at checkout. Claim your account later to go live.</p>
               </div>
             )}
 
@@ -115,16 +115,16 @@ export const PaymentButtonModal = ({ open, onClose, onInsert }) => {
                   <label className={labelCls}>PayPal Client ID</label>
                   <input value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder="AeA1QI…  (or 'test' for a demo)" className={inputCls + " font-mono"} data-testid="pay-paypal-clientid" />
                 </div>
-                <p className="text-[11px] text-gray-500">Get your Client ID from <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener" className="text-[#0070ba] underline">developer.paypal.com</a>. Buttons render fully client-side, so they work on your published static site.</p>
+                <p className="text-[11px] text-[#948C79]">Get your Client ID from <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener" className="text-[#0070ba] underline">developer.paypal.com</a>. Buttons render fully client-side, so they work on your published static site.</p>
               </div>
             )}
           </div>
 
           {/* Preview */}
           <div className="flex flex-col overflow-hidden bg-[#f5f5f5]">
-            <div className="px-4 py-2 border-b border-[#2B2B2B] bg-[#141414] flex justify-between items-center">
-              <div className="text-[11px] uppercase tracking-widest text-gray-400">Live preview</div>
-              <button onClick={insert} className="text-xs px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium" data-testid="pay-insert">Insert onto canvas</button>
+            <div className="px-4 py-2 border-b border-[#332D22] bg-[#1C1A15] flex justify-between items-center">
+              <div className="text-[11px] uppercase tracking-widest text-[#A79C87]">Live preview</div>
+              <button onClick={insert} className="text-xs px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-[#F1EDE2] font-medium" data-testid="pay-insert">Insert onto canvas</button>
             </div>
             <iframe
               title="payment-preview"

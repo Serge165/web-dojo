@@ -41,11 +41,11 @@ const AESTHETIC_PREVIEWS = {
 };
 
 const StarterCard = ({ tpl, onPreview }) => {
-  const preview = AESTHETIC_PREVIEWS[tpl.aesthetic] || { bg: "#1F1F1F", fg: "#ffffff" };
+  const preview = AESTHETIC_PREVIEWS[tpl.aesthetic] || { bg: "#242019", fg: "#ffffff" };
   return (
     <button
       onClick={() => onPreview(tpl)}
-      className="text-left rounded-lg border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60 overflow-hidden transition-colors group relative"
+      className="text-left rounded-lg border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60 overflow-hidden transition-colors group relative"
       data-testid={`tpl-preview-${tpl.id}`}
     >
       <div
@@ -57,15 +57,15 @@ const StarterCard = ({ tpl, onPreview }) => {
           className="text-[11px] font-semibold uppercase tracking-widest opacity-90"
         >{tpl.aesthetic}</span>
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-white text-xs font-medium flex items-center gap-1.5"><Eye size={12} /> Preview</span>
+          <span className="text-[#F1EDE2] text-xs font-medium flex items-center gap-1.5"><Eye size={12} /> Preview</span>
         </div>
       </div>
       <div className="p-3">
-        <div className="flex items-center gap-1.5 text-sm text-white truncate">
+        <div className="flex items-center gap-1.5 text-sm text-[#F1EDE2] truncate">
           <Sparkles size={11} className="text-amber-400 shrink-0" />
           {tpl.name}
         </div>
-        <div className="text-[11px] text-gray-500 line-clamp-2 mt-1">{tpl.description || "—"}</div>
+        <div className="text-[11px] text-[#948C79] line-clamp-2 mt-1">{tpl.description || "—"}</div>
       </div>
     </button>
   );
@@ -80,21 +80,21 @@ const TemplatePreviewModal = ({ tpl, onClose, onUse }) => {
   const width = viewport === "mobile" ? 390 : viewport === "tablet" ? 820 : 1280;
   return (
     <Dialog open={!!tpl} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-[95vw] w-[95vw] max-h-[92vh] overflow-hidden p-0" data-testid="template-preview-modal">
-        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-[95vw] w-[95vw] max-h-[92vh] overflow-hidden p-0" data-testid="template-preview-modal">
+        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#332D22]">
           <DialogTitle className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-base">
               <Sparkles size={14} className="text-amber-400" />
               {tpl.name}
-              <span className="text-[10px] uppercase tracking-widest text-gray-500 border border-[#2B2B2B] rounded px-1.5 py-0.5">{tpl.aesthetic}</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#948C79] border border-[#332D22] rounded px-1.5 py-0.5">{tpl.aesthetic}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5" data-testid="preview-viewport">
+              <div className="flex items-center bg-[#15130E] border border-[#332D22] rounded-md p-0.5" data-testid="preview-viewport">
                 {[{ id: "desktop", Icon: Monitor }, { id: "tablet", Icon: Tablet }, { id: "mobile", Icon: Smartphone }].map(({ id, Icon }) => (
                   <button
                     key={id}
                     onClick={() => setViewport(id)}
-                    className={`p-1.5 rounded ${viewport === id ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+                    className={`p-1.5 rounded ${viewport === id ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
                     data-testid={`preview-${id}`}
                     title={id}
                   ><Icon size={12} /></button>
@@ -102,22 +102,22 @@ const TemplatePreviewModal = ({ tpl, onClose, onUse }) => {
               </div>
               <button
                 onClick={onClose}
-                className="text-xs px-3 py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+                className="text-xs px-3 py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
                 data-testid="preview-cancel"
               >Close</button>
               <button
                 onClick={() => onUse(tpl)}
-                className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium"
+                className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] font-medium"
                 data-testid="preview-use"
               >Use this template</button>
             </div>
           </DialogTitle>
         </DialogHeader>
-        <div className="flex-1 bg-[#0D0D0D] overflow-auto p-6 flex justify-center items-start" style={{ height: "calc(92vh - 68px)" }}>
+        <div className="flex-1 bg-[#15130E] overflow-auto p-6 flex justify-center items-start" style={{ height: "calc(92vh - 68px)" }}>
           <iframe
             title="template-preview"
             srcDoc={html}
-            className="bg-white shadow-2xl border border-[#2B2B2B] transition-all"
+            className="bg-white shadow-2xl border border-[#332D22] transition-all"
             style={{ width: `${width}px`, minHeight: "600px", height: "100%" }}
             sandbox="allow-same-origin"
             data-testid="template-preview-iframe"
@@ -129,20 +129,20 @@ const TemplatePreviewModal = ({ tpl, onClose, onUse }) => {
 };
 
 const UserTemplateRow = ({ tpl, onUse, onDelete }) => (
-  <div className="p-3 rounded border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60" data-testid={`tpl-row-${tpl.id}`}>
+  <div className="p-3 rounded border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60" data-testid={`tpl-row-${tpl.id}`}>
     <div className="flex items-start gap-2">
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 text-sm text-white truncate">
-          <Bookmark size={11} className="text-blue-400 shrink-0" />
+        <div className="flex items-center gap-1.5 text-sm text-[#F1EDE2] truncate">
+          <Bookmark size={11} className="text-[#D9BC55] shrink-0" />
           {tpl.name}
         </div>
-        <div className="text-[11px] text-gray-500 line-clamp-2">{tpl.description || "—"}</div>
+        <div className="text-[11px] text-[#948C79] line-clamp-2">{tpl.description || "—"}</div>
       </div>
-      <button onClick={() => onDelete(tpl.id)} className="p-1 text-gray-500 hover:text-red-400" data-testid={`tpl-del-${tpl.id}`}><Trash2 size={12} /></button>
+      <button onClick={() => onDelete(tpl.id)} className="p-1 text-[#948C79] hover:text-red-400" data-testid={`tpl-del-${tpl.id}`}><Trash2 size={12} /></button>
     </div>
     <button
       onClick={() => onUse(tpl)}
-      className="mt-2 w-full text-xs py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+      className="mt-2 w-full text-xs py-1 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
       data-testid={`tpl-use-${tpl.id}`}
     >Use template</button>
   </div>
@@ -213,25 +213,25 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
   return (
     <>
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-3xl max-h-[85vh] overflow-y-auto" data-testid="templates-modal">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-3xl max-h-[85vh] overflow-y-auto" data-testid="templates-modal">
         <DialogHeader><DialogTitle>Project templates</DialogTitle></DialogHeader>
         <div className="space-y-5">
 
           {/* Search + filter */}
           <div className="flex flex-col gap-2">
             <div className="relative">
-              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-[#948C79]" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by name, description or aesthetic…"
-                className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded pl-6 pr-6 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                className="w-full bg-[#15130E] border border-[#332D22] rounded pl-6 pr-6 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                 data-testid="tpl-search"
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#948C79] hover:text-[#F1EDE2]"
                   data-testid="tpl-search-clear"
                 ><X size={12} /></button>
               )}
@@ -239,14 +239,14 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
             <div className="flex flex-wrap gap-1" data-testid="aesthetic-filter">
               <button
                 onClick={() => setAestheticFilter("")}
-                className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === "" ? "border-blue-500 bg-blue-500/20 text-white" : "border-[#2B2B2B] bg-[#0D0D0D] text-gray-400 hover:border-blue-500/60"}`}
+                className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === "" ? "border-[#C9A227] bg-[#C9A227]/20 text-[#F1EDE2]" : "border-[#332D22] bg-[#15130E] text-[#A79C87] hover:border-[#C9A227]/60"}`}
                 data-testid="aesthetic-all"
               >All · {templates.filter((t) => t.is_starter).length}</button>
               {aesthetics.map((a) => (
                 <button
                   key={a}
                   onClick={() => setAestheticFilter(a === aestheticFilter ? "" : a)}
-                  className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === a ? "border-amber-400 bg-amber-400/15 text-white" : "border-[#2B2B2B] bg-[#0D0D0D] text-gray-400 hover:border-amber-400/60"}`}
+                  className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === a ? "border-amber-400 bg-amber-400/15 text-[#F1EDE2]" : "border-[#332D22] bg-[#15130E] text-[#A79C87] hover:border-amber-400/60"}`}
                   data-testid={`aesthetic-${a}`}
                 >{a}</button>
               ))}
@@ -257,8 +257,8 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={13} className="text-amber-400" />
-              <div className="text-[11px] uppercase tracking-widest text-gray-400">Starter gallery · aesthetics</div>
-              <div className="text-[10px] text-gray-600">{starters.length} showing</div>
+              <div className="text-[11px] uppercase tracking-widest text-[#A79C87]">Starter gallery · aesthetics</div>
+              <div className="text-[10px] text-[#6B6353]">{starters.length} showing</div>
             </div>
             <div className="grid grid-cols-3 gap-2" data-testid="starter-gallery">
               {starters.map((t) => (
@@ -266,16 +266,16 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
               ))}
             </div>
             {starters.length === 0 && (
-              <div className="text-[11px] text-gray-500 py-6 text-center border border-dashed border-[#2B2B2B] rounded">No aesthetics match your search.</div>
+              <div className="text-[11px] text-[#948C79] py-6 text-center border border-dashed border-[#332D22] rounded">No aesthetics match your search.</div>
             )}
           </div>
 
           {/* User templates */}
           <div>
-            <div className="text-[11px] uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2">
-              <Bookmark size={13} className="text-blue-400" /> Your templates
+            <div className="text-[11px] uppercase tracking-widest text-[#A79C87] mb-2 flex items-center gap-2">
+              <Bookmark size={13} className="text-[#D9BC55]" /> Your templates
             </div>
-            {userTemplates.length === 0 && <div className="text-[11px] text-gray-500 py-4 text-center border border-dashed border-[#2B2B2B] rounded">No custom templates yet — save your current project below.</div>}
+            {userTemplates.length === 0 && <div className="text-[11px] text-[#948C79] py-4 text-center border border-dashed border-[#332D22] rounded">No custom templates yet — save your current project below.</div>}
             {userTemplates.length > 0 && (
               <div className="grid grid-cols-2 gap-2">
                 {userTemplates.map((t) => (
@@ -291,17 +291,17 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
           </div>
 
           {/* Save current project as template */}
-          <div className="p-3 rounded border border-[#2B2B2B] bg-[#0D0D0D] space-y-2">
-            <div className="text-[10px] uppercase tracking-wider text-gray-500">Save current project as template</div>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500" data-testid="tpl-name" />
-            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500" data-testid="tpl-desc" />
-            <button onClick={saveTemplate} disabled={busy} className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white" data-testid="tpl-save">
+          <div className="p-3 rounded border border-[#332D22] bg-[#15130E] space-y-2">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Save current project as template</div>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-name" />
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-desc" />
+            <button onClick={saveTemplate} disabled={busy} className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2]" data-testid="tpl-save">
               {busy ? "Saving…" : "Save as template"}
             </button>
           </div>
 
           <div className="flex justify-end">
-            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="tpl-close">Close</button>
+            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="tpl-close">Close</button>
           </div>
         </div>
       </DialogContent>

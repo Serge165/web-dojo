@@ -45,7 +45,7 @@ export const ColorPicker = ({ value = "#2563eb", alpha = 1, onChange }) => {
         role="button"
         tabIndex={0}
         onClick={handleSquareClick}
-        className="relative w-full h-40 rounded-md border border-[#2B2B2B] cursor-crosshair"
+        className="relative w-full h-28 rounded-md border border-[#332D22] cursor-crosshair"
         style={{ background: svBg }}
         data-testid="color-sv-square"
       >
@@ -57,7 +57,7 @@ export const ColorPicker = ({ value = "#2563eb", alpha = 1, onChange }) => {
       </div>
 
       <div>
-        <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Hue</label>
+        <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Hue</label>
         <input
           type="range"
           min={0}
@@ -74,7 +74,7 @@ export const ColorPicker = ({ value = "#2563eb", alpha = 1, onChange }) => {
       </div>
 
       <div>
-        <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Alpha</label>
+        <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Alpha</label>
         <input
           type="range"
           min={0}
@@ -88,30 +88,30 @@ export const ColorPicker = ({ value = "#2563eb", alpha = 1, onChange }) => {
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Hex</label>
+          <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Hex</label>
           <input
             value={alpha < 1 ? rgbToHex({ ...rgb, a: alpha }) : value}
             onChange={(e) => updateFromHex(e.target.value)}
-            className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded-md px-2 py-1.5 text-xs font-mono text-white focus:border-blue-500 outline-none"
+            className="w-full bg-[#15130E] border border-[#332D22] rounded-md px-2 py-1.5 text-xs font-mono text-[#F1EDE2] focus:border-[#C9A227] outline-none"
             data-testid="color-hex-input"
           />
         </div>
         <div className="flex items-end">
-          <div className="w-full h-8 rounded-md border border-[#2B2B2B]" style={{ background: rgbaString({ ...rgb, a: alpha }) }} data-testid="color-swatch" />
+          <div className="w-full h-8 rounded-md border border-[#332D22]" style={{ background: rgbaString({ ...rgb, a: alpha }) }} data-testid="color-swatch" />
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
         {["r", "g", "b"].map((k) => (
           <div key={k}>
-            <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">{k.toUpperCase()}</label>
+            <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">{k.toUpperCase()}</label>
             <input
               type="number"
               min={0}
               max={255}
               value={rgb[k]}
               onChange={(e) => updateFromRgb(k, e.target.value)}
-              className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded-md px-2 py-1 text-xs font-mono text-white focus:border-blue-500 outline-none"
+              className="w-full bg-[#15130E] border border-[#332D22] rounded-md px-2 py-1 text-xs font-mono text-[#F1EDE2] focus:border-[#C9A227] outline-none"
               data-testid={`color-${k}-input`}
             />
           </div>
@@ -121,14 +121,14 @@ export const ColorPicker = ({ value = "#2563eb", alpha = 1, onChange }) => {
       <div className="grid grid-cols-3 gap-2">
         {["h", "s", "l"].map((k) => (
           <div key={k}>
-            <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">{k.toUpperCase()}</label>
+            <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">{k.toUpperCase()}</label>
             <input
               type="number"
               min={0}
               max={k === "h" ? 360 : 100}
               value={hsl[k]}
               onChange={(e) => updateFromHsl(k, e.target.value)}
-              className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded-md px-2 py-1 text-xs font-mono text-white focus:border-blue-500 outline-none"
+              className="w-full bg-[#15130E] border border-[#332D22] rounded-md px-2 py-1 text-xs font-mono text-[#F1EDE2] focus:border-[#C9A227] outline-none"
               data-testid={`color-${k}-input`}
             />
           </div>

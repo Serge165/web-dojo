@@ -71,28 +71,28 @@ export const MenuBar = ({
   ];
 
   return (
-    <div ref={rootRef} className="h-7 flex-none border-b border-[#2B2B2B] bg-[#141414] flex items-center px-2 gap-0.5 relative" data-testid="menu-bar">
+    <div ref={rootRef} className="h-7 flex-none border-b border-[#332D22] bg-[#1C1A15] flex items-center px-2 gap-0.5 relative" data-testid="menu-bar">
       {menus.map((m) => (
         <div key={m.id} className="relative">
           <button
             onClick={() => setOpenMenu((v) => (v === m.id ? null : m.id))}
-            className={`text-[11px] px-2.5 py-1 rounded ${openMenu === m.id ? "bg-[#2B2B2B] text-white" : "text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]"}`}
+            className={`text-[11px] px-2.5 py-1 rounded ${openMenu === m.id ? "bg-[#332D22] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2] hover:bg-[#242019]"}`}
             data-testid={`menu-${m.id}`}
           >{m.label}</button>
           {openMenu === m.id && (
-            <div className="absolute left-0 top-7 w-56 bg-[#141414] border border-[#2B2B2B] rounded-md py-1 z-50 shadow-2xl" data-testid={`menu-${m.id}-panel`}>
+            <div className="absolute left-0 top-7 w-56 bg-[#1C1A15] border border-[#332D22] rounded-md py-1 z-50 shadow-2xl" data-testid={`menu-${m.id}-panel`}>
               {m.items.map((item, i) => item.sep ? (
-                <div key={i} className="h-px bg-[#2B2B2B] my-1" />
+                <div key={i} className="h-px bg-[#332D22] my-1" />
               ) : (
                 <button
                   key={item.label}
                   disabled={item.disabled}
                   onClick={() => run(item.onClick)}
-                  className="w-full flex items-center justify-between text-left text-xs px-3 py-1.5 text-gray-200 hover:bg-[#1F1F1F] disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-between text-left text-xs px-3 py-1.5 text-[#F1EDE2] hover:bg-[#242019] disabled:opacity-30 disabled:cursor-not-allowed"
                   data-testid={`menu-${m.id}-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                 >
                   <span>{item.label}</span>
-                  {item.shortcut && <span className="text-gray-500 font-mono text-[10px]">{item.shortcut}</span>}
+                  {item.shortcut && <span className="text-[#948C79] font-mono text-[10px]">{item.shortcut}</span>}
                 </button>
               ))}
             </div>

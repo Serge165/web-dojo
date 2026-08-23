@@ -90,16 +90,16 @@ export const LeftSidebar = ({
       onDragStart={(e) => onDragStart(e, stamped)}
       onDoubleClick={() => onAddBlock(stamped)}
       {...previewProps(stamped)}
-      className="rounded bg-[#1F1F1F] border border-[#2B2B2B] p-2 flex items-center gap-2 cursor-grab hover:border-blue-500/60 hover:bg-[#232323] transition-colors group"
+      className="rounded bg-[#242019] border border-[#332D22] p-2 flex items-center gap-2 cursor-grab hover:border-[#C9A227]/60 hover:bg-[#332D22] transition-colors group"
       data-testid={testId}
       title="Drag to canvas or double-click to insert"
     >
-      <div className="w-1 h-4 bg-blue-500/60 rounded-full" />
-      <span className="text-xs text-gray-200 flex-1 truncate">{label}</span>
+      <div className="w-1 h-4 bg-[#C9A227]/60 rounded-full" />
+      <span className="text-xs text-[#F1EDE2] flex-1 truncate">{label}</span>
       {onDelete && (
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400"
+          className="opacity-0 group-hover:opacity-100 text-[#A79C87] hover:text-red-400"
           title="Delete saved component"
           data-testid={`${testId}-del`}
         ><Trash2 size={11} /></button>
@@ -109,8 +109,8 @@ export const LeftSidebar = ({
   };
 
   return (
-    <aside className="w-64 flex-none border-r border-[#2B2B2B] bg-[#141414] flex flex-col overflow-hidden" data-testid="left-sidebar">
-      <div className="grid grid-cols-7 border-b border-[#2B2B2B] text-[10px]">
+    <aside className="w-64 flex-none border-r border-[#332D22] bg-[#1C1A15] flex flex-col overflow-hidden" data-testid="left-sidebar">
+      <div className="grid grid-cols-7 border-b border-[#332D22] text-[10px]">
         {[
           { id: "library", label: "Library" },
           { id: "layout", label: "Layout" },
@@ -123,7 +123,7 @@ export const LeftSidebar = ({
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`py-2 ${tab === t.id ? "text-white bg-[#1F1F1F]" : "text-gray-400 hover:text-gray-200"}`}
+            className={`py-2 ${tab === t.id ? "text-[#F1EDE2] bg-[#242019]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
             data-testid={`left-tab-${t.id}`}
           >{t.label}</button>
         ))}
@@ -132,20 +132,20 @@ export const LeftSidebar = ({
       {tab === "library" && (
         <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto">
-          <div className="px-2 pt-2 pb-1.5 sticky top-0 bg-[#141414] z-10 border-b border-[#2B2B2B]">
+          <div className="px-2 pt-2 pb-1.5 sticky top-0 bg-[#1C1A15] z-10 border-b border-[#332D22]">
             <div className="relative">
-              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-[#948C79]" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search components…"
-                className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded pl-6 pr-6 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                className="w-full bg-[#15130E] border border-[#332D22] rounded pl-6 pr-6 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                 data-testid="library-search"
               />
               {q && (
                 <button
                   onClick={() => setQ("")}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#948C79] hover:text-[#F1EDE2]"
                   data-testid="library-search-clear"
                 ><X size={12} /></button>
               )}
@@ -155,20 +155,20 @@ export const LeftSidebar = ({
             <div key={g.id} data-testid={`group-${g.id}`}>
               <button
                 onClick={() => toggleGroup(g.id)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 bg-[#0D0D0D] hover:text-gray-300 sticky top-[42px] z-[5]"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#948C79] bg-[#15130E] hover:text-[#E4DECE] sticky top-[42px] z-[5]"
                 data-testid={`group-toggle-${g.id}`}
               >
                 <span>{g.label}</span>
                 {(groupOpen[g.id] ?? true) || q ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
               </button>
               {((groupOpen[g.id] ?? true) || q) && g.categories.map((cat) => (
-                <div key={cat.id} className="border-b border-[#2B2B2B]">
+                <div key={cat.id} className="border-b border-[#332D22]">
                   <button
                     onClick={() => toggle(cat.id)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 hover:bg-[#1F1F1F]"
+                    className="w-full flex items-center justify-between px-3 py-2 text-[11px] uppercase tracking-wider text-[#E4DECE] hover:bg-[#242019]"
                     data-testid={`cat-toggle-${cat.id}`}
                   >
-                    <span>{cat.label} <span className="text-gray-500 normal-case">· {cat.blocks.length}</span></span>
+                    <span>{cat.label} <span className="text-[#948C79] normal-case">· {cat.blocks.length}</span></span>
                     {(open[cat.id] ?? true) || q ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </button>
                   {((open[cat.id] ?? true) || q) && (
@@ -183,25 +183,25 @@ export const LeftSidebar = ({
             </div>
           ))}
           {groupedCategories.length === 0 && (
-            <div className="text-[11px] text-gray-500 p-4 text-center">No components match "{q}"</div>
+            <div className="text-[11px] text-[#948C79] p-4 text-center">No components match "{q}"</div>
           )}
 
           {/* Cards with count */}
-          <div className="border-b border-[#2B2B2B]">
-            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300">Cards</div>
+          <div className="border-b border-[#332D22]">
+            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-[#E4DECE]">Cards</div>
             <div className="px-3 pb-3 space-y-2">
               <div className="flex items-center gap-2">
-                <label className="text-[11px] text-gray-500">Count</label>
+                <label className="text-[11px] text-[#948C79]">Count</label>
                 <input
                   type="number" min={1} max={6} value={cardCount}
                   onChange={(e) => setCardCount(Math.min(6, Math.max(1, Number(e.target.value) || 1)))}
-                  className="w-16 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-xs font-mono text-white outline-none focus:border-blue-500"
+                  className="w-16 bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                   data-testid="cards-count-input"
                 />
               </div>
               <button
                 onClick={() => onAddBlock(cardTemplate(cardCount))}
-                className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-1"
+                className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] flex items-center justify-center gap-1"
                 data-testid="cards-insert-btn"
               ><Plus size={12} /> Insert card row</button>
             </div>
@@ -209,12 +209,12 @@ export const LeftSidebar = ({
 
           {/* CDN-aware tools */}
           {cdnComponentGroups(headHtml).length > 0 && (
-            <div className="border-b border-[#2B2B2B]">
+            <div className="border-b border-[#332D22]">
               <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-emerald-300/80">From your CDNs</div>
               <div className="px-3 pb-3 space-y-3" data-testid="cdn-tools">
                 {cdnComponentGroups(headHtml).map((g) => (
                   <div key={g.id}>
-                    <div className="text-[10px] text-gray-500 mb-1.5">{g.label}</div>
+                    <div className="text-[10px] text-[#948C79] mb-1.5">{g.label}</div>
                     <div className="space-y-1.5">
                       {g.blocks.map((b) => (
                         <BlockItem key={b.id} label={b.label} html={b.html} catId={g.id} blockId={b.id} testId={`cdn-block-${b.id}`} />
@@ -227,40 +227,40 @@ export const LeftSidebar = ({
           )}
 
           {/* Social buttons */}
-          <div className="border-b border-[#2B2B2B]">
-            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 flex items-center gap-1.5"><Share2 size={12} /> Social buttons</div>
+          <div className="border-b border-[#332D22]">
+            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-[#E4DECE] flex items-center gap-1.5"><Share2 size={12} /> Social buttons</div>
             <div className="px-3 pb-3">
               <button
                 onClick={onOpenSocialBuilder}
-                className="w-full text-xs py-2 rounded bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white flex items-center justify-center gap-1.5 font-medium"
+                className="w-full text-xs py-2 rounded bg-[#242019] border border-[#332D22] hover:border-[#C9A227]/60 hover:bg-[#332D22] text-[#F1EDE2] flex items-center justify-center gap-1.5 font-medium"
                 data-testid="open-social-builder"
-              ><Share2 size={12} /> Open social builder</button>
-              <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed">Share bar or profile links — pick platforms, shape, style & hover animation.</p>
+              ><Share2 size={12} className="text-[#C9A227]" /> Open social builder</button>
+              <p className="text-[10px] text-[#948C79] mt-1.5 leading-relaxed">Share bar or profile links — pick platforms, shape, style & hover animation.</p>
             </div>
           </div>
 
           {/* Stream / community embeds */}
-          <div className="border-b border-[#2B2B2B]">
-            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 flex items-center gap-1.5"><Radio size={12} /> Live stream / community</div>
+          <div className="border-b border-[#332D22]">
+            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-[#E4DECE] flex items-center gap-1.5"><Radio size={12} /> Live stream / community</div>
             <div className="px-3 pb-3">
               <button
                 onClick={onOpenStreamEmbed}
-                className="w-full text-xs py-2 rounded bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white flex items-center justify-center gap-1.5 font-medium"
+                className="w-full text-xs py-2 rounded bg-[#242019] border border-[#332D22] hover:border-[#C9A227]/60 hover:bg-[#332D22] text-[#F1EDE2] flex items-center justify-center gap-1.5 font-medium"
                 data-testid="open-stream-embed-builder"
-              ><Radio size={12} /> Add Twitch / YouTube / Discord embed</button>
-              <p className="text-[10px] text-gray-500 mt-1.5 leading-relaxed">Real, working embeds — no API keys needed.</p>
+              ><Radio size={12} className="text-[#C9A227]" /> Add Twitch / YouTube / Discord embed</button>
+              <p className="text-[10px] text-[#948C79] mt-1.5 leading-relaxed">Real, working embeds — no API keys needed.</p>
             </div>
           </div>
 
           {/* Fonts */}
-          <div className="border-b border-[#2B2B2B]">
-            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-gray-300 flex items-center gap-1.5"><Type size={12} /> Fonts</div>
+          <div className="border-b border-[#332D22]">
+            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-[#E4DECE] flex items-center gap-1.5"><Type size={12} /> Fonts</div>
             <div className="px-3 pb-3 space-y-2">
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Web-safe</label>
+                <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Web-safe</label>
                 <select
                   onChange={(e) => onAddFont({ family: e.target.value, google: false })}
-                  className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                  className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                   defaultValue=""
                   data-testid="font-websafe-select"
                 >
@@ -269,22 +269,22 @@ export const LeftSidebar = ({
                 </select>
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Google Font</label>
+                <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Google Font</label>
                 <div className="flex gap-1.5">
-                  <input value={gFont} onChange={(e) => setGFont(e.target.value)} placeholder="e.g. Inter" className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500" data-testid="font-google-input" />
+                  <input value={gFont} onChange={(e) => setGFont(e.target.value)} placeholder="e.g. Inter" className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="font-google-input" />
                   <button
                     onClick={() => gFont.trim() && onAddFont({ family: gFont.trim(), google: true })}
-                    className="px-2 py-1 rounded bg-[#1F1F1F] border border-[#2B2B2B] text-xs text-gray-200 hover:bg-[#2B2B2B]"
+                    className="px-2 py-1 rounded bg-[#242019] border border-[#332D22] text-xs text-[#F1EDE2] hover:bg-[#332D22]"
                     data-testid="font-google-add-btn"
                   >Add</button>
                 </div>
               </div>
               {fonts.length > 0 && (
                 <div className="pt-1">
-                  <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Loaded</div>
+                  <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1">Loaded</div>
                   <div className="flex flex-wrap gap-1">
                     {fonts.map((f) => (
-                      <span key={f} className="text-[10px] px-1.5 py-0.5 rounded bg-[#1F1F1F] border border-[#2B2B2B] text-gray-300">{f}</span>
+                      <span key={f} className="text-[10px] px-1.5 py-0.5 rounded bg-[#242019] border border-[#332D22] text-[#E4DECE]">{f}</span>
                     ))}
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export const LeftSidebar = ({
       {tab === "saved" && (
         <div className="flex-1 overflow-y-auto p-2 space-y-2" data-testid="saved-components">
           {savedComponents.length === 0 && (
-            <div className="text-[11px] text-gray-500 p-3 text-center">
+            <div className="text-[11px] text-[#948C79] p-3 text-center">
               Click the save icon on any canvas element to keep it here for future projects.
             </div>
           )}
@@ -329,7 +329,7 @@ export const LeftSidebar = ({
               draggable
               onDragStart={(e) => { e.dataTransfer.setData("text/html-block", c.html); e.dataTransfer.effectAllowed = "copy"; }}
               onDoubleClick={() => onAddBlock(c.html)}
-              className="rounded overflow-hidden border border-[#2B2B2B] bg-[#1F1F1F] hover:border-blue-500/60 cursor-grab group"
+              className="rounded overflow-hidden border border-[#332D22] bg-[#242019] hover:border-[#C9A227]/60 cursor-grab group"
               data-testid={`saved-${c.id}`}
               title="Drag to canvas or double-click to insert"
             >
@@ -337,11 +337,11 @@ export const LeftSidebar = ({
                 <ComponentThumbnail html={c.html} width={232} height={120} scale={0.18} />
               </div>
               <div className="flex items-center gap-2 px-2 py-1.5">
-                <div className="w-1 h-3 bg-blue-500/60 rounded-full" />
-                <span className="text-xs text-gray-200 flex-1 truncate">{c.name}</span>
+                <div className="w-1 h-3 bg-[#C9A227]/60 rounded-full" />
+                <span className="text-xs text-[#F1EDE2] flex-1 truncate">{c.name}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); onDeleteSavedComponent(c.id); }}
-                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400"
+                  className="opacity-0 group-hover:opacity-100 text-[#A79C87] hover:text-red-400"
                   title="Delete saved component"
                   data-testid={`saved-${c.id}-del`}
                 ><Trash2 size={11} /></button>

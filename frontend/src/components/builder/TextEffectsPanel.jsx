@@ -138,10 +138,10 @@ const mergeStyleIntoRootTag = (html, styleObj) => {
 };
 
 const FxChip = ({ testid, onClick, previewHtml, label, animated }) => (
-  <button onClick={onClick} data-testid={testid} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group bg-[#0D0D0D]" title={label}>
+  <button onClick={onClick} data-testid={testid} className="relative rounded border border-[#332D22] hover:border-[#C9A227] overflow-hidden group bg-[#15130E]" title={label}>
     <div className="h-9 flex items-center justify-center px-1" dangerouslySetInnerHTML={{ __html: previewHtml }} />
-    <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{label}</div>
-    {animated && <span className="absolute top-0.5 right-0.5 text-[7px] px-1 rounded bg-blue-600/70 text-white">anim</span>}
+    <div className="text-[9px] text-[#A79C87] py-0.5 bg-[#1C1A15] group-hover:text-[#F1EDE2] truncate px-1 text-center">{label}</div>
+    {animated && <span className="absolute top-0.5 right-0.5 text-[7px] px-1 rounded bg-[#AD8B21]/70 text-[#F1EDE2]">anim</span>}
   </button>
 );
 
@@ -371,16 +371,16 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       {/* Intensity */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Gauge size={12} /> FX intensity</span>
-          <span className="text-xs font-mono text-gray-300">{Math.round(intensity * 100)}%</span>
+          <span className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Gauge size={12} /> FX intensity</span>
+          <span className="text-xs font-mono text-[#E4DECE]">{Math.round(intensity * 100)}%</span>
         </div>
         <input type="range" min="25" max="250" value={Math.round(intensity * 100)} onChange={(e) => setIntensity(Number(e.target.value) / 100)} className="w-full" data-testid="textfx-intensity" />
-        <p className="text-[10px] text-gray-500">Scales glow, shadow &amp; stroke strength before you apply.</p>
+        <p className="text-[10px] text-[#948C79]">Scales glow, shadow &amp; stroke strength before you apply.</p>
       </div>
 
       {/* Fill & stroke */}
-      <div className="space-y-1.5 pt-3 border-t border-[#2B2B2B]">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Type size={12} /> Fill &amp; stroke</div>
+      <div className="space-y-1.5 pt-3 border-t border-[#332D22]">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Type size={12} /> Fill &amp; stroke</div>
         <div className="grid grid-cols-3 gap-1.5">
           {STATIC_FX.map((fx) => (
             <FxChip key={fx.id} testid={`textfx-static-${fx.id}`} onClick={() => applyStatic(fx)} label={fx.label}
@@ -390,8 +390,8 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       </div>
 
       {/* Animated */}
-      <div className="space-y-1.5 pt-3 border-t border-[#2B2B2B]">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Sparkles size={12} /> Animated</div>
+      <div className="space-y-1.5 pt-3 border-t border-[#332D22]">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Sparkles size={12} /> Animated</div>
         <div className="grid grid-cols-3 gap-1.5">
           {ANIM_FX.map((fx) => (
             <FxChip key={fx.id} testid={`textfx-anim-${fx.id}`} onClick={() => applyAnim(fx)} label={fx.label} animated
@@ -401,91 +401,91 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
       </div>
 
       {/* Hover */}
-      <div className="space-y-1.5 pt-3 border-t border-[#2B2B2B]">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><MousePointerClick size={12} /> Hover</div>
+      <div className="space-y-1.5 pt-3 border-t border-[#332D22]">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><MousePointerClick size={12} /> Hover</div>
         <div className="grid grid-cols-3 gap-1.5">
           {HOVER_FX.map((fx) => (
             <FxChip key={fx.id} testid={`textfx-hover-${fx.id}`} onClick={() => applyHover(fx)} label={fx.label}
               previewHtml={`<span style="font-weight:800;font-size:18px;line-height:1;color:#e5e7eb">Ag</span>`} />
           ))}
         </div>
-        <button onClick={stripHover} disabled={!hasHover} className="w-full flex items-center justify-center gap-1.5 text-[11px] py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed mt-1" data-testid="textfx-hover-clear"><Eraser size={11} /> Remove hover from element</button>
-        <p className="text-[10px] text-gray-500">Hover effects run on your published/previewed site. Preview them in the Preview tab.</p>
+        <button onClick={stripHover} disabled={!hasHover} className="w-full flex items-center justify-center gap-1.5 text-[11px] py-1.5 rounded border border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2] hover:border-[#948C79] disabled:opacity-40 disabled:cursor-not-allowed mt-1" data-testid="textfx-hover-clear"><Eraser size={11} /> Remove hover from element</button>
+        <p className="text-[10px] text-[#948C79]">Hover effects run on your published/previewed site. Preview them in the Preview tab.</p>
       </div>
 
       {/* Custom: outline color/thickness, directional shadow, 3D tilt, reflection */}
-      <div className="space-y-2 pt-3 border-t border-[#2B2B2B]">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><SlidersHorizontal size={12} /> Custom</div>
+      <div className="space-y-2 pt-3 border-t border-[#332D22]">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><SlidersHorizontal size={12} /> Custom</div>
 
-        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
-          <div className="text-[10px] text-gray-400">Outline</div>
+        <div className="space-y-1.5 p-2 rounded border border-[#332D22]">
+          <div className="text-[10px] text-[#A79C87]">Outline</div>
           <div className="flex items-center gap-2">
-            <input type="color" value={outlineColor} onChange={(e) => setOutlineColor(e.target.value)} className="w-8 h-7 bg-transparent border border-[#2B2B2B] rounded" data-testid="textfx-outline-color" />
+            <input type="color" value={outlineColor} onChange={(e) => setOutlineColor(e.target.value)} className="w-8 h-7 bg-transparent border border-[#332D22] rounded" data-testid="textfx-outline-color" />
             <input type="range" min={1} max={8} step={0.5} value={outlineThickness} onChange={(e) => setOutlineThickness(Number(e.target.value))} className="flex-1" data-testid="textfx-outline-thickness" />
-            <span className="w-9 text-right text-[10px] font-mono text-gray-300">{outlineThickness}px</span>
-            <button onClick={applyOutline} disabled={!selected} className="text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-outline-apply">Apply</button>
+            <span className="w-9 text-right text-[10px] font-mono text-[#E4DECE]">{outlineThickness}px</span>
+            <button onClick={applyOutline} disabled={!selected} className="text-[10px] px-2 py-1 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-outline-apply">Apply</button>
           </div>
         </div>
 
-        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
-          <div className="text-[10px] text-gray-400">Directional shadow</div>
+        <div className="space-y-1.5 p-2 rounded border border-[#332D22]">
+          <div className="text-[10px] text-[#A79C87]">Directional shadow</div>
           <div className="grid grid-cols-3 gap-1.5">
             <div>
-              <label className="text-[9px] text-gray-500 block">Angle ({shadowAngle}°)</label>
+              <label className="text-[9px] text-[#948C79] block">Angle ({shadowAngle}°)</label>
               <input type="range" min={0} max={360} value={shadowAngle} onChange={(e) => setShadowAngle(Number(e.target.value))} className="w-full" data-testid="textfx-shadow-angle" />
             </div>
             <div>
-              <label className="text-[9px] text-gray-500 block">Distance ({shadowDistance})</label>
+              <label className="text-[9px] text-[#948C79] block">Distance ({shadowDistance})</label>
               <input type="range" min={0} max={30} value={shadowDistance} onChange={(e) => setShadowDistance(Number(e.target.value))} className="w-full" data-testid="textfx-shadow-distance" />
             </div>
             <div>
-              <label className="text-[9px] text-gray-500 block">Blur ({shadowBlur})</label>
+              <label className="text-[9px] text-[#948C79] block">Blur ({shadowBlur})</label>
               <input type="range" min={0} max={20} value={shadowBlur} onChange={(e) => setShadowBlur(Number(e.target.value))} className="w-full" data-testid="textfx-shadow-blur" />
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <input type="color" value={shadowColor} onChange={(e) => setShadowColor(e.target.value)} className="w-8 h-7 bg-transparent border border-[#2B2B2B] rounded" data-testid="textfx-shadow-color" />
-            <button onClick={applyDirectionalShadow} disabled={!selected} className="flex-1 text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-shadow-apply">Apply</button>
+            <input type="color" value={shadowColor} onChange={(e) => setShadowColor(e.target.value)} className="w-8 h-7 bg-transparent border border-[#332D22] rounded" data-testid="textfx-shadow-color" />
+            <button onClick={applyDirectionalShadow} disabled={!selected} className="flex-1 text-[10px] px-2 py-1 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-shadow-apply">Apply</button>
           </div>
         </div>
 
-        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
-          <div className="text-[10px] text-gray-400">3D tilt</div>
+        <div className="space-y-1.5 p-2 rounded border border-[#332D22]">
+          <div className="text-[10px] text-[#A79C87]">3D tilt</div>
           <div className="flex items-center gap-2">
             <input type="range" min={-60} max={60} value={tiltDepth} onChange={(e) => setTiltDepth(Number(e.target.value))} className="flex-1" data-testid="textfx-tilt-depth" />
-            <span className="w-9 text-right text-[10px] font-mono text-gray-300">{tiltDepth}°</span>
-            <button onClick={applyTilt} disabled={!selected} className="text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-tilt-apply">Apply</button>
+            <span className="w-9 text-right text-[10px] font-mono text-[#E4DECE]">{tiltDepth}°</span>
+            <button onClick={applyTilt} disabled={!selected} className="text-[10px] px-2 py-1 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-tilt-apply">Apply</button>
           </div>
         </div>
 
-        <div className="space-y-1.5 p-2 rounded border border-[#2B2B2B]">
-          <div className="text-[10px] text-gray-400">Reflection</div>
+        <div className="space-y-1.5 p-2 rounded border border-[#332D22]">
+          <div className="text-[10px] text-[#A79C87]">Reflection</div>
           <div className="grid grid-cols-2 gap-1.5">
             <div>
-              <label className="text-[9px] text-gray-500 block">Distance ({reflectDistance})</label>
+              <label className="text-[9px] text-[#948C79] block">Distance ({reflectDistance})</label>
               <input type="range" min={0} max={20} value={reflectDistance} onChange={(e) => setReflectDistance(Number(e.target.value))} className="w-full" data-testid="textfx-reflect-distance" />
             </div>
             <div>
-              <label className="text-[9px] text-gray-500 block">Opacity ({reflectOpacity})</label>
+              <label className="text-[9px] text-[#948C79] block">Opacity ({reflectOpacity})</label>
               <input type="range" min={0} max={1} step={0.05} value={reflectOpacity} onChange={(e) => setReflectOpacity(Number(e.target.value))} className="w-full" data-testid="textfx-reflect-opacity" />
             </div>
           </div>
-          <button onClick={applyReflection} disabled={!selected} className="w-full text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-reflect-apply">Apply</button>
+          <button onClick={applyReflection} disabled={!selected} className="w-full text-[10px] px-2 py-1 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-reflect-apply">Apply</button>
         </div>
       </div>
 
-      <div className="pt-3 border-t border-[#2B2B2B] grid grid-cols-2 gap-2">
-        <button onClick={copyFx} disabled={!selected} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-copy"><Copy size={12} /> Copy style</button>
-        <button onClick={pasteFx} disabled={!selected || !clip} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-paste"><ClipboardPaste size={12} /> Paste style</button>
+      <div className="pt-3 border-t border-[#332D22] grid grid-cols-2 gap-2">
+        <button onClick={copyFx} disabled={!selected} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-copy"><Copy size={12} /> Copy style</button>
+        <button onClick={pasteFx} disabled={!selected || !clip} className="flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-paste"><ClipboardPaste size={12} /> Paste style</button>
       </div>
 
       {/* Style library (persists across projects via localStorage) */}
-      <div className="space-y-1.5 pt-3 border-t border-[#2B2B2B]">
+      <div className="space-y-1.5 pt-3 border-t border-[#332D22]">
         <div className="flex items-center justify-between">
-          <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Library size={12} /> Style library</div>
+          <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Library size={12} /> Style library</div>
           <div className="flex items-center gap-1">
-            <button onClick={exportLibrary} disabled={!library.length} className="p-1 rounded border border-[#2B2B2B] text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" title="Export library as a file" data-testid="style-lib-export"><Download size={11} /></button>
-            <button onClick={() => fileRef.current && fileRef.current.click()} className="p-1 rounded border border-[#2B2B2B] text-gray-400 hover:text-gray-200" title="Import a library file" data-testid="style-lib-import"><Upload size={11} /></button>
+            <button onClick={exportLibrary} disabled={!library.length} className="p-1 rounded border border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" title="Export library as a file" data-testid="style-lib-export"><Download size={11} /></button>
+            <button onClick={() => fileRef.current && fileRef.current.click()} className="p-1 rounded border border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]" title="Import a library file" data-testid="style-lib-import"><Upload size={11} /></button>
             <input ref={fileRef} type="file" accept="application/json,.json" onChange={importLibrary} className="hidden" data-testid="style-lib-import-input" />
           </div>
         </div>
@@ -493,11 +493,11 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
           <>
             {libCategories.length > 1 && (
               <div className="flex items-center gap-1.5">
-                <Filter size={11} className="text-gray-500 flex-none" />
+                <Filter size={11} className="text-[#948C79] flex-none" />
                 <select
                   value={libCategories.includes(libFilter) || libFilter === "all" ? libFilter : "all"}
                   onChange={(e) => setLibFilter(e.target.value)}
-                  className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[10px] text-gray-200 outline-none focus:border-blue-500"
+                  className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-[10px] text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                   data-testid="style-lib-filter"
                 >
                   <option value="all">{`All categories · ${library.length}`}</option>
@@ -515,23 +515,23 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
                   <div key={cat} data-testid={`style-lib-group-${cat}`}>
                     <button
                       onClick={() => toggleCollapsed(cat)}
-                      className="w-full flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-200 py-0.5"
+                      className="w-full flex items-center gap-1 text-[10px] text-[#A79C87] hover:text-[#F1EDE2] py-0.5"
                       data-testid={`style-lib-group-toggle-${cat}`}
                     >
                       {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                       <Folder size={11} className="text-amber-400/70" />
                       <span className="uppercase tracking-wider">{cat}</span>
-                      <span className="text-gray-600">· {items.length}</span>
+                      <span className="text-[#6B6353]">· {items.length}</span>
                     </button>
                     {isOpen && (
                       <div className="grid grid-cols-3 gap-1.5 mt-1">
                         {items.map((entry) => (
-                          <div key={entry.id} role="button" tabIndex={0} onClick={() => applyLibrary(entry)} data-testid={`style-lib-${entry.id}`} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group cursor-pointer" title={`Apply ${entry.name}`}>
+                          <div key={entry.id} role="button" tabIndex={0} onClick={() => applyLibrary(entry)} data-testid={`style-lib-${entry.id}`} className="relative rounded border border-[#332D22] hover:border-[#C9A227] overflow-hidden group cursor-pointer" title={`Apply ${entry.name}`}>
                             <div className="h-10 flex items-center justify-center" style={{ background: "linear-gradient(135deg,#eef2ff,#dbe2ef)" }}>
                               <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${libPreview(entry.style)}"></div>` }} />
                             </div>
-                            <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{entry.name}</div>
-                            <button onClick={(e) => { e.stopPropagation(); deleteLibrary(entry.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-gray-300 hover:text-red-400 opacity-70 hover:opacity-100" title="Delete" data-testid={`style-lib-delete-${entry.id}`}><X size={10} /></button>
+                            <div className="text-[9px] text-[#A79C87] py-0.5 bg-[#1C1A15] group-hover:text-[#F1EDE2] truncate px-1 text-center">{entry.name}</div>
+                            <button onClick={(e) => { e.stopPropagation(); deleteLibrary(entry.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-[#E4DECE] hover:text-red-400 opacity-70 hover:opacity-100" title="Delete" data-testid={`style-lib-delete-${entry.id}`}><X size={10} /></button>
                           </div>
                         ))}
                       </div>
@@ -542,19 +542,19 @@ export const TextEffectsPanel = ({ selected, onPatch, onApplyAnimation, onReplac
             </div>
           </>
         ) : (
-          <p className="text-[10px] text-gray-500">Copy a style, then save it here to reuse it across your projects.</p>
+          <p className="text-[10px] text-[#948C79]">Copy a style, then save it here to reuse it across your projects.</p>
         )}
         <div className="space-y-1.5">
-          <input value={libName} onChange={(e) => setLibName(e.target.value)} placeholder="Name this style…" className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="style-lib-name" />
+          <input value={libName} onChange={(e) => setLibName(e.target.value)} placeholder="Name this style…" className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-[11px] text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="style-lib-name" />
           <div className="flex gap-1.5">
-            <input value={libCategory} onChange={(e) => setLibCategory(e.target.value)} placeholder="Folder / category (optional)…" list="wd-lib-cats" className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="style-lib-category" />
+            <input value={libCategory} onChange={(e) => setLibCategory(e.target.value)} placeholder="Folder / category (optional)…" list="wd-lib-cats" className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-[11px] text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="style-lib-category" />
             <datalist id="wd-lib-cats">{libCategories.map((c) => <option key={c} value={c} />)}</datalist>
-            <button onClick={saveToLibrary} disabled={!clip} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="style-lib-save"><Save size={11} /> Save</button>
+            <button onClick={saveToLibrary} disabled={!clip} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="style-lib-save"><Save size={11} /> Save</button>
           </div>
         </div>
       </div>
 
-      <button onClick={clearFx} disabled={!selected} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-clear"><Eraser size={12} /> Clear text FX</button>
+      <button onClick={clearFx} disabled={!selected} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#E4DECE] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="textfx-clear"><Eraser size={12} /> Clear text FX</button>
     </div>
   );
 };

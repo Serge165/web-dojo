@@ -20,7 +20,7 @@ const parseNumber = (v, fallback = 0) => {
 
 const Row = ({ label, children }) => (
   <div>
-    <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">{label}</label>
+    <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">{label}</label>
     {children}
   </div>
 );
@@ -35,13 +35,13 @@ const Slider = ({ min, max, step, value, onChange, testId, unit }) => (
       className="flex-1 h-1.5"
       data-testid={testId}
     />
-    <span className="w-12 text-right text-[11px] font-mono text-gray-300">{value}{unit}</span>
+    <span className="w-12 text-right text-[11px] font-mono text-[#E4DECE]">{value}{unit}</span>
   </div>
 );
 
 export const StyleInspector = ({ selected, onPatch, onReplaceHtml }) => {
   if (!selected) {
-    return <div className="text-[11px] text-gray-500">Select an element on the canvas to edit its style.</div>;
+    return <div className="text-[11px] text-[#948C79]">Select an element on the canvas to edit its style.</div>;
   }
   const html = selected.html;
   const padding = parseNumber(readStyle(html, "padding"), 24);
@@ -67,7 +67,7 @@ export const StyleInspector = ({ selected, onPatch, onReplaceHtml }) => {
       <Row label={`Opacity (${Math.round(opacity * 100)}%)`}>
         <Slider min={0} max={100} value={Math.round(opacity * 100)} unit="%" testId="style-opacity" onChange={(v) => onPatch({ opacity: String(v / 100) })} />
       </Row>
-      <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-[#2B2B2B]">
+      <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-[#332D22]">
         {[
           { label: "L", key: "text-align", value: "left" },
           { label: "C", key: "text-align", value: "center" },
@@ -77,7 +77,7 @@ export const StyleInspector = ({ selected, onPatch, onReplaceHtml }) => {
           <button
             key={b.label}
             onClick={() => onPatch({ [b.key]: b.value })}
-            className="py-1.5 text-xs rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200"
+            className="py-1.5 text-xs rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2]"
             data-testid={`align-${b.value}`}
           >{b.label}</button>
         ))}
@@ -91,7 +91,7 @@ export const StyleInspector = ({ selected, onPatch, onReplaceHtml }) => {
           <button
             key={b.value}
             onClick={() => onPatch({ "font-weight": b.value })}
-            className="py-1.5 text-xs rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200"
+            className="py-1.5 text-xs rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2]"
             data-testid={`weight-${b.value}`}
           >{b.label}</button>
         ))}

@@ -20,16 +20,16 @@ export const useHoverPreview = () => {
   });
 
   const previewNode = (
-    <div className="border-t border-[#2B2B2B] bg-[#0D0D0D] flex-none" data-testid="block-hover-preview">
+    <div className="border-t border-[#332D22] bg-[#15130E] flex-none" data-testid="block-hover-preview">
       {preview ? (
         <div className="p-2">
-          <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5">Preview</div>
-          <div className="rounded-lg overflow-hidden border border-[#2B2B2B] bg-white">
+          <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1.5">Preview</div>
+          <div className="rounded-lg overflow-hidden border border-[#332D22] bg-white">
             <ComponentThumbnail html={preview.html} width={232} height={140} scale={0.19} />
           </div>
         </div>
       ) : (
-        <div className="p-3 text-[10px] text-gray-600 text-center">Hover a block to preview it here</div>
+        <div className="p-3 text-[10px] text-[#6B6353] text-center">Hover a block to preview it here</div>
       )}
     </div>
   );

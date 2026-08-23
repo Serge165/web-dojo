@@ -4,9 +4,9 @@ import { toast } from "sonner";
 import { Plus, Trash2, ArrowUp, ArrowDown, GripVertical, X, Save } from "lucide-react";
 import { DEFAULT_FORM, FIELD_TYPES, newField, buildFormHtml } from "@/lib/forms";
 
-const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
-const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
-const btnCls = "text-[11px] px-2 py-1 rounded bg-[#1F1F1F] border border-[#2B2B2B] text-gray-200 hover:bg-[#2B2B2B]";
+const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]";
+const labelCls = "text-[10px] uppercase tracking-wider text-[#948C79] block mb-1";
+const btnCls = "text-[11px] px-2 py-1 rounded bg-[#242019] border border-[#332D22] text-[#F1EDE2] hover:bg-[#332D22]";
 
 // Left column: per-form config + field editor. Right column: live iframe
 // preview updated on every state change.
@@ -67,17 +67,17 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-6xl w-[92vw] max-h-[90vh] overflow-hidden p-0" data-testid="form-builder-modal">
-        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-6xl w-[92vw] max-h-[90vh] overflow-hidden p-0" data-testid="form-builder-modal">
+        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#332D22]">
           <DialogTitle className="flex items-center gap-2 text-base">Form builder</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-[380px_1fr] max-h-[calc(90vh-56px)]">
           {/* Left: configuration panel */}
-          <div className="border-r border-[#2B2B2B] overflow-y-auto p-4 space-y-4">
+          <div className="border-r border-[#332D22] overflow-y-auto p-4 space-y-4">
             {/* Global settings */}
             <section className="space-y-2">
-              <div className="text-[10px] uppercase tracking-widest text-gray-500">Form settings</div>
+              <div className="text-[10px] uppercase tracking-widest text-[#948C79]">Form settings</div>
               <div>
                 <label className={labelCls}>Form name (inbox label)</label>
                 <input value={form.name || ""} onChange={(e) => patchForm({ name: e.target.value })} className={inputCls} placeholder="Contact form" data-testid="form-name-inbox" />
@@ -85,7 +85,7 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
               <div>
                 <label className={labelCls}>Action URL</label>
                 <input value={form.action} onChange={(e) => patchForm({ action: e.target.value })} className={inputCls} placeholder="https://formspree.io/f/…" data-testid="form-action" />
-                <p className="text-[10px] text-gray-500 mt-1 leading-relaxed">Defaults to your Web Dojo inbox — submissions appear under the Inbox icon in the toolbar. Change it to Formspree/Basin to use another backend.</p>
+                <p className="text-[10px] text-[#948C79] mt-1 leading-relaxed">Defaults to your Web Dojo inbox — submissions appear under the Inbox icon in the toolbar. Change it to Formspree/Basin to use another backend.</p>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -114,7 +114,7 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
                 </div>
                 <div>
                   <label className={labelCls}>Accent</label>
-                  <input type="color" value={form.brand} onChange={(e) => patchForm({ brand: e.target.value })} className="w-full h-[30px] rounded bg-[#0D0D0D] border border-[#2B2B2B] cursor-pointer" data-testid="form-brand" />
+                  <input type="color" value={form.brand} onChange={(e) => patchForm({ brand: e.target.value })} className="w-full h-[30px] rounded bg-[#15130E] border border-[#332D22] cursor-pointer" data-testid="form-brand" />
                 </div>
               </div>
               <div>
@@ -130,22 +130,22 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
             {/* Fields list */}
             <section>
               <div className="flex items-center justify-between mb-2">
-                <div className="text-[10px] uppercase tracking-widest text-gray-500">Fields · {form.fields.length}</div>
+                <div className="text-[10px] uppercase tracking-widest text-[#948C79]">Fields · {form.fields.length}</div>
               </div>
               <div className="space-y-1" data-testid="form-fields-list">
                 {form.fields.map((f, i) => (
                   <div
                     key={f.id}
                     onClick={() => setSelectedFieldId(f.id)}
-                    className={`flex items-center gap-1 px-2 py-1.5 rounded cursor-pointer text-xs ${selectedFieldId === f.id ? "bg-blue-600/20 border border-blue-500/60" : "bg-[#0D0D0D] border border-[#2B2B2B] hover:border-blue-500/40"}`}
+                    className={`flex items-center gap-1 px-2 py-1.5 rounded cursor-pointer text-xs ${selectedFieldId === f.id ? "bg-[#AD8B21]/20 border border-[#C9A227]/60" : "bg-[#15130E] border border-[#332D22] hover:border-[#C9A227]/40"}`}
                     data-testid={`field-row-${f.id}`}
                   >
-                    <GripVertical size={11} className="text-gray-600" />
-                    <span className="text-[10px] font-mono uppercase text-gray-500 min-w-[60px]">{f.type}</span>
-                    <span className="text-gray-200 truncate flex-1">{f.label || f.name || "—"}</span>
-                    <button onClick={(e) => { e.stopPropagation(); moveField(f.id, -1); }} className="p-0.5 text-gray-500 hover:text-white" data-testid={`field-up-${f.id}`}><ArrowUp size={10} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); moveField(f.id, 1); }} className="p-0.5 text-gray-500 hover:text-white" data-testid={`field-down-${f.id}`}><ArrowDown size={10} /></button>
-                    <button onClick={(e) => { e.stopPropagation(); removeField(f.id); }} className="p-0.5 text-gray-500 hover:text-red-400" data-testid={`field-del-${f.id}`}><Trash2 size={10} /></button>
+                    <GripVertical size={11} className="text-[#6B6353]" />
+                    <span className="text-[10px] font-mono uppercase text-[#948C79] min-w-[60px]">{f.type}</span>
+                    <span className="text-[#F1EDE2] truncate flex-1">{f.label || f.name || "—"}</span>
+                    <button onClick={(e) => { e.stopPropagation(); moveField(f.id, -1); }} className="p-0.5 text-[#948C79] hover:text-[#F1EDE2]" data-testid={`field-up-${f.id}`}><ArrowUp size={10} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); moveField(f.id, 1); }} className="p-0.5 text-[#948C79] hover:text-[#F1EDE2]" data-testid={`field-down-${f.id}`}><ArrowDown size={10} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); removeField(f.id); }} className="p-0.5 text-[#948C79] hover:text-red-400" data-testid={`field-del-${f.id}`}><Trash2 size={10} /></button>
                   </div>
                 ))}
               </div>
@@ -167,8 +167,8 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
 
             {/* Selected field editor */}
             {selectedField && (
-              <section className="border-t border-[#2B2B2B] pt-3 space-y-2" data-testid="field-editor">
-                <div className="text-[10px] uppercase tracking-widest text-gray-500">Selected · <span className="text-blue-400">{selectedField.type}</span></div>
+              <section className="border-t border-[#332D22] pt-3 space-y-2" data-testid="field-editor">
+                <div className="text-[10px] uppercase tracking-widest text-[#948C79]">Selected · <span className="text-[#D9BC55]">{selectedField.type}</span></div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className={labelCls}>Name attr</label>
@@ -211,7 +211,7 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
                         <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-1" data-testid={`field-option-${i}`}>
                           <input value={o.v} onChange={(e) => patchOption(selectedField.id, i, { v: e.target.value })} placeholder="value" className={inputCls + " font-mono"} />
                           <input value={o.l} onChange={(e) => patchOption(selectedField.id, i, { l: e.target.value })} placeholder="label" className={inputCls} />
-                          <button onClick={() => removeOption(selectedField.id, i)} className="text-gray-500 hover:text-red-400 px-1" data-testid={`option-del-${i}`}><X size={12} /></button>
+                          <button onClick={() => removeOption(selectedField.id, i)} className="text-[#948C79] hover:text-red-400 px-1" data-testid={`option-del-${i}`}><X size={12} /></button>
                         </div>
                       ))}
                       <button onClick={() => addOption(selectedField.id)} className={btnCls + " w-full mt-1"} data-testid="add-option"><Plus size={10} className="inline mr-1" />Add option</button>
@@ -219,7 +219,7 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
                   </div>
                 )}
                 {selectedField.type !== "hidden" && (
-                  <label className="flex items-center gap-2 text-xs text-gray-300 pt-1">
+                  <label className="flex items-center gap-2 text-xs text-[#E4DECE] pt-1">
                     <input type="checkbox" checked={!!selectedField.required} onChange={(e) => patchField(selectedField.id, { required: e.target.checked })} data-testid="field-required" />
                     Required
                   </label>
@@ -230,13 +230,13 @@ export const FormBuilderModal = ({ open, onClose, initial, onInsert, onSaveCompo
 
           {/* Right: preview + actions */}
           <div className="flex flex-col overflow-hidden bg-[#f5f5f5]">
-            <div className="px-4 py-2 border-b border-[#2B2B2B] bg-[#141414] flex justify-between items-center">
-              <div className="text-[11px] uppercase tracking-widest text-gray-400">Live preview</div>
+            <div className="px-4 py-2 border-b border-[#332D22] bg-[#1C1A15] flex justify-between items-center">
+              <div className="text-[11px] uppercase tracking-widest text-[#A79C87]">Live preview</div>
               <div className="flex gap-2">
                 {onSaveComponent && (
                   <button onClick={save} className={btnCls} data-testid="form-save-component"><Save size={11} className="inline -mt-0.5 mr-1" />Save to library</button>
                 )}
-                <button onClick={insert} className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium" data-testid="form-insert">Insert onto canvas</button>
+                <button onClick={insert} className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] font-medium" data-testid="form-insert">Insert onto canvas</button>
               </div>
             </div>
             <iframe

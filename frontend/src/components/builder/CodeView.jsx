@@ -146,15 +146,15 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
   const Tab = ({ id, label }) => (
     <button
       onClick={() => setTab(id)}
-      className={`px-2.5 py-1 rounded text-[11px] border ${tab === id ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`}
+      className={`px-2.5 py-1 rounded text-[11px] border ${tab === id ? "bg-[#AD8B21] border-[#C9A227] text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"}`}
       data-testid={`codeview-tab-${id}`}
     >{label}</button>
   );
 
   return (
     <div className="flex-1 bg-[#050505] overflow-hidden flex" data-testid="code-view">
-      <div className={showPreview ? "w-1/2 border-r border-[#2B2B2B] flex flex-col" : "w-full flex flex-col"}>
-        <div className="px-3 py-2 border-b border-[#2B2B2B] flex items-center justify-between gap-2">
+      <div className={showPreview ? "w-1/2 border-r border-[#332D22] flex flex-col" : "w-full flex flex-col"}>
+        <div className="px-3 py-2 border-b border-[#332D22] flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <Tab id="html" label="HTML" />
             <Tab id="css" label="CSS" />
@@ -169,7 +169,7 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
                 navigator.clipboard.writeText(text);
                 toast.success(`${tab.toUpperCase()} copied`);
               }}
-              className="flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-[#2B2B2B] text-gray-400 hover:text-gray-200 hover:bg-[#1F1F1F]"
+              className="flex items-center gap-1 text-[11px] px-2 py-1 rounded border border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2] hover:bg-[#242019]"
               title="Copy this tab's content"
               data-testid="codeview-copy-btn"
             ><Copy size={12} /> Copy</button>
@@ -192,7 +192,7 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
       </div>
       {showPreview && (
         <div className="w-1/2 flex flex-col">
-          <div className="px-3 py-2 border-b border-[#2B2B2B] text-[11px] uppercase tracking-wider text-gray-400">Preview</div>
+          <div className="px-3 py-2 border-b border-[#332D22] text-[11px] uppercase tracking-wider text-[#A79C87]">Preview</div>
           <div className="flex-1 min-h-0 bg-white">
             {/* allow-same-origin is intentionally NOT set here — same
                 rationale as Builder.jsx's live-preview iframe: combined
@@ -219,7 +219,7 @@ const LangSelector = ({ value, onChange, testId }) => (
   <select
     value={value}
     onChange={(e) => onChange(e.target.value)}
-    className="bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-0.5 text-[10px] text-gray-200 outline-none focus:border-blue-500 normal-case tracking-normal"
+    className="bg-[#15130E] border border-[#332D22] rounded px-1.5 py-0.5 text-[10px] text-[#F1EDE2] outline-none focus:border-[#C9A227] normal-case tracking-normal"
     data-testid={testId}
   >
     {MONACO_LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}

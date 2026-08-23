@@ -14,12 +14,12 @@ const languageFor = (path) => LANG_BY_EXT[(path || "").split(".").pop().toLowerC
 // it (the only way content ever landed in a tree file was drag/upload).
 export const FileEditorModal = ({ file, onClose, onChange, onSave }) => (
   <Dialog open={!!file} onOpenChange={(v) => !v && onClose()}>
-    <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-4xl w-[90vw] h-[80vh] flex flex-col" data-testid="file-editor-modal">
+    <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-4xl w-[90vw] h-[80vh] flex flex-col" data-testid="file-editor-modal">
       <DialogHeader>
         <DialogTitle className="font-mono text-sm truncate">{file?.path}</DialogTitle>
         <DialogDescription className="sr-only">Edit the contents of this project file.</DialogDescription>
       </DialogHeader>
-      <div className="flex-1 min-h-0 border border-[#2B2B2B] rounded overflow-hidden">
+      <div className="flex-1 min-h-0 border border-[#332D22] rounded overflow-hidden">
         {file && (
           <CodeEditor
             value={file.content || ""}

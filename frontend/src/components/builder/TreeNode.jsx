@@ -17,18 +17,18 @@ export function TreeNode(props) {
     return (
       <div>
         <div
-          className="flex items-center gap-1 pr-1 py-0.5 rounded hover:bg-[#1F1F1F] text-[12px] text-gray-200 group"
+          className="flex items-center gap-1 pr-1 py-0.5 rounded hover:bg-[#242019] text-[12px] text-[#F1EDE2] group"
           style={{ paddingLeft: 4 + depth * 10 }}
           data-testid={`tree-folder-${node.path || "root"}`}
         >
-          <button onClick={() => onToggle(node.path)} className="p-0.5 text-gray-400">
+          <button onClick={() => onToggle(node.path)} className="p-0.5 text-[#A79C87]">
             {open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
           </button>
-          <Folder size={12} className="text-blue-400" />
+          <Folder size={12} className="text-[#D9BC55]" />
           <span className="flex-1 truncate">{node.name || "project"}</span>
           <button
             onClick={() => onAddUnder(node.path || "", "file")}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-white"
+            className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-[#F1EDE2]"
             title="New file"
             data-testid={`tree-add-file-${node.path || "root"}`}
           >
@@ -36,7 +36,7 @@ export function TreeNode(props) {
           </button>
           <button
             onClick={() => onAddUnder(node.path || "", "folder")}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-white"
+            className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-[#F1EDE2]"
             title="New folder"
             data-testid={`tree-add-folder-${node.path || "root"}`}
           >
@@ -45,7 +45,7 @@ export function TreeNode(props) {
           {node.path ? (
             <button
               onClick={() => onRemove(node.path)}
-              className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-400"
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-red-400"
               title="Delete folder"
               data-testid={`tree-del-${node.path}`}
             >
@@ -88,7 +88,7 @@ export function TreeNode(props) {
     <div
       draggable={isHtml}
       onDragStart={onDragStart}
-      className="flex items-center gap-1 py-0.5 pr-1 rounded hover:bg-[#1F1F1F] text-[12px] text-gray-200 group"
+      className="flex items-center gap-1 py-0.5 pr-1 rounded hover:bg-[#242019] text-[12px] text-[#F1EDE2] group"
       style={{ paddingLeft: 4 + depth * 10 }}
       data-testid={`tree-file-${node.path}`}
     >
@@ -96,7 +96,7 @@ export function TreeNode(props) {
       {isImage ? (
         <img src={node.content} alt="" style={{ width: 12, height: 12, objectFit: "cover", borderRadius: 2 }} />
       ) : (
-        <FileText size={12} className={isHtml ? "text-emerald-400" : "text-gray-400"} />
+        <FileText size={12} className={isHtml ? "text-emerald-400" : "text-[#A79C87]"} />
       )}
       <button
         onDoubleClick={onDbl}
@@ -111,7 +111,7 @@ export function TreeNode(props) {
       {isHtml ? (
         <button
           onClick={() => onInsertHtml && onInsertHtml(node.content || "")}
-          className="opacity-0 group-hover:opacity-100 text-[10px] text-blue-400 hover:text-blue-300 px-1"
+          className="opacity-0 group-hover:opacity-100 text-[10px] text-[#D9BC55] hover:text-blue-300 px-1"
           title="Insert into canvas"
           data-testid={`tree-insert-${node.path}`}
         >
@@ -120,7 +120,7 @@ export function TreeNode(props) {
       ) : null}
       <button
         onClick={() => onRemove(node.path)}
-        className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-400"
+        className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-red-400"
         title="Delete"
         data-testid={`tree-del-${node.path}`}
       >

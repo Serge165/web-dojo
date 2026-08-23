@@ -935,7 +935,7 @@ export default function Builder() {
   ], [project, past.length, future.length, selected, zoom]);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#0D0D0D] text-white overflow-hidden text-sm" style={{ fontFamily: "Manrope, sans-serif" }} data-testid="builder-shell">
+    <div className="h-screen w-screen flex flex-col bg-[#15130E] text-[#F1EDE2] overflow-hidden text-sm" style={{ fontFamily: "Manrope, sans-serif" }} data-testid="builder-shell">
       <TopBar
         mode={mode} setMode={setMode}
         projectName={projectName} setProjectName={setProjectName}
@@ -983,13 +983,13 @@ export default function Builder() {
       {/* Full-width like PagesBar, deliberately outside the sidebar/canvas
           flex row below — LeftSidebar/RightSidebar mount and unmount based
           on `mode`, and this bar must not shift position when they do. */}
-      <div className="h-9 flex-none border-b border-[#2B2B2B] bg-[#141414] flex items-center px-3" data-testid="mode-toggle">
-        <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5">
-          <button onClick={() => setMode("design")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "design" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-design"><MousePointer2 size={12} /> Design</button>
-          <button onClick={() => setMode("code")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-code"><Code2 size={12} /> Code</button>
-          <button onClick={() => setMode("split")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "split" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-split"><Columns2 size={12} /> Split View</button>
-          <button onClick={() => setMode("outline")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "outline" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-outline"><Presentation size={12} /> Outline</button>
-          <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`} data-testid="mode-preview"><Eye size={12} /> Preview</button>
+      <div className="h-9 flex-none border-b border-[#332D22] bg-[#1C1A15] flex items-center px-3" data-testid="mode-toggle">
+        <div className="flex items-center bg-[#15130E] border border-[#332D22] rounded-md p-0.5">
+          <button onClick={() => setMode("design")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "design" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid="mode-design"><MousePointer2 size={12} /> Design</button>
+          <button onClick={() => setMode("code")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "code" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid="mode-code"><Code2 size={12} /> Code</button>
+          <button onClick={() => setMode("split")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "split" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid="mode-split"><Columns2 size={12} /> Split View</button>
+          <button onClick={() => setMode("outline")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "outline" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid="mode-outline"><Presentation size={12} /> Outline</button>
+          <button onClick={() => setMode("preview")} className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded ${mode === "preview" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid="mode-preview"><Eye size={12} /> Preview</button>
         </div>
       </div>
 
@@ -998,7 +998,7 @@ export default function Builder() {
           leftCollapsed ? (
             <button
               onClick={() => setLeftCollapsed(false)}
-              className="w-6 flex-none border-r border-[#2B2B2B] bg-[#141414] flex items-start justify-center pt-3 text-gray-500 hover:text-white hover:bg-[#1F1F1F]"
+              className="w-6 flex-none border-r border-[#332D22] bg-[#1C1A15] flex items-start justify-center pt-3 text-[#948C79] hover:text-[#F1EDE2] hover:bg-[#242019]"
               title="Expand library"
               data-testid="left-sidebar-expand"
             ><ChevronRight size={14} /></button>
@@ -1028,7 +1028,7 @@ export default function Builder() {
               />
               <button
                 onClick={() => setLeftCollapsed(true)}
-                className="absolute top-2 -right-3 z-10 w-6 h-6 rounded-full bg-[#1F1F1F] border border-[#2B2B2B] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#2B2B2B]"
+                className="absolute top-2 -right-3 z-10 w-6 h-6 rounded-full bg-[#242019] border border-[#332D22] flex items-center justify-center text-[#A79C87] hover:text-[#F1EDE2] hover:bg-[#332D22]"
                 title="Collapse library"
                 data-testid="left-sidebar-collapse"
               ><ChevronLeft size={12} /></button>
@@ -1069,12 +1069,12 @@ export default function Builder() {
           />
         )}
         {mode === "preview" && (
-          <div className="flex-1 flex flex-col bg-[#0D0D0D] overflow-hidden" data-testid="preview-mode">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-[#2B2B2B] bg-[#141414] text-xs">
-              <div className="flex items-center gap-2 text-gray-400">
+          <div className="flex-1 flex flex-col bg-[#15130E] overflow-hidden" data-testid="preview-mode">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[#332D22] bg-[#1C1A15] text-xs">
+              <div className="flex items-center gap-2 text-[#A79C87]">
                 <Eye size={12} className="text-emerald-400" /> Live preview · {viewport} · what your visitors will see
               </div>
-              <div className="text-[10px] text-gray-500 font-mono">{elements.length} block{elements.length === 1 ? "" : "s"} · exit via Design tab</div>
+              <div className="text-[10px] text-[#948C79] font-mono">{elements.length} block{elements.length === 1 ? "" : "s"} · exit via Design tab</div>
             </div>
             <div className="flex-1 flex justify-center items-start overflow-auto p-6">
               {/* allow-same-origin is intentionally NOT set: combined with
@@ -1087,7 +1087,7 @@ export default function Builder() {
               <iframe
                 title="live-preview"
                 srcDoc={buildStandaloneHtml(project)}
-                className="bg-white shadow-2xl border border-[#2B2B2B] transition-all"
+                className="bg-white shadow-2xl border border-[#332D22] transition-all"
                 style={{
                   width: viewport === "mobile" ? "390px" : viewport === "tablet" ? "820px" : "1280px",
                   height: "100%",
@@ -1113,7 +1113,7 @@ export default function Builder() {
           rightCollapsed ? (
             <button
               onClick={() => setRightCollapsed(false)}
-              className="w-6 flex-none border-l border-[#2B2B2B] bg-[#141414] flex items-start justify-center pt-3 text-gray-500 hover:text-white hover:bg-[#1F1F1F]"
+              className="w-6 flex-none border-l border-[#332D22] bg-[#1C1A15] flex items-start justify-center pt-3 text-[#948C79] hover:text-[#F1EDE2] hover:bg-[#242019]"
               title="Expand inspector"
               data-testid="right-sidebar-expand"
             ><ChevronLeft size={14} /></button>
@@ -1121,7 +1121,7 @@ export default function Builder() {
             <div className="relative flex-none flex">
               <button
                 onClick={() => setRightCollapsed(true)}
-                className="absolute top-2 -left-3 z-10 w-6 h-6 rounded-full bg-[#1F1F1F] border border-[#2B2B2B] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#2B2B2B]"
+                className="absolute top-2 -left-3 z-10 w-6 h-6 rounded-full bg-[#242019] border border-[#332D22] flex items-center justify-center text-[#A79C87] hover:text-[#F1EDE2] hover:bg-[#332D22]"
                 title="Collapse inspector"
                 data-testid="right-sidebar-collapse"
               ><ChevronRight size={12} /></button>
@@ -1168,17 +1168,17 @@ export default function Builder() {
       />
 
       <Dialog open={loadOpen} onOpenChange={setLoadOpen}>
-        <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white" data-testid="load-modal">
+        <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2]" data-testid="load-modal">
           <DialogHeader><DialogTitle>Open project</DialogTitle></DialogHeader>
           <div className="space-y-1 max-h-[400px] overflow-y-auto">
-            {projects.length === 0 && <div className="text-sm text-gray-400">No saved projects yet.</div>}
+            {projects.length === 0 && <div className="text-sm text-[#A79C87]">No saved projects yet.</div>}
             {projects.map((p) => (
-              <div key={p.id} className="flex items-center gap-2 p-2 rounded border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60" data-testid={`project-row-${p.id}`}>
+              <div key={p.id} className="flex items-center gap-2 p-2 rounded border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60" data-testid={`project-row-${p.id}`}>
                 <button className="flex-1 text-left" onClick={() => loadProject(p.id)}>
-                  <div className="text-sm text-gray-100">{p.name}</div>
-                  <div className="text-[11px] text-gray-500 font-mono">{new Date(p.updated_at).toLocaleString()}</div>
+                  <div className="text-sm text-[#F1EDE2]">{p.name}</div>
+                  <div className="text-[11px] text-[#948C79] font-mono">{new Date(p.updated_at).toLocaleString()}</div>
                 </button>
-                <button onClick={() => deleteProject(p.id)} className="p-1.5 text-gray-400 hover:text-red-400" data-testid={`project-delete-${p.id}`}>
+                <button onClick={() => deleteProject(p.id)} className="p-1.5 text-[#A79C87] hover:text-red-400" data-testid={`project-delete-${p.id}`}>
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -1188,20 +1188,20 @@ export default function Builder() {
       </Dialog>
 
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-2xl" data-testid="import-sections-modal">
+        <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-2xl" data-testid="import-sections-modal">
           <DialogHeader><DialogTitle>Imported sections — {importedSections.length}</DialogTitle></DialogHeader>
-          <div className="text-xs text-gray-400 mb-2">Detected components from your HTML. Click to add to canvas.</div>
+          <div className="text-xs text-[#A79C87] mb-2">Detected components from your HTML. Click to add to canvas.</div>
           <div className="space-y-1 max-h-[420px] overflow-y-auto">
             {importedSections.map((s) => (
               <button
                 key={s.id}
                 onClick={() => insertImportedSection(s)}
-                className="w-full flex items-center gap-3 p-2 rounded border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60 text-left"
+                className="w-full flex items-center gap-3 p-2 rounded border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60 text-left"
                 data-testid={`imported-${s.id}`}
               >
-                <div className="w-1 h-4 bg-blue-500 rounded" />
-                <span className="text-sm font-mono text-gray-200">{s.label}</span>
-                <span className="ml-auto text-[10px] text-gray-500 truncate max-w-[240px]">{s.html.slice(0, 60)}…</span>
+                <div className="w-1 h-4 bg-[#C9A227] rounded" />
+                <span className="text-sm font-mono text-[#F1EDE2]">{s.label}</span>
+                <span className="ml-auto text-[10px] text-[#948C79] truncate max-w-[240px]">{s.html.slice(0, 60)}…</span>
               </button>
             ))}
           </div>

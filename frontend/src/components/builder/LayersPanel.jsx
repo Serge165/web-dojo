@@ -64,81 +64,81 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
   return (
     <div className="space-y-1.5" data-testid="layers-panel">
       {!hideHeader && (
-        <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-gray-500">
+        <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-[#948C79]">
           <span>Layers · {elements.length}</span>
           <span className="font-mono">z-index</span>
         </div>
       )}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-gray-500">{onlyFx ? `${list.length} with effects` : `${elements.length} layers`}</span>
+        <span className="text-[10px] text-[#948C79]">{onlyFx ? `${list.length} with effects` : `${elements.length} layers`}</span>
         <button
           onClick={() => setOnlyFx((v) => !v)}
-          className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border ${onlyFx ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`}
+          className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border ${onlyFx ? "bg-[#AD8B21] border-[#C9A227] text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"}`}
           data-testid="layers-filter-fx"
           title="Show only elements that carry a text/hover effect"
         ><Filter size={10} /> Effects{fxCount ? ` · ${fxCount}` : ""}</button>
       </div>
       {elements.length > 0 && (
         <div className="flex items-center gap-1.5" data-testid="layers-select-bar">
-          <span className="text-[10px] text-gray-500 flex items-center gap-1"><CheckSquare size={10} /> Check all:</span>
+          <span className="text-[10px] text-[#948C79] flex items-center gap-1"><CheckSquare size={10} /> Check all:</span>
           <button
             onClick={selectEffected}
             disabled={fxCount === 0}
-            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2] hover:border-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed"
             data-testid="layers-select-effected"
             title="Check every layer that carries a text/hover effect"
           ><Sparkles size={10} className="text-indigo-400" /> Effected{fxCount ? ` · ${fxCount}` : ""}</button>
           <button
             onClick={selectAll}
-            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-blue-500"
+            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2] hover:border-[#C9A227]"
             data-testid="layers-select-all"
             title="Check every layer"
           >All · {elements.length}</button>
         </div>
       )}
       {checked.size > 0 && (
-        <div className="flex items-center gap-2 p-1.5 rounded bg-blue-600/15 border border-blue-500/40" data-testid="layers-batch-bar">
+        <div className="flex items-center gap-2 p-1.5 rounded bg-[#AD8B21]/15 border border-[#C9A227]/40" data-testid="layers-batch-bar">
           <span className="text-[10px] text-blue-200">{checked.size} selected</span>
           <button
             onClick={pasteMany}
             disabled={!clipReady}
-            className="ml-auto flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            className="ml-auto flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed"
             data-testid="layers-paste-many"
             title={clipReady ? "Paste the copied style onto all checked layers" : "Copy a style first (Text FX tab → Copy style)"}
           ><ClipboardPaste size={11} /> Paste to {checked.size}</button>
           <button
             onClick={applyAnimMany}
             disabled={!animClipReady}
-            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed"
             data-testid="layers-anim-many"
             title={animClipReady ? "Apply the Motion tab's current animation to all checked layers" : "Dial in an animation first (Motion tab)"}
           ><Wand2 size={11} /> Animate {checked.size}</button>
-          <button onClick={() => setChecked(new Set())} className="text-[10px] px-2 py-1 rounded border border-[#2B2B2B] text-gray-300 hover:text-white" data-testid="layers-clear-select">Clear</button>
+          <button onClick={() => setChecked(new Set())} className="text-[10px] px-2 py-1 rounded border border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2]" data-testid="layers-clear-select">Clear</button>
         </div>
       )}
       <div className="space-y-1 max-h-[360px] overflow-y-auto pr-1">
-        {rev.length === 0 && <div className="text-[11px] text-gray-500">No layers yet — drop a block on the canvas.</div>}
-        {rev.length > 0 && list.length === 0 && <div className="text-[11px] text-gray-500" data-testid="layers-filter-empty">No elements carry an effect yet.</div>}
+        {rev.length === 0 && <div className="text-[11px] text-[#948C79]">No layers yet — drop a block on the canvas.</div>}
+        {rev.length > 0 && list.length === 0 && <div className="text-[11px] text-[#948C79]" data-testid="layers-filter-empty">No elements carry an effect yet.</div>}
         {list.map((el) => {
           const hidden = /(^|;)\s*display\s*:\s*none/i.test(el.html);
           const fx = fxOf(el.html);
           return (
             <div
               key={el.id}
-              className={`flex items-center gap-1 p-1.5 rounded border ${selectedId === el.id ? "border-blue-500 bg-[#111623]" : "border-[#2B2B2B] bg-[#0D0D0D]"}`}
+              className={`flex items-center gap-1 p-1.5 rounded border ${selectedId === el.id ? "border-[#C9A227] bg-[#2A2416]" : "border-[#332D22] bg-[#15130E]"}`}
               data-testid={`layer-row-${el.id}`}
             >
               <input
                 type="checkbox"
                 checked={checked.has(el.id)}
                 onChange={() => toggleCheck(el.id)}
-                className="accent-blue-500 w-3 h-3 flex-none"
+                className="accent-[#C9A227] w-3 h-3 flex-none"
                 data-testid={`layer-check-${el.id}`}
                 title="Select for batch paste"
               />
               <button
                 onClick={() => onToggleVisible(el.id)}
-                className="p-1 text-gray-400 hover:text-white"
+                className="p-1 text-[#A79C87] hover:text-[#F1EDE2]"
                 title="Toggle visibility"
                 data-testid={`layer-vis-${el.id}`}
               >{hidden ? <EyeOff size={12} /> : <Eye size={12} />}</button>
@@ -155,7 +155,7 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
               )}
               <button
                 onClick={() => onSelect(el.id)}
-                className="flex-1 text-left text-[11px] font-mono text-gray-200 truncate"
+                className="flex-1 text-left text-[11px] font-mono text-[#F1EDE2] truncate"
                 data-testid={`layer-name-${el.id}`}
                 title={el.id}
               >{labelFor(el.html)}</button>
@@ -163,7 +163,7 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
                 type="number"
                 value={el.zIndex ?? 0}
                 onChange={(e) => onSetZIndex(el.id, Number(e.target.value))}
-                className="w-11 bg-transparent border border-[#2B2B2B] rounded px-1 py-0.5 text-[10px] font-mono text-white outline-none focus:border-blue-500"
+                className="w-11 bg-transparent border border-[#332D22] rounded px-1 py-0.5 text-[10px] font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                 data-testid={`layer-z-${el.id}`}
                 title="z-index"
               />
@@ -172,9 +172,9 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
                   "up" in this reversed list means +1 (later in the array,
                   higher in the stack), the opposite of Canvas's own arrows
                   which move +1/-1 against the unreversed document order. */}
-              <button onClick={() => onMove(el.id, 1)} className="p-1 text-gray-400 hover:text-white" title="Move up" data-testid={`layer-up-${el.id}`}><ArrowUp size={12} /></button>
-              <button onClick={() => onMove(el.id, -1)} className="p-1 text-gray-400 hover:text-white" title="Move down" data-testid={`layer-down-${el.id}`}><ArrowDown size={12} /></button>
-              <button onClick={() => onDelete(el.id)} className="p-1 text-gray-400 hover:text-red-400" title="Delete" data-testid={`layer-del-${el.id}`}><Trash2 size={12} /></button>
+              <button onClick={() => onMove(el.id, 1)} className="p-1 text-[#A79C87] hover:text-[#F1EDE2]" title="Move up" data-testid={`layer-up-${el.id}`}><ArrowUp size={12} /></button>
+              <button onClick={() => onMove(el.id, -1)} className="p-1 text-[#A79C87] hover:text-[#F1EDE2]" title="Move down" data-testid={`layer-down-${el.id}`}><ArrowDown size={12} /></button>
+              <button onClick={() => onDelete(el.id)} className="p-1 text-[#A79C87] hover:text-red-400" title="Delete" data-testid={`layer-del-${el.id}`}><Trash2 size={12} /></button>
             </div>
           );
         })}

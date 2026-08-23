@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Square, Sparkles, Eraser, Wand2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
-const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
-const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
+const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]";
+const labelCls = "text-[10px] uppercase tracking-wider text-[#948C79] block mb-1";
 
 const cssStr = (obj) => Object.entries(obj).map(([k, v]) => `${k}:${v}`).join(";");
 
@@ -141,29 +141,29 @@ export const ShapePanel = ({ selected, onPatch }) => {
     <div className="space-y-4" data-testid="shape-panel">
       {/* One-click presets */}
       <div className="space-y-1.5">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Wand2 size={12} /> One-click presets</div>
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Wand2 size={12} /> One-click presets</div>
         <div className="grid grid-cols-3 gap-1.5">
           {[...PRESETS, ...customPresets].map((p) => (
-            <div key={p.id} role="button" tabIndex={0} onClick={() => applyPreset(p)} data-testid={`shape-preset-${p.id}`} className="relative rounded border border-[#2B2B2B] hover:border-blue-500 overflow-hidden group cursor-pointer" title={`Apply ${p.label}`}>
+            <div key={p.id} role="button" tabIndex={0} onClick={() => applyPreset(p)} data-testid={`shape-preset-${p.id}`} className="relative rounded border border-[#332D22] hover:border-[#C9A227] overflow-hidden group cursor-pointer" title={`Apply ${p.label}`}>
               <div className="h-11 flex items-center justify-center" style={{ background: p.custom ? "linear-gradient(135deg,#eef2ff,#dbe2ef)" : p.bg }}>
                 <div dangerouslySetInnerHTML={{ __html: `<div style="width:60%;height:56%;${cssStr({ background: p.patch.background || (p.custom ? "#818cf8" : "#c7d2fe"), ...p.patch })}"></div>` }} />
               </div>
-              <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414] group-hover:text-gray-200 truncate px-1 text-center">{p.label}</div>
+              <div className="text-[9px] text-[#A79C87] py-0.5 bg-[#1C1A15] group-hover:text-[#F1EDE2] truncate px-1 text-center">{p.label}</div>
               {p.custom && (
-                <button onClick={(e) => { e.stopPropagation(); deletePreset(p.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-gray-300 hover:text-red-400 opacity-70 hover:opacity-100" title="Delete preset" data-testid={`shape-preset-delete-${p.id}`}><X size={10} /></button>
+                <button onClick={(e) => { e.stopPropagation(); deletePreset(p.id); }} className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded bg-black/60 text-[#E4DECE] hover:text-red-400 opacity-70 hover:opacity-100" title="Delete preset" data-testid={`shape-preset-delete-${p.id}`}><X size={10} /></button>
               )}
             </div>
           ))}
         </div>
         <div className="flex gap-1.5">
-          <input value={presetName} onChange={(e) => setPresetName(e.target.value)} placeholder="Name this style…" className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid="shape-preset-name" />
-          <button onClick={saveCurrentPreset} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-200" data-testid="shape-save-preset"><Save size={11} /> Save current</button>
+          <input value={presetName} onChange={(e) => setPresetName(e.target.value)} placeholder="Name this style…" className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-[11px] text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="shape-preset-name" />
+          <button onClick={saveCurrentPreset} className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#F1EDE2]" data-testid="shape-save-preset"><Save size={11} /> Save current</button>
         </div>
       </div>
 
       {/* Live preview over a checkerboard */}
       <div
-        className="rounded-lg border border-[#2B2B2B] flex items-center justify-center h-[130px]"
+        className="rounded-lg border border-[#332D22] flex items-center justify-center h-[130px]"
         style={{
           backgroundImage: "linear-gradient(45deg,#181818 25%,transparent 25%),linear-gradient(-45deg,#181818 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#181818 75%),linear-gradient(-45deg,transparent 75%,#181818 75%)",
           backgroundSize: "16px 16px",
@@ -178,7 +178,7 @@ export const ShapePanel = ({ selected, onPatch }) => {
 
       {/* Border */}
       <div className="space-y-2">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Square size={12} /> Border</div>
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Square size={12} /> Border</div>
         <div className="grid grid-cols-3 gap-2">
           <div>
             <label className={labelCls}>Width</label>
@@ -192,27 +192,27 @@ export const ShapePanel = ({ selected, onPatch }) => {
           </div>
           <div>
             <label className={labelCls}>Color</label>
-            <input type="color" value={bcolor} onChange={(e) => setBcolor(e.target.value)} className="w-full h-8 rounded bg-[#0D0D0D] border border-[#2B2B2B]" data-testid="shape-border-color" />
+            <input type="color" value={bcolor} onChange={(e) => setBcolor(e.target.value)} className="w-full h-8 rounded bg-[#15130E] border border-[#332D22]" data-testid="shape-border-color" />
           </div>
         </div>
       </div>
 
       {/* Radius */}
-      <div className="space-y-2 pt-3 border-t border-[#2B2B2B]">
+      <div className="space-y-2 pt-3 border-t border-[#332D22]">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-gray-500">Corner radius</span>
-          <label className="flex items-center gap-1.5 text-[10px] text-gray-400"><input type="checkbox" checked={linked} onChange={(e) => setLinked(e.target.checked)} data-testid="shape-radius-linked" /> Link all</label>
+          <span className="text-[10px] uppercase tracking-wider text-[#948C79]">Corner radius</span>
+          <label className="flex items-center gap-1.5 text-[10px] text-[#A79C87]"><input type="checkbox" checked={linked} onChange={(e) => setLinked(e.target.checked)} data-testid="shape-radius-linked" /> Link all</label>
         </div>
         {linked ? (
           <div className="flex items-center gap-2">
             <input type="range" min="0" max="80" value={r} onChange={(e) => setAllRadius(Number(e.target.value))} className="flex-1" data-testid="shape-radius-all" />
-            <span className="text-xs font-mono text-gray-300 w-10 text-right">{r}px</span>
+            <span className="text-xs font-mono text-[#E4DECE] w-10 text-right">{r}px</span>
           </div>
         ) : (
           <div className="grid grid-cols-4 gap-1.5">
             {[["TL", tl, setTl], ["TR", tr, setTr], ["BR", br, setBr], ["BL", bl, setBl]].map(([lab, val, set]) => (
               <div key={lab}>
-                <label className="text-[9px] text-gray-500 block mb-0.5 text-center">{lab}</label>
+                <label className="text-[9px] text-[#948C79] block mb-0.5 text-center">{lab}</label>
                 <input type="number" min="0" value={val} onChange={(e) => set(Number(e.target.value))} className={inputCls + " text-center px-1"} data-testid={`shape-radius-${lab.toLowerCase()}`} />
               </div>
             ))}
@@ -221,25 +221,25 @@ export const ShapePanel = ({ selected, onPatch }) => {
       </div>
 
       {/* Corner shape (CSS3) */}
-      <div className="space-y-2 pt-3 border-t border-[#2B2B2B]">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1.5"><Sparkles size={12} /> Corner shape <span className="text-[9px] text-gray-600 normal-case tracking-normal">css3</span></div>
+      <div className="space-y-2 pt-3 border-t border-[#332D22]">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] flex items-center gap-1.5"><Sparkles size={12} /> Corner shape <span className="text-[9px] text-[#6B6353] normal-case tracking-normal">css3</span></div>
         <div className="grid grid-cols-3 gap-1">
           {CORNER_SHAPES.map((s) => (
-            <button key={s.id} onClick={() => setShape(s.id)} className={`text-[10px] py-1.5 rounded border ${shape === s.id ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`} data-testid={`shape-corner-${s.id}`}>{s.label}</button>
+            <button key={s.id} onClick={() => setShape(s.id)} className={`text-[10px] py-1.5 rounded border ${shape === s.id ? "bg-[#AD8B21] border-[#C9A227] text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid={`shape-corner-${s.id}`}>{s.label}</button>
           ))}
         </div>
-        <p className="text-[10px] text-gray-500">Needs a non-zero radius. Chrome/Edge 139+ render these; other browsers fall back to rounded corners.</p>
+        <p className="text-[10px] text-[#948C79]">Needs a non-zero radius. Chrome/Edge 139+ render these; other browsers fall back to rounded corners.</p>
       </div>
 
       {/* Shadow */}
-      <div className="space-y-2 pt-3 border-t border-[#2B2B2B]">
+      <div className="space-y-2 pt-3 border-t border-[#332D22]">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-gray-500">Box shadow</span>
-          <label className="flex items-center gap-1.5 text-[10px] text-gray-400"><input type="checkbox" checked={shadowOn} onChange={(e) => setShadowOn(e.target.checked)} data-testid="shape-shadow-on" /> On</label>
+          <span className="text-[10px] uppercase tracking-wider text-[#948C79]">Box shadow</span>
+          <label className="flex items-center gap-1.5 text-[10px] text-[#A79C87]"><input type="checkbox" checked={shadowOn} onChange={(e) => setShadowOn(e.target.checked)} data-testid="shape-shadow-on" /> On</label>
         </div>
         <div className="grid grid-cols-3 gap-1">
           {SHADOW_PRESETS.map((p) => (
-            <button key={p.id} onClick={() => { if (p.v) { setShadowOn(true); setSh(p.v); } else { setShadowOn(false); } }} className="text-[10px] py-1.5 rounded border border-[#2B2B2B] text-gray-400 hover:text-gray-200" data-testid={`shape-shadow-${p.id}`}>{p.label}</button>
+            <button key={p.id} onClick={() => { if (p.v) { setShadowOn(true); setSh(p.v); } else { setShadowOn(false); } }} className="text-[10px] py-1.5 rounded border border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]" data-testid={`shape-shadow-${p.id}`}>{p.label}</button>
           ))}
         </div>
         {shadowOn && (
@@ -247,24 +247,24 @@ export const ShapePanel = ({ selected, onPatch }) => {
             <div className="grid grid-cols-4 gap-1.5">
               {[["X", "x"], ["Y", "y"], ["Blur", "blur"], ["Spread", "spread"]].map(([lab, key]) => (
                 <div key={key}>
-                  <label className="text-[9px] text-gray-500 block mb-0.5 text-center">{lab}</label>
+                  <label className="text-[9px] text-[#948C79] block mb-0.5 text-center">{lab}</label>
                   <input type="number" value={sh[key]} onChange={(e) => setSh((s) => ({ ...s, [key]: Number(e.target.value) }))} className={inputCls + " text-center px-1"} data-testid={`shape-shadow-${key}`} />
                 </div>
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <input type="color" value={/^#[0-9a-f]{6}$/i.test(sh.color) ? sh.color : "#000000"} onChange={(e) => setSh((s) => ({ ...s, color: e.target.value }))} className="w-10 h-8 rounded bg-[#0D0D0D] border border-[#2B2B2B]" data-testid="shape-shadow-color" />
+              <input type="color" value={/^#[0-9a-f]{6}$/i.test(sh.color) ? sh.color : "#000000"} onChange={(e) => setSh((s) => ({ ...s, color: e.target.value }))} className="w-10 h-8 rounded bg-[#15130E] border border-[#332D22]" data-testid="shape-shadow-color" />
               <input value={sh.color} onChange={(e) => setSh((s) => ({ ...s, color: e.target.value }))} className={inputCls + " font-mono"} data-testid="shape-shadow-color-hex" />
-              <label className="flex items-center gap-1 text-[10px] text-gray-400 whitespace-nowrap"><input type="checkbox" checked={sh.inset} onChange={(e) => setSh((s) => ({ ...s, inset: e.target.checked }))} data-testid="shape-shadow-inset" /> Inset</label>
+              <label className="flex items-center gap-1 text-[10px] text-[#A79C87] whitespace-nowrap"><input type="checkbox" checked={sh.inset} onChange={(e) => setSh((s) => ({ ...s, inset: e.target.checked }))} data-testid="shape-shadow-inset" /> Inset</label>
             </div>
           </>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 pt-3 border-t border-[#2B2B2B]">
-        <button onClick={apply} disabled={!selected} className="flex-1 text-xs py-2 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed" data-testid="shape-apply">Apply to selection</button>
-        <button onClick={clear} disabled={!selected} className="flex items-center gap-1.5 text-xs px-3 py-2 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] border border-[#2B2B2B] text-gray-300 disabled:opacity-40" data-testid="shape-clear"><Eraser size={12} /> Clear</button>
+      <div className="flex gap-2 pt-3 border-t border-[#332D22]">
+        <button onClick={apply} disabled={!selected} className="flex-1 text-xs py-2 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="shape-apply">Apply to selection</button>
+        <button onClick={clear} disabled={!selected} className="flex items-center gap-1.5 text-xs px-3 py-2 rounded bg-[#242019] hover:bg-[#332D22] border border-[#332D22] text-[#E4DECE] disabled:opacity-40" data-testid="shape-clear"><Eraser size={12} /> Clear</button>
       </div>
     </div>
   );

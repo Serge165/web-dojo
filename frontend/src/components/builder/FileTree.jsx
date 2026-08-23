@@ -219,8 +219,8 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" data-testid="file-tree">
-      <div className="px-3 py-2 border-b border-[#2B2B2B] flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500">Project files</div>
+      <div className="px-3 py-2 border-b border-[#332D22] flex items-center justify-between">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Project files</div>
         <div className="flex items-center gap-1">
           <input
             ref={fileInputRef}
@@ -230,26 +230,26 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
             className="hidden"
             data-testid="tree-folder-picker"
           />
-          <button onClick={() => fileInputRef.current && fileInputRef.current.click()} className="p-1 text-gray-400 hover:text-white" title="Upload folder" data-testid="tree-upload-folder">
+          <button onClick={() => fileInputRef.current && fileInputRef.current.click()} className="p-1 text-[#A79C87] hover:text-[#F1EDE2]" title="Upload folder" data-testid="tree-upload-folder">
             <Upload size={12} />
           </button>
-          <button onClick={() => addAtRoot("file")} className="p-1 text-gray-400 hover:text-white" title="New file" data-testid="tree-new-file">
+          <button onClick={() => addAtRoot("file")} className="p-1 text-[#A79C87] hover:text-[#F1EDE2]" title="New file" data-testid="tree-new-file">
             <FilePlus size={12} />
           </button>
-          <button onClick={() => addAtRoot("folder")} className="p-1 text-gray-400 hover:text-white" title="New folder" data-testid="tree-new-folder">
+          <button onClick={() => addAtRoot("folder")} className="p-1 text-[#A79C87] hover:text-[#F1EDE2]" title="New folder" data-testid="tree-new-folder">
             <FolderPlus size={12} />
           </button>
         </div>
       </div>
       <div
-        className={`flex-1 overflow-y-auto p-1 relative ${dragging ? "bg-blue-500/10 border-2 border-dashed border-blue-500" : ""}`}
+        className={`flex-1 overflow-y-auto p-1 relative ${dragging ? "bg-[#C9A227]/10 border-2 border-dashed border-[#C9A227]" : ""}`}
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         data-testid="tree-dropzone"
       >
         {files.length === 0 ? (
-          <div className="text-[11px] text-gray-500 p-3 text-center">
+          <div className="text-[11px] text-[#948C79] p-3 text-center">
             Drop a folder here, click the + icons to create, or use the upload button.
           </div>
         ) : (

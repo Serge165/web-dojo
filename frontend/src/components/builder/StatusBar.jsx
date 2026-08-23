@@ -5,7 +5,7 @@ import { Loader2, Check, AlertCircle } from "lucide-react";
 // TopBar's save indicator rather than replacing it (that one's tied to
 // the Save button; this one's just ambient status).
 export const StatusBar = ({ pageName, elementCount, mode, viewport, zoom, saveStatus }) => (
-  <footer className="h-6 flex-none border-t border-[#2B2B2B] bg-[#141414] flex items-center justify-between px-3 text-[10px] text-gray-500 font-mono" data-testid="status-bar">
+  <footer className="h-6 flex-none border-t border-[#332D22] bg-[#1C1A15] flex items-center justify-between px-3 text-[10px] text-[#948C79] font-mono" data-testid="status-bar">
     <div className="flex items-center gap-3">
       <span data-testid="status-page-name">{pageName}</span>
       <span>{elementCount} block{elementCount === 1 ? "" : "s"}</span>
