@@ -739,3 +739,81 @@ class TestSmtpConfigEndpoint:
     def test_an_unknown_project_id_is_rejected(self, client):
         r = client.post("/api/commerce/smtp-config", json=self._payload("no-such-project"))
         assert r.status_code == 404
+
+
+class TestEmailTemplates:
+    def _order(self, **overrides):
+        base = {
+            "customer_name": "Ada Lovelace", "customer_email": "ada@example.com",
+            "amount_total": 3800, "currency": "usd",
+            "line_items": [{"name": "Aurora Bottle", "quantity": 1}],
+            "shipping_address": None,
+        }
+        base.update(overrides)
+        return base
+
+    def test_confirmation_email_includes_order_details(self):
+        subject, html_body = server._email_confirmation("Aurora Shop", self._order())
+        assert "Aurora Shop" in subject
+        assert "Ada Lovelace" in html_body
+        assert "Aurora Bottle" in html_body
+        assert "38.00 USD" in html_body
+
+    def test_shipped_email_mentions_shipping_and_includes_the_address(self):
+        subject, html_body = server._email_shipped("Aurora Shop", self._order(shipping_address={"line1": "221B Baker Street"}))
+        assert "shipped" in subject.lower()
+        assert "221B Baker Street" in html_body
+
+    def test_delivered_email_confirms_delivery(self):
+        subject, _ = server._email_delivered("Aurora Shop", self._order())
+        assert "delivered" in subject.lower()
+
+    def test_templates_escape_customer_supplied_text(self):
+        # customer_name is buyer-controlled at checkout time; must not inject raw HTML.
+        _, html_body = server._email_confirmation("Shop", self._order(customer_name="<script>alert(1)</script>"))
+        assert "<script>" not in html_body
+
+
+class TestSendEmail:
+    @pytest.mark.asyncio
+    async def test_does_nothing_when_the_project_has_no_smtp_config(self, project_id):
+        with patch("smtplib.SMTP") as mock_smtp:
+            await server._send_email(project_id, "buyer@example.com", "Subject", "<p>hi</p>")
+        mock_smtp.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_sends_via_the_projects_saved_smtp_config(self, project_id):
+        await server.db.projects.update_one({"id": project_id}, {"$set": {"smtp_config_enc": server._encrypt(json.dumps({
+            "host": "smtp.example.com", "port": 587, "username": "user@example.com",
+            "password": "app-password", "from_address": "store@example.com",
+        }))}})
+        mock_conn = MagicMock()
+        with patch("smtplib.SMTP") as mock_smtp:
+            mock_smtp.return_value.__enter__.return_value = mock_conn
+            await server._send_email(project_id, "buyer@example.com", "Order confirmed", "<p>Thanks!</p>")
+        mock_smtp.assert_called_once_with("smtp.example.com", 587, timeout=10)
+        mock_conn.starttls.assert_called_once()
+        mock_conn.login.assert_called_once_with("user@example.com", "app-password")
+        mock_conn.send_message.assert_called_once()
+        sent_msg = mock_conn.send_message.call_args[0][0]
+        assert sent_msg["To"] == "buyer@example.com"
+        assert sent_msg["Subject"] == "Order confirmed"
+        assert sent_msg["From"] == "store@example.com"
+
+    @pytest.mark.asyncio
+    async def test_swallows_smtp_errors_without_raising(self, project_id):
+        await server.db.projects.update_one({"id": project_id}, {"$set": {"smtp_config_enc": server._encrypt(json.dumps({
+            "host": "smtp.example.com", "port": 587, "username": "user@example.com",
+            "password": "app-password", "from_address": "store@example.com",
+        }))}})
+        with patch("smtplib.SMTP", side_effect=OSError("connection refused")):
+            await server._send_email(project_id, "buyer@example.com", "Subject", "<p>hi</p>")  # must not raise
+
+    @pytest.mark.asyncio
+    async def test_does_nothing_when_the_recipient_is_empty(self, project_id):
+        await server.db.projects.update_one({"id": project_id}, {"$set": {"smtp_config_enc": server._encrypt(json.dumps({
+            "host": "smtp.example.com", "port": 587, "username": "u", "password": "p", "from_address": "f",
+        }))}})
+        with patch("smtplib.SMTP") as mock_smtp:
+            await server._send_email(project_id, "", "Subject", "<p>hi</p>")
+        mock_smtp.assert_not_called()

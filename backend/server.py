@@ -28,6 +28,9 @@ import hashlib
 import hmac
 import secrets
 import base64
+import smtplib
+from email.message import EmailMessage
+import html
 
 
 ROOT_DIR = Path(__file__).parent
@@ -347,6 +350,80 @@ async def _paypal_get_order(order_id: str, access_token: str) -> dict:
         )
         resp.raise_for_status()
         return resp.json()
+
+
+def _order_email_html(project_name: str, order: dict, heading: str, intro: str) -> str:
+    items_html = "".join(
+        f"<li>{html.escape(str(li.get('name', '')))} × {html.escape(str(li.get('quantity', 1)))}</li>"
+        for li in (order.get("line_items") or [])
+    )
+    total = f"{(order.get('amount_total', 0) / 100):.2f} {(order.get('currency') or '').upper()}"
+    greeting = html.escape(order.get("customer_name") or order.get("customer_email") or "there")
+    shipping_html = ""
+    shipping = order.get("shipping_address")
+    if shipping:
+        shipping_html = f"<p>Shipping to: {html.escape(json.dumps(shipping))}</p>"
+    return f"""<html><body style="font-family:system-ui,sans-serif;color:#1a1a1a;max-width:480px;margin:0 auto;">
+<h1 style="font-size:20px;">{html.escape(heading)}</h1>
+<p>Hi {greeting},</p>
+<p>{html.escape(intro)} Order from <b>{html.escape(project_name)}</b>.</p>
+<ul>{items_html}</ul>
+<p><b>Total: {html.escape(total)}</b></p>
+{shipping_html}
+</body></html>"""
+
+
+def _email_confirmation(project_name: str, order: dict) -> tuple[str, str]:
+    subject = f"Your order from {project_name} is confirmed"
+    body = _order_email_html(project_name, order, "Order confirmed", "Thanks for your order! Here's what you bought.")
+    return subject, body
+
+
+def _email_shipped(project_name: str, order: dict) -> tuple[str, str]:
+    subject = f"Your order from {project_name} has shipped"
+    body = _order_email_html(project_name, order, "Your order has shipped", "Your order is on its way.")
+    return subject, body
+
+
+def _email_delivered(project_name: str, order: dict) -> tuple[str, str]:
+    subject = f"Your order from {project_name} was delivered"
+    body = _order_email_html(project_name, order, "Your order was delivered", "Your order has been delivered. We hope you enjoy it!")
+    return subject, body
+
+
+def _send_email_sync(config: dict, to_addr: str, subject: str, html_body: str) -> None:
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = config.get("from_address") or config.get("username")
+    msg["To"] = to_addr
+    msg.set_content("This email requires an HTML-capable client to view.")
+    msg.add_alternative(html_body, subtype="html")
+    with smtplib.SMTP(config["host"], int(config["port"]), timeout=10) as smtp:
+        smtp.starttls()
+        smtp.login(config["username"], config["password"])
+        smtp.send_message(msg)
+
+
+async def _send_email(project_id: str, to_addr: str, subject: str, html_body: str) -> None:
+    """Never raises — deliverability must never break order recording or a
+    dashboard action. A project with no smtp_config_enc saved is a silent
+    no-op, matching the PayPal Secret's "opt-in, not required" posture."""
+    if not to_addr:
+        return
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0, "smtp_config_enc": 1})
+    enc = (project or {}).get("smtp_config_enc")
+    if not enc:
+        return
+    try:
+        config = json.loads(_decrypt(enc))
+    except Exception:
+        logger.warning("Could not decrypt SMTP config for project %s", project_id)
+        return
+    try:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, _send_email_sync, config, to_addr, subject, html_body)
+    except Exception:
+        logger.warning("Failed to send email to %s for project %s", to_addr, project_id, exc_info=True)
 
 
 # ---------- Routes ----------
