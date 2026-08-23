@@ -24,11 +24,17 @@ export default function EcommerceOrdersPanel({ projectId }) {
         return;
       }
       setToken(body.token);
-      const ordersRes = await fetch(`${API}/api/dashboard/${projectId}/orders`, {
-        headers: { "X-Dashboard-Token": body.token },
-      });
-      const ordersBody = await ordersRes.json();
-      setOrders(ordersBody.orders || []);
+      try {
+        const ordersRes = await fetch(`${API}/api/dashboard/${projectId}/orders`, {
+          headers: { "X-Dashboard-Token": body.token },
+        });
+        const ordersBody = await ordersRes.json();
+        setOrders(ordersBody.orders || []);
+      } catch {
+        setError("Unlocked, but your orders couldn't be loaded. Please try again.");
+      }
+    } catch {
+      setError("Couldn't reach the server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -45,17 +51,20 @@ export default function EcommerceOrdersPanel({ projectId }) {
   }
 
   return (
-    <table>
-      <tbody>
-        {orders.map((o) => (
-          <tr key={o.id}>
-            <td>{o.provider}</td>
-            <td>{o.customer_email}</td>
-            <td>{(o.amount_total / 100).toFixed(2)} {(o.currency || "").toUpperCase()}</td>
-            <td>{o.created_at}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <>
+      {error && <p role="alert">{error}</p>}
+      <table>
+        <tbody>
+          {orders.map((o) => (
+            <tr key={o.id}>
+              <td>{o.provider}</td>
+              <td>{o.customer_email}</td>
+              <td>{(o.amount_total / 100).toFixed(2)} {(o.currency || "").toUpperCase()}</td>
+              <td>{o.created_at}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }

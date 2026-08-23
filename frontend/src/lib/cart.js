@@ -132,7 +132,7 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     window.paypal.Buttons({
       style:{layout:"horizontal",color:"gold",shape:"pill",height:40,tagline:false},
       createOrder:function(data,actions){ return actions.order.create({purchase_units:[{amount:{value:total().toFixed(2),currency_code:CFG.currency.toUpperCase()}}]}); },
-      onApprove:function(data,actions){ return actions.order.capture().then(function(){ fetch(CFG.api+"/api/commerce/paypal/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_id: "${projectId}", order_id:data.orderID})}).then(function(){ WDCart.clear(); alert("Payment complete — thank you!"); }); }); }
+      onApprove:function(data,actions){ return actions.order.capture().then(function(){ fetch(CFG.api+"/api/commerce/paypal/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_id: "${projectId}", order_id:data.orderID})}).then(function(){ WDCart.clear(); alert("Payment complete — thank you!"); }).catch(function(){ alert("Your payment went through, but we couldn't confirm it just now. Please contact us with your PayPal order ID: "+data.orderID); }); }); }
     }).render("#wdc-paypal");
   }
   document.addEventListener("click", function(e){
@@ -151,27 +151,35 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     var params = new URLSearchParams(window.location.search);
     var sessionId = params.get("session_id");
     if (!sessionId) return;
+    // Strip the capability token out of the visible URL before the merchant's
+    // own analytics scripts get a chance to log the full location.
+    try { history.replaceState(null, "", window.location.pathname); } catch (e) {}
     var tries = 0;
+    function showReceipt(html) {
+      var box = document.createElement("div");
+      box.style.cssText = "max-width:480px;margin:60px auto;padding:32px;border:1px solid #e2e8f0;border-radius:12px;font-family:system-ui,sans-serif;";
+      box.innerHTML = html;
+      document.body.insertBefore(box, document.body.firstChild);
+    }
     function poll() {
-      fetch(CFG.api + "/api/commerce/receipt/" + sessionId).then(function (r) { return r.json(); }).then(function (order) {
+      fetch(CFG.api + "/api/commerce/receipt/" + encodeURIComponent(sessionId)).then(function (r) { return r.json(); }).then(function (order) {
         if (order.status === "processing" && tries < 5) {
           tries++;
           setTimeout(poll, 2000);
           return;
         }
-        var box = document.createElement("div");
-        box.style.cssText = "max-width:480px;margin:60px auto;padding:32px;border:1px solid #e2e8f0;border-radius:12px;font-family:system-ui,sans-serif;";
         if (order.status === "processing") {
-          box.innerHTML = "<h2>Thanks for your order</h2><p>Your payment was received. This receipt will update shortly — refresh in a moment.</p>";
+          showReceipt("<h2>Thanks for your order</h2><p>Your payment was received. This receipt will update shortly — refresh in a moment.</p>");
         } else {
           var items = (order.line_items || []).map(function (li) {
             return "<li>" + li.name + " × " + li.quantity + "</li>";
           }).join("");
-          box.innerHTML = "<h2>Order confirmed</h2><p>Thanks, " + (order.customer_name || order.customer_email || "") + "!</p><ul>" + items + "</ul>" +
+          showReceipt("<h2>Order confirmed</h2><p>Thanks, " + (order.customer_name || "") + "!</p><ul>" + items + "</ul>" +
             "<p><b>Total: " + (order.amount_total / 100).toFixed(2) + " " + (order.currency || "").toUpperCase() + "</b></p>" +
-            "<button onclick=\\"window.print()\\">Print / Save as PDF</button>";
+            "<button onclick=\\"window.print()\\">Print / Save as PDF</button>");
         }
-        document.body.insertBefore(box, document.body.firstChild);
+      }).catch(function () {
+        showReceipt("<h2>Thanks for your order</h2><p>Your payment went through, but we couldn't load your receipt right now. Please refresh, or check your email for confirmation.</p>");
       });
     }
     poll();

@@ -1,7 +1,9 @@
 import asyncio
 import atexit
+import hashlib
 import json
 import os
+import stat
 import tempfile
 import time
 from unittest.mock import patch
@@ -15,6 +17,7 @@ os.environ.setdefault("DB_NAME", "webdojo_test")
 # configured" guard — signature verification itself is mocked per-test.
 os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test_dummy")
 
+import httpx
 import pytest
 import stripe as stripe_sdk
 from starlette.testclient import TestClient
@@ -109,6 +112,39 @@ class TestDashboardToken:
         token = server._issue_dashboard_token("proj-123")
         assert server._verify_dashboard_token(token, "proj-123") is True
 
+    def test_a_token_bound_to_a_password_hash_verifies_against_that_hash(self):
+        stored = server._hash_password("hunter22")
+        token = server._issue_dashboard_token("proj-123", stored)
+        assert server._verify_dashboard_token(token, "proj-123", stored) is True
+
+    def test_a_token_stops_verifying_once_the_password_hash_changes(self):
+        # I6: rotating the password revokes every outstanding token.
+        old_hash = server._hash_password("hunter22")
+        token = server._issue_dashboard_token("proj-123", old_hash)
+        new_hash = server._hash_password("hunter22")  # same plaintext, new salt
+        assert server._verify_dashboard_token(token, "proj-123", new_hash) is False
+
+    def test_the_signing_secret_is_not_a_hardcoded_string(self, tmp_path, monkeypatch):
+        # C2: with no env var configured, the secret must be randomly generated
+        # and persisted 0o600 — never derived from a constant in the source.
+        monkeypatch.delenv("WEBDOJO_SECRET_KEY", raising=False)
+        key_path = tmp_path / "dashboard_key_a"
+        monkeypatch.setattr(server, "_DASHBOARD_KEY_PATH", key_path)
+        first = server._dashboard_token_secret()
+
+        assert key_path.exists()
+        assert stat.S_IMODE(key_path.stat().st_mode) == 0o600
+        # Stable across calls once persisted (otherwise no token would verify)...
+        assert server._dashboard_token_secret() == first
+        # ...but a fresh install derives a different secret, so a token forged
+        # against one deployment's key is worthless against another's.
+        other_path = tmp_path / "dashboard_key_b"
+        monkeypatch.setattr(server, "_DASHBOARD_KEY_PATH", other_path)
+        assert server._dashboard_token_secret() != first
+        # And nothing derives from the old "webdojo-dev-secret" literal.
+        legacy = hashlib.sha256(b"webdojo-dev-secret" + b":dashboard-token").digest()
+        assert first != legacy
+
     def test_a_token_does_not_verify_for_a_different_project(self):
         token = server._issue_dashboard_token("proj-123")
         assert server._verify_dashboard_token(token, "proj-456") is False
@@ -147,6 +183,80 @@ class TestDashboardSetPasswordAndUnlock:
         body = r.json()
         assert "dashboard_password_hash" not in body
         assert "paypal_secret_enc" not in body
+
+
+class TestSetPasswordTakeoverIsBlocked:
+    """C1: project_id is published in plaintext in every exported site, so
+    anyone can view-source it. It must not be sufficient to seize the gate."""
+
+    def test_first_time_setup_needs_no_token(self, client, project_id):
+        r = client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        assert r.status_code == 200
+
+    def test_overwriting_an_existing_password_without_a_token_is_rejected(self, client, project_id, db):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        before = db.projects.find_one({"id": project_id})["dashboard_password_hash"]
+
+        r = client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "attacker-pw"})
+        assert r.status_code == 401
+
+        # The original password still works and the attacker's does not.
+        assert db.projects.find_one({"id": project_id})["dashboard_password_hash"] == before
+        assert client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "attacker-pw"}).status_code == 401
+        assert client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).status_code == 200
+
+    def test_overwriting_with_an_invalid_token_is_rejected(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        r = client.post(
+            f"/api/dashboard/{project_id}/set-password",
+            json={"password": "attacker-pw"},
+            headers={"X-Dashboard-Token": server._issue_dashboard_token(project_id, "some-other-hash")},
+        )
+        assert r.status_code == 401
+
+    def test_the_owner_can_rotate_the_password_with_a_valid_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        token = client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+        r = client.post(
+            f"/api/dashboard/{project_id}/set-password",
+            json={"password": "rotated-pw"},
+            headers={"X-Dashboard-Token": token},
+        )
+        assert r.status_code == 200
+        assert client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "rotated-pw"}).status_code == 200
+
+    def test_project_update_cannot_set_the_password_hash(self, client, project_id, db):
+        # The second takeover path: PUT /api/projects/{id} used to $set whatever
+        # the payload carried, including a hand-crafted salt$digest.
+        forged = server._hash_password("attacker-pw")
+        r = client.put(f"/api/projects/{project_id}", json={"name": "Renamed", "dashboard_password_hash": forged})
+        assert r.status_code == 200
+        assert not db.projects.find_one({"id": project_id}).get("dashboard_password_hash")
+        assert client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "attacker-pw"}).status_code == 401
+
+    def test_project_update_cannot_set_the_paypal_secret(self, client, project_id, db):
+        r = client.put(f"/api/projects/{project_id}", json={"name": "Renamed", "paypal_secret_enc": "forged"})
+        assert r.status_code == 200
+        assert not db.projects.find_one({"id": project_id}).get("paypal_secret_enc")
+
+    def test_project_create_cannot_set_the_password_hash(self, client, db):
+        forged = server._hash_password("attacker-pw")
+        pid = client.post("/api/projects", json={"name": "Seeded", "dashboard_password_hash": forged}).json()["id"]
+        assert not db.projects.find_one({"id": pid}).get("dashboard_password_hash")
+
+    def test_a_token_issued_before_a_password_change_stops_working(self, client, project_id):
+        # I6, end to end through the real endpoints.
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        old_token = client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+        assert client.get(f"/api/dashboard/{project_id}/orders", headers={"X-Dashboard-Token": old_token}).status_code == 200
+
+        client.post(
+            f"/api/dashboard/{project_id}/set-password",
+            json={"password": "rotated-pw"},
+            headers={"X-Dashboard-Token": old_token},
+        )
+        r = client.get(f"/api/dashboard/{project_id}/orders", headers={"X-Dashboard-Token": old_token})
+        assert r.status_code == 401
 
 
 FAKE_SESSION_ID = "cs_test_abc123"
@@ -188,12 +298,14 @@ class TestStripeWebhook:
             r = client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "bad"})
         assert r.status_code == 400
 
-    def test_a_valid_completed_session_event_creates_an_order(self, client):
+    def test_a_valid_completed_session_event_creates_an_order(self, client, db):
         with patch.object(stripe_sdk.Webhook, "construct_event", return_value=_fake_stripe_event()), \
              patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()):
             r = client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
         assert r.status_code == 200
-        order = client.get(f"/api/commerce/receipt/{FAKE_SESSION_ID}").json()
+        # The receipt endpoint deliberately returns a trimmed view (see I8), so
+        # assert the full record against the stored document instead.
+        order = db.orders.find_one({"provider_ref": FAKE_SESSION_ID})
         assert order["status"] == "completed"
         assert order["project_id"] == "proj-123"
         assert order["customer_email"] == "buyer@example.com"
@@ -206,13 +318,13 @@ class TestStripeWebhook:
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
         assert db.orders.count_documents({"provider_ref": FAKE_SESSION_ID}) == 1
 
-    def test_a_duplicate_delivery_does_not_change_the_order_id(self, client):
+    def test_a_duplicate_delivery_does_not_change_the_order_id(self, client, db):
         with patch.object(stripe_sdk.Webhook, "construct_event", return_value=_fake_stripe_event()), \
              patch.object(stripe_sdk.checkout.Session, "list_line_items", return_value=_fake_line_items()):
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
-            first_id = client.get(f"/api/commerce/receipt/{FAKE_SESSION_ID}").json()["id"]
+            first_id = db.orders.find_one({"provider_ref": FAKE_SESSION_ID})["id"]
             client.post("/api/commerce/webhook", content=b"{}", headers={"Stripe-Signature": "valid"})
-            second_id = client.get(f"/api/commerce/receipt/{FAKE_SESSION_ID}").json()["id"]
+            second_id = db.orders.find_one({"provider_ref": FAKE_SESSION_ID})["id"]
         assert first_id == second_id
 
 
@@ -223,7 +335,7 @@ class TestCheckoutSessionProjectId:
         })
         assert r.status_code == 422  # Pydantic validation error — project_id is required
 
-    def test_checkout_session_passes_project_id_through_as_stripe_metadata(self, client):
+    def test_checkout_session_passes_project_id_through_as_stripe_metadata(self, client, project_id):
         captured = {}
 
         def fake_create(**kwargs):
@@ -236,13 +348,25 @@ class TestCheckoutSessionProjectId:
         with patch.object(stripe_sdk.checkout.Session, "create", side_effect=fake_create):
             r = client.post("/api/commerce/checkout-session", json={
                 "items": [{"name": "Aurora Bottle", "amount": 3800, "currency": "usd", "quantity": 1}],
-                "project_id": "proj-123",
+                "project_id": project_id,
             })
         assert r.status_code == 200
-        assert captured["metadata"] == {"project_id": "proj-123"}
+        assert captured["metadata"] == {"project_id": project_id}
         assert captured["allow_promotion_codes"] is True
         assert captured["billing_address_collection"] == "required"
         assert "shipping_address_collection" in captured
+
+    @pytest.mark.parametrize("bad_project_id", ["null", "", "no-such-project"])
+    def test_checkout_session_with_an_unknown_project_id_is_rejected(self, client, bad_project_id):
+        # I3: a cart block added before the project's first save bakes the
+        # literal string "null" (or "") into the exported site forever.
+        with patch.object(stripe_sdk.checkout.Session, "create", side_effect=AssertionError("must not reach Stripe")):
+            r = client.post("/api/commerce/checkout-session", json={
+                "items": [{"name": "Aurora Bottle", "amount": 3800, "currency": "usd", "quantity": 1}],
+                "project_id": bad_project_id,
+            })
+        assert r.status_code == 400
+        assert "project_id" in r.json()["detail"]
 
 
 class TestPaypalHelpers:
@@ -296,6 +420,33 @@ class TestPaypalSecretEndpoint:
         body = client.get(f"/api/projects/{project_id}").json()
         assert "paypal_secret_enc" not in body
         assert "plaintext-secret" not in json.dumps(body)
+
+    def test_replacing_existing_credentials_without_a_token_is_rejected(self, client, project_id, db):
+        # C1 part 3: same root cause as set-password — project_id is public.
+        client.post("/api/commerce/paypal-secret", json={
+            "project_id": project_id, "client_id": "client-abc", "secret": "plaintext-secret",
+        })
+        r = client.post("/api/commerce/paypal-secret", json={
+            "project_id": project_id, "client_id": "attacker-client", "secret": "attacker-secret",
+        })
+        assert r.status_code == 401
+        stored = db.projects.find_one({"id": project_id})
+        assert stored["paypal_client_id"] == "client-abc"
+        assert server._decrypt(stored["paypal_secret_enc"]) == "plaintext-secret"
+
+    def test_the_owner_can_replace_credentials_with_a_valid_token(self, client, project_id, db):
+        client.post("/api/commerce/paypal-secret", json={
+            "project_id": project_id, "client_id": "client-abc", "secret": "plaintext-secret",
+        })
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        token = client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+        r = client.post(
+            "/api/commerce/paypal-secret",
+            json={"project_id": project_id, "client_id": "client-new", "secret": "rotated-secret"},
+            headers={"X-Dashboard-Token": token},
+        )
+        assert r.status_code == 200
+        assert server._decrypt(db.projects.find_one({"id": project_id})["paypal_secret_enc"]) == "rotated-secret"
 
 
 class TestOrdersListEndpoint:
@@ -352,30 +503,143 @@ class TestOrdersListEndpoint:
         # Bounded to skip+page_size (2), not an unbounded fetch of the whole collection.
         assert seen_lengths == [2]
 
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    @pytest.mark.parametrize("requested,clamped", [(100000, 100), (0, 1), (-5, 1)])
+    def test_page_size_is_clamped_not_honored_literally(self, client, project_id, requested, clamped):
+        # I7.
+        token = self._unlocked_token(client, project_id)
+        r = client.get(
+            f"/api/dashboard/{project_id}/orders",
+            headers={"X-Dashboard-Token": token},
+            params={"page_size": requested},
+        )
+        assert r.status_code == 200
+        assert r.json()["page_size"] == clamped
+
+    @pytest.mark.parametrize("requested", [0, -1, -99999])
+    def test_a_non_positive_page_cannot_produce_a_pathological_skip(self, client, project_id, requested):
+        token = self._unlocked_token(client, project_id)
+        r = client.get(
+            f"/api/dashboard/{project_id}/orders",
+            headers={"X-Dashboard-Token": token},
+            params={"page": requested},
+        )
+        assert r.status_code == 200
+        assert r.json()["page"] == 1
+
+
+@pytest.fixture()
+def paypal_project_id(client, project_id, db):
+    db.projects.update_one(
+        {"id": project_id},
+        {"$set": {"paypal_secret_enc": server._encrypt("shh-secret"), "paypal_client_id": "client-abc"}},
+    )
+    return project_id
+
+
+def _fake_paypal_order(order_id="PP-COMPLETE-1", value="38.00"):
+    return {
+        "id": order_id,
+        "status": "COMPLETED",
+        "purchase_units": [{"amount": {"value": value, "currency_code": "USD"}}],
+        "payer": {"email_address": "buyer@example.com", "name": {"given_name": "Ada"}},
+    }
+
 
 class TestPaypalVerify:
-    def test_an_order_that_is_not_completed_is_rejected(self, client):
+    def test_an_order_that_is_not_completed_is_rejected(self, client, paypal_project_id):
         with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \
              patch.object(server, "_paypal_get_order", new=AsyncMock(return_value={"id": "PP-1", "status": "CREATED"})):
-            r = client.post("/api/commerce/paypal/verify", json={"project_id": "proj-123", "order_id": "PP-1"})
+            r = client.post("/api/commerce/paypal/verify", json={"project_id": paypal_project_id, "order_id": "PP-1"})
         assert r.status_code == 400
+        assert "COMPLETED" in r.json()["detail"]
 
-    def test_a_completed_paypal_order_creates_a_record(self, client, project_id, db):
-        db.projects.update_one(
-            {"id": project_id},
-            {"$set": {"paypal_secret_enc": server._encrypt("shh-secret"), "paypal_client_id": "client-abc"}},
-        )
-        fake_order = {
-            "id": "PP-COMPLETE-1",
-            "status": "COMPLETED",
-            "purchase_units": [{"amount": {"value": "38.00", "currency_code": "USD"}}],
-            "payer": {"email_address": "buyer@example.com", "name": {"given_name": "Ada"}},
-        }
+    @pytest.mark.parametrize("bad_project_id", ["null", "", "no-such-project"])
+    def test_an_unknown_project_id_is_rejected(self, client, bad_project_id):
+        # I3, PayPal side.
+        with patch.object(server, "_paypal_get_access_token", new=AsyncMock(side_effect=AssertionError("must not reach PayPal"))):
+            r = client.post("/api/commerce/paypal/verify", json={"project_id": bad_project_id, "order_id": "PP-1"})
+        assert r.status_code == 400
+        assert r.json()["detail"] == "Unknown project_id"
+
+    def test_a_paypal_side_failure_returns_502_not_an_unhandled_500(self, client, paypal_project_id):
+        # I10.
+        with patch.object(server, "_paypal_get_access_token", new=AsyncMock(side_effect=httpx.ConnectError("boom"))):
+            r = client.post("/api/commerce/paypal/verify", json={"project_id": paypal_project_id, "order_id": "PP-1"})
+        assert r.status_code == 502
+        assert "PayPal" in r.json()["detail"]
+
+    def test_a_completed_paypal_order_creates_a_record(self, client, paypal_project_id, db):
         with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \
-             patch.object(server, "_paypal_get_order", new=AsyncMock(return_value=fake_order)):
-            r = client.post("/api/commerce/paypal/verify", json={"project_id": project_id, "order_id": "PP-COMPLETE-1"})
+             patch.object(server, "_paypal_get_order", new=AsyncMock(return_value=_fake_paypal_order())):
+            r = client.post("/api/commerce/paypal/verify", json={"project_id": paypal_project_id, "order_id": "PP-COMPLETE-1"})
         assert r.status_code == 200
-        receipt = client.get("/api/commerce/receipt/PP-COMPLETE-1").json()
-        assert receipt["status"] == "completed"
-        assert receipt["provider"] == "paypal"
-        assert receipt["customer_email"] == "buyer@example.com"
+        order = db.orders.find_one({"provider_ref": "PP-COMPLETE-1"})
+        assert order["status"] == "completed"
+        assert order["provider"] == "paypal"
+        assert order["customer_email"] == "buyer@example.com"
+
+    @pytest.mark.parametrize("value,expected_cents", [
+        ("8.20", 820),   # int(float("8.20") * 100) == 819 — the bug
+        ("38.00", 3800),
+        ("0.29", 29),
+        ("1234.56", 123456),
+    ])
+    def test_decimal_amounts_convert_to_cents_without_losing_a_penny(self, client, paypal_project_id, db, value, expected_cents):
+        # I2.
+        ref = f"PP-MONEY-{value}"
+        with patch.object(server, "_paypal_get_access_token", new=AsyncMock(return_value="tok")), \
+             patch.object(server, "_paypal_get_order", new=AsyncMock(return_value=_fake_paypal_order(ref, value))):
+            r = client.post("/api/commerce/paypal/verify", json={"project_id": paypal_project_id, "order_id": ref})
+        assert r.status_code == 200
+        assert db.orders.find_one({"provider_ref": ref})["amount_total"] == expected_cents
+
+
+class TestReceiptEndpointDoesNotLeakPII:
+    """I8: provider_ref travels in the published site's URL query string,
+    where the merchant's own analytics scripts routinely log it."""
+
+    def test_the_receipt_omits_email_and_shipping_address(self, client, db):
+        db.orders.insert_one({
+            "id": "receipt-o1", "project_id": "p", "provider": "stripe", "provider_ref": "cs_receipt_1",
+            "status": "completed", "amount_total": 1999, "currency": "usd",
+            "customer_email": "buyer@example.com", "customer_name": "Ada Lovelace",
+            "shipping_address": {"line1": "221B Baker Street"},
+            "line_items": [{"name": "Aurora Bottle", "quantity": 1}],
+            "created_at": "2026-08-21T00:00:00Z",
+        })
+        body = client.get("/api/commerce/receipt/cs_receipt_1").json()
+        assert set(body) == {"status", "amount_total", "currency", "line_items", "customer_name"}
+        assert "buyer@example.com" not in json.dumps(body)
+        assert "221B Baker Street" not in json.dumps(body)
+        # Still carries everything the rendered receipt needs.
+        assert body["amount_total"] == 1999
+        assert body["customer_name"] == "Ada Lovelace"
+        assert body["line_items"][0]["name"] == "Aurora Bottle"
+
+    def test_an_unknown_reference_reports_processing(self, client):
+        assert client.get("/api/commerce/receipt/no-such-ref").json() == {"status": "processing"}
+
+
+class TestOrdersIndex:
+    def test_provider_ref_index_is_created_when_the_backend_supports_indexes(self):
+        # I1. sqlite_compat's dev shim has no create_index, so the startup hook
+        # must no-op there rather than crash the app on boot.
+        assert not hasattr(server.db.orders, "create_index")
+        asyncio.run(server.ensure_indexes())  # must not raise on the SQLite shim
+
+        created = []
+
+        class FakeOrders:
+            async def create_index(self, key, unique=False):
+                created.append((key, unique))
+
+        class FakeDb:
+            orders = FakeOrders()
+
+        with patch.object(server, "db", FakeDb()):
+            asyncio.run(server.ensure_indexes())
+        assert created == [("provider_ref", True)]

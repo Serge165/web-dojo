@@ -16,6 +16,7 @@ from pathlib import Path
 import uuid
 import json
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 from cryptography.fernet import Fernet
 import stripe
 import httpx
@@ -78,8 +79,10 @@ class ProjectCreate(BaseModel):
     canvas_bg: str = "#ffffff"
     fonts: List[str] = []
     files: List[Any] = []
-    dashboard_password_hash: Optional[str] = None
-    paypal_secret_enc: Optional[str] = None
+    # dashboard_password_hash / paypal_secret_enc are deliberately absent: they
+    # are settable only via their own gated endpoints, never through a generic
+    # project create/update, which would let anyone holding a project_id
+    # overwrite the storefront's password gate.
     pages: List[Any] = []
     active_page_id: Optional[str] = None
     template: Optional[Any] = None
@@ -94,8 +97,7 @@ class ProjectUpdate(BaseModel):
     canvas_bg: Optional[str] = None
     fonts: Optional[List[str]] = None
     files: Optional[List[Any]] = None
-    dashboard_password_hash: Optional[str] = None
-    paypal_secret_enc: Optional[str] = None
+    # See ProjectCreate — never settable through the generic project update.
     pages: Optional[List[Any]] = None
     active_page_id: Optional[str] = None
     template: Optional[Any] = None
@@ -209,6 +211,7 @@ class PublishPresetCreate(BaseModel):
 # ---------- Encryption helpers for preset passwords ----------
 
 _KEY_PATH = ROOT_DIR / ".preset_key"
+_DASHBOARD_KEY_PATH = ROOT_DIR / ".dashboard_key"
 
 def _get_fernet() -> Fernet:
     key = os.environ.get("WEBDOJO_SECRET_KEY")
@@ -254,19 +257,38 @@ def _verify_password(password: str, stored: str) -> bool:
 
 
 def _dashboard_token_secret() -> bytes:
-    base = os.environ.get("WEBDOJO_SECRET_KEY", "webdojo-dev-secret").encode("utf-8")
-    return hashlib.sha256(base + b":dashboard-token").digest()
+    """Signing key for dashboard tokens. Mirrors _get_fernet: env var first,
+    else a random key persisted 0o600 to a key file. No hardcoded fallback —
+    one would make every token forgeable from a string in a public repo."""
+    key = os.environ.get("WEBDOJO_SECRET_KEY")
+    if not key and _DASHBOARD_KEY_PATH.exists():
+        key = _DASHBOARD_KEY_PATH.read_text().strip()
+        try:
+            os.chmod(_DASHBOARD_KEY_PATH, 0o600)
+        except Exception:
+            pass
+    if not key:
+        key = secrets.token_urlsafe(32)
+        try:
+            _DASHBOARD_KEY_PATH.write_text(key)
+            os.chmod(_DASHBOARD_KEY_PATH, 0o600)
+        except Exception:
+            pass
+    return hashlib.sha256(key.encode("utf-8") + b":dashboard-token").digest()
 
 
-def _issue_dashboard_token(project_id: str, ttl_seconds: int = 604800) -> str:
+def _issue_dashboard_token(project_id: str, password_hash: str = "", ttl_seconds: int = 604800) -> str:
     expiry = int(time.time()) + ttl_seconds
-    payload = f"{project_id}:{expiry}".encode("utf-8")
+    payload = f"{project_id}:{expiry}:{password_hash}".encode("utf-8")
     sig = hmac.new(_dashboard_token_secret(), payload, hashlib.sha256).hexdigest()
     raw = f"{project_id}:{expiry}:{sig}".encode("utf-8")
     return base64.urlsafe_b64encode(raw).decode("ascii")
 
 
-def _verify_dashboard_token(token: str, project_id: str) -> bool:
+def _verify_dashboard_token(token: str, project_id: str, password_hash: str = "") -> bool:
+    """The project's *current* password hash is part of the signing input, so
+    rotating the password invalidates every token issued under the old one —
+    revocation without a session store."""
     try:
         raw = base64.urlsafe_b64decode(token.encode("ascii")).decode("utf-8")
         tok_project_id, expiry_str, sig = raw.split(":", 2)
@@ -277,7 +299,7 @@ def _verify_dashboard_token(token: str, project_id: str) -> bool:
         return False
     if time.time() > expiry:
         return False
-    payload = f"{tok_project_id}:{expiry}".encode("utf-8")
+    payload = f"{tok_project_id}:{expiry}:{password_hash}".encode("utf-8")
     expected_sig = hmac.new(_dashboard_token_secret(), payload, hashlib.sha256).hexdigest()
     return hmac.compare_digest(sig, expected_sig)
 
@@ -396,15 +418,33 @@ class DashboardPasswordRequest(BaseModel):
 
 
 @api_router.post("/dashboard/{project_id}/set-password")
-async def set_dashboard_password(project_id: str, payload: DashboardPasswordRequest):
+async def set_dashboard_password(
+    project_id: str,
+    payload: DashboardPasswordRequest,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    """project_id is public — it is baked in plaintext into every exported
+    site — so this endpoint cannot treat it as a secret. First-time setup is
+    open (there is nothing to steal yet); once a password exists, changing it
+    requires proving you already know the current one via a dashboard token."""
     if not payload.password or len(payload.password) < 6:
         raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
-    existing = await db.projects.find_one({"id": project_id}, {"_id": 0, "id": 1})
+    existing = await db.projects.find_one({"id": project_id}, {"_id": 0, "id": 1, "dashboard_password_hash": 1})
     if not existing:
         raise HTTPException(status_code=404, detail="Project not found")
+    current_hash = existing.get("dashboard_password_hash")
+    if current_hash and not (
+        x_dashboard_token and _verify_dashboard_token(x_dashboard_token, project_id, current_hash)
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="A dashboard password is already set — unlock with the current password to change it",
+        )
+    loop = asyncio.get_running_loop()
+    new_hash = await loop.run_in_executor(None, _hash_password, payload.password)
     await db.projects.update_one(
         {"id": project_id},
-        {"$set": {"dashboard_password_hash": _hash_password(payload.password)}},
+        {"$set": {"dashboard_password_hash": new_hash}},
     )
     return {"ok": True}
 
@@ -414,20 +454,26 @@ async def unlock_dashboard(project_id: str, payload: DashboardPasswordRequest):
     project = await db.projects.find_one({"id": project_id})
     if not project or not project.get("dashboard_password_hash"):
         raise HTTPException(status_code=401, detail="Dashboard password not set for this project")
-    if not _verify_password(payload.password, project["dashboard_password_hash"]):
+    stored = project["dashboard_password_hash"]
+    loop = asyncio.get_running_loop()
+    if not await loop.run_in_executor(None, _verify_password, payload.password, stored):
         raise HTTPException(status_code=401, detail="Incorrect password")
-    return {"token": _issue_dashboard_token(project_id)}
+    return {"token": _issue_dashboard_token(project_id, stored)}
 
 
 async def _require_dashboard_token(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)) -> None:
-    if not x_dashboard_token or not _verify_dashboard_token(x_dashboard_token, project_id):
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0, "dashboard_password_hash": 1})
+    current_hash = (project or {}).get("dashboard_password_hash") or ""
+    if not x_dashboard_token or not _verify_dashboard_token(x_dashboard_token, project_id, current_hash):
         raise HTTPException(status_code=401, detail="Missing or invalid dashboard token")
 
 
 @api_router.get("/dashboard/{project_id}/orders")
 async def list_orders(project_id: str, page: int = 1, page_size: int = 20, x_dashboard_token: Optional[str] = Header(default=None)):
     await _require_dashboard_token(project_id, x_dashboard_token)
-    skip = max(page - 1, 0) * page_size
+    page = max(page, 1)
+    page_size = min(max(page_size, 1), 100)
+    skip = (page - 1) * page_size
     cursor = db.orders.find({"project_id": project_id}, {"_id": 0}).sort("created_at", -1)
     all_orders = await cursor.to_list(length=skip + page_size)
     orders = all_orders[skip:skip + page_size]
@@ -1349,6 +1395,11 @@ async def commerce_checkout_session(payload: CheckoutSessionCreate):
             raise HTTPException(status_code=400, detail="Item amount must be greater than zero")
         if it.amount > 999999:
             raise HTTPException(status_code=400, detail="Item amount is too large")
+    # Exported sites bake project_id in at build time; one added before the
+    # project's first save bakes in "null"/"" forever. Reject here — the one
+    # point every caller converges on — so no unattributable order is created.
+    if not await db.projects.find_one({"id": payload.project_id}, {"_id": 0, "id": 1}):
+        raise HTTPException(status_code=400, detail="Unknown project_id")
     origin = (payload.origin_url or "").strip().rstrip("/")
     if not (origin.startswith("http://") or origin.startswith("https://")):
         origin = ""
@@ -1390,7 +1441,10 @@ async def stripe_webhook(request: Request):
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        line_items_result = stripe.checkout.Session.list_line_items(session["id"])
+        loop = asyncio.get_running_loop()
+        line_items_result = await loop.run_in_executor(
+            None, stripe.checkout.Session.list_line_items, session["id"]
+        )
         line_items = [
             {
                 "name": item.description,
@@ -1425,10 +1479,25 @@ class PaypalSecretRequest(BaseModel):
 
 
 @api_router.post("/commerce/paypal-secret")
-async def set_paypal_secret(payload: PaypalSecretRequest):
-    existing = await db.projects.find_one({"id": payload.project_id}, {"_id": 0, "id": 1})
+async def set_paypal_secret(
+    payload: PaypalSecretRequest,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    existing = await db.projects.find_one(
+        {"id": payload.project_id},
+        {"_id": 0, "id": 1, "paypal_secret_enc": 1, "dashboard_password_hash": 1},
+    )
     if not existing:
         raise HTTPException(status_code=404, detail="Project not found")
+    # Same reasoning as set_dashboard_password: project_id is public, so
+    # first write is open but replacing existing credentials needs a token.
+    if existing.get("paypal_secret_enc"):
+        current_hash = existing.get("dashboard_password_hash") or ""
+        if not (x_dashboard_token and _verify_dashboard_token(x_dashboard_token, payload.project_id, current_hash)):
+            raise HTTPException(
+                status_code=401,
+                detail="PayPal credentials are already set — unlock the dashboard to replace them",
+            )
     await db.projects.update_one(
         {"id": payload.project_id},
         {"$set": {
@@ -1447,12 +1516,19 @@ class PaypalVerifyRequest(BaseModel):
 @api_router.post("/commerce/paypal/verify")
 async def paypal_verify(payload: PaypalVerifyRequest):
     project = await db.projects.find_one({"id": payload.project_id})
-    if not project or not project.get("paypal_secret_enc") or not project.get("paypal_client_id"):
+    if not project:
+        raise HTTPException(status_code=400, detail="Unknown project_id")
+    if not project.get("paypal_secret_enc") or not project.get("paypal_client_id"):
         raise HTTPException(status_code=400, detail="PayPal is not configured for this project")
 
     secret = _decrypt(project["paypal_secret_enc"])
-    access_token = await _paypal_get_access_token(project["paypal_client_id"], secret)
-    order = await _paypal_get_order(payload.order_id, access_token)
+    try:
+        access_token = await _paypal_get_access_token(project["paypal_client_id"], secret)
+        order = await _paypal_get_order(payload.order_id, access_token)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not reach PayPal to verify this order: {type(e).__name__}")
 
     if order.get("status") != "COMPLETED":
         raise HTTPException(status_code=400, detail=f"PayPal order status is {order.get('status')}, not COMPLETED")
@@ -1462,6 +1538,11 @@ async def paypal_verify(payload: PaypalVerifyRequest):
     payer = order.get("payer", {}) or {}
     payer_name_obj = payer.get("name", {}) or {}
     payer_name = " ".join(filter(None, [payer_name_obj.get("given_name"), payer_name_obj.get("surname")])) or None
+    # Decimal, not int(float(v) * 100): int(float("8.20") * 100) is 819.
+    try:
+        amount_total = int(Decimal(str(amount.get("value") or "0")).scaleb(2))
+    except InvalidOperation:
+        raise HTTPException(status_code=502, detail="PayPal returned an unreadable amount")
 
     await _upsert_order({
         "id": str(uuid.uuid4()),
@@ -1469,7 +1550,7 @@ async def paypal_verify(payload: PaypalVerifyRequest):
         "provider": "paypal",
         "provider_ref": order["id"],
         "status": "completed",
-        "amount_total": int(float(amount.get("value", "0")) * 100),
+        "amount_total": amount_total,
         "currency": amount.get("currency_code", "usd").lower(),
         "customer_email": payer.get("email_address"),
         "customer_name": payer_name,
@@ -1482,10 +1563,20 @@ async def paypal_verify(payload: PaypalVerifyRequest):
 
 @api_router.get("/commerce/receipt/{provider_ref}")
 async def get_receipt(provider_ref: str):
+    """provider_ref arrives as a URL query param on the published site, where
+    the merchant's own analytics scripts routinely log the full URL. Return
+    only what the receipt actually renders — never the buyer's email or
+    shipping address."""
     order = await db.orders.find_one({"provider_ref": provider_ref}, {"_id": 0})
     if not order:
         return {"status": "processing"}
-    return order
+    return {
+        "status": order.get("status", "completed"),
+        "amount_total": order.get("amount_total", 0),
+        "currency": order.get("currency", ""),
+        "line_items": order.get("line_items", []),
+        "customer_name": order.get("customer_name"),
+    }
 
 
 class UrlImport(BaseModel):
@@ -1777,43 +1868,74 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_PUBLIC_CORS_PATHS = {"/api/submissions", "/api/commerce/checkout-session"}
+_PUBLIC_CORS_PATHS = {
+    "/api/submissions",
+    "/api/commerce/checkout-session",
+    "/api/commerce/paypal/verify",
+}
+# Path-parametered, so exact-set membership can't match it; and it is a GET,
+# unlike every entry above. Widened for GET only.
+_PUBLIC_CORS_GET_PREFIX = "/api/commerce/receipt/"
 
 
 @app.middleware("http")
 async def _public_cors_override(request: Request, call_next):
     """A handful of endpoints are, by design, called cross-origin from
     arbitrary published/exported-site domains (form submissions, cart
-    checkout) rather than the builder's own frontend. The strict
-    CORSMiddleware above restricts everything else to a fixed origin
-    allowlist; this override widens exactly those two paths back open for
-    POST/OPTIONS only (no credentials are ever involved for either, so a
-    wildcard origin is safe here) without touching the strict default
-    everything else gets — including GET/DELETE on /api/submissions,
-    which return/erase stored form data and must stay origin-restricted.
-    Registered after CORSMiddleware, so it wraps outermost and can run
-    before CORSMiddleware sees the request (short-circuiting OPTIONS) and
-    override its response headers afterward."""
-    if request.url.path in _PUBLIC_CORS_PATHS and request.method in ("POST", "OPTIONS"):
-        if request.method == "OPTIONS":
-            return Response(
-                status_code=200,
-                headers={
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "POST, OPTIONS",
-                    "Access-Control-Allow-Headers": "Content-Type, Accept",
-                },
-            )
-        response = await call_next(request)
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        return response
-    return await call_next(request)
+    checkout, PayPal capture verification, receipt lookup) rather than the
+    builder's own frontend. The strict CORSMiddleware above restricts
+    everything else to a fixed origin allowlist; this override widens exactly
+    those paths back open, and only for the method each one actually needs (no
+    credentials are ever involved, so a wildcard origin is safe here), without
+    touching the strict default everything else gets — including GET/DELETE on
+    /api/submissions, which return/erase stored form data and must stay
+    origin-restricted. Registered after CORSMiddleware, so it wraps outermost
+    and can run before CORSMiddleware sees the request (short-circuiting
+    OPTIONS) and override its response headers afterward."""
+    path = request.url.path
+    if path in _PUBLIC_CORS_PATHS:
+        allowed = ("POST", "OPTIONS")
+    elif path.startswith(_PUBLIC_CORS_GET_PREFIX):
+        allowed = ("GET", "OPTIONS")
+    else:
+        return await call_next(request)
+    if request.method not in allowed:
+        return await call_next(request)
+    if request.method == "OPTIONS":
+        return Response(
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": ", ".join(allowed),
+                "Access-Control-Allow-Headers": "Content-Type, Accept",
+            },
+        )
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def ensure_indexes():
+    """provider_ref is the idempotency key for orders. _upsert_order's
+    read-then-write is TOCTOU-prone under concurrent webhook redelivery; this
+    index is what actually enforces one-order-per-payment.
+
+    sqlite_compat's dev shim has no create_index, so the SQLite path keeps only
+    the read-then-write guard — a known, accepted gap, since concurrent
+    redelivery is a production (i.e. Mongo) concern."""
+    if not hasattr(db.orders, "create_index"):
+        return
+    try:
+        await db.orders.create_index("provider_ref", unique=True)
+    except Exception as e:
+        logger.warning(f"orders provider_ref index creation failed: {e}")
 
 
 @app.on_event("startup")

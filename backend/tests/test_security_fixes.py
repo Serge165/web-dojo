@@ -191,6 +191,18 @@ class TestCORS:
         assert "access-control-allow-credentials" not in {k.lower() for k in r.headers.keys()}
 
 
+class _EmptyDb:
+    """Stands in for server.db so CORS tests can reach routes that do a
+    find_one without needing a live MongoDB (see this module's docstring)."""
+
+    class _Collection:
+        async def find_one(self, *a, **kw):
+            return None
+
+    def __getattr__(self, name):
+        return self._Collection()
+
+
 class TestPublicCORSOverride:
     def test_submissions_options_allows_any_origin(self, client):
         r = client.options("/api/submissions", headers={
@@ -215,6 +227,43 @@ class TestPublicCORSOverride:
         }, headers={"Origin": "https://another-published-site.example"})
         assert r.status_code == 503
         assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_paypal_verify_options_allows_any_origin(self, client):
+        # C3: this is a JSON POST, so the browser preflights it. Without the
+        # override the preflight fails, the fetch is never sent, and PayPal
+        # captures the money while Web Dojo records no order at all.
+        r = client.options("/api/commerce/paypal/verify", headers={
+            "Origin": "https://another-published-site.example",
+            "Access-Control-Request-Method": "POST",
+        })
+        assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_paypal_verify_post_response_carries_wildcard_origin(self, client, monkeypatch):
+        # No such project, so this 400s before touching PayPal — but the CORS
+        # header must still be set, or the page cannot read the response.
+        monkeypatch.setattr(server, "db", _EmptyDb())
+        r = client.post("/api/commerce/paypal/verify", json={
+            "project_id": "proj-cors-test", "order_id": "PP-CORS-1",
+        }, headers={"Origin": "https://another-published-site.example"})
+        assert r.status_code == 400
+        assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_receipt_get_response_carries_wildcard_origin(self, client, monkeypatch):
+        # C3: path-parametered, so exact-set membership can't match it, and it
+        # is a GET rather than a POST. Without the header the browser withholds
+        # the response body from the page and the receipt never renders.
+        monkeypatch.setattr(server, "db", _EmptyDb())
+        r = client.get("/api/commerce/receipt/cs_cors_test", headers={
+            "Origin": "https://another-published-site.example",
+        })
+        assert r.status_code == 200
+        assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_receipt_override_does_not_widen_other_methods(self, client):
+        r = client.delete("/api/commerce/receipt/cs_cors_test", headers={
+            "Origin": "https://evil.example",
+        })
+        assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
 
     def test_other_endpoints_unaffected_by_public_override(self, client):
         r = client.get("/api/", headers={"Origin": "https://evil.example"})
