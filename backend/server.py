@@ -62,6 +62,7 @@ class Project(BaseModel):
     # that uses this model, regardless of which DB query populated them.
     dashboard_password_hash: Optional[str] = Field(default=None, exclude=True)
     paypal_secret_enc: Optional[str] = Field(default=None, exclude=True)
+    smtp_config_enc: Optional[str] = Field(default=None, exclude=True)
     # Multi-page + template system
     pages: List[Any] = Field(default_factory=list)
     active_page_id: Optional[str] = None
@@ -379,7 +380,7 @@ async def list_projects():
 async def get_project(project_id: str):
     doc = await db.projects.find_one(
         {"id": project_id},
-        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0},
+        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0, "smtp_config_enc": 0},
     )
     if not doc:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -399,7 +400,7 @@ async def update_project(project_id: str, payload: ProjectUpdate):
     await db.projects.update_one({"id": project_id}, {"$set": updates})
     doc = await db.projects.find_one(
         {"id": project_id},
-        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0},
+        {"_id": 0, "dashboard_password_hash": 0, "paypal_secret_enc": 0, "smtp_config_enc": 0},
     )
     doc = _deserialize(doc)
     return Project(**doc)
@@ -1509,6 +1510,49 @@ async def set_paypal_secret(
             "paypal_client_id": payload.client_id,
             "paypal_secret_enc": _encrypt(payload.secret),
         }},
+    )
+    return {"ok": True}
+
+
+class SmtpConfigRequest(BaseModel):
+    project_id: str
+    host: str
+    port: int
+    username: str
+    password: str
+    from_address: str
+
+
+@api_router.post("/commerce/smtp-config")
+async def set_smtp_config(
+    payload: SmtpConfigRequest,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    existing = await db.projects.find_one(
+        {"id": payload.project_id},
+        {"_id": 0, "id": 1, "smtp_config_enc": 1, "dashboard_password_hash": 1},
+    )
+    if not existing:
+        raise HTTPException(status_code=404, detail="Project not found")
+    # Same reasoning as set_paypal_secret: project_id is public, so first
+    # write is open but replacing existing credentials needs a token.
+    if existing.get("smtp_config_enc"):
+        current_hash = existing.get("dashboard_password_hash") or ""
+        if not (x_dashboard_token and _verify_dashboard_token(x_dashboard_token, payload.project_id, current_hash)):
+            raise HTTPException(
+                status_code=401,
+                detail="SMTP settings are already set — unlock the dashboard to replace them",
+            )
+    config = {
+        "host": payload.host,
+        "port": payload.port,
+        "username": payload.username,
+        "password": payload.password,
+        "from_address": payload.from_address,
+    }
+    await db.projects.update_one(
+        {"id": payload.project_id},
+        {"$set": {"smtp_config_enc": _encrypt(json.dumps(config))}},
     )
     return {"ok": True}
 

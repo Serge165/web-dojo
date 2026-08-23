@@ -692,3 +692,50 @@ class TestOrdersIndex:
         with patch.object(server, "db", FakeDb()):
             asyncio.run(server.ensure_indexes())
         assert created == [("provider_ref", True)]
+
+
+class TestSmtpConfigEndpoint:
+    def _payload(self, project_id, **overrides):
+        body = {
+            "project_id": project_id, "host": "smtp.example.com", "port": 587,
+            "username": "user@example.com", "password": "app-password", "from_address": "store@example.com",
+        }
+        body.update(overrides)
+        return body
+
+    def test_setting_the_config_encrypts_it_at_rest(self, client, project_id, db):
+        r = client.post("/api/commerce/smtp-config", json=self._payload(project_id))
+        assert r.status_code == 200
+        stored = db.projects.find_one({"id": project_id})
+        assert stored["smtp_config_enc"] != "app-password"
+        decrypted = json.loads(server._decrypt(stored["smtp_config_enc"]))
+        assert decrypted["host"] == "smtp.example.com"
+        assert decrypted["password"] == "app-password"
+
+    def test_project_get_response_never_includes_the_smtp_config(self, client, project_id):
+        client.post("/api/commerce/smtp-config", json=self._payload(project_id))
+        body = client.get(f"/api/projects/{project_id}").json()
+        assert "smtp_config_enc" not in body
+        assert "app-password" not in json.dumps(body)
+
+    def test_replacing_an_existing_config_without_a_token_is_rejected(self, client, project_id, db):
+        client.post("/api/commerce/smtp-config", json=self._payload(project_id))
+        r = client.post("/api/commerce/smtp-config", json=self._payload(project_id, host="smtp2.example.com"))
+        assert r.status_code == 401
+        assert json.loads(server._decrypt(db.projects.find_one({"id": project_id})["smtp_config_enc"]))["host"] == "smtp.example.com"
+
+    def test_replacing_an_existing_config_with_a_valid_token_succeeds(self, client, project_id, db):
+        client.post("/api/commerce/smtp-config", json=self._payload(project_id))
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        token = client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+        r = client.post(
+            "/api/commerce/smtp-config",
+            json=self._payload(project_id, host="smtp2.example.com"),
+            headers={"X-Dashboard-Token": token},
+        )
+        assert r.status_code == 200
+        assert json.loads(server._decrypt(db.projects.find_one({"id": project_id})["smtp_config_enc"]))["host"] == "smtp2.example.com"
+
+    def test_an_unknown_project_id_is_rejected(self, client):
+        r = client.post("/api/commerce/smtp-config", json=self._payload("no-such-project"))
+        assert r.status_code == 404
