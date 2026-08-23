@@ -739,6 +739,82 @@ async def get_analytics(project_id: str, x_dashboard_token: Optional[str] = Head
     }
 
 
+def _compute_stale_products(all_orders: list, today) -> Optional[dict]:
+    trailing_start = (today - timedelta(days=29)).isoformat()
+    trailing_end = today.isoformat()
+    prior_start = (today - timedelta(days=59)).isoformat()
+    prior_end = (today - timedelta(days=30)).isoformat()
+
+    trailing_products = set()
+    prior_products = set()
+    for o in all_orders:
+        day = (o.get("created_at") or "")[:10]
+        for item in (o.get("line_items") or []):
+            name = (item.get("name") or "").strip()
+            if not name:
+                continue
+            if trailing_start <= day <= trailing_end:
+                trailing_products.add(name)
+            elif prior_start <= day <= prior_end:
+                prior_products.add(name)
+
+    stale = sorted(prior_products - trailing_products)
+    if not stale:
+        return None
+    return {
+        "id": "stale_products",
+        "severity": "info",
+        "title": "Products haven't sold recently",
+        "detail": f"{len(stale)} product{'s' if len(stale) != 1 else ''} sold in the prior 30 days but haven't sold in the last 30.",
+        "data": {"count": len(stale), "products": stale[:5]},
+    }
+
+
+def _compute_revenue_drop(all_orders: list, today) -> Optional[dict]:
+    current_start = (today - timedelta(days=6)).isoformat()
+    current_end = today.isoformat()
+    prior_start = (today - timedelta(days=13)).isoformat()
+    prior_end = (today - timedelta(days=7)).isoformat()
+
+    current_revenue = 0
+    prior_revenue = 0
+    for o in all_orders:
+        day = (o.get("created_at") or "")[:10]
+        amount = o.get("amount_total", 0)
+        if current_start <= day <= current_end:
+            current_revenue += amount
+        elif prior_start <= day <= prior_end:
+            prior_revenue += amount
+
+    if prior_revenue <= 0 or current_revenue >= prior_revenue * 0.8:
+        return None
+
+    percent_change = round((current_revenue - prior_revenue) / prior_revenue * 100)
+    return {
+        "id": "revenue_drop",
+        "severity": "warning",
+        "title": "Revenue is down",
+        "detail": f"Revenue this week is down {abs(percent_change)}% from last week.",
+        "data": {"current_revenue": current_revenue, "prior_revenue": prior_revenue, "percent_change": percent_change},
+    }
+
+
+@api_router.get("/dashboard/{project_id}/insights")
+async def get_insights(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    today = datetime.now(timezone.utc).date()
+
+    cursor = db.orders.find({"project_id": project_id, "status": "completed"}, {"_id": 0})
+    all_orders = await cursor.to_list(length=None)
+
+    alerts = []
+    for alert in (_compute_stale_products(all_orders, today), _compute_revenue_drop(all_orders, today)):
+        if alert is not None:
+            alerts.append(alert)
+
+    return {"alerts": alerts}
+
+
 def _build_google_fonts_link(fonts):
     if not fonts:
         return ""

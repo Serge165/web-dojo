@@ -1191,3 +1191,84 @@ class TestAnalyticsTopProducts:
         token = self._unlocked_token(client, project_id)
         body = client.get(f"/api/dashboard/{project_id}/analytics", headers={"X-Dashboard-Token": token}).json()
         assert body["top_products"] == []
+
+
+class TestInsightsStaleProductsAndRevenueDrop:
+    def _unlocked_token(self, client, project_id):
+        client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "hunter22"})
+        return client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "hunter22"}).json()["token"]
+
+    def _order_with_items(self, order_id, project_id, created_at, line_items, amount=None, email="buyer@example.com"):
+        return {
+            "id": order_id, "project_id": project_id, "provider": "stripe", "provider_ref": f"ref-{order_id}",
+            "status": "completed",
+            "amount_total": amount if amount is not None else sum(i["quantity"] * i["unit_amount"] for i in line_items),
+            "currency": "usd", "customer_email": email, "customer_name": None,
+            "shipping_address": None, "line_items": line_items, "fulfillment_status": "processing",
+            "created_at": created_at,
+        }
+
+    def test_without_a_token_is_rejected(self, client, project_id):
+        r = client.get(f"/api/dashboard/{project_id}/insights")
+        assert r.status_code == 401
+
+    def test_a_product_with_no_sales_in_the_trailing_30_days_is_flagged_stale(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        prior_day = (today - timedelta(days=45)).isoformat()
+        db.orders.insert_one(self._order_with_items(
+            "ins-stale-1", project_id, f"{prior_day}T00:00:00Z",
+            [{"name": "Aurora Bottle", "quantity": 1, "unit_amount": 3800, "currency": "usd"}],
+        ))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        alert = next(a for a in body["alerts"] if a["id"] == "stale_products")
+        assert alert["severity"] == "info"
+        assert alert["data"]["count"] == 1
+        assert "Aurora Bottle" in alert["data"]["products"]
+
+    def test_a_product_that_also_sold_in_the_trailing_30_days_is_not_flagged(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        today_str = today.isoformat()
+        prior_day = (today - timedelta(days=45)).isoformat()
+        db.orders.insert_one(self._order_with_items(
+            "ins-stale-2a", project_id, f"{prior_day}T00:00:00Z",
+            [{"name": "Forge Mug", "quantity": 1, "unit_amount": 1800, "currency": "usd"}],
+        ))
+        db.orders.insert_one(self._order_with_items(
+            "ins-stale-2b", project_id, f"{today_str}T00:00:00Z",
+            [{"name": "Forge Mug", "quantity": 1, "unit_amount": 1800, "currency": "usd"}],
+        ))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert not any(a["id"] == "stale_products" for a in body["alerts"])
+
+    def test_revenue_down_more_than_20_percent_is_flagged(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        current_day = today.isoformat()
+        prior_day = (today - timedelta(days=10)).isoformat()
+        db.orders.insert_one(self._order_with_items("ins-rev-cur-1", project_id, f"{current_day}T00:00:00Z", [], amount=1000))
+        db.orders.insert_one(self._order_with_items("ins-rev-prior-1", project_id, f"{prior_day}T00:00:00Z", [], amount=2000))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        alert = next(a for a in body["alerts"] if a["id"] == "revenue_drop")
+        assert alert["severity"] == "warning"
+        assert alert["data"]["current_revenue"] == 1000
+        assert alert["data"]["prior_revenue"] == 2000
+        assert alert["data"]["percent_change"] == -50
+
+    def test_revenue_drop_under_20_percent_is_not_flagged(self, client, project_id, db):
+        today = datetime.now(timezone.utc).date()
+        current_day = today.isoformat()
+        prior_day = (today - timedelta(days=10)).isoformat()
+        db.orders.insert_one(self._order_with_items("ins-rev-cur-2", project_id, f"{current_day}T00:00:00Z", [], amount=1900))
+        db.orders.insert_one(self._order_with_items("ins-rev-prior-2", project_id, f"{prior_day}T00:00:00Z", [], amount=2000))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert not any(a["id"] == "revenue_drop" for a in body["alerts"])
+
+    def test_no_prior_revenue_does_not_flag_a_drop(self, client, project_id, db):
+        today_str = datetime.now(timezone.utc).date().isoformat()
+        db.orders.insert_one(self._order_with_items("ins-rev-noprior-1", project_id, f"{today_str}T00:00:00Z", [], amount=1000))
+        token = self._unlocked_token(client, project_id)
+        body = client.get(f"/api/dashboard/{project_id}/insights", headers={"X-Dashboard-Token": token}).json()
+        assert not any(a["id"] == "revenue_drop" for a in body["alerts"])
