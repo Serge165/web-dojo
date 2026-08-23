@@ -12,7 +12,7 @@ import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Trash2, Eye, MousePointer2, Code2, Columns2, Presentation,
-  FilePlus2, FolderOpen, Save, Download, Upload, Search, Palette, BarChart3, LayoutTemplate, Inbox, HelpCircle,
+  FilePlus2, FolderOpen, Save, Download, Upload, Search, Palette, BarChart3, LayoutTemplate, Inbox, Store, HelpCircle,
   Undo2, Redo2, Scissors, Copy, ClipboardPaste, ZoomIn, ZoomOut, RotateCcw, Monitor, Tablet, Smartphone,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
@@ -34,6 +34,7 @@ import { StreamEmbedModal } from "@/components/builder/StreamEmbedModal";
 import { SocialShareModal } from "@/components/builder/SocialShareModal";
 import { ImportExportModal } from "@/components/builder/ImportExportModal";
 import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
+import { EcommerceDashboardModal } from "@/components/builder/EcommerceDashboardModal";
 import { buildStandaloneHtml, downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { buildCartRuntimeHtml } from "@/lib/cart";
 import { scanHtml } from "@/lib/importHtml";
@@ -149,6 +150,7 @@ export default function Builder() {
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [seoOpen, setSeoOpen] = useState(false);
   const [submissionsOpen, setSubmissionsOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
   // Sidebar collapse — remembered per-browser (workspace preference, not
@@ -924,6 +926,7 @@ export default function Builder() {
         { id: "analytics", label: "Analytics", icon: BarChart3, onRun: () => setAnalyticsOpen(true) },
         { id: "templates", label: "Project templates", icon: LayoutTemplate, onRun: () => setTemplatesOpen(true) },
         { id: "submissions", label: "Form submissions inbox", icon: Inbox, onRun: () => setSubmissionsOpen(true) },
+        { id: "dashboard", label: "E-commerce dashboard", icon: Store, onRun: () => setDashboardOpen(true) },
       ],
     },
     {
@@ -950,6 +953,7 @@ export default function Builder() {
         onAnalytics={() => setAnalyticsOpen(true)}
         onTemplates={() => setTemplatesOpen(true)}
         onSubmissions={() => setSubmissionsOpen(true)}
+        onDashboard={() => setDashboardOpen(true)}
         onUndo={undo} onRedo={redo}
         canUndo={past.length > 0} canRedo={future.length > 0}
         viewport={viewport} setViewport={setViewport}
@@ -1338,6 +1342,12 @@ export default function Builder() {
       <SubmissionsModal
         open={submissionsOpen}
         onClose={() => setSubmissionsOpen(false)}
+        projectId={projectId}
+      />
+
+      <EcommerceDashboardModal
+        open={dashboardOpen}
+        onClose={() => setDashboardOpen(false)}
         projectId={projectId}
       />
 

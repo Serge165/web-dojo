@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Inbox, Loader2, Check, AlertCircle } from "lucide-react";
+import { Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Inbox, Store, Loader2, Check, AlertCircle } from "lucide-react";
 import { scanHtml } from "@/lib/importHtml";
 import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ export const TopBar = ({
   onShare,
   onPublish,
   onStartTour,
-  onFind, onAssets, onAnalytics, onTemplates, onSubmissions,
+  onFind, onAssets, onAnalytics, onTemplates, onSubmissions, onDashboard,
   onOpenTransfer,
 }) => {
   const fileRef = useRef(null);
@@ -130,6 +130,7 @@ export const TopBar = ({
           <button onClick={onAnalytics} className="p-1.5 rounded hover:bg-[#242019] text-[#A79C87] hover:text-[#F1EDE2]" title="Analytics" data-testid="analytics-btn"><BarChart3 size={14} /></button>
           <button onClick={onTemplates} className="p-1.5 rounded hover:bg-[#242019] text-[#A79C87] hover:text-[#F1EDE2]" title="Project templates" data-testid="templates-btn"><LayoutTemplate size={14} /></button>
           <button onClick={onSubmissions} className="p-1.5 rounded hover:bg-[#242019] text-[#A79C87] hover:text-[#F1EDE2]" title="Form submissions inbox" data-testid="submissions-btn"><Inbox size={14} /></button>
+          <button onClick={onDashboard} className="p-1.5 rounded hover:bg-[#242019] text-[#A79C87] hover:text-[#F1EDE2]" title="E-commerce dashboard (orders, customers, analytics, insights)" data-testid="dashboard-btn"><Store size={14} /></button>
         </div>
         <div className="h-6 w-px bg-[#332D22]" />
         {saveStatus === "saving" && <span className="flex items-center gap-1 text-[11px] text-[#948C79]" data-testid="save-status-saving"><Loader2 size={12} className="animate-spin" /> Saving…</span>}
