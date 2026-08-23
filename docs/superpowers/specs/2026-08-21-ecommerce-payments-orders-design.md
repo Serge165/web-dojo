@@ -35,9 +35,11 @@ Building customer tracking, analytics, or insights (Phases 2-4) is impossible wi
 - Per-project Stripe accounts (Stripe Connect) — flagged below as a known limitation, not fixed here.
 - Multi-user roles/accounts — a single per-project password is the right amount of access control given nothing else in the app has user accounts either.
 
-## Known limitation carried forward (not fixed in this phase)
+## Known limitations carried forward (not fixed in this phase)
 
 `STRIPE_SECRET_KEY` is one global backend env var — every Web Dojo project currently shares the same Stripe account. This phase doesn't change that (making commerce genuinely multi-tenant is its own project, e.g. Stripe Connect). What this phase *does* fix: every order gets tagged with `project_id` so data is correctly attributed to the right site even though the money still flows through one shared account today.
+
+Neither Stripe nor PayPal verification checks the charged amount against an independently-known "expected" price — there is no server-side cart in this phase, so both `checkout-session` and `paypal/verify` take pricing from whatever the client (or, for PayPal, PayPal's own API response reporting what was actually captured) reports, with no third source to cross-check against. What both *do* guarantee: the payment genuinely happened, on the merchant's own account, verified server-side (Stripe via signed webhook, PayPal via a live API call) — not that the price was the one the site owner intended to charge. A true expected-amount authority needs a server-side cart/pricing source, which is a bigger feature than this phase's scope.
 
 ## Data Model
 
@@ -75,8 +77,9 @@ Project doc gains one new optional field: `dashboard_password_hash` (PBKDF2-HMAC
 Today's flow (browser captures the payment, backend never involved) means Web Dojo currently has zero ability to confirm a PayPal payment actually happened — it just trusts the browser. Fixing this needs your PayPal **Secret**, not just the Client ID `CommerceTab` collects today:
 
 1. After the browser's `actions.order.capture()` resolves, the client reports the PayPal order ID (plus `project_id`) to a new `POST /api/commerce/paypal/verify`.
-2. The backend calls PayPal's Orders API (`GET /v2/checkout/orders/{id}`) with Web Dojo's own server-side PayPal credentials and confirms the order's status is genuinely `COMPLETED` and the amount matches what was expected, before writing an order record. A client-reported "it worked" is never trusted on its own.
-3. `CommerceTab`'s PayPal field becomes two fields: Client ID (already there, used client-side to load the SDK) and Secret (new, server-side only, never sent to the browser — stored like the Stripe key, as a project-scoped credential; see below).
+2. The backend calls PayPal's Orders API (`GET /v2/checkout/orders/{id}`) with Web Dojo's own server-side PayPal credentials and confirms the order's status is genuinely `COMPLETED`, then writes an order record with every payment fact (amount, currency, customer identity) sourced from that response — never from anything the client claims. A client-reported "it worked" is never trusted on its own.
+3. **Amendment (post-implementation):** this does *not* also check "the amount matches what was expected" — there is no server-side cart in this phase (checkout-session takes prices from the client, same as Stripe's existing gap), so the backend has no independently-known expected amount to compare PayPal's response against. What this phase *does* guarantee: the order genuinely happened, at whatever price PayPal reports, on the merchant's own PayPal account. Building a true expected-amount authority needs a server-side cart/pricing source, which is out of scope here and would apply equally to the Stripe path. Recorded as a known limitation, matching the Stripe-global-key limitation above.
+4. `CommerceTab`'s PayPal field becomes two fields: Client ID (already there, used client-side to load the SDK) and Secret (new, server-side only, never sent to the browser — stored like the Stripe key, as a project-scoped credential; see below).
 
 Per-project payment credentials (Stripe key stays global per the limitation above, but PayPal Secret is naturally project-scoped since `CommerceTab` already lets each project set its own PayPal Client ID) are stored Fernet-encrypted using the existing `_encrypt`/`_decrypt`/`_get_fernet` helpers already in `server.py` — same pattern as FTP publish-preset passwords, no new crypto.
 
