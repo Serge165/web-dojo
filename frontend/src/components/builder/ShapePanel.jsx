@@ -165,10 +165,10 @@ export const ShapePanel = ({ selected, onPatch }) => {
       <div
         className="rounded-lg border border-[#332D22] flex items-center justify-center h-[130px]"
         style={{
-          backgroundImage: "linear-gradient(45deg,#181818 25%,transparent 25%),linear-gradient(-45deg,#181818 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#181818 75%),linear-gradient(-45deg,transparent 75%,#181818 75%)",
+          backgroundImage: "linear-gradient(45deg,#242019 25%,transparent 25%),linear-gradient(-45deg,#242019 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#242019 75%),linear-gradient(-45deg,transparent 75%,#242019 75%)",
           backgroundSize: "16px 16px",
           backgroundPosition: "0 0,0 8px,8px -8px,-8px 0",
-          backgroundColor: "#0d0d0d",
+          backgroundColor: "#15130E",
         }}
       >
         <div dangerouslySetInnerHTML={{ __html: `<div style="width:140px;height:82px;background:linear-gradient(135deg,#6366f1,#ec4899);${cssString}"></div>` }} />

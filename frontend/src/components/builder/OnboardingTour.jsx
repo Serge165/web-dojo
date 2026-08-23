@@ -79,7 +79,7 @@ const Spotlight = ({ selector }) => {
         left: rect.left,
         width: rect.width,
         height: rect.height,
-        boxShadow: "0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 2px #3b82f6, 0 0 40px rgba(59,130,246,0.6)",
+        boxShadow: "0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 2px #C9A227, 0 0 40px rgba(201,162,39,0.6)",
       }}
     />
   );

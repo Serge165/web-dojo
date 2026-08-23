@@ -58,11 +58,11 @@ export const CodeEditor = ({ value, onChange, language = "html", readOnly = fals
       ],
       colors: {
         "editor.background": "#15130E",
-        "editor.foreground": "#e5e7eb",
-        "editor.lineHighlightBackground": "#0d0d0d",
-        "editorLineNumber.foreground": "#3f3f46",
+        "editor.foreground": "#F1EDE2",
+        "editor.lineHighlightBackground": "#242019",
+        "editorLineNumber.foreground": "#6B6353",
         "editorGutter.background": "#15130E",
-        "editorCursor.foreground": "#60a5fa",
+        "editorCursor.foreground": "#C9A227",
       },
     });
     monaco.editor.setTheme("forge-dark");

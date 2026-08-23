@@ -104,8 +104,8 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
   return (
     <div className="space-y-4" data-testid="divider-panel">
       {/* Preview: two mock sections with the divider between */}
-      <div className="rounded-lg border border-[#332D22] overflow-hidden" style={{ background: "#0d0d0d" }}>
-        <div style={{ background: "#1b1b1b", height: 22 }} />
+      <div className="rounded-lg border border-[#332D22] overflow-hidden" style={{ background: "#15130E" }}>
+        <div style={{ background: "#242019", height: 22 }} />
         <div dangerouslySetInnerHTML={{ __html: buildSvg(shape, color, Math.min(height, 90), flipX, flipY, false) }} />
         <div style={{ background: color, height: 22, opacity: 0.28 }} />
       </div>
