@@ -1,8 +1,21 @@
-import { buildMultiPageExport } from "./exportHtml";
+import { buildMultiPageExport, buildStandaloneHtml } from "./exportHtml";
 
 const page = (overrides) => ({
   id: "p1", name: "Home", slug: "index", elements: [], head_html: "", canvas_bg: "#ffffff",
   ...overrides,
+});
+
+test("buildStandaloneHtml defaults og:type to website and JSON-LD @type to WebSite", () => {
+  const html = buildStandaloneHtml({ id: "p1", name: "Home", elements: [], seo: {} });
+  expect(html).toContain('<meta property="og:type" content="website">');
+  expect(html).toContain('"@type":"WebSite"');
+});
+
+test("buildStandaloneHtml honors seo.og_type and seo.schema_type when set (e.g. by a template)", () => {
+  const html = buildStandaloneHtml({ id: "p1", name: "Home", elements: [], seo: { og_type: "product", schema_type: "Product", title: "Acme Widget" } });
+  expect(html).toContain('<meta property="og:type" content="product">');
+  expect(html).toContain('"@type":"Product"');
+  expect(html).toContain('"name":"Acme Widget"');
 });
 
 test("buildMultiPageExport writes globals.css with clearly labeled sections in the right order", () => {
@@ -59,4 +72,41 @@ test("buildMultiPageExport keeps non-forge head_html content (e.g. a CDN embed) 
   const { files } = buildMultiPageExport({ id: "proj1", name: "Test", pages: [page({ head_html: headHtml })] });
   expect(files["index.html"]).toContain("https://example.com/widget.js");
   expect(files["globals.css"]).not.toContain("widget.js");
+});
+
+test("buildMultiPageExport extracts a data-forge-js script from element markup into js/<name>, replacing it with a src reference", () => {
+  const html = `<div>${"<script data-forge-js=\"comments.js\">(function(){console.log('hi');})();</script>"}</div>`;
+  const { files } = buildMultiPageExport({ id: "proj1", name: "Test", pages: [page({ elements: [{ id: "e1", html }] })] });
+  expect(files["js/comments.js"]).toContain("console.log('hi')");
+  expect(files["index.html"]).toContain('<script src="js/comments.js"></script>');
+  expect(files["index.html"]).not.toContain("data-forge-js");
+});
+
+test("buildMultiPageExport writes one js file even when the same data-forge-js name appears on multiple pages/elements", () => {
+  const html = `<div>${"<script data-forge-js=\"comments.js\">CODE_A</script>"}</div>`;
+  const { files } = buildMultiPageExport({
+    id: "proj1", name: "Test",
+    pages: [
+      page({ id: "p1", slug: "index", elements: [{ id: "e1", html }] }),
+      page({ id: "p2", slug: "about", elements: [{ id: "e2", html }] }),
+    ],
+  });
+  expect(Object.keys(files).filter((f) => f === "js/comments.js")).toHaveLength(1);
+  expect(files["about.html"]).toContain('<script src="js/comments.js"></script>');
+});
+
+test("buildMultiPageExport extracts a data-forge-js script from head_html too", () => {
+  const headHtml = `<script data-forge-js="tracker.js">window.track=1;</script>`;
+  const { files } = buildMultiPageExport({ id: "proj1", name: "Test", pages: [page({ head_html: headHtml })] });
+  expect(files["js/tracker.js"]).toContain("window.track=1");
+  expect(files["index.html"]).toContain('<script src="js/tracker.js"></script>');
+});
+
+test("buildMultiPageExport routes an imported page's data-forge-imported-css into globals.css's Components section", () => {
+  const headHtml = `<style data-forge-imported-css>\n.hero{color:red}\n</style>`;
+  const { files } = buildMultiPageExport({ id: "proj1", name: "Test", pages: [page({ head_html: headHtml })] });
+  const css = files["globals.css"];
+  const componentsSection = css.split("/* ===== Components ===== */")[1].split("/* =====")[0];
+  expect(componentsSection).toContain(".hero{color:red}");
+  expect(files["index.html"]).not.toContain("data-forge-imported-css");
 });

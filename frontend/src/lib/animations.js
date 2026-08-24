@@ -259,6 +259,74 @@ export const ANIMATION_CATEGORIES = [
   { id: "on-scroll", label: "On Scroll" },
 ];
 
+// ---------- Animation library presets ----------
+// Each library (GSAP / Framer Motion / CSS) gets 3 entrance, 3 exit, and
+// 3 on-scroll presets. These are used by AnimationGenerator.jsx's library
+// selector to generate library-specific animation code.
+
+export const ANIMATION_LIBRARIES = [
+  { id: "gsap", label: "GSAP" },
+  { id: "framer", label: "Framer Motion" },
+  { id: "css", label: "CSS only" },
+];
+
+// GSAP presets — produce gsap.to() / gsap.from() code
+export const GSAP_PRESETS = {
+  entrance: [
+    { id: "gsap-fade-up", label: "Fade Up", code: (el) => `gsap.from("${el}", { opacity: 0, y: 40, duration: 0.8, ease: "power3.out" });` },
+    { id: "gsap-scale-in", label: "Scale In", code: (el) => `gsap.from("${el}", { opacity: 0, scale: 0.8, duration: 0.7, ease: "back.out(1.7)" });` },
+    { id: "gsap-slide-left", label: "Slide Left", code: (el) => `gsap.from("${el}", { opacity: 0, x: -60, duration: 0.8, ease: "power2.out" });` },
+  ],
+  exit: [
+    { id: "gsap-fade-out", label: "Fade Out", code: (el) => `gsap.to("${el}", { opacity: 0, duration: 0.5, ease: "power2.in" });` },
+    { id: "gsap-scale-out", label: "Scale Out", code: (el) => `gsap.to("${el}", { opacity: 0, scale: 0.5, duration: 0.5, ease: "back.in(1.7)" });` },
+    { id: "gsap-slide-out", label: "Slide Out", code: (el) => `gsap.to("${el}", { opacity: 0, x: 80, duration: 0.6, ease: "power2.in" });` },
+  ],
+  "on-scroll": [
+    { id: "gsap-scroll-fade", label: "Scroll Fade", code: (el) => `gsap.from("${el}", { opacity: 0, scrollTrigger: { trigger: "${el}", start: "top 80%" } });` },
+    { id: "gsap-scroll-up", label: "Scroll Up", code: (el) => `gsap.from("${el}", { opacity: 0, y: 60, scrollTrigger: { trigger: "${el}", start: "top 80%" } });` },
+    { id: "gsap-scroll-stagger", label: "Scroll Stagger", code: (el) => `gsap.from("${el} > *", { opacity: 0, y: 30, stagger: 0.1, scrollTrigger: { trigger: "${el}", start: "top 80%" } });` },
+  ],
+};
+
+// Framer Motion presets — produce motion component props
+export const FRAMER_PRESETS = {
+  entrance: [
+    { id: "framer-fade-up", label: "Fade Up", code: () => `initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}` },
+    { id: "framer-scale", label: "Scale In", code: () => `initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, type: "spring" }}` },
+    { id: "framer-slide", label: "Slide In", code: () => `initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}` },
+  ],
+  exit: [
+    { id: "framer-fade-out", label: "Fade Out", code: () => `exit={{ opacity: 0 }} transition={{ duration: 0.5 }}` },
+    { id: "framer-scale-out", label: "Scale Out", code: () => `exit={{ opacity: 0, scale: 0.5 }} transition={{ duration: 0.5 }}` },
+    { id: "framer-slide-out", label: "Slide Out", code: () => `exit={{ opacity: 0, x: 80 }} transition={{ duration: 0.6 }}` },
+  ],
+  "on-scroll": [
+    { id: "framer-whileinview", label: "While In View", code: () => `initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}` },
+    { id: "framer-inview-up", label: "In View Up", code: () => `initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}` },
+    { id: "framer-inview-stagger", label: "In View Stagger", code: () => `initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ staggerChildren: 0.1 }}` },
+  ],
+};
+
+// Build library-specific animation code for a given library + category + preset
+export const buildLibraryAnimation = ({ library, category, presetId, elementSelector }) => {
+  if (library === "gsap") {
+    const preset = (GSAP_PRESETS[category] || []).find((p) => p.id === presetId);
+    if (!preset) return "";
+    return preset.code(elementSelector || ".forge-anim");
+  }
+  if (library === "framer") {
+    const preset = (FRAMER_PRESETS[category] || []).find((p) => p.id === presetId);
+    if (!preset) return "";
+    return preset.code();
+  }
+  // CSS fallback — use the existing keyframes system
+  const preset = ANIMATION_PRESETS.find((p) => p.id === presetId);
+  if (!preset) return "";
+  const name = `forge_${preset.id.replace(/-/g, "_")}`;
+  return `${buildKeyframes(name, preset.frames)}\n\n.forge-anim { animation: ${buildAnimationShorthand({ name, duration: 0.7, timing: "cubic-bezier(0.22, 1, 0.36, 1)", delay: 0, iteration: "1" })}; }`;
+};
+
 export const buildKeyframes = (name, frames) => {
   const body = Object.entries(frames)
     .map(([k, v]) => `  ${k} { ${Object.entries(v).map(([p, val]) => `${p}: ${val}`).join("; ")} }`)

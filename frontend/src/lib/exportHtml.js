@@ -21,6 +21,13 @@ const THEME_RE = /<style data-forge-theme(?:="[^"]*")?>([\s\S]*?)<\/style>\n?/g;
 const VARS_RE = /<style data-forge-vars>([\s\S]*?)<\/style>\n?/g;
 const RESPONSIVE_OVERRIDES_RE = /<style data-forge-responsive-overrides>([\s\S]*?)<\/style>\n?/g;
 const ANIM_RE = /<style data-forge-anim="[^"]*">([\s\S]*?)<\/style>\n?/g;
+// importHtml.js's scanHtml wraps every <style> rule an imported page
+// carried (its own + whatever /import/url fetched from its <link
+// rel="stylesheet"> tags) in this marker, so an import's real styling
+// lands in globals.css's Components section — the same bucket
+// stripInlineStyles' own per-block CSS goes into — instead of being
+// stranded, unshared, in that one page's <head>.
+const IMPORTED_CSS_RE = /<style data-forge-imported-css>([\s\S]*?)<\/style>\n?/g;
 const ROOT_BLOCK_RE = /:root\s*{[^}]*}/;
 
 const extractForgeCss = (headHtml) => {
@@ -29,6 +36,7 @@ const extractForgeCss = (headHtml) => {
   const base = [];
   const mediaQueries = [];
   const animations = [];
+  const importedCss = [];
 
   remaining = remaining.replace(THEME_RE, (_, body) => {
     const rootMatch = body.match(ROOT_BLOCK_RE);
@@ -49,8 +57,12 @@ const extractForgeCss = (headHtml) => {
     if (body.trim()) animations.push(body.trim());
     return "";
   });
+  remaining = remaining.replace(IMPORTED_CSS_RE, (_, body) => {
+    if (body.trim()) importedCss.push(body.trim());
+    return "";
+  });
 
-  return { remainingHead: remaining.trim(), themeVars, base, mediaQueries, animations };
+  return { remainingHead: remaining.trim(), themeVars, base, mediaQueries, animations, importedCss };
 };
 
 // Merges however many `:root { --x: 1; }` block strings into one deduped
@@ -71,6 +83,25 @@ const mergeRootBlocks = (blocks) => {
 
 const dedupe = (arr) => [...new Set(arr.filter(Boolean))];
 
+// Pulls <script data-forge-js="name.js">...</script> blocks out of a page's
+// head_html or element markup (e.g. a comment widget's behavior script) and
+// replaces each with <script src="js/name.js"></script>, so the multi-page
+// export writes one real file per name instead of repeating the same script
+// inline on every page/element that uses it. First occurrence of a given
+// filename wins — a shared widget script is expected to be byte-identical
+// everywhere it's used, same assumption buildOrganizedStylesheet makes for
+// deduped CSS. Existing blocks with plain inline `<script>` (no
+// data-forge-js marker) are untouched — this is opt-in, not a retrofit.
+const JS_FILE_RE = /<script data-forge-js="([^"]+)">([\s\S]*?)<\/script>\n?/g;
+const extractForgeJs = (html) => {
+  const files = {};
+  const remaining = (html || "").replace(JS_FILE_RE, (_, filename, code) => {
+    if (!(filename in files)) files[filename] = code.trim();
+    return `<script src="js/${filename}"></script>`;
+  });
+  return { remaining, files };
+};
+
 // Assembles one clearly labeled globals.css from every page's extracted
 // forge CSS plus the shared component CSS stripInlineStyles produced.
 // Section order: Theme Variables, Base, Components, Animations, Media
@@ -82,6 +113,8 @@ const buildOrganizedStylesheet = ({ themeVars, base, componentCss, animations, m
     ["Components", componentCss || ""],
     ["Animations", dedupe(animations).join("\n\n")],
     ["Media Queries", [RESPONSIVE_CSS_BODY, ...dedupe(mediaQueries)].join("\n")],
+    // A11y: users with a reduced-motion OS preference get a static site.
+    ["Reduced Motion", "@media (prefers-reduced-motion: reduce) {\n  *, *::before, *::after {\n    animation-duration: 0.01ms !important;\n    animation-iteration-count: 1 !important;\n    transition-duration: 0.01ms !important;\n  }\n}"],
   ];
   return sections
     .map(([label, body]) => `/* ===== ${label} ===== */\n${body || "/* none */"}`)
@@ -100,7 +133,7 @@ const buildFontLinks = (fonts) => {
 
 const buildSeoMeta = (seo) => {
   const s = seo || {};
-  const out = [`<meta property="og:type" content="website">`];
+  const out = [`<meta property="og:type" content="${escAttr(s.og_type || "website")}">`];
   if (s.description) out.push(`<meta name="description" content="${escAttr(s.description)}">`);
   if (s.keywords) out.push(`<meta name="keywords" content="${escAttr(s.keywords)}">`);
   if (s.canonical) out.push(`<link rel="canonical" href="${escAttr(s.canonical)}">`);
@@ -130,11 +163,13 @@ const injectLazyLoading = (html) => {
   });
 };
 
-// Minimal WebSite JSON-LD — enough for search engines to associate the
-// page with its name/description without inventing a full schema editor.
+// Minimal JSON-LD — enough for search engines to associate the page with
+// its name/description without inventing a full schema editor. Defaults
+// to WebSite; a template (see seoTemplates.js) or manual edit can set
+// seo.schema_type to Organization/Product/Article/LocalBusiness etc.
 const buildJsonLd = (project) => {
   const seo = project.seo || {};
-  const data = { "@context": "https://schema.org", "@type": "WebSite", name: seo.title || project.name || "Untitled" };
+  const data = { "@context": "https://schema.org", "@type": seo.schema_type || "WebSite", name: seo.title || project.name || "Untitled" };
   if (seo.description) data.description = seo.description;
   if (seo.canonical) data.url = seo.canonical;
   return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
@@ -264,18 +299,26 @@ export const buildMultiPageExport = (project) => {
   const allBase = [];
   const allAnimations = [];
   const allMediaQueries = [];
+  const allJsFiles = {};
 
   pages.forEach((page, i) => {
     const filename = safePageFilename(page.slug, i, used);
     const prefix = `${filename.slice(0, -5)}-`; // strip ".html"
-    const { html: cleanedRaw, componentCss, mediaCss } = stripInlineStyles(page.elements || [], prefix);
+    const elementsWithJsExtracted = (page.elements || []).map((el) => {
+      const { remaining, files: jsFiles } = extractForgeJs(el.html);
+      Object.entries(jsFiles).forEach(([name, code]) => { if (!(name in allJsFiles)) allJsFiles[name] = code; });
+      return { ...el, html: remaining };
+    });
+    const { html: cleanedRaw, componentCss, mediaCss } = stripInlineStyles(elementsWithJsExtracted, prefix);
     const cleaned = injectLazyLoading([header, cleanedRaw, footer].filter(Boolean).join("\n"));
     const seo = page.seo || {};
     const title = seo.title || page.name || project.name || "Untitled";
     const fonts = buildFontLinks((page.fonts && page.fonts.length) ? page.fonts : project.fonts);
     const customJs = page.custom_js || "";
     const customJsTag = customJs.trim() ? `<script>${escRawScript(customJs)}</script>\n` : "";
-    const { remainingHead, themeVars, base, mediaQueries, animations } = extractForgeCss(page.head_html);
+    const { remainingHead: headBeforeJs, themeVars, base, mediaQueries, animations, importedCss } = extractForgeCss(page.head_html);
+    const { remaining: remainingHead, files: headJsFiles } = extractForgeJs(headBeforeJs);
+    Object.entries(headJsFiles).forEach(([name, code]) => { if (!(name in allJsFiles)) allJsFiles[name] = code; });
     files[filename] = `<!doctype html>
 <html lang="en">
 <head>
@@ -294,7 +337,7 @@ ${remainingHead}
 ${cleaned}
 ${customJsTag}</body>
 </html>`;
-    componentCssParts.push(componentCss);
+    componentCssParts.push(componentCss, ...importedCss);
     allThemeVars.push(...themeVars);
     allBase.push(...base);
     allAnimations.push(...animations);
@@ -308,6 +351,13 @@ ${customJsTag}</body>
     animations: allAnimations,
     mediaQueries: allMediaQueries,
   });
+  Object.entries(allJsFiles).forEach(([name, code]) => { files[`js/${name}`] = code; });
+  // Site folder scaffolding: every exported site carries js/, imgs/ and
+  // fonts/ directories at its root (globals.css stays at the root too —
+  // there is deliberately no css/ folder). The .keep placeholders keep
+  // the (otherwise empty) folders alive in zip exports.
+  files["imgs/.keep"] = "";
+  files["fonts/.keep"] = "";
   return { files };
 };
 

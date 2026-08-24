@@ -12,13 +12,15 @@ import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Trash2, Eye, MousePointer2, Code2, Columns2, Presentation,
-  FilePlus2, FolderOpen, Save, Download, Upload, Search, Palette, BarChart3, LayoutTemplate, Inbox, Store, HelpCircle,
+  FilePlus2, FolderOpen, Save, Download, Upload, Search, Palette, BarChart3, LayoutTemplate, Inbox, Store, HelpCircle, Megaphone,
   Undo2, Redo2, Scissors, Copy, ClipboardPaste, ZoomIn, ZoomOut, RotateCcw, Monitor, Tablet, Smartphone,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { OutlineView } from "@/components/builder/OutlineView";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
+import { ThemeGallery } from "@/components/builder/ThemeGallery";
+import { applyTheme, getSavedThemeName } from "@/themes";
 import { PagesBar } from "@/components/builder/PagesBar";
 import { TemplateEditor } from "@/components/builder/TemplateEditor";
 import { SeoPanel } from "@/components/builder/SeoPanel";
@@ -35,9 +37,11 @@ import { SocialShareModal } from "@/components/builder/SocialShareModal";
 import { ImportExportModal } from "@/components/builder/ImportExportModal";
 import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
 import { EcommerceDashboardModal } from "@/components/builder/EcommerceDashboardModal";
+import { ZeneroDashboardModal } from "@/components/builder/ZeneroDashboardModal";
 import { buildStandaloneHtml, downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { buildCartRuntimeHtml } from "@/lib/cart";
-import { scanHtml } from "@/lib/importHtml";
+import { scanHtml, inlineLocalStylesheets } from "@/lib/importHtml";
+import { hasZeneroWidget } from "@/lib/zeneroWidgets";
 import { escText } from "@/lib/escapeHtml";
 import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
 import { upsertResponsiveOverridesCss } from "@/lib/responsiveOverrides";
@@ -151,7 +155,11 @@ export default function Builder() {
   const [seoOpen, setSeoOpen] = useState(false);
   const [submissionsOpen, setSubmissionsOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [zeneroOpen, setZeneroOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [themeGalleryOpen, setThemeGalleryOpen] = useState(false);
+  // Restore the saved editor skin (View → 🎨 Themes) on load.
+  useEffect(() => { applyTheme(getSavedThemeName()); }, []);
   const [zoom, setZoom] = useState(100);
   // Sidebar collapse — remembered per-browser (workspace preference, not
   // project data, so it isn't part of the saved project or undo history).
@@ -174,6 +182,15 @@ export default function Builder() {
   const doc = useMemo(() => ({ elements, canvasBg, headHtml, fonts, files, customJs }), [elements, canvasBg, headHtml, fonts, files, customJs]);
   const docRef = useRef(doc);
   useEffect(() => { docRef.current = doc; }, [doc]);
+
+  // The Zenero content dashboard is only useful once the site actually has
+  // a block that reads from it — gate its entry point on that, checking
+  // every page (not just the active one) since content can be added to any
+  // page's Zenero-content or Social Wall block.
+  const hasZeneroContent = useMemo(
+    () => hasZeneroWidget([...elements, ...pages.flatMap((p) => p.elements || [])]),
+    [elements, pages]
+  );
 
   // Push previous state on every change (unless we're in the middle of undo/redo).
   const prevDoc = useRef(doc);
@@ -620,6 +637,18 @@ export default function Builder() {
     if (h) setHeadHtml((cur) => cur ? cur + "\n" + h : h);
     setImportedSections(sections); setImportOpen(true);
   };
+  // FileTree's "insert" button (a whole HTML file from an imported
+  // folder) used to go straight to addBlock() with the raw file text,
+  // skipping scanHtml entirely — its CSS never reached headHtml/
+  // globals.css. Route it through the same scan+review pipeline every
+  // other import source (paste, URL, templates) already uses, inlining
+  // any sibling .css file's content first since folder imports carry
+  // their CSS as separate files rather than inline <style> tags.
+  const onImportFile = (content) => {
+    const siblingCssByName = {};
+    files.forEach((f) => { if (/\.css$/i.test(f.path)) siblingCssByName[f.path.split("/").pop()] = f.content; });
+    onImportSections(scanHtml(inlineLocalStylesheets(content, siblingCssByName)));
+  };
   const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
 
   // The Shop tab's "Add cart + checkout" button used to call onAddBlock
@@ -927,6 +956,7 @@ export default function Builder() {
         { id: "templates", label: "Project templates", icon: LayoutTemplate, onRun: () => setTemplatesOpen(true) },
         { id: "submissions", label: "Form submissions inbox", icon: Inbox, onRun: () => setSubmissionsOpen(true) },
         { id: "dashboard", label: "E-commerce dashboard", icon: Store, onRun: () => setDashboardOpen(true) },
+        ...(hasZeneroContent ? [{ id: "zenero", label: "Zenero content dashboard", icon: Megaphone, onRun: () => setZeneroOpen(true) }] : []),
       ],
     },
     {
@@ -935,7 +965,7 @@ export default function Builder() {
       ],
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [project, past.length, future.length, selected, zoom]);
+  ], [project, past.length, future.length, selected, zoom, hasZeneroContent]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-[#15130E] text-[#F1EDE2] overflow-hidden text-sm" style={{ fontFamily: "Manrope, sans-serif" }} data-testid="builder-shell">
@@ -954,6 +984,7 @@ export default function Builder() {
         onTemplates={() => setTemplatesOpen(true)}
         onSubmissions={() => setSubmissionsOpen(true)}
         onDashboard={() => setDashboardOpen(true)}
+        onZeneroDashboard={hasZeneroContent ? () => setZeneroOpen(true) : null}
         onUndo={undo} onRedo={redo}
         canUndo={past.length > 0} canRedo={future.length > 0}
         viewport={viewport} setViewport={setViewport}
@@ -968,6 +999,7 @@ export default function Builder() {
         zoom={zoom} onZoomIn={zoomIn} onZoomOut={zoomOut} onZoomReset={zoomReset}
         onHelpTour={() => setTourForce((v) => v + 1)}
         onOpenPalette={() => setPaletteOpen(true)}
+        onOpenThemes={() => setThemeGalleryOpen(true)}
       />
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} groups={paletteGroups} />
@@ -1015,11 +1047,16 @@ export default function Builder() {
                 files={files}
                 onFilesChange={setFiles}
                 onFileClick={(node) => node.type !== "folder" && setEditingFileId(node.id)}
+                onImportFile={onImportFile}
                 savedComponents={savedComponents}
                 onDeleteSavedComponent={deleteSavedComponent}
                 onWrapSelection={wrapSelectionWithContainer}
                 hasSelection={!!selected}
                 selectedHtml={selected?.html || ""}
+                selectedId={selectedId}
+                pages={pages}
+                projectId={projectId}
+                onEditSelected={(html) => selected && editHtml(selected.id, html)}
                 onOpenFormBuilder={() => setFormBuilderOpen(true)}
                 onOpenPaymentBuilder={() => setPaymentBuilderOpen(true)}
                 onOpenSocialBuilder={() => setSocialBuilderOpen(true)}
@@ -1351,7 +1388,14 @@ export default function Builder() {
         projectId={projectId}
       />
 
+      <ZeneroDashboardModal
+        open={zeneroOpen}
+        onClose={() => setZeneroOpen(false)}
+        projectId={projectId}
+      />
+
       <OnboardingTour key={tourForce} force={tourForce > 0} />
+      <ThemeGallery isOpen={themeGalleryOpen} onClose={() => setThemeGalleryOpen(false)} />
     </div>
   );
 }

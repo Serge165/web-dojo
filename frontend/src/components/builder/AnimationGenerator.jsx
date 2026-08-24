@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ANIMATION_PRESETS, ANIMATION_CATEGORIES, buildKeyframes, buildAnimationShorthand } from "@/lib/animations";
+import { ANIMATION_PRESETS, ANIMATION_CATEGORIES, ANIMATION_LIBRARIES, GSAP_PRESETS, FRAMER_PRESETS, buildKeyframes, buildAnimationShorthand, buildLibraryAnimation } from "@/lib/animations";
 import { setAnimClip } from "@/lib/animClipboard";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
 export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
+  const [library, setLibrary] = useState("css");
   const [preset, setPreset] = useState(ANIMATION_PRESETS[1]);
   const [duration, setDuration] = useState(0.7);
   const [delay, setDelay] = useState(0);
@@ -15,6 +16,11 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
   const keyframes = buildKeyframes(name, preset.frames);
   const shorthand = buildAnimationShorthand({ name, duration, timing, delay, iteration });
   const css = `${keyframes}\n\n.forge-anim { animation: ${shorthand}; }`;
+
+  // Library-specific code generation
+  const libraryCode = library === "css"
+    ? css
+    : buildLibraryAnimation({ library, category: preset.category, presetId: preset.id, elementSelector: ".forge-anim" });
 
   // Keeps the Layers panel's multi-select "Apply to N" batch bar in sync
   // with whatever's currently dialed in here — see lib/animClipboard.js.
@@ -30,6 +36,19 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
 
   return (
     <div className="space-y-3" data-testid="animation-generator">
+      <div>
+        <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Animation Library</label>
+        <select
+          value={library}
+          onChange={(e) => setLibrary(e.target.value)}
+          className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+          data-testid="anim-library"
+        >
+          {ANIMATION_LIBRARIES.map((l) => (
+            <option key={l.id} value={l.id}>{l.label}</option>
+          ))}
+        </select>
+      </div>
       <div className="space-y-2.5">
         {ANIMATION_CATEGORIES.map((cat) => (
           <div key={cat.id}>
@@ -96,10 +115,10 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
             data-testid="anim-preview"
           />
         </div>
-        <pre className="text-[10px] font-mono text-[#E4DECE] whitespace-pre-wrap bg-[#15130E] border border-[#332D22] rounded p-2 max-h-40 overflow-auto" data-testid="anim-css">{css}</pre>
+        <pre className="text-[10px] font-mono text-[#E4DECE] whitespace-pre-wrap bg-[#15130E] border border-[#332D22] rounded p-2 max-h-40 overflow-auto" data-testid="anim-css">{libraryCode}</pre>
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => { navigator.clipboard.writeText(css); toast.success("CSS copied"); }}
+            onClick={() => { navigator.clipboard.writeText(libraryCode); toast.success(`${library === "css" ? "CSS" : library === "gsap" ? "GSAP" : "Framer Motion"} code copied`); }}
             className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1"
             data-testid="anim-copy"
           ><Copy size={12} /> Copy CSS</button>

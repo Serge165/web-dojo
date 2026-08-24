@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ColorPicker } from "./ColorPicker";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
+import { GRADIENT_PRESETS, GRADIENT_PRESET_CATEGORIES } from "@/lib/gradientPresets";
 
 const defaultStops = [
   { color: "#2563eb", alpha: 1, position: 0 },
@@ -55,6 +56,29 @@ export const GradientMixer = ({ onApply }) => {
         style={{ background: gradient }}
         data-testid="gradient-preview"
       />
+
+      <select
+        value=""
+        onChange={(e) => {
+          const preset = GRADIENT_PRESETS.find((p) => p.id === e.target.value);
+          if (!preset) return;
+          setType(preset.type);
+          setAngle(preset.angle);
+          setStops(preset.stops.map((st) => ({ ...st })));
+          setEditing(0);
+        }}
+        className="w-full bg-[#242019] border border-[#332D22] rounded-md px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+        data-testid="gradient-preset-select"
+      >
+        <option value="">Start from a preset…</option>
+        {GRADIENT_PRESET_CATEGORIES.map((cat) => (
+          <optgroup key={cat} label={cat}>
+            {GRADIENT_PRESETS.filter((p) => p.category === cat).map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
 
       <div className="grid grid-cols-2 gap-2">
         <select

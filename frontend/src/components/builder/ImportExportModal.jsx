@@ -4,9 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { FileCode2, FileArchive, Braces, Copy, Link2, Upload, Download } from "lucide-react";
 import { downloadStandalone, downloadZip, downloadProjectJson, buildStandaloneHtml } from "@/lib/exportHtml";
 import { scanHtml } from "@/lib/importHtml";
+import { warnAboutSeoThenRun } from "@/lib/seoExportGuard";
 
 const Row = ({ icon: Icon, title, desc, action, label, testId, tone = "default" }) => (
-  <button onClick={action} className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors ${tone === "accent" ? "border-indigo-500/40 bg-indigo-500/5 hover:bg-indigo-500/10" : "border-[#332D22] bg-[#1A1A1A] hover:border-indigo-500/40"}`} data-testid={testId}>
+  <button onClick={action} className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors ${tone === "accent" ? "border-indigo-500/40 bg-indigo-500/5 hover:bg-indigo-500/10" : "border-[#332D22] bg-[#1C1A15] hover:border-indigo-500/40"}`} data-testid={testId}>
     <Icon size={18} className="text-indigo-400 flex-none" />
     <div className="flex-1 min-w-0"><div className="text-sm text-[#F1EDE2] font-medium">{title}</div><div className="text-[11px] text-[#948C79] truncate">{desc}</div></div>
     {label && <span className="text-[10px] text-[#A79C87] border border-[#332D22] rounded px-2 py-0.5 flex-none">{label}</span>}
@@ -32,10 +33,12 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
   const copyHtml = async () => { await navigator.clipboard.writeText(buildStandaloneHtml(project)); toast.success("Full HTML copied to clipboard"); };
 
   const sendTo = (t) => {
-    if (t.act === "copy") { navigator.clipboard.writeText(buildStandaloneHtml(project)); }
-    else if (t.act === "zip") { downloadZip(project); }
-    else if (t.act === "standalone") { downloadStandalone(project); }
-    toast.success(t.note);
+    warnAboutSeoThenRun(project, () => {
+      if (t.act === "copy") { navigator.clipboard.writeText(buildStandaloneHtml(project)); }
+      else if (t.act === "zip") { downloadZip(project); }
+      else if (t.act === "standalone") { downloadStandalone(project); }
+      toast.success(t.note);
+    });
   };
 
   const doPaste = () => {
@@ -83,8 +86,8 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-130px)] space-y-2">
           {tab === "export" && (
             <>
-              <Row icon={FileCode2} title="Standalone HTML" desc="One .html file with inline CSS" label=".html" action={() => downloadStandalone(project)} testId="exp-standalone" />
-              <Row icon={FileArchive} title="Clean HTML + CSS" desc="Separate index.html + globals.css" label=".zip" action={() => downloadZip(project)} testId="exp-zip" />
+              <Row icon={FileCode2} title="Standalone HTML" desc="One .html file with inline CSS" label=".html" action={() => warnAboutSeoThenRun(project, () => downloadStandalone(project))} testId="exp-standalone" />
+              <Row icon={FileArchive} title="Clean HTML + CSS" desc="Separate index.html + globals.css" label=".zip" action={() => warnAboutSeoThenRun(project, () => downloadZip(project))} testId="exp-zip" />
               <Row icon={Braces} title="Web Dojo project" desc="Full editable project — re-import anytime" label=".json" action={() => downloadProjectJson(project)} testId="exp-json" />
               <Row icon={Copy} title="Copy full HTML" desc="Copy the page markup to your clipboard" action={copyHtml} testId="exp-copy" />
               <div className="text-[10px] uppercase tracking-wider text-[#948C79] pt-3 pb-1">Send to a design / hosting tool</div>
@@ -97,7 +100,7 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
 
           {tab === "import" && (
             <>
-              <div className="rounded-lg border border-[#332D22] bg-[#1A1A1A] p-3">
+              <div className="rounded-lg border border-[#332D22] bg-[#1C1A15] p-3">
                 <div className="text-xs text-[#F1EDE2] font-medium mb-2 flex items-center gap-1.5"><Link2 size={14} className="text-indigo-400" /> Import from a live URL</div>
                 <div className="flex gap-2">
                   <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com" className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 py-2 text-xs text-[#F1EDE2] outline-none focus:border-indigo-500 font-mono" data-testid="imp-url-input" />
@@ -105,15 +108,15 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[#332D22] bg-[#1A1A1A] p-3">
+              <div className="rounded-lg border border-[#332D22] bg-[#1C1A15] p-3">
                 <div className="text-xs text-[#F1EDE2] font-medium mb-2">Paste HTML</div>
                 <textarea rows={5} value={pasteHtml} onChange={(e) => setPasteHtml(e.target.value)} placeholder="<section>…</section>" className="w-full bg-[#15130E] border border-[#332D22] rounded p-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-indigo-500" data-testid="imp-paste-textarea" />
                 <div className="flex justify-end mt-2"><button onClick={doPaste} className="text-xs px-4 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2]" data-testid="imp-paste-btn">Scan & Import</button></div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => fileRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1A1A1A] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-html-file-btn"><Upload size={14} /> Import .html file</button>
-                <button onClick={() => jsonRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1A1A1A] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-json-file-btn"><Braces size={14} /> Import .json project</button>
+                <button onClick={() => fileRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1C1A15] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-html-file-btn"><Upload size={14} /> Import .html file</button>
+                <button onClick={() => jsonRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1C1A15] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-json-file-btn"><Braces size={14} /> Import .json project</button>
               </div>
               <input ref={fileRef} type="file" accept=".html,.htm,text/html" onChange={handleHtmlFile} className="hidden" />
               <input ref={jsonRef} type="file" accept=".json,application/json" onChange={handleJsonFile} className="hidden" />

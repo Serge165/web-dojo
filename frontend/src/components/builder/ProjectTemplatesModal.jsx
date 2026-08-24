@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone } from "lucide-react";
+import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone, Upload, Link2 } from "lucide-react";
 import { buildTemplatePreviewHtml } from "@/lib/exportHtml";
+import { scanHtml } from "@/lib/importHtml";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -148,6 +149,130 @@ const UserTemplateRow = ({ tpl, onUse, onDelete }) => (
   </div>
 );
 
+// Turns scanHtml's {headHtml, sections} into the same single-page project
+// shape starter templates already use, so it flows through the exact same
+// preview (buildTemplatePreviewHtml) and save (POST /templates) paths as
+// a hand-authored template — no separate storage/rendering code needed.
+const sectionsToProjectData = (name, headHtml, sections) => ({
+  name,
+  canvas_bg: "#ffffff",
+  fonts: [],
+  head_html: "",
+  files: [],
+  template: { header_html: "", footer_html: "", use_template: false },
+  pages: [{
+    id: "imported-home", name: "Home", slug: "index", status: "draft", seo: {},
+    elements: sections.map((s) => ({ id: s.id, html: s.html })),
+    head_html: headHtml, canvas_bg: "#ffffff", fonts: [],
+  }],
+  active_page_id: "imported-home",
+});
+
+// Any external site's markup + CSS, converted into Web Dojo's own block
+// model: scanHtml splits top-level markup into elements[] (same shape the
+// canvas/inspector already work with) and consolidates every <style> rule
+// into one data-forge-imported-css block, which the export pipeline
+// (extractForgeCss) routes into globals.css's Components section — so an
+// imported template's styling lands in the right place automatically,
+// the same way a hand-built page's would.
+const ImportTemplatePanel = ({ onClose, onSaved }) => {
+  const [mode, setMode] = useState("paste");
+  const [pasteHtml, setPasteHtml] = useState("");
+  const [url, setUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [scanned, setScanned] = useState(null); // { headHtml, sections, sourceLabel }
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const doScan = async () => {
+    setBusy(true);
+    try {
+      let raw = pasteHtml;
+      let sourceLabel = "Pasted HTML";
+      if (mode === "url") {
+        if (!/^https?:\/\//.test(url.trim())) { toast.error("Enter a valid http(s) URL"); return; }
+        const r = await axios.post(`${API}/import/url`, { url: url.trim() });
+        raw = r.data.html || "";
+        try { sourceLabel = new URL(url.trim()).hostname; } catch { sourceLabel = url.trim(); }
+      }
+      if (!raw.trim()) { toast.error("Nothing to scan"); return; }
+      const { headHtml, sections } = scanHtml(raw);
+      if (sections.length === 0) { toast.error("No importable sections found in that markup"); return; }
+      setScanned({ headHtml, sections, sourceLabel });
+      setName((n) => n || sourceLabel);
+      toast.success(`Found ${sections.length} section${sections.length === 1 ? "" : "s"}`);
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Import failed");
+    } finally { setBusy(false); }
+  };
+
+  const projectData = scanned ? sectionsToProjectData(name || "Imported Template", scanned.headHtml, scanned.sections) : null;
+  const previewTpl = projectData ? { id: "staged-import", name: name || "Imported Template", description, aesthetic: null, data: projectData } : null;
+
+  const doSave = async () => {
+    if (!name.trim()) { toast.error("Give the template a name"); return; }
+    setBusy(true);
+    try {
+      await axios.post(`${API}/templates`, { name: name.trim(), description: description.trim(), data: projectData });
+      toast.success("Template saved");
+      onSaved();
+    } catch { toast.error("Save failed"); } finally { setBusy(false); }
+  };
+
+  return (
+    <>
+      <div className="p-3 rounded border border-[#332D22] bg-[#15130E] space-y-3" data-testid="tpl-import-panel">
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Import a template from outside Web Dojo</div>
+          <button onClick={onClose} className="text-[#948C79] hover:text-[#F1EDE2]" data-testid="tpl-import-close"><X size={14} /></button>
+        </div>
+        <p className="text-[11px] text-[#948C79] leading-relaxed">Any page's markup gets split into blocks and its CSS consolidated into one stylesheet that exports to the right place in globals.css, same as a built-in template.</p>
+        <div className="grid grid-cols-2 gap-1">
+          <button onClick={() => setMode("paste")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "paste" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-paste"><Upload size={12} /> Paste HTML</button>
+          <button onClick={() => setMode("url")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "url" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-url"><Link2 size={12} /> From URL</button>
+        </div>
+        {mode === "paste" ? (
+          <textarea
+            value={pasteHtml}
+            onChange={(e) => setPasteHtml(e.target.value)}
+            placeholder="<html>…</html>"
+            rows={4}
+            className="w-full bg-[#1C1A15] border border-[#332D22] rounded p-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+            data-testid="tpl-import-paste"
+          />
+        ) : (
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com"
+            className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+            data-testid="tpl-import-url"
+          />
+        )}
+        <button onClick={doScan} disabled={busy} className="w-full text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-scan">
+          {busy ? "Scanning…" : "Scan"}
+        </button>
+
+        {scanned && (
+          <div className="pt-2 border-t border-[#332D22] space-y-2">
+            <div className="text-[11px] text-[#A79C87]">{scanned.sections.length} section{scanned.sections.length === 1 ? "" : "s"} detected from {scanned.sourceLabel}{scanned.headHtml.includes("data-forge-imported-css") ? " · CSS consolidated" : ""}</div>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-name" />
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-desc" />
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => setPreviewOpen(true)} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1" data-testid="tpl-import-preview"><Eye size={12} /> Preview</button>
+              <button onClick={doSave} disabled={busy} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2]" data-testid="tpl-import-save">{busy ? "Saving…" : "Save as template"}</button>
+            </div>
+          </div>
+        )}
+      </div>
+      {previewOpen && (
+        <TemplatePreviewModal tpl={previewTpl} onClose={() => setPreviewOpen(false)} onUse={() => setPreviewOpen(false)} />
+      )}
+    </>
+  );
+};
+
 // Two-mode modal: save the current project as a starter template, or start a
 // new project from an existing template (including built-in aesthetics).
 export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTemplate }) => {
@@ -158,6 +283,7 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
   const [query, setQuery] = useState("");
   const [aestheticFilter, setAestheticFilter] = useState("");
   const [previewTpl, setPreviewTpl] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => { if (open) refresh(); }, [open]);
 
@@ -272,9 +398,22 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
 
           {/* User templates */}
           <div>
-            <div className="text-[11px] uppercase tracking-widest text-[#A79C87] mb-2 flex items-center gap-2">
-              <Bookmark size={13} className="text-[#D9BC55]" /> Your templates
+            <div className="text-[11px] uppercase tracking-widest text-[#A79C87] mb-2 flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2"><Bookmark size={13} className="text-[#D9BC55]" /> Your templates</span>
+              {!importOpen && (
+                <button onClick={() => setImportOpen(true)} className="text-[10px] normal-case tracking-normal px-2 py-1 rounded bg-[#242019] hover:bg-[#332D22] text-[#E4DECE] border border-[#332D22] flex items-center gap-1" data-testid="tpl-import-open">
+                  <Upload size={11} /> Import a template
+                </button>
+              )}
             </div>
+            {importOpen && (
+              <div className="mb-3">
+                <ImportTemplatePanel
+                  onClose={() => setImportOpen(false)}
+                  onSaved={() => { setImportOpen(false); refresh(); }}
+                />
+              </div>
+            )}
             {userTemplates.length === 0 && <div className="text-[11px] text-[#948C79] py-4 text-center border border-dashed border-[#332D22] rounded">No custom templates yet — save your current project below.</div>}
             {userTemplates.length > 0 && (
               <div className="grid grid-cols-2 gap-2">

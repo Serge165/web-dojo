@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { CATEGORIES, cardTemplate, WEB_SAFE_FONTS } from "@/lib/blocks";
 import { ChevronDown, ChevronRight, Type, Plus, Trash2, Search, X, Share2, Radio } from "lucide-react";
 import { FileTree } from "./FileTree";
@@ -7,6 +7,7 @@ import { LayoutBuilder } from "./LayoutBuilder";
 import { SnippetsTab } from "./SnippetsTab";
 import { FormsTab } from "./FormsTab";
 import { CommerceTab } from "./CommerceTab";
+import { BlockEditMenu, detectBlockKind } from "./BlockEditMenu";
 import { cdnComponentGroups } from "@/lib/cdnComponents";
 import { stampVariant } from "@/lib/variants";
 import { useHoverPreview } from "./HoverPreview";
@@ -33,10 +34,11 @@ const GROUPS = [
 
 export const LeftSidebar = ({
   onAddBlock, onAddFont, fonts,
-  files, onFilesChange, onFileClick,
+  files, onFilesChange, onFileClick, onImportFile,
   savedComponents, onDeleteSavedComponent,
   onWrapSelection, hasSelection,
-  selectedHtml,
+  selectedHtml, selectedId, onEditSelected,
+  pages = [], projectId = null,
   onOpenFormBuilder,
   onOpenPaymentBuilder,
   onOpenSocialBuilder,
@@ -82,6 +84,14 @@ export const LeftSidebar = ({
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
   const { previewProps, previewNode } = useHoverPreview();
 
+  // When the user selects an editable block (gallery/bento/timeline/navbar)
+  // on canvas, automatically surface its edit menu in this sidebar.
+  const selectedIsEditable = useMemo(() => !!detectBlockKind(selectedHtml), [selectedHtml]);
+  useEffect(() => {
+    if (selectedIsEditable && selectedId) setTab("edit");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
   const BlockItem = ({ label, html, testId, catId, blockId, onDelete }) => {
     const stamped = catId && blockId ? stampVariant(html, catId, blockId) : html;
     return (
@@ -110,8 +120,9 @@ export const LeftSidebar = ({
 
   return (
     <aside className="w-64 flex-none border-r border-[#332D22] bg-[#1C1A15] flex flex-col overflow-hidden" data-testid="left-sidebar">
-      <div className="grid grid-cols-7 border-b border-[#332D22] text-[10px]">
+      <div className="grid grid-cols-8 border-b border-[#332D22] text-[10px]">
         {[
+          { id: "edit", label: "Edit" },
           { id: "library", label: "Library" },
           { id: "layout", label: "Layout" },
           { id: "forms", label: "Forms" },
@@ -128,6 +139,18 @@ export const LeftSidebar = ({
           >{t.label}</button>
         ))}
       </div>
+
+      {tab === "edit" && (
+        <div className="flex-1 overflow-y-auto p-2 space-y-2" data-testid="left-tab-edit">
+          {selectedHtml && selectedIsEditable ? (
+            <BlockEditMenu selectedHtml={selectedHtml} onChange={(html) => onEditSelected && onEditSelected(html)} pages={pages} projectId={projectId} blockId={selectedId} />
+          ) : (
+            <div className="text-[11px] text-[#948C79] p-3 text-center">
+              Select a gallery, bento, timeline, or navbar block on the canvas to edit it here.
+            </div>
+          )}
+        </div>
+      )}
 
       {tab === "library" && (
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -313,7 +336,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "files" && (
-        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onAddBlock} />
+        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onImportFile} />
       )}
 
       {tab === "saved" && (

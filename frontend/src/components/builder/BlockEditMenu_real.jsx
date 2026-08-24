@@ -1,0 +1,846 @@
+import React, { useMemo, useRef, useState } from "react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Upload } from "lucide-react";
+
+// ============================================================
+// Block-type-specific edit menus shown in the LEFT sidebar when
+// a block is selected on canvas. Each editor parses the block's
+// raw HTML fragment into structured items, lets the user edit
+// them, and serializes back — changes apply live to the preview
+// through Builder's editHtml(). Pure helpers are exported so
+// they can be unit-tested without rendering React.
+// ============================================================
+
+// --- shared tiny helpers -------------------------------------
+
+/** Split a HTML fragment into top-level sibling chunks of `tagName`
+ * (depth-zero relative to the fragment). Never throws. */
+export const splitSiblings = (html, tagName) => {
+  if (!html) return [];
+  const events = [];
+  const openRe = new RegExp(`<${tagName}(\\s|>)`, "gi");
+  let mOpen;
+  while ((mOpen = openRe.exec(html))) {
+    events.push({ pos: mOpen.index, type: "open", len: mOpen[0].length });
+    openRe.lastIndex = mOpen.index + mOpen[0].length;
+  }
+  const closeRe = new RegExp(`</${tagName}>`, "gi");
+  let mClose;
+  while ((mClose = closeRe.exec(html))) {
+    events.push({ pos: mClose.index, type: "close", len: mClose[0].length });
+  }
+  events.sort((a, b) => a.pos - b.pos);
+  const out = [];
+  let depth = 0;
+  let start = -1;
+  events.forEach((ev) => {
+    if (ev.type === "open") {
+      if (depth === 0) start = ev.pos;
+      depth += 1;
+    } else {
+      depth -= 1;
+      if (depth === 0 && start >= 0) {
+        out.push(html.slice(start, ev.pos + ev.len));
+        start = -1;
+      }
+    }
+  });
+  return out;
+};
+
+const escAttrLocal = (s) =>
+  String(s ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+const escTextLocal = (s) =>
+  String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// When serializing an item list back into a block, entries whose editable
+// fields are unchanged keep their ORIGINAL markup (`_raw`) instead of being
+// regenerated from canonical templates — so hand-styled variants survive
+// while edited items are rebuilt. `reparse` derives an item's editable
+// fields back out of its raw markup for that comparison.
+const stripRaw = (item) => {
+  const { _raw, ...rest } = item;
+  return rest;
+};
+const sameFields = (a, b) =>
+  Object.keys(a).every((k) => String(a[k] ?? "") === String(b[k] ?? ""));
+const pickRawOrRebuild = (items, rebuild, reparse) =>
+  items.map((it) => {
+    if (!it._raw) return rebuild(it);
+    try {
+      return sameFields(stripRaw(it), reparse(it._raw)) ? it._raw : rebuild(it);
+    } catch {
+      return rebuild(it);
+    }
+  });
+
+const readFirstAttr = (tag, attr) => {
+  const m = tag.match(new RegExp(`${attr}="([^"]*)"`, "i"));
+  return m ? m[1].replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&lt;/g, "<") : "";
+};
+
+const moveItem = (arr, idx, delta) => {
+  const next = [...arr];
+  const j = idx + delta;
+  if (j < 0 || j >= next.length) return next;
+  [next[idx], next[j]] = [next[j], next[idx]];
+  return next;
+};
+
+const readAsDataURL = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result));
+  reader.onerror = () => reject(reader.error);
+  reader.readAsDataURL(file);
+});
+const baseName = (name) => String(name || "image").replace(/\.[^.]+$/, "");
+
+const Btn = ({ onClick, title, children, testId, disabled }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    title={title}
+    aria-label={title}
+    data-testid={testId}
+    className="p-1 rounded bg-[#242019] border border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2] hover:bg-[#332D22] disabled:opacity-40"
+  >{children}</button>
+);
+
+const labelCls = "text-[10px] uppercase tracking-wider text-[#948C79]";
+const inputCls = "w-full px-1.5 py-1 rounded bg-[#242019] border border-[#332D22] text-xs text-[#F1EDE2]";
+
+// --- kind detection ------------------------------------------
+
+export const detectBlockKind = (html) => {
+  if (!html) return null;
+  if (/data-forge-widget=["']gallery["']/i.test(html)) return "gallery";
+  if (/<nav\b/i.test(html)) return "navbar";
+  if (/data-forge-portfolio-timeline/i.test(html)) return "timeline";
+  const imgCount = (html.match(/<img\b/gi) || []).length;
+  if (imgCount >= 3 && /(display:\s*grid|column-count)/i.test(html)) return "gallery";
+  if (/<li[\s>]/i.test(html) && /(border-left:\s*2px|position:absolute;left:-\d+px)/i.test(html)) return "timeline";
+  if (/display:\s*grid/i.test(html) && /<h3[\s>]/i.test(html)) return "bento";
+  return null;
+};
+
+// ============================================================
+// GALLERY
+// ============================================================
+
+export const parseGalleryImages = (html) =>
+  (html.match(/<img\b[^>]*>/gi) || []).map((tag) => ({
+    src: readFirstAttr(tag, "src"),
+    alt: readFirstAttr(tag, "alt"),
+  }));
+
+export const setGalleryImages = (html, images) => {
+  const tags = html.match(/<img\b[^>]*>/gi) || [];
+  let out = html;
+  // Walk backwards so earlier replacements can't shift later offsets.
+  for (let i = Math.max(tags.length, images.length) - 1; i >= 0; i -= 1) {
+    if (i < images.length && i < tags.length) {
+      let tag = tags[i]
+        .replace(/src="[^"]*"/i, `src="${escAttrLocal(images[i].src)}"`)
+        .replace(/alt="[^"]*"/i, `alt="${escAttrLocal(images[i].alt)}"`);
+      if (!/alt=/i.test(tag)) tag = tag.replace(/<img/i, `<img alt="${escAttrLocal(images[i].alt)}"`);
+      out = out.replace(tags[i], () => tag);
+    } else if (i >= images.length && i < tags.length) {
+      out = out.replace(tags[i], "");
+    }
+  }
+  return out;
+};
+
+export const setGalleryStyle = (html, styleKey) => {
+  const styles = {
+    "grid-auto": "display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;",
+    "grid-2": "display:grid;grid-template-columns:repeat(2,1fr);gap:12px;",
+    "grid-3": "display:grid;grid-template-columns:repeat(3,1fr);gap:12px;",
+    "grid-4": "display:grid;grid-template-columns:repeat(4,1fr);gap:12px;",
+    masonry: "column-count:3;column-gap:12px;",
+    carousel: "display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;",
+  };
+  const style = styles[styleKey] || styles["grid-auto"];
+  // Patch the container that carries the current grid/masonry/flex layout.
+  const re = /(style=")([^"]*(?:display:\s*grid|column-count|overflow-x)[^"]*)(")/i;
+  if (re.test(html)) return html.replace(re, (_m, a, _old, c) => `${a}${style}${c}`);
+  return html;
+};
+
+const GalleryEditor = ({ html, onChange, projectId = null, blockId = null }) => {
+  const fileRef = useRef(null);
+  const images = useMemo(() => parseGalleryImages(html), [html]);
+  const styleKey = useMemo(() => {
+    if (/column-count/i.test(html)) return "masonry";
+    if (/overflow-x/i.test(html)) return "carousel";
+    const cols = html.match(/repeat\((\d),/i);
+    return cols ? `grid-${cols[1]}` : "grid-auto";
+  }, [html]);
+
+  const commit = (next) => onChange(setGalleryImages(html, next));
+
+  // Phase 2D: prefer the backend asset pipeline (file lands in
+  // imgs/gallery-{id}/ and the HTML references a clean relative URL);
+  // fall back to an embedded data URL when no project is saved yet or
+  // the backend is unreachable — the image still shows either way.
+  const uploadOne = async (file) => {
+    if (!projectId) return { src: await readAsDataURL(file), alt: baseName(file.name) };
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const API = process.env.REACT_APP_BACKEND_URL || "";
+      const res = await fetch(`${API}/api/projects/${projectId}/assets/upload?asset_type=gallery&asset_id=${encodeURIComponent(blockId || "1")}`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) throw new Error(`upload failed (${res.status})`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.detail || "upload failed");
+      return { src: data.url, alt: data.filename };
+    } catch {
+      return { src: await readAsDataURL(file), alt: baseName(file.name) };
+    }
+  };
+
+  const onUpload = async (e) => {
+    const picked = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!picked.length) return;
+    const added = (await Promise.all(picked.map(uploadOne))).filter(Boolean);
+    commit([...images, ...added]);
+  };
+
+  return (
+    <div className="space-y-2" data-testid="block-edit-gallery">
+      <div className="flex items-center justify-between">
+        <span className={labelCls}>Images ({images.length})</span>
+        <div className="flex gap-1">
+          <Btn onClick={() => fileRef.current?.click()} title="Upload images" testId="gallery-upload-btn"><Upload size={11} /></Btn>
+          <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={onUpload} data-testid="gallery-upload-input" />
+          <Btn onClick={() => commit([...images, { src: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=70", alt: "" }])} title="Add placeholder image" testId="gallery-add-image"><Plus size={11} /></Btn>
+        </div>
+      </div>
+      {images.map((img, i) => (
+        <div key={`${i}-${img.src.slice(0, 24)}`} className="p-1.5 rounded border border-[#332D22]">
+          <div className="flex items-center gap-1">
+            <img src={img.src} alt="" className="w-8 h-8 object-cover rounded flex-none" />
+            <input
+              value={img.alt}
+              placeholder="Caption"
+              aria-label={`Image ${i + 1} caption`}
+              className={inputCls}
+              data-testid={`gallery-caption-${i}`}
+              onChange={(e) => commit(images.map((x, j) => j === i ? { ...x, alt: e.target.value } : x))}
+            />
+            <Btn onClick={() => commit(moveItem(images, i, -1))} disabled={i === 0} title="Move up"><ArrowUp size={11} /></Btn>
+            <Btn onClick={() => commit(moveItem(images, i, 1))} disabled={i === images.length - 1} title="Move down"><ArrowDown size={11} /></Btn>
+            <Btn onClick={() => commit(images.filter((_, j) => j !== i))} title="Remove image" testId={`gallery-remove-${i}`}><Trash2 size={11} /></Btn>
+          </div>
+        </div>
+      ))}
+      <div>
+        <div className={`${labelCls} mb-1`}>Style</div>
+        <select
+          value={styleKey}
+          onChange={(e) => onChange(setGalleryStyle(html, e.target.value))}
+          className={inputCls}
+          data-testid="gallery-style-select"
+        >
+          <option value="grid-auto">Grid · auto-fit</option>
+          <option value="grid-2">Grid · 2 columns</option>
+          <option value="grid-3">Grid · 3 columns</option>
+          <option value="grid-4">Grid · 4 columns</option>
+          <option value="masonry">Masonry</option>
+          <option value="carousel">Carousel (scroll)</option>
+        </select>
+      </div>
+    </div>
+  );
+};
+
+
+
+// ============================================================
+// NAVBAR — tree model (brand + nested items w/ dropdowns),
+// style variants, page linking.
+// ============================================================
+
+export const NAVBAR_VARIANTS = [
+  { id: "horizontal-top", label: "Horizontal Top" },
+  { id: "horizontal-centered", label: "Horizontal Centered" },
+  { id: "horizontal-sticky", label: "Horizontal Sticky" },
+  { id: "horizontal-split", label: "Horizontal Split" },
+  { id: "vertical-left", label: "Vertical Left Sidebar" },
+  { id: "vertical-right", label: "Vertical Right Sidebar" },
+  { id: "mega-menu", label: "Mega Menu" },
+  { id: "minimalist", label: "Minimalist (Hamburger)" },
+  { id: "pill", label: "Pill/Rounded" },
+  { id: "underline", label: "Underline Accent" },
+];
+
+const NAV_A_STYLE = "color:inherit;text-decoration:none;";
+const DD_STYLE = "position:relative;display:inline-block;";
+const DD_MENU_STYLE = "display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid #ddd;border-radius:6px;min-width:180px;z-index:100;padding:4px 0;box-shadow:0 4px 10px rgba(0,0,0,.12);";
+export const NAV_CSS_TAG = '<style data-wd-nav-css>.wd-dd:hover .wd-dd-menu{display:flex!important;flex-direction:column}.wd-dd-menu a:hover{background:#f3f4f6}</style>';
+
+/** Balanced-chunk extractor: returns the first `<tag …> … </tag>` chunk at
+ * the given position, or "" if unbalanced. */
+const chunkAt = (html, pos, tag) => {
+  const slice = html.slice(pos);
+  const chunks = splitSiblings(slice, tag);
+  return chunks.length && slice.indexOf(chunks[0]) === 0 ? chunks[0] : "";
+};
+
+const firstAnchorOf = (chunk) => (chunk.match(/<a\b[^>]*>[^<]*<\/a>/i) || [""])[0];
+
+/** Recursively parse nav nodes out of an HTML fragment. A node is either a
+ * plain anchor or a `.wd-dd` wrapper whose children form the submenu. */
+export const parseNavNodes = (inner) => {
+  const nodes = [];
+  let rest = inner || "";
+  for (;;) {
+    const ddIdx = rest.search(/<span\s+class="wd-dd"/i);
+    const aIdx = rest.search(/<a\b/i);
+    if (ddIdx < 0 && aIdx < 0) break;
+    if (ddIdx >= 0 && (aIdx < 0 || ddIdx < aIdx)) {
+      const chunk = chunkAt(rest, ddIdx, "span");
+      if (!chunk) { rest = rest.slice(ddIdx + 4); continue; }
+      const a = firstAnchorOf(chunk);
+      const menuStart = chunk.search(/class="wd-dd-menu"/i);
+      const menuOpen = menuStart >= 0 ? chunk.indexOf(">", menuStart) + 1 : -1;
+      const menuEnd = menuOpen >= 0 ? chunk.lastIndexOf("</div>") : -1;
+      const menuInner = menuOpen >= 0 && menuEnd > menuOpen ? chunk.slice(menuOpen, menuEnd) : "";
+      nodes.push({
+        label: (a.replace(/<[^>]*>/g, "") || "").trim(),
+        href: readFirstAttr(a, "href"),
+        children: parseNavNodes(menuInner),
+      });
+      rest = rest.slice(rest.indexOf(chunk) + chunk.length);
+    } else {
+      const m = rest.match(/<a\b[^>]*>[^<]*<\/a>/i);
+      if (!m) break;
+      nodes.push({
+        label: (m[0].replace(/<[^>]*>/g, "") || "").trim(),
+        href: readFirstAttr(m[0], "href"),
+        children: [],
+      });
+      rest = rest.slice(rest.indexOf(m[0]) + m[0].length);
+    }
+  }
+  return nodes;
+};
+
+/** Locate the first div inside the nav that contains anchors — that's the
+ * items container this editor rebuilds. Everything else (brand, CTA
+ * buttons) is preserved verbatim. */
+const itemsZoneMatch = (html) => {
+  const navOpen = html.match(/<nav\b[^>]*>/i);
+  if (!navOpen) return null;
+  const navStart = navOpen.index + navOpen[0].length;
+  const divs = splitSiblings(html.slice(navStart), "div");
+  const zone = divs.find((d) => /<a\b/i.test(d));
+  if (!zone) return null;
+  const absStart = navStart + html.slice(navStart).indexOf(zone);
+  const inner = zone.slice(zone.indexOf(">") + 1, zone.lastIndexOf("</div>"));
+  return { absStart, zone, inner };
+};
+
+
+export const readNavBrand = (html) => {
+  const m = (html || "").match(/<nav\b[^>]*>[\s\S]*?<div\b[^>]*>([^<]{1,60})<\/div>/i);
+  return m ? m[1].trim() : "";
+};
+
+export const setNavBrand = (html, brand) => {
+  const m = html.match(/(<nav\b[^>]*>[\s\S]*?<div\b[^>]*>)([^<]{1,60})(<\/div>)/i);
+  if (!m) return html;
+  return html.replace(m[0], () => `${m[1]}${escTextLocal(brand)}${m[3]}`);
+};
+
+const buildNavNode = (node, depth = 0) => {
+  const aStyle = depth === 0 ? NAV_A_STYLE : `padding:10px 14px;color:#333;text-decoration:none;display:block;font-size:14px;`;
+  if (!node.children || !node.children.length) {
+    return `<a href="${escAttrLocal(node.href || "#")}" style="${aStyle}">${escTextLocal(node.label)}</a>`;
+  }
+  return (
+    `<span class="wd-dd" style="${DD_STYLE}">`
+    + `<a href="${escAttrLocal(node.href || "#")}" style="${aStyle}">${escTextLocal(node.label)}</a>`
+    + `<div class="wd-dd-menu" style="${DD_MENU_STYLE}">`
+    + node.children.map((c) => buildNavNode(c, depth + 1)).join("\n")
+    + `</div></span>`
+  );
+};
+
+export const parseNavbarTree = (html) => ({
+  brand: readNavBrand(html),
+  variant: readFirstAttr((html.match(/<nav\b[^>]*>/i) || [""])[0], "data-navbar-variant") || "horizontal-top",
+  items: itemsZoneMatch(html) ? parseNavNodes(itemsZoneMatch(html).inner) : [],
+});
+
+export const setNavbarItems = (html, items) => {
+  const zone = itemsZoneMatch(html);
+  if (!zone) return html;
+  const hasDd = items.some((n) => n.children && n.children.length);
+  const body = items.map((n) => buildNavNode(n)).join("\n");
+  const rebuilt = `${hasDd ? `${NAV_CSS_TAG}\n` : ""}${body}`;
+  const newZone = `${zone.zone.slice(0, zone.zone.indexOf(">") + 1)}\n${rebuilt}\n${zone.zone.slice(zone.zone.lastIndexOf("</div>"))}`;
+  return html.slice(0, zone.absStart) + newZone + html.slice(zone.absStart + zone.zone.length);
+};
+
+// "display:flex;gap:24px;" → { display: "flex", gap: "24px" } for patchTagStyle
+const styleDecls = (styleStr) => Object.fromEntries(
+  styleStr.split(";").filter(Boolean).map((d) => {
+    const i = d.indexOf(":");
+    return [d.slice(0, i).trim(), d.slice(i + 1).trim()];
+  }),
+);
+
+const VARIANT_NAV_STYLE = {
+  "horizontal-top": "display:flex;align-items:center;justify-content:space-between;padding:18px 32px;",
+  "horizontal-centered": "display:flex;flex-direction:column;align-items:center;gap:15px;padding:18px 32px;",
+  "horizontal-sticky": "position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px 32px;",
+  "horizontal-split": "display:flex;align-items:center;justify-content:space-between;padding:18px 32px;",
+  "mega-menu": "display:flex;align-items:center;justify-content:space-between;padding:18px 32px;",
+  minimalist: "display:flex;align-items:center;justify-content:space-between;padding:18px 32px;",
+  pill: "display:flex;align-items:center;justify-content:space-between;padding:18px 32px;",
+  underline: "display:flex;align-items:center;justify-content:space-between;padding:18px 32px;",
+  "vertical-left": "position:fixed;top:0;left:0;width:250px;height:100vh;overflow-y:auto;padding:20px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;z-index:40;background:#fff;",
+  "vertical-right": "position:fixed;top:0;right:0;width:250px;height:100vh;overflow-y:auto;padding:20px;display:flex;flex-direction:column;align-items:flex-start;gap:16px;z-index:40;background:#fff;",
+};
+const VARIANT_ITEMS_MODE = {
+  minimalist: "minimalist",
+};
+const VARIANT_LINK_PATCH = {
+  pill: "background:#f0f0f0;border-radius:20px;padding:8px 20px;",
+  underline: "border-bottom:2px solid transparent;padding:8px 2px;",
+};
+
+/** Switch a navbar block's variant: stamps data-navbar-variant (which the
+ * export pipeline keys off) AND rewrites structural inline styles so the
+ * canvas preview reflects the choice immediately. */
+export const setNavbarVariant = (html, variant) => {
+  let out = html;
+  // 1. stamp attribute + variant class on the <nav> tag (merging any
+  // pre-existing class attr rather than duplicating it)
+  const navTag = out.match(/<nav\b[^>]*>/i)?.[0];
+  if (!navTag) return html;
+  let newTag = navTag.replace(/<nav/i, `<nav class="navbar-1 ${variant}"`);
+  newTag = /data-navbar-variant="/.test(newTag)
+    ? newTag.replace(/data-navbar-variant="[^"]*"/i, `data-navbar-variant="${escAttrLocal(variant)}"`)
+    : newTag.replace(/>/, ` data-navbar-variant="${escAttrLocal(variant)}">`);
+  out = out.replace(navTag, () => newTag);
+  // 2. structural inline styles on the nav itself
+  out = patchTagStyle(out, "nav", styleDecls(VARIANT_NAV_STYLE[variant] || VARIANT_NAV_STYLE["horizontal-top"]));
+  // 3. items container layout (vertical stacks links; minimalist hides them)
+  const zone = itemsZoneMatch(out);
+  if (zone) {
+    const mode = variant.startsWith("vertical") ? "vertical" : VARIANT_ITEMS_MODE[variant] || "horizontal";
+    const itemsStyle = mode === "vertical"
+      ? "flex-direction:column;gap:5px;"
+      : mode === "minimalist" ? "display:none;" : "";
+    if (itemsStyle) {
+      const patched = patchTagStyle(zone.inner, "div", styleDecls(itemsStyle));
+      out = out.slice(0, zone.absStart)
+        + zone.zone.slice(0, zone.zone.indexOf(">") + 1) + patched + zone.zone.slice(zone.zone.lastIndexOf("</div>"))
+        + out.slice(zone.absStart + zone.zone.length);
+    }
+  }
+  // 4. per-link visual variants
+  if (VARIANT_LINK_PATCH[variant]) {
+    out = out.replace(/(<a\b[^>]*?style=")([^"]*)("[^>]*>)/gi,
+      (_m2, a, style, c) => `${a}${style};${VARIANT_LINK_PATCH[variant]}${c}`);
+  }
+  return out;
+};
+
+// Back-compat shims ------------------------------------------------
+
+export const parseNavItems = (html) =>
+  parseNavbarTree(html).items.map((n) => ({ label: n.label, href: n.href }));
+
+export const setNavItems = (html, items) =>
+  setNavbarItems(html, items.map((i) => ({ ...i, children: [] })));
+
+
+
+// ============================================================
+// PAGE PICKER — site structure modal (Phase 2C)
+// ============================================================
+
+export const pageHref = (page) => `${(page.slug || "index").replace(/\.html$/, "")}.html`;
+
+const PagePickerModal = ({ pages, onPick, onClose }) => {
+  const [external, setExternal] = useState("");
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-4" data-testid="page-picker-modal" role="dialog" aria-label="Pick link target">
+      <div className="w-full max-w-sm max-h-[70vh] overflow-y-auto rounded-lg border border-[#332D22] bg-[#1C1A15] p-3 space-y-2">
+        <div className="text-xs font-semibold text-[#D9BC55]">Link to page</div>
+        {pages.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onPick(pageHref(p))}
+            className="w-full flex items-center gap-2 text-left text-xs px-2 py-1.5 rounded bg-[#242019] border border-[#332D22] text-[#F1EDE2] hover:bg-[#332D22]"
+            data-testid={`page-picker-page-${p.slug || p.id}`}
+          >
+            📄 <span className="flex-1 truncate">{p.name}</span>
+            <span className="text-[10px] text-[#948C79]">{pageHref(p)}</span>
+          </button>
+        ))}
+        <div className="pt-2 border-t border-[#332D22] space-y-1">
+          <div className={labelCls}>Or external URL</div>
+          <div className="flex gap-1">
+            <input
+              value={external}
+              onChange={(e) => setExternal(e.target.value)}
+              placeholder="https://example.com"
+              aria-label="External URL"
+              className={inputCls}
+              data-testid="page-picker-external"
+            />
+            <Btn
+              onClick={() => external.trim() && onPick(external.trim())}
+              disabled={!external.trim()}
+              title="Use external URL"
+              testId="page-picker-use-external"
+            ><Plus size={11} /></Btn>
+          </div>
+        </div>
+        <div className="flex justify-end pt-1">
+          <button type="button" onClick={onClose} className="text-[11px] px-2 py-1 rounded bg-[#242019] border border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]" data-testid="page-picker-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================
+// TIMELINE
+// ============================================================
+
+export const parseTimelineEntries = (html) => {
+  const olInner = (html.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i) || [])[1] || "";
+  return splitSiblings(olInner, "li").map((li) => {
+    const divs = (li.match(/<div\b[^>]*>([^<]*)<\/div>/gi) || []).map((d) => d.replace(/<[^>]*>/g, "").trim());
+    const p = (li.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i) || [])[1] || "";
+    return { date: divs[0] || "", title: divs[1] || "", description: p.trim(), _raw: li };
+  });
+};
+
+const buildTimelineLi = (entry) => (
+  `<li style="position:relative;padding:0 0 32px 24px;">
+        <span style="position:absolute;left:-9px;top:4px;width:16px;height:16px;border-radius:999px;background:var(--fc-primary, #2563eb);border:3px solid var(--fc-bg, #ffffff);box-shadow:0 0 0 2px var(--fc-primary, #2563eb);"></span>
+        <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:4px;">${escTextLocal(entry.date)}</div>
+        <div style="font-size:18px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:4px;">${escTextLocal(entry.title)}</div>
+        <p style="margin:0;font-size:14px;color:var(--fc-muted, #475569);line-height:1.55;">${escTextLocal(entry.description)}</p>
+      </li>`
+);
+
+export const setTimelineEntries = (html, entries) => {
+  const olMatch = html.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i);
+  if (!olMatch) return html;
+  const body = pickRawOrRebuild(entries, buildTimelineLi, (raw) => parseTimelineEntries(`<ol>${raw}</ol>`)[0] || {}).join("\n");
+  const newOl = olMatch[0].replace(olMatch[1], () => `\n${body}\n    `);
+  return html.replace(olMatch[0], () => newOl);
+};
+
+const TimelineEditor = ({ html, onChange }) => {
+  const entries = useMemo(() => parseTimelineEntries(html), [html]);
+  const commit = (next) => onChange(setTimelineEntries(html, next));
+
+  if (!entries.length) {
+    return <div className="text-[11px] text-[#948C79]" data-testid="block-edit-timeline-empty">No timeline entries detected in this block.</div>;
+  }
+
+  return (
+    <div className="space-y-2" data-testid="block-edit-timeline">
+      <div className="flex items-center justify-between">
+        <span className={labelCls}>Entries ({entries.length})</span>
+        <Btn
+          onClick={() => commit([...entries, { date: "2026", title: "New milestone", description: "" }])}
+          title="Add entry"
+          testId="timeline-add-entry"
+        ><Plus size={11} /></Btn>
+      </div>
+      {entries.map((entry, i) => (
+        <div key={i} className="p-1.5 rounded border border-[#332D22] space-y-1">
+          <div className="flex gap-1">
+            <input
+              value={entry.date}
+              placeholder="Date"
+              aria-label={`Entry ${i + 1} date`}
+              className={inputCls}
+              data-testid={`timeline-date-${i}`}
+              onChange={(e) => commit(entries.map((x, j) => j === i ? { ...x, date: e.target.value } : x))}
+            />
+            <input
+              value={entry.title}
+              placeholder="Title"
+              aria-label={`Entry ${i + 1} title`}
+              className={inputCls}
+              data-testid={`timeline-title-${i}`}
+              onChange={(e) => commit(entries.map((x, j) => j === i ? { ...x, title: e.target.value } : x))}
+            />
+          </div>
+          <textarea
+            value={entry.description}
+            placeholder="Description"
+            aria-label={`Entry ${i + 1} description`}
+            rows={2}
+            className={inputCls}
+            data-testid={`timeline-desc-${i}`}
+            onChange={(e) => commit(entries.map((x, j) => j === i ? { ...x, description: e.target.value } : x))}
+          />
+          <div className="flex gap-1 justify-end">
+            <Btn onClick={() => commit(moveItem(entries, i, -1))} disabled={i === 0} title="Move up"><ArrowUp size={11} /></Btn>
+            <Btn onClick={() => commit(moveItem(entries, i, 1))} disabled={i === entries.length - 1} title="Move down"><ArrowDown size={11} /></Btn>
+            <Btn onClick={() => commit(entries.filter((_, j) => j !== i))} title="Remove entry" testId={`timeline-remove-${i}`}><Trash2 size={11} /></Btn>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
+// ============================================================
+// BENTO
+// ============================================================
+
+const buildBentoItem = (item) => (
+  `<div style="padding:20px;border-radius:12px;background:${escAttrLocal(item.bg)};color:#fff;">
+        <h3 style="font-size:18px;margin:0 0 8px;color:inherit;">${escTextLocal(item.title)}</h3>
+        <p style="font-size:14px;margin:0;opacity:.75;">${escTextLocal(item.description)}</p>
+      </div>`
+);
+
+export const parseBentoItems = (html) => {
+  if (!html) return [];
+  // The bento container is the div whose style declares display:grid;
+  // its depth-zero children are the tiles.
+  const openGrid = html.search(/<div\b[^>]*style="[^"]*display:\s*grid/i);
+  if (openGrid < 0) return [];
+  const container = splitSiblings(html.slice(openGrid), "div")[0];
+  if (!container) return [];
+  const inner = container.slice(container.indexOf(">") + 1, container.lastIndexOf("</div>"));
+  return splitSiblings(inner, "div").map((chunk) => ({
+    title: ((chunk.match(/<h3\b[^>]*>([\s\S]*?)<\/h3>/i) || [])[1]
+      // fallback: first non-empty div text (real bento blocks often use
+      // styled divs rather than h3/p)
+      || (splitSiblings(chunk, "div").map((d) => d.replace(/<[^>]*>/g, "").trim()).find(Boolean))
+      || "").trim(),
+    description: ((chunk.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i) || [])[1] || "").trim(),
+    bg: (readFirstAttr(chunk, "style").match(/background(?:-color)?:\s*([^;]+);?/i)?.[1] || "#1f2937").trim(),
+    _raw: chunk,
+  }));
+};
+
+export const setBentoItems = (html, items) => {
+  const openGrid = html.search(/<div\b[^>]*style="[^"]*display:\s*grid/i);
+  if (openGrid < 0) return html;
+  const container = splitSiblings(html.slice(openGrid), "div")[0];
+  if (!container) return html;
+  const containerStart = openGrid + html.slice(openGrid).indexOf(container);
+  const body = pickRawOrRebuild(items, buildBentoItem, (raw) => {
+    const reparsed = parseBentoItems(`<div style="display:grid">${raw}</div>`);
+    return reparsed[0] || {};
+  }).join("\n");
+  const newContainer = `${container.slice(0, container.indexOf(">") + 1)}\n${body}\n    </div>`;
+  return html.slice(0, containerStart) + newContainer + html.slice(containerStart + container.length);
+};
+
+const BentoEditor = ({ html, onChange }) => {
+  const items = useMemo(() => parseBentoItems(html), [html]);
+  const commit = (next) => onChange(setBentoItems(html, next));
+
+  if (!items.length) {
+    return <div className="text-[11px] text-[#948C79]" data-testid="block-edit-bento-empty">No bento items detected in this block.</div>;
+  }
+
+  return (
+    <div className="space-y-2" data-testid="block-edit-bento">
+      <div className="flex items-center justify-between">
+        <span className={labelCls}>Items ({items.length})</span>
+        <Btn
+          onClick={() => commit([...items, { title: "New tile", description: "", bg: "#1f2937" }])}
+          title="Add item"
+          testId="bento-add-item"
+        ><Plus size={11} /></Btn>
+      </div>
+      {items.map((item, i) => (
+        <div key={i} className="p-1.5 rounded border border-[#332D22] space-y-1">
+          <div className="flex gap-1 items-center">
+            <input
+              value={/^#[0-9a-f]{3,8}$/i.test(item.bg) ? item.bg : "#1f2937"}
+              type="color"
+              aria-label={`Item ${i + 1} background color`}
+              className="w-8 h-7 rounded cursor-pointer bg-transparent flex-none"
+              data-testid={`bento-bg-${i}`}
+              onChange={(e) => commit(items.map((x, j) => j === i ? { ...x, bg: e.target.value } : x))}
+            />
+            <input
+              value={item.title}
+              placeholder="Title"
+              aria-label={`Item ${i + 1} title`}
+              className={inputCls}
+              data-testid={`bento-title-${i}`}
+              onChange={(e) => commit(items.map((x, j) => j === i ? { ...x, title: e.target.value } : x))}
+            />
+            <Btn onClick={() => commit(moveItem(items, i, -1))} disabled={i === 0} title="Move up"><ArrowUp size={11} /></Btn>
+            <Btn onClick={() => commit(moveItem(items, i, 1))} disabled={i === items.length - 1} title="Move down"><ArrowDown size={11} /></Btn>
+            <Btn onClick={() => commit(items.filter((_, j) => j !== i))} title="Remove item" testId={`bento-remove-${i}`}><Trash2 size={11} /></Btn>
+          </div>
+          <textarea
+            value={item.description}
+            placeholder="Description"
+            aria-label={`Item ${i + 1} description`}
+            rows={2}
+            className={inputCls}
+            data-testid={`bento-desc-${i}`}
+            onChange={(e) => commit(items.map((x, j) => j === i ? { ...x, description: e.target.value } : x))}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ============================================================
+// Root — renders the right editor for the selected block kind.
+// ============================================================
+
+const KIND_LABELS = { gallery: "Gallery", navbar: "Navbar", timeline: "Timeline", bento: "Bento Box" };
+
+export const BlockEditMenu = ({ selectedHtml, onChange, pages = [], projectId = null, blockId = null }) => {
+  const kind = useMemo(() => detectBlockKind(selectedHtml), [selectedHtml]);
+  if (!selectedHtml || !kind) return null;
+  return (
+    <div className="space-y-2" data-testid={`block-edit-menu-${kind}`}>
+      <div className="text-[11px] font-semibold text-[#D9BC55]">{KIND_LABELS[kind]} — edit menu</div>
+      {kind === "gallery" && <GalleryEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
+      {kind === "navbar" && <NavbarEditor html={selectedHtml} onChange={onChange} pages={pages} />}
+      {kind === "timeline" && <TimelineEditor html={selectedHtml} onChange={onChange} />}
+      {kind === "bento" && <BentoEditor html={selectedHtml} onChange={onChange} />}
+    </div>
+  );
+};
+
+
+// ============================================================
+// NAVBAR EDITOR (variants + dropdowns + page linking)
+// ============================================================
+
+/** Recursive editor rows for one nav node (+ its submenu). */
+const NavNodeRows = ({ node, path, commit, pages }) => {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const patch = (fields) => commit(path, fields);
+  return (
+    <div className="p-1.5 rounded border border-[#332D22] space-y-1" style={{ marginLeft: (path.length - 1) * 8 }}>
+      <div className="flex gap-1">
+        <input
+          value={node.label}
+          placeholder="Label"
+          aria-label={`Nav item label${path.length > 1 ? " (submenu)" : ""}`}
+          className={inputCls}
+          data-testid={`navbar-item-label-${path.join("-")}`}
+          onChange={(e) => patch({ label: e.target.value })}
+        />
+        <Btn
+          onClick={() => commit(path, { children: [...(node.children || []), { label: "Sub item", href: "#", children: [] }] })}
+          title="Add submenu item"
+          testId={`navbar-add-sub-${path.join("-")}`}
+        ><Plus size={11} /></Btn>
+        <Btn onClick={() => commit(path, null)} title="Remove nav item" testId={`navbar-remove-${path.join("-")}`}><Trash2 size={11} /></Btn>
+      </div>
+      <div className="flex gap-1">
+        <input
+          value={node.href}
+          placeholder="Link (#, URL, or pick a page)"
+          aria-label={`Nav item link${path.length > 1 ? " (submenu)" : ""}`}
+          className={inputCls}
+          data-testid={`navbar-item-href-${path.join("-")}`}
+          onChange={(e) => patch({ href: e.target.value })}
+        />
+        <Btn onClick={() => setPickerOpen(true)} title="Pick page or URL" testId={`navbar-pick-page-${path.join("-")}`}>📄</Btn>
+      </div>
+      {(node.children || []).length > 0 && (
+        <div className="space-y-1 pl-2 border-l border-[#332D22]" data-testid={`navbar-submenu-${path.join("-")}`}>
+          {node.children.map((child, ci) => (
+            <NavNodeRows key={ci} node={child} path={[...path, ci]} commit={commit} pages={pages} />
+          ))}
+        </div>
+      )}
+      {pickerOpen && (
+        <PagePickerModal
+          pages={pages}
+          onClose={() => setPickerOpen(false)}
+          onPick={(url) => { setPickerOpen(false); patch({ href: url }); }}
+        />
+      )}
+    </div>
+  );
+};
+
+export const NavbarEditor = ({ html, onChange, pages = [] }) => {
+  const tree = useMemo(() => parseNavbarTree(html), [html]);
+  const items = tree.items;
+  const brand = tree.brand;
+
+  // Immutably apply a change at [topIdx, subIdx, ...]; fields===null removes.
+  const commitPath = (path, fields) => {
+    const apply = (nodes, depth) => nodes.map((n, i) => {
+      if (i !== path[depth]) return n;
+      if (fields === null) return null;
+      const next = { ...n, ...fields };
+      if (depth < path.length - 1) next.children = apply(n.children || [], depth + 1).filter(Boolean);
+      return next;
+    });
+    let nextItems = apply(items, 0).filter(Boolean);
+    if (fields === null && path.length > 1) {
+      // removal deeper in the tree — prune empty parents' children lists
+      nextItems = nextItems.map((n) => ({ ...n, children: (n.children || []).map((c) => ({ ...c, children: (c.children || []).filter(Boolean) })) }));
+    }
+    onChange(setNavbarItems(html, nextItems));
+  };
+
+  return (
+    <div className="space-y-2" data-testid="block-edit-navbar">
+      <div>
+        <div className={`${labelCls} mb-1`}>Navbar style</div>
+        <select
+          value={tree.variant}
+          aria-label="Navbar style"
+          className={inputCls}
+          data-testid="navbar-variant-select"
+          onChange={(e) => onChange(setNavbarVariant(html, e.target.value))}
+        >
+          {NAVBAR_VARIANTS.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
+        </select>
+      </div>
+      {brand !== "" && (
+        <div>
+          <div className={`${labelCls} mb-1`}>Brand</div>
+          <input
+            value={brand}
+            aria-label="Brand text"
+            className={inputCls}
+            data-testid="navbar-brand-input"
+            onChange={(e) => onChange(setNavBrand(html, e.target.value))}
+          />
+        </div>
+      )}
+      <div className="flex items-center justify-between">
+        <span className={labelCls}>Nav items ({items.length})</span>
+        <Btn
+          onClick={() => onChange(setNavbarItems(html, [...items, { label: "New link", href: "#", children: [] }]))}
+          title="Add nav item"
+          testId="navbar-add-item"
+        ><Plus size={11} /></Btn>
+      </div>
+      {items.map((item, i) => (
+        <NavNodeRows key={i} node={item} path={[i]} commit={commitPath} pages={pages} />
+      ))}
+    </div>
+  );
+};
+

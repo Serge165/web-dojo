@@ -11,7 +11,7 @@ export const MenuBar = ({
   onCut, onCopy, onPaste, hasSelection,
   onSearchBlocks, onFindReplace,
   zoom, onZoomIn, onZoomOut, onZoomReset,
-  onHelpTour, onOpenPalette,
+  onHelpTour, onOpenPalette, onOpenThemes,
 }) => {
   const [openMenu, setOpenMenu] = useState(null);
   const rootRef = useRef(null);
@@ -57,6 +57,7 @@ export const MenuBar = ({
     {
       id: "view", label: "View", items: [
         { label: "Command Palette…", shortcut: "Ctrl+K", onClick: onOpenPalette },
+        { label: "🎨 Themes…", onClick: onOpenThemes },
         { sep: true },
         { label: "Zoom In", onClick: onZoomIn },
         { label: "Zoom Out", onClick: onZoomOut },

@@ -2,9 +2,19 @@
 
 ## Status
 
+**Phase 1 (this spec) is superseded — not by a doc, but by real code:** the "Zenero"
+stack (`backend/models/zenero.py` + `frontend/src/components/builder/
+ZeneroDashboardPanel.jsx`), the project owner's own in-progress work, already implements
+this ground for real — live CRUD for updates/gallery/blog/portfolio, wired into
+`server.py`'s `zenero_router`, plus a matching dashboard UI, both just not yet mounted
+into the app's navigation. (An earlier pass here briefly proposed a second, generic,
+static-export CMS spec — `2026-08-24-cms-template-layout-collections-design.md` — before
+discovering Zenero already existed; that spec is itself now marked retired.) Phase 2 and
+Phase 3 below are unaffected — they cover unrelated live-widget and analytics/email work.
+
 Phase 1 of a 3-phase "Dashboard" effort. Scoped and approved for implementation.
 
-- **Phase 1 (this spec)** — Blog/Updates/Bento/Timeline content management, homepage widgets, share-button posting. No third-party API keys required.
+- **Phase 1 (this spec, superseded — see above)** — Blog/Updates/Bento/Timeline content management, homepage widgets, share-button posting. No third-party API keys required.
 - **Phase 2 (separate spec, later)** — Live Twitch/Discord widget dashboard (streams, follower counts, server member counts) with client-side polling. Already scoped in conversation; not written up yet.
 - **Phase 3 (separate spec, later)** — Google Analytics + social API bolt-in, scheduled weekly SMTP digest emails. Needs its own design pass (OAuth flow, backend scheduler, no existing email infra).
 

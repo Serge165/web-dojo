@@ -21,6 +21,83 @@ const PORT = [
   "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70",
 ];
 
+// Comment thread: seed data lives as an inline <script type="application/
+// json"> tag (not a fetched sibling .json file — that breaks under file://
+// via CORS, which is how people often first open an exported .html before
+// deploying it) and COMMENTS_JS renders it client-side, with a real (if
+// non-persistent) "post a comment" form. COMMENTS_JS carries the
+// data-forge-js="comments.js" marker so Web Dojo's export pipeline pulls
+// it into a real js/comments.js file instead of repeating it inline on
+// every page that uses it (see extractForgeJs in exportHtml.js / server.py
+// _extract_forge_js — keep this script's *behavior* in sync with the
+// hand-copied identical strings in backend/starter_templates.py's
+// Xanga/LiveJournal starters, which can't import this JS module).
+const COMMENTS_JS = `(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function renderComment(c){
+  return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
+    + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
+                : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
+    + '<div style="flex:1;min-width:0;">'
+    + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
+    + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
+    + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
+    + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
+    + '</div></div>';
+}
+function initWidget(root){
+  root.setAttribute("data-forge-comments-init","1");
+  var seedEl=root.querySelector("[data-forge-comments-seed]");
+  var comments=[];
+  try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
+  var list=root.querySelector("[data-forge-comment-list]");
+  var countEl=root.querySelector("[data-forge-comment-count]");
+  function renderAll(){
+    if(list) list.innerHTML=comments.map(renderComment).join("");
+    if(countEl) countEl.textContent=String(comments.length);
+  }
+  renderAll();
+  var form=root.querySelector("[data-forge-comment-form]");
+  if(form){
+    form.addEventListener("submit",function(e){
+      e.preventDefault();
+      var nameInput=form.querySelector('[name="name"]');
+      var textInput=form.querySelector('[name="text"]');
+      var name=(nameInput&&nameInput.value||"").trim();
+      var text=(textInput&&textInput.value||"").trim();
+      if(!name||!text) return;
+      comments.push({id:Date.now(),author:name,date:"Just now",text:text});
+      renderAll();
+      form.reset();
+    });
+  }
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();`;
+
+// Builds a full comment-thread section: heading + count, comment list,
+// a working (client-only) "post a comment" form, the JSON seed, and the
+// shared behavior script. `styleOverrides` lets a template (e.g. a Xanga/
+// LiveJournal throwback) restyle the wrapper/heading while reusing the
+// exact same structure and script.
+const buildCommentsSectionHtml = ({ seedComments, wrapStyle, headingStyle }) => `<section data-forge-comments style="${wrapStyle || `font-family:${F};padding:56px 32px;background:var(--fc-bg, #ffffff);`}">
+  <div style="max-width:640px;margin:0 auto;">
+    <h3 style="${headingStyle || "font-size:20px;margin:0 0 16px;color:var(--fc-text, #0f172a);"}">Comments (<span data-forge-comment-count>0</span>)</h3>
+    <div data-forge-comment-list></div>
+    <form data-forge-comment-form style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
+      <input name="name" placeholder="Your name" required style="padding:10px 12px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);font-size:14px;outline:none;">
+      <textarea name="text" placeholder="Say something..." required rows="3" style="padding:10px 12px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);font-size:14px;outline:none;resize:vertical;"></textarea>
+      <button type="submit" style="align-self:flex-start;padding:10px 20px;background:var(--fc-primary, #0f172a);color:#fff;border:0;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">Post Comment</button>
+    </form>
+    <script type="application/json" data-forge-comments-seed>${JSON.stringify(seedComments || [])}</script>
+    <script data-forge-js="comments.js">${COMMENTS_JS}</script>
+  </div>
+</section>`;
+
 // background-attachment:fixed is the actual parallax mechanism for every
 // block below — it's the one native, zero-JS way to get a real depth
 // effect (background stays put in the viewport while foreground content
@@ -965,6 +1042,85 @@ export const EXTRA_CATEGORIES = [
   </div>
 </div>`,
       },
+      {
+        id: "retro-awaymessage",
+        label: "Retro · AIM Away Message",
+        html: `<div style="font-family:'Trebuchet MS',sans-serif;max-width:340px;background:#fff;border:2px solid #316ac5;border-radius:6px;box-shadow:2px 2px 6px rgba(0,0,0,.25);">
+  <div style="background:linear-gradient(180deg,#5a8fdc,#2f5fb8);color:#fff;font-size:12px;font-weight:bold;padding:4px 8px;border-radius:4px 4px 0 0;display:flex;justify-content:space-between;align-items:center;">
+    <span>xXsk8rgrl02Xx — Away Message</span>
+    <span style="font-family:monospace;">✕</span>
+  </div>
+  <div style="padding:12px;font-size:12px;color:#222;line-height:1.6;">
+    <div style="margin-bottom:8px;"><strong>I'm away from my computer right now.</strong></div>
+    <div style="background:#f0f4ff;border:1px solid #c8d8f0;border-radius:4px;padding:8px;font-style:italic;">"in class, txt my cell &lt;3 back in an hour probably"</div>
+    <div style="margin-top:8px;color:#666;">Auto-response sent at 2:14 PM</div>
+  </div>
+</div>`,
+      },
+      {
+        id: "retro-poll",
+        label: "Retro · Poll Widget",
+        html: `<div style="font-family:${F};max-width:280px;background:#fdf6e3;border:2px solid #d4a017;border-radius:6px;padding:14px;">
+  <div style="font-weight:bold;font-size:13px;color:#7a5200;margin-bottom:10px;border-bottom:2px dotted #d4a017;padding-bottom:8px;">⭐ Poll of the Week ⭐</div>
+  <div style="font-size:12px;color:#333;margin-bottom:10px;">What should the next site layout be?</div>
+  ${["Sparkly & pink", "Dark & moody", "Rainbow chaos", "Keep this one"].map((opt, i) => `
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#333;margin-bottom:6px;cursor:pointer;">
+    <input type="radio" name="wd-poll" ${i === 0 ? "checked" : ""} />
+    <span>${opt}</span>
+  </label>`).join("")}
+  <button style="margin-top:8px;width:100%;padding:6px;background:#d4a017;color:#fff;border:1px solid #a67c00;border-radius:3px;font-size:11px;font-weight:bold;cursor:pointer;">Vote!</button>
+  <div style="margin-top:6px;font-size:10px;color:#997700;text-align:center;">1,204 votes so far</div>
+</div>`,
+      },
+      {
+        id: "retro-petadopt",
+        label: "Retro · Pet Adoption Badge",
+        html: `<div style="font-family:${F};display:inline-flex;align-items:center;gap:10px;max-width:260px;background:linear-gradient(180deg,#eaffea,#d0f5d0);border:2px solid #4caf50;border-radius:10px;padding:10px 14px;">
+  <div style="width:48px;height:48px;flex-shrink:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe082,#ff8a65);border:2px solid #fff;box-shadow:0 0 0 1px #4caf50;"></div>
+  <div>
+    <div style="font-size:12px;font-weight:bold;color:#2e7d32;">You adopted Sprinkle!</div>
+    <div style="font-size:10px;color:#4e7d52;">Level 3 Cloud Puff · Fed 2 hrs ago</div>
+    <a href="#" style="font-size:10px;color:#2e7d32;text-decoration:underline;">Visit my pet →</a>
+  </div>
+</div>`,
+      },
+      {
+        id: "retro-forumheader",
+        label: "Retro · Forum Header",
+        html: `<header style="font-family:Verdana,sans-serif;">
+  <div style="background:linear-gradient(180deg,#3b6ea5,#1d3d63);padding:14px 24px;">
+    <div style="color:#fff;font-size:20px;font-weight:bold;">FieldworkForums.net</div>
+    <div style="color:#aecbe8;font-size:11px;margin-top:2px;">the only forum you will ever need, established 2003</div>
+  </div>
+  <div style="background:#dde6f0;border-bottom:1px solid #b8c8dc;padding:6px 24px;font-size:11px;color:#3b6ea5;">Forum Index &raquo; General Discussion &raquo; <strong>Thread Title Goes Here</strong></div>
+</header>`,
+      },
+      {
+        id: "retro-forumpost",
+        label: "Retro · Forum Post",
+        html: `<div style="display:grid;grid-template-columns:150px 1fr;background:#ffffff;border:1px solid #b8c8dc;border-radius:3px;font-family:Verdana,sans-serif;">
+  <div style="padding:12px;border-right:1px solid #b8c8dc;text-align:center;background:#f4f7fb;">
+    <div style="width:64px;height:64px;background:linear-gradient(135deg,#3b6ea5,#1d3d63);border:1px solid #b8c8dc;border-radius:3px;margin:0 auto 8px;"></div>
+    <div style="font-size:12px;font-weight:bold;color:#1d3d63;">forumveteran99</div>
+    <div style="font-size:10px;color:#7a8aa0;margin-top:2px;">Senior Member</div>
+    <div style="font-size:9px;color:#9aabc0;margin-top:8px;">Joined: Mar 2004<br>Posts: 3,204</div>
+  </div>
+  <div style="padding:12px 16px;">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:#7a8aa0;border-bottom:1px dotted #cdd8e6;padding-bottom:6px;margin-bottom:8px;"><span>Posted: Today, 9:14 AM</span><span>Post #1 <a href="#" style="color:#3b6ea5;">Quote</a></span></div>
+    <div style="font-size:13px;line-height:1.65;color:#28303d;">Type the post content here. Duplicate this block to build out a full thread.</div>
+    <div style="font-size:10px;color:#9aabc0;font-style:italic;margin-top:12px;border-top:1px dotted #cdd8e6;padding-top:6px;">Signature line goes here</div>
+  </div>
+</div>`,
+      },
+      {
+        id: "retro-forumreply",
+        label: "Retro · Forum Reply Box",
+        html: buildCommentsSectionHtml({
+          seedComments: [],
+          wrapStyle: "font-family:Verdana,sans-serif;padding:16px 0;background:#e8ecf1;",
+          headingStyle: "font-size:13px;font-weight:bold;color:#1d3d63;",
+        }),
+      },
     ],
   },
   {
@@ -1045,6 +1201,491 @@ export const EXTRA_CATEGORIES = [
   <h2 style="font-size:38px;letter-spacing:-0.02em;margin:0 0 12px;color:#fff;">Ready when the skyline is.</h2>
   <p style="font-size:16px;color:rgba(255,255,255,.85);margin:0 0 28px;">Start free — upgrade only once you're ready to publish.</p>
   <button style="background:#fff;color:#0a1419;border:0;padding:14px 30px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Start building free</button>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "social",
+    label: "Social",
+    blocks: [
+      {
+        id: "social-wall-columns",
+        label: "Social Media Wall (Multi-Column)",
+        html: `<section data-forge-widget="social-wall" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:1080px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Live from social</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">What people are saying</h2>
+    <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;">
+      ${[
+        ["twitter","𝕏","Twitter / X",[
+          ["Web Dojo","@webdojo_hq","2h","Just shipped dark mode across every export. Thanks for the 200+ bug reports that got us here 🙏","💬 12   🔁 34   ♥ 156"],
+          ["Sam Reyes","@designer_sam","5h","Client sent over \"make it pop\" for the fourth time today. I have achieved zen.","💬 8   🔁 3   ♥ 91"],
+          ["Kai Nakamura","@buildwithkai","1d","Hot take: the best websites still load in under a second. Fight me.","💬 41   🔁 12   ♥ 203"],
+        ]],
+        ["instagram","📷","Instagram",[
+          ["studio.northlane","Studio Northlane","3h","Behind the scenes from today's shoot 🎬","♥ 412   💬 18"],
+          ["mira.codes","Mira Chen","6h","New desk setup, finally organized after 6 months 📐","♥ 289   💬 24"],
+          ["thefolio.club","The Folio Club","1d","Portfolio review night was a hit — thank you to everyone who came out.","♥ 567   💬 41"],
+        ]],
+        ["facebook","f","Facebook",[
+          ["Riverside Coffee Co.","Riverside Coffee Co.","4h","We're extending our weekend hours starting this Saturday! Come say hi ☕","♥ 89   💬 12   ↗ 6"],
+          ["Northgate Studio","Northgate Studio","8h","Our new client showcase is live on the site — link in comments.","♥ 134   💬 22   ↗ 9"],
+          ["The Local Market","The Local Market","2d","Thank you for another incredible farmers market season 🌽","♥ 210   💬 31   ↗ 14"],
+        ]],
+      ].map(([platform,glyph,label,cards])=>`
+      <div data-forge-widget="social-wall-column" data-platform="${platform}" style="flex:0 0 300px;display:flex;flex-direction:column;border:1px solid var(--fc-border, #e2e8f0);border-radius:14px;overflow:hidden;background:var(--fc-surface, #f8fafc);height:520px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--fc-text, #0f172a);color:var(--fc-bg, #ffffff);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="width:24px;height:24px;border-radius:999px;background:var(--fc-bg, #ffffff);color:var(--fc-text, #0f172a);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${glyph}</span>
+            <span style="font-size:14px;font-weight:600;">${label}</span>
+          </div>
+          <span data-forge-connect="${platform}" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--fc-bg, #ffffff);opacity:.85;border-radius:999px;padding:3px 8px;cursor:pointer;">Not connected</span>
+        </div>
+        <div data-forge-cards style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;">
+          ${cards.map(([name,handle,time,text,stats])=>`
+          <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:10px;padding:10px 12px;background:var(--fc-bg, #ffffff);">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;">
+              <span style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">${name}</span>
+              <span style="font-size:11px;color:var(--fc-muted, #94a3b8);white-space:nowrap;">${time}</span>
+            </div>
+            <div style="font-size:11px;color:var(--fc-muted, #64748b);margin-bottom:6px;">${handle}</div>
+            <p style="margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--fc-text, #0f172a);">${text}</p>
+            <div style="font-size:11px;color:var(--fc-muted, #94a3b8);">${stats}</div>
+          </div>`).join("")}
+        </div>
+      </div>`).join("")}
+    </div>
+  </div>
+  <script data-forge-js="social-wall.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function renderCard(post){
+  return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:10px;padding:10px 12px;background:var(--fc-bg, #ffffff);">'
+    + '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;">'
+    + '<span style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">'+esc(post.author)+'</span>'
+    + '<span style="font-size:11px;color:var(--fc-muted, #94a3b8);white-space:nowrap;">'+esc(post.timestamp)+'</span>'
+    + '</div>'
+    + '<div style="font-size:11px;color:var(--fc-muted, #64748b);margin-bottom:6px;">'+esc(post.handle)+'</div>'
+    + '<p style="margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--fc-text, #0f172a);">'+esc(post.content)+'</p>'
+    + '<div style="font-size:11px;color:var(--fc-muted, #94a3b8);">💬 '+esc(post.comments)+'   🔁 '+esc(post.shares)+'   ♥ '+esc(post.likes)+'</div>'
+    + '</div>';
+}
+function initWidget(root){
+  root.setAttribute("data-forge-social-wall-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  fetch("/api/"+pid+"/social-feed").then(function(r){return r.json();}).then(function(data){
+    var posts=data.posts||[];
+    var connected=data.connected||[];
+    var columns=root.querySelectorAll("[data-forge-widget='social-wall-column']");
+    columns.forEach(function(col){
+      var platform=col.getAttribute("data-platform");
+      var badge=col.querySelector("[data-forge-connect='"+platform+"']");
+      if(badge && connected.indexOf(platform)!==-1){
+        badge.textContent="Connected";
+        badge.style.opacity="1";
+      }
+      var platformPosts=posts.filter(function(p){return p.platform===platform;});
+      if(!platformPosts.length) return; // no live posts yet: leave the sample cards in place
+      var cardsEl=col.querySelector("[data-forge-cards]");
+      if(cardsEl) cardsEl.innerHTML=platformPosts.map(renderCard).join("");
+    });
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='social-wall']:not([data-forge-social-wall-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+    ],
+  },
+  {
+    id: "comments",
+    label: "Comments",
+    blocks: [
+      {
+        id: "comments-section",
+        label: "Comment Thread",
+        html: buildCommentsSectionHtml({
+          seedComments: [
+            { id: 1, author: "Priya K.", avatar: AVA[0], date: "2 days ago", text: "This is exactly what I needed to read today — thank you for writing it out so clearly." },
+            { id: 2, author: "Marcus D.", avatar: AVA[1], date: "1 day ago", text: "Solid points. I'd add that the second one is easy to overlook until it bites you." },
+            { id: 3, author: "Renee A.", avatar: AVA[2], date: "5 hours ago", text: "Bookmarking this. Coming back to it next time I forget why I did it this way." },
+          ],
+        }),
+      },
+    ],
+  },
+  {
+    id: "zenero",
+    label: "Zenero Content",
+    blocks: [
+      {
+        id: "updates-block",
+        label: "Latest Updates",
+        html: `<section data-forge-widget="updates" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:960px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">What's new</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Latest Updates</h2>
+    <div data-forge-updates-list style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">2 days ago</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Welcome to our new site</div>
+        <div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">We're excited to launch. Check back for regular updates.</div>
+      </div>
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">1 week ago</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">New features coming soon</div>
+        <div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">We're working on something special. Stay tuned.</div>
+      </div>
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">2 weeks ago</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Community milestone</div>
+        <div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">Thank you to everyone who's been part of this journey.</div>
+      </div>
+    </div>
+  </div>
+  <script data-forge-js="updates.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-updates-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var list=root.querySelector("[data-forge-updates-list]");
+  if(!list) return;
+  fetch("/api/"+pid+"/updates").then(function(r){return r.json();}).then(function(data){
+    var items=(data.updates||[]).slice(0,3);
+    if(!items.length) return;
+    list.innerHTML=items.map(function(u){
+      return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">'
+        + '<div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">'+esc((u.timestamp||"").slice(0,10))+'</div>'
+        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">'+esc(u.title)+'</div>'
+        + '<div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">'+esc(u.content)+'</div>'
+        + '</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='updates']:not([data-forge-updates-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "gallery-block",
+        label: "Gallery Grid",
+        html: `<section data-forge-widget="gallery" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:1080px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Our work</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Gallery</h2>
+    <div data-forge-gallery-grid style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      ${PORT.slice(0, 6).map((src) => `<img src="${src}" alt="Gallery item" style="width:100%;height:200px;object-fit:cover;border-radius:10px;" />`).join("")}
+    </div>
+  </div>
+  <script data-forge-js="gallery.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-gallery-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var grid=root.querySelector("[data-forge-gallery-grid]");
+  if(!grid) return;
+  fetch("/api/"+pid+"/gallery_items").then(function(r){return r.json();}).then(function(data){
+    var items=data.gallery_items||[];
+    if(!items.length) return;
+    grid.innerHTML=items.map(function(g){
+      return '<img src="'+esc(g.image_url)+'" alt="'+esc(g.alt_text||"")+'" style="width:100%;height:200px;object-fit:cover;border-radius:10px;" />';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='gallery']:not([data-forge-gallery-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "latest-from-blog",
+        label: "Latest from Blog",
+        html: `<section data-forge-widget="latest-blog" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:720px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">From the blog</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Latest from Blog</h2>
+    <div data-forge-blog-titles style="display:flex;flex-direction:column;gap:8px;">
+      <button style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;">Getting Started with Web Dojo</button>
+      <button style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;">Design Tips for Better Landing Pages</button>
+      <button style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;">Why Static Sites Still Win</button>
+    </div>
+    <div data-forge-blog-excerpt style="display:none;margin-top:16px;padding:16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);"></div>
+  </div>
+  <script data-forge-js="latest-blog.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+// Rich-text pasted from Word/Docs/etc. into the Blog tab tends to carry
+// inline style="..." (and sometimes whole <style> blocks) that fight the
+// site's own theme. Strip both before ever injecting content_html — this
+// runs on every render, so it fixes previously-pasted posts too, not just
+// new ones.
+function stripStyles(html){
+  var d=document.createElement("div");
+  d.innerHTML=html||"";
+  var styled=d.querySelectorAll("[style]");
+  for(var i=0;i<styled.length;i++) styled[i].removeAttribute("style");
+  var styleTags=d.querySelectorAll("style");
+  for(var j=0;j<styleTags.length;j++) styleTags[j].remove();
+  return d.innerHTML;
+}
+function initWidget(root){
+  root.setAttribute("data-forge-blog-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var titles=root.querySelector("[data-forge-blog-titles]");
+  var excerpt=root.querySelector("[data-forge-blog-excerpt]");
+  if(!titles) return;
+  fetch("/api/"+pid+"/blog_posts").then(function(r){return r.json();}).then(function(data){
+    var posts=(data.blog_posts||[]).slice(0,3);
+    if(!posts.length) return;
+    titles.innerHTML=posts.map(function(p){
+      return '<button data-forge-blog-id="'+esc(p.id)+'" style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;width:100%;">'+esc(p.title)+'</button>';
+    }).join("");
+    titles.querySelectorAll("[data-forge-blog-id]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        var post=posts.find(function(p){return p.id===btn.getAttribute("data-forge-blog-id");});
+        if(!post||!excerpt) return;
+        excerpt.style.display="block";
+        excerpt.innerHTML='<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);">'+esc(post.excerpt||"")+'</div>'
+          + '<button data-forge-blog-read-full style="background:none;border:0;padding:0;display:inline-flex;align-items:center;gap:4px;margin-top:12px;font-size:13px;font-weight:600;color:var(--fc-primary, #0f172a);cursor:pointer;">Read Full Post <span aria-hidden="true">→</span></button>';
+        var readFull=excerpt.querySelector("[data-forge-blog-read-full]");
+        if(readFull) readFull.addEventListener("click",function(){
+          excerpt.innerHTML='<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);">'+stripStyles(post.content_html)+'</div>';
+        });
+      });
+    });
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='latest-blog']:not([data-forge-blog-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "portfolio-timeline",
+        label: "Portfolio Timeline",
+        html: `<section data-forge-widget="portfolio" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:720px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Selected work</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Portfolio</h2>
+    <div data-forge-portfolio-timeline style="position:relative;padding-left:24px;border-left:2px solid var(--fc-border, #e2e8f0);">
+      <div style="position:relative;margin-bottom:24px;">
+        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
+        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2024</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Project Alpha</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">A flagship web experience.</div>
+      </div>
+      <div style="position:relative;margin-bottom:24px;">
+        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
+        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2023</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Project Beta</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">A mobile-first redesign.</div>
+      </div>
+      <div style="position:relative;">
+        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
+        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2022</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Project Gamma</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">An e-commerce buildout.</div>
+      </div>
+    </div>
+  </div>
+  <script data-forge-js="portfolio.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-portfolio-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var timeline=root.querySelector("[data-forge-portfolio-timeline]");
+  if(!timeline) return;
+  fetch("/api/"+pid+"/portfolio_items").then(function(r){return r.json();}).then(function(data){
+    var items=data.portfolio_items||[];
+    if(!items.length) return;
+    timeline.innerHTML=items.map(function(p){
+      return '<div style="position:relative;margin-bottom:24px;">'
+        + '<div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>'
+        + '<div style="font-size:12px;color:var(--fc-muted, #94a3b8);">'+esc(p.date||"")+'</div>'
+        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">'+esc(p.title)+'</div>'
+        + '<div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">'+esc(p.description||"")+'</div>'
+        + (p.link ? '<a href="'+esc(p.link)+'" style="display:inline-block;margin-top:8px;font-size:13px;font-weight:600;color:var(--fc-primary, #0f172a);text-decoration:none;">View project →</a>' : '')
+        + '</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='portfolio']:not([data-forge-portfolio-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "testimonials-from-comments",
+        label: "Testimonials from Comments",
+        html: `<section data-forge-widget="testimonials" data-forge-project-id="" data-forge-platform="facebook" data-forge-post-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:720px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">What people say</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Testimonials</h2>
+    <div data-forge-testimonials-list style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:13px;line-height:1.5;color:var(--fc-text, #334155);">"This product changed how we work. Highly recommended."</div>
+        <div style="font-size:12px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:8px;">— Sarah M.</div>
+      </div>
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:13px;line-height:1.5;color:var(--fc-text, #334155);">"Incredible support and a beautiful product."</div>
+        <div style="font-size:12px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:8px;">— James K.</div>
+      </div>
+    </div>
+  </div>
+  <script data-forge-js="testimonials.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-testimonials-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  var platform=root.getAttribute("data-forge-platform")||"facebook";
+  var postId=root.getAttribute("data-forge-post-id")||"";
+  if(!pid||!postId) return;
+  var list=root.querySelector("[data-forge-testimonials-list]");
+  if(!list) return;
+  fetch("/api/"+pid+"/social-testimonials?platform="+platform+"&post_id="+postId).then(function(r){return r.json();}).then(function(data){
+    var items=data.testimonials||[];
+    if(!items.length) return;
+    list.innerHTML=items.map(function(t){
+      return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">'
+        + '<div style="font-size:13px;line-height:1.5;color:var(--fc-text, #334155);">"'+esc(t.text)+'"</div>'
+        + '<div style="font-size:12px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:8px;">— '+esc(t.author)+'</div>'
+        + '</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='testimonials']:not([data-forge-testimonials-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "timeline-block",
+        label: "Timeline",
+        html: `<section data-forge-widget="timeline" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:720px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Our story</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Timeline</h2>
+    <div data-forge-timeline-list style="position:relative;padding-left:24px;border-left:2px solid var(--fc-border, #e2e8f0);">
+      <div style="position:relative;margin-bottom:24px;">
+        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
+        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2024</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Founded</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">Started the company.</div>
+      </div>
+      <div style="position:relative;">
+        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
+        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2025</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Launched</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">Shipped the first release.</div>
+      </div>
+    </div>
+  </div>
+  <script data-forge-js="timeline.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-timeline-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var list=root.querySelector("[data-forge-timeline-list]");
+  if(!list) return;
+  fetch("/api/"+pid+"/timeline_entries").then(function(r){return r.json();}).then(function(data){
+    var items=data.timeline_entries||[];
+    if(!items.length) return;
+    list.innerHTML=items.map(function(t){
+      return '<div style="position:relative;margin-bottom:24px;">'
+        + '<div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>'
+        + '<div style="font-size:12px;color:var(--fc-muted, #94a3b8);">'+esc(t.date||"")+'</div>'
+        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">'+esc(t.title)+'</div>'
+        + '<div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">'+esc(t.description||"")+'</div>'
+        + '</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='timeline']:not([data-forge-timeline-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "bento-block",
+        label: "Features Bento",
+        html: `<section data-forge-widget="bento" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
+  <div style="max-width:960px;margin:0 auto;">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Why us</div>
+    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Features</h2>
+    <div data-forge-bento-grid style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:24px;margin-bottom:10px;">🚀</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Fast</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);">Loads in under a second.</div>
+      </div>
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:24px;margin-bottom:10px;">🔒</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Secure</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);">Built with best practices.</div>
+      </div>
+      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);">
+        <div style="font-size:24px;margin-bottom:10px;">🎨</div>
+        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Beautiful</div>
+        <div style="font-size:13px;color:var(--fc-muted, #64748b);">Designed to stand out.</div>
+      </div>
+    </div>
+  </div>
+  <script data-forge-js="bento.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-bento-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var grid=root.querySelector("[data-forge-bento-grid]");
+  if(!grid) return;
+  fetch("/api/"+pid+"/bento_tiles").then(function(r){return r.json();}).then(function(data){
+    var items=data.bento_tiles||[];
+    if(!items.length) return;
+    grid.innerHTML=items.map(function(b){
+      var inner='<div style="font-size:24px;margin-bottom:10px;">'+esc(b.icon)+'</div>'
+        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">'+esc(b.title)+'</div>'
+        + '<div style="font-size:13px;color:var(--fc-muted, #64748b);">'+esc(b.description||"")+'</div>';
+      var style='border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);display:block;text-decoration:none;';
+      return b.href
+        ? '<a href="'+esc(b.href)+'" style="'+style+'">'+inner+'</a>'
+        : '<div style="'+style+'">'+inner+'</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='bento']:not([data-forge-bento-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
 </section>`,
       },
     ],

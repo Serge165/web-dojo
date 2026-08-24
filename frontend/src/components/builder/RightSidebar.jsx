@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { ColorPicker } from "./ColorPicker";
 import { TokenSelector } from "./TokenSelector";
 import { GradientMixer } from "./GradientMixer";
+import { PatternPanel } from "./PatternPanel";
+import { SvgBackgroundPanel } from "./SvgBackgroundPanel";
 import { StyleInspector } from "./StyleInspector";
 import { ResponsivePanel } from "./ResponsivePanel";
 import { VariantPanel } from "./VariantPanel";
@@ -20,6 +22,8 @@ const TABS = [
   { id: "color", label: "Color" },
   { id: "tokens", label: "Tokens" },
   { id: "gradient", label: "Gradient" },
+  { id: "pattern", label: "Pattern" },
+  { id: "svgbg", label: "SVG BG" },
   { id: "style", label: "Style" },
   { id: "responsive", label: "Responsive" },
   { id: "variants", label: "Variants" },
@@ -124,6 +128,14 @@ export const RightSidebar = ({
 
         {tab === "gradient" && (
           <GradientMixer onApply={(g) => selected && onApplyBackground(g)} />
+        )}
+
+        {tab === "pattern" && (
+          <PatternPanel onApply={(g) => selected && onApplyBackground(g)} />
+        )}
+
+        {tab === "svgbg" && (
+          <SvgBackgroundPanel onApply={(g) => selected && onApplyBackground(g)} />
         )}
 
         {tab === "style" && (

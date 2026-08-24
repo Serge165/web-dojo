@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Header, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Header, BackgroundTasks, UploadFile, File, Query
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any
@@ -1019,6 +1020,52 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
     )
 
 
+# ---------- Asset uploads (Phase 2D) ----------
+# Block edit menus (gallery/bento/timeline) upload images here so the
+# exported site references clean relative URLs like
+# /assets/projects/{pid}/imgs/gallery-{block}/my-image.jpg instead of
+# huge data URIs. Files live on disk under ASSETS_ROOT (env-overridable
+# for tests) and are served by the StaticFiles mount at the bottom.
+
+ASSETS_ROOT = Path(os.environ.get("WEBDOJO_ASSETS_DIR", Path(__file__).parent / "assets"))
+
+_ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+_MAX_ASSET_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
+def _slugify_filename(name: str, fallback_ext: str = ".jpg") -> str:
+    """'My Holiday Photo.JPG' → 'my-holiday-photo.jpg' (filesystem-safe)."""
+    base, ext = os.path.splitext(name or "")
+    slug = re.sub(r"[^a-z0-9]+", "-", base.lower()).strip("-") or "image"
+    safe_ext = re.sub(r"[^a-z0-9.]", "", (ext or fallback_ext).lower()) or fallback_ext
+    return f"{slug}{safe_ext}"
+
+
+@api_router.post("/projects/{project_id}/assets/upload")
+async def upload_asset(
+    project_id: str,
+    file: UploadFile = File(...),
+    asset_type: str = Query(..., pattern="^(gallery|bento|timeline)$"),
+    asset_id: str = Query("1"),
+):
+    if (file.content_type or "") not in _ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail="Only image files allowed")
+    block_slug = re.sub(r"[^a-z0-9-]+", "-", (asset_id or "1").lower()).strip("-") or "1"
+    rel_dir = f"projects/{project_id}/imgs/{asset_type}-{block_slug}"
+    dest_dir = ASSETS_ROOT / rel_dir
+    filename = _slugify_filename(file.filename, f".{(file.content_type or 'image/jpeg').split('/')[1]}")
+    content = await file.read()
+    if len(content) > _MAX_ASSET_BYTES:
+        raise HTTPException(status_code=413, detail="Asset too large (max 10 MB)")
+    try:
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        (dest_dir / filename).write_bytes(content)
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"Could not store asset: {type(e).__name__}")
+    url = f"/assets/{rel_dir}/{filename}"
+    return {"success": True, "url": url, "filename": filename, "size": len(content)}
+
+
 @api_router.get("/preview/{project_id}", response_class=HTMLResponse)
 async def preview_project(project_id: str, page_id: Optional[str] = None):
     doc = await db.projects.find_one(
@@ -1448,6 +1495,14 @@ def _build_organized_stylesheet(theme_vars, base, component_css, animations, med
         ("Components", component_css or ""),
         ("Animations", "\n\n".join(_dedupe(animations))),
         ("Media Queries", "\n".join([RESPONSIVE_CSS_BODY, *_dedupe(media_queries)])),
+        # A11y: users with a reduced-motion OS preference get a static site.
+        ("Reduced Motion",
+         "@media (prefers-reduced-motion: reduce) {\n"
+         "  *, *::before, *::after {\n"
+         "    animation-duration: 0.01ms !important;\n"
+         "    animation-iteration-count: 1 !important;\n"
+         "    transition-duration: 0.01ms !important;\n"
+         "  }\n}"),
     ]
     return "\n\n".join(f"/* ===== {label} ===== */\n{body or '/* none */'}" for label, body in sections)
 
@@ -1530,7 +1585,36 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
     )
     for name, code in all_js_files.items():
         files[f"js/{name}"] = code
+    # Site folder scaffolding (mirrors frontend/src/lib/exportHtml.js):
+    # js/, imgs/ and fonts/ at the site root, globals.css at root — no css/.
+    files["imgs/.keep"] = ""
+    files["fonts/.keep"] = ""
     return files
+
+
+def _validate_publish_filename(name: str) -> str:
+    """Reject filenames that could escape the upload directory: path
+    separators (including Windows-style backslashes), '..' segments, or
+    leading-dot names like '.htaccess'. Returns the name or raises 400."""
+    if not name:
+        return name
+    if "/" in name or "\\" in name or name.startswith("."):
+        raise HTTPException(status_code=400, detail="Filenames must be a plain name with no path separators")
+    return name
+
+
+def _build_project_bundle(doc: dict, html_filename: str = "index.html", css_filename: str = "globals.css") -> tuple:
+    """Single-page bundle convenience wrapper around _build_multi_page_bundle.
+    Returns (html, css) for the requested page filename. Kept as its own
+    function so audit tests (and any future single-page export path) can
+    assert on exactly what gets uploaded."""
+    files = _build_multi_page_bundle(doc, css_filename)
+    if html_filename in files:
+        return files[html_filename], files[css_filename]
+    html_name = next((k for k in files if k.endswith(".html")), None)
+    if html_name is None:
+        raise RuntimeError("bundle produced no HTML file")
+    return files[html_name], files[css_filename]
 
 
 def _ftp_upload(payload: PublishRequest, files: dict):
@@ -1625,9 +1709,11 @@ async def publish_project(project_id: str, payload: PublishRequest):
     # construction, so single-page projects still publish as index.html
     # exactly as before). Only css_filename remains a real choice — it's
     # the one shared stylesheet name across every page.
-    css_name = payload.css_filename or "globals.css"
-    if "/" in css_name or "\\" in css_name or css_name.startswith("."):
-        raise HTTPException(status_code=400, detail="Filenames must be a plain name with no path separators")
+    css_name = _validate_publish_filename(payload.css_filename or "globals.css")
+    # html_filename is validated too even though it's legacy/unused (see
+    # below) — it's still accepted from previously-saved publish presets,
+    # so a traversal value there must never reach the filesystem.
+    _validate_publish_filename(payload.html_filename or "index.html")
     files = _build_multi_page_bundle(doc, css_name)
 
     if payload.include_zip:
@@ -2317,7 +2403,118 @@ async def clear_submissions(form_name: Optional[str] = None, project_id: Optiona
     return {"ok": True, "deleted": res.deleted_count}
 
 
+# Zenero Stack content management + funnel tracking routers. These modules
+# reference `db` and `_require_dashboard_token` from this module's namespace;
+# inject them so the route handlers resolve correctly.
+from models.zenero import zenero_router
+from models.funnels import funnel_router
+import models.zenero as _zenero_mod
+import models.funnels as _funnel_mod
+_zenero_mod.db = db
+_zenero_mod._require_dashboard_token = _require_dashboard_token
+_funnel_mod.db = db
+_funnel_mod._require_dashboard_token = _require_dashboard_token
+
 app.include_router(api_router)
+
+# Serve uploaded block assets (gallery/bento/timeline images) statically so
+# the builder canvas and published previews can render them.
+ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
+app.mount("/assets", StaticFiles(directory=str(ASSETS_ROOT)), name="assets")
+app.include_router(zenero_router)
+app.include_router(funnel_router)
+
+
+# ---------- Social Wall: config + live feed ----------
+
+class SocialConfigRequest(BaseModel):
+    config: dict  # {platform: {token, page_id, ...}}
+
+
+@api_router.post("/{project_id}/social-config")
+async def save_social_config_endpoint(
+    project_id: str,
+    payload: SocialConfigRequest,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    """Store social API tokens encrypted in project settings (never in
+    exported HTML). Gated by the dashboard token."""
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    from integrations.social import save_social_config
+    await save_social_config(project_id, payload.config)
+    return {"ok": True}
+
+
+@api_router.get("/{project_id}/social-feed")
+async def get_social_feed(project_id: str, platform: Optional[str] = None):
+    """Fetch live social feed for a project. Public — the live page's
+    Social Wall block fetches this. If `platform` is provided, only that
+    platform's posts are returned (filtering)."""
+    from integrations.social import (
+        load_social_config,
+        fetch_facebook_feed,
+        fetch_instagram_feed,
+        fetch_x_feed,
+        fetch_tiktok_feed,
+        fetch_linkedin_feed,
+        fetch_youtube_feed,
+    )
+
+    config = await load_social_config(project_id)
+    if not config:
+        return {"posts": [], "connected": []}
+
+    platforms = [platform] if platform else list(config.keys())
+    connected = [p for p in platforms if config.get(p, {}).get("token")]
+
+    posts = []
+    for p in platforms:
+        creds = config.get(p, {})
+        token = creds.get("token", "")
+        if not token:
+            continue
+        try:
+            if p == "facebook":
+                posts.extend(await fetch_facebook_feed(token, creds.get("page_id", "")))
+            elif p == "instagram":
+                posts.extend(await fetch_instagram_feed(token, creds.get("user_id", "")))
+            elif p == "x":
+                posts.extend(await fetch_x_feed(token, creds.get("user_id", "")))
+            elif p == "tiktok":
+                posts.extend(await fetch_tiktok_feed(token, creds.get("user_id", "")))
+            elif p == "linkedin":
+                posts.extend(await fetch_linkedin_feed(token, creds.get("company_id", "")))
+            elif p == "youtube":
+                posts.extend(await fetch_youtube_feed(token, creds.get("channel_id", "")))
+        except Exception:
+            # A failed platform fetch shouldn't break the whole wall.
+            continue
+
+    posts.sort(key=lambda p: p.get("timestamp", ""), reverse=True)
+    return {"posts": posts, "connected": connected}
+
+
+@api_router.get("/{project_id}/social-testimonials")
+async def get_social_testimonials(project_id: str, platform: str = "facebook", post_id: str = ""):
+    """Fetch comments from a social platform to use as testimonials.
+    Public — the Testimonials block fetches this."""
+    from integrations.social import load_social_config, fetch_facebook_comments
+
+    config = await load_social_config(project_id)
+    creds = config.get(platform, {})
+    token = creds.get("token", "")
+    if not token or not post_id:
+        return {"testimonials": []}
+
+    try:
+        if platform == "facebook":
+            comments = await fetch_facebook_comments(token, post_id)
+        else:
+            comments = []
+    except Exception:
+        comments = []
+
+    return {"testimonials": comments}
 
 _cors_origins_env = os.environ.get('CORS_ORIGINS', '').strip()
 if _cors_origins_env:

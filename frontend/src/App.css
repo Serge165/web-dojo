@@ -1,1 +1,47 @@
 .App { height: 100vh; width: 100vw; }
+
+/* ============================================================
+   Web Dojo editor themes (View → 🎨 Themes). Themes set --wd-*
+   custom properties on <html> via src/themes/index.js applyTheme().
+   The builder UI keeps its hand-tuned Tailwind palette, so themes
+   express themselves through accent/glow/glass effects layered on
+   top rather than a full repaint — visible, but never breaking.
+   ============================================================ */
+:root {
+  --wd-primary: #C9A227;
+  --wd-secondary: #332D22;
+  --wd-accent: #F1EDE2;
+  --wd-background: #14120E;
+  --wd-surface: #242019;
+  --wd-text: #F1EDE2;
+  --wd-text-secondary: #A79C87;
+  --wd-border: #332D22;
+  --wd-font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+}
+
+/* Neon themes: buttons and tabs pick up a primary-colored glow. */
+.theme-glow button {
+  box-shadow: 0 0 6px color-mix(in srgb, var(--wd-primary) 45%, transparent);
+}
+.theme-glow [data-testid="menu-bar"] button:hover {
+  text-shadow: 0 0 6px var(--wd-primary);
+}
+
+/* Glass themes: modals get a translucent backdrop-blur treatment. */
+.theme-glass [role="dialog"] > div {
+  background: color-mix(in srgb, var(--wd-surface) 78%, transparent) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Beveled themes (Winamp Classic, Win95): outset edges on panels. */
+.theme-beveled [data-testid="left-sidebar"],
+.theme-beveled [data-testid="menu-bar"],
+.theme-beveled [role="dialog"] > div {
+  border-style: outset;
+}
+
+/* Gradient themes tint the menu bar. */
+.theme-gradients [data-testid="menu-bar"] {
+  background: linear-gradient(180deg, var(--wd-surface), var(--wd-background));
+}
+

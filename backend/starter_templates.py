@@ -7,6 +7,7 @@ stylistic range so users always have a distinctive jumping-off point.
 """
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from typing import List, Dict, Any
 
@@ -15,13 +16,13 @@ def _uid(prefix: str, i: int) -> str:
     return f"{prefix}-el-{i}"
 
 
-def _page(prefix: str, name: str, canvas_bg: str, fonts: List[str], html_blocks: List[str]) -> Dict[str, Any]:
+def _page(prefix: str, name: str, canvas_bg: str, fonts: List[str], html_blocks: List[str], seo: Dict[str, Any] = None) -> Dict[str, Any]:
     return {
         "id": f"{prefix}-home",
         "name": name,
         "slug": "index",
         "status": "draft",
-        "seo": {},
+        "seo": seo or {},
         "elements": [{"id": _uid(prefix, i), "html": h} for i, h in enumerate(html_blocks)],
         "head_html": "",
         "canvas_bg": canvas_bg,
@@ -30,6 +31,15 @@ def _page(prefix: str, name: str, canvas_bg: str, fonts: List[str], html_blocks:
 
 
 def _tpl(id_: str, name: str, description: str, aesthetic: str, canvas_bg: str, fonts: List[str], html_blocks: List[str]) -> Dict[str, Any]:
+    # Template auto-fill (scoped): starters already carry a hand-written
+    # name + description for the picker UI — reuse that copy as the
+    # starting SEO title/description instead of leaving it blank, so a
+    # user who starts from a template gets a real (if generic) starting
+    # point rather than an empty stub. They're expected to edit it, same
+    # as the placeholder "Home" page name. No keywords: Google has
+    # ignored the meta-keywords tag since ~2009, so seeding it with the
+    # aesthetic slug would just be noise.
+    seo = {"title": name, "description": description}
     return {
         "id": id_,
         "name": name,
@@ -44,11 +54,89 @@ def _tpl(id_: str, name: str, description: str, aesthetic: str, canvas_bg: str, 
             "head_html": "",
             "files": [],
             "template": {"header_html": "", "footer_html": "", "use_template": False},
-            "pages": [_page(id_, "Home", canvas_bg, fonts, html_blocks)],
+            "pages": [_page(id_, "Home", canvas_bg, fonts, html_blocks, seo=seo)],
             "active_page_id": f"{id_}-home",
         },
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+# Shared comment-thread widget for the Blog/Xanga/LiveJournal starters
+# below. Seed data lives as an inline <script type="application/json">
+# tag rather than a fetched sibling .json file (fetch() breaks under
+# file:// via CORS — how people often first open an exported .html before
+# deploying it). _COMMENTS_JS carries the data-forge-js="comments.js"
+# marker so the export pipeline (_extract_forge_js) pulls it into a real
+# js/comments.js file instead of repeating it on every page that uses it.
+# Byte-identical to frontend/src/lib/blocksExtra.js's COMMENTS_JS —
+# Python can't import that module, so keep them in sync by hand.
+_COMMENTS_JS = """(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function renderComment(c){
+  return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
+    + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
+                : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
+    + '<div style="flex:1;min-width:0;">'
+    + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
+    + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
+    + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
+    + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
+    + '</div></div>';
+}
+function initWidget(root){
+  root.setAttribute("data-forge-comments-init","1");
+  var seedEl=root.querySelector("[data-forge-comments-seed]");
+  var comments=[];
+  try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
+  var list=root.querySelector("[data-forge-comment-list]");
+  var countEl=root.querySelector("[data-forge-comment-count]");
+  function renderAll(){
+    if(list) list.innerHTML=comments.map(renderComment).join("");
+    if(countEl) countEl.textContent=String(comments.length);
+  }
+  renderAll();
+  var form=root.querySelector("[data-forge-comment-form]");
+  if(form){
+    form.addEventListener("submit",function(e){
+      e.preventDefault();
+      var nameInput=form.querySelector('[name="name"]');
+      var textInput=form.querySelector('[name="text"]');
+      var name=(nameInput&&nameInput.value||"").trim();
+      var text=(textInput&&textInput.value||"").trim();
+      if(!name||!text) return;
+      comments.push({id:Date.now(),author:name,date:"Just now",text:text});
+      renderAll();
+      form.reset();
+    });
+  }
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();"""
+
+
+def _comments_section(seed_comments: list, wrap_style: str, heading_style: str = None) -> str:
+    """Builds a full comment-thread section (heading+count, list, working
+    client-only post form, JSON seed, behavior script). Mirrors frontend/
+    src/lib/blocksExtra.js's buildCommentsSectionHtml."""
+    heading = heading_style or "font-size:20px;margin:0 0 16px;"
+    return (
+        '<section data-forge-comments style="' + wrap_style + '">'
+        '<div style="max-width:640px;margin:0 auto;">'
+        '<h3 style="' + heading + '">Comments (<span data-forge-comment-count>0</span>)</h3>'
+        '<div data-forge-comment-list></div>'
+        '<form data-forge-comment-form style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">'
+        '<input name="name" placeholder="Your name" required style="padding:10px 12px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);font-size:14px;outline:none;">'
+        '<textarea name="text" placeholder="Say something..." required rows="3" style="padding:10px 12px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);font-size:14px;outline:none;resize:vertical;"></textarea>'
+        '<button type="submit" style="align-self:flex-start;padding:10px 20px;background:var(--fc-primary, #0f172a);color:#fff;border:0;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">Post Comment</button>'
+        '</form>'
+        '<script type="application/json" data-forge-comments-seed>' + json.dumps(seed_comments) + '</script>'
+        '<script data-forge-js="comments.js">' + _COMMENTS_JS + '</script>'
+        '</div></section>'
+    )
 
 
 STARTER_TEMPLATES: List[Dict[str, Any]] = [
@@ -430,7 +518,88 @@ STARTER_TEMPLATES: List[Dict[str, Any]] = [
             '<footer style="padding:24px 56px;background:#2a3520;color:#8a6f2a;font-family:Lora,serif;font-size:12px;font-style:italic;text-align:center;">gremlin approved · nothing here is fresh · thank you for looking</footer>',
         ],
     ),
-    # 28. Dreamcore
+    # 29. Blog — clean single-column editorial layout (2026 best practice:
+    # no heavy sidebar, readable line length, minimal chrome). Ends with a
+    # real comment thread on the featured post.
+    _tpl(
+        "starter-blog",
+        "Blog",
+        "A clean, readable editorial blog — featured post, recent posts, and working comments.",
+        "blog",
+        "#faf9f6",
+        ["Fraunces", "Inter"],
+        [
+            '<header style="padding:28px 32px;background:#faf9f6;border-bottom:1px solid #e7e2d8;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:space-between;"><div style="font-family:Fraunces,serif;font-size:22px;font-weight:600;color:#1c1917;">The Long Way Round</div><nav style="display:flex;gap:24px;font-size:14px;color:#57534e;"><a href="#" style="color:#1c1917;text-decoration:none;font-weight:600;">Home</a><a href="#" style="color:#57534e;text-decoration:none;">Archive</a><a href="#" style="color:#57534e;text-decoration:none;">Tags</a><a href="#" style="color:#57534e;text-decoration:none;">About</a></nav></header>',
+            '<section style="padding:64px 32px 48px;background:#faf9f6;font-family:Inter,sans-serif;"><div style="max-width:720px;margin:0 auto;"><div style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#b45309;font-weight:600;margin-bottom:12px;">Featured</div><h1 style="font-family:Fraunces,serif;font-size:44px;line-height:1.15;margin:0 0 16px;color:#1c1917;font-weight:500;">What nobody tells you about shipping the first version</h1><p style="font-size:12px;color:#78716c;margin:0 0 20px;">March 4, 2026 · 7 min read · <a href="#" style="color:#b45309;text-decoration:none;">#process</a></p><p style="font-size:18px;line-height:1.75;color:#3f3c37;margin:0 0 16px;">Every version-one product looks like a compromise from the inside and a decision from the outside. The gap between those two views is where most of the anxiety lives — and almost none of it is visible to the people using what you built.</p><p style="font-size:18px;line-height:1.75;color:#3f3c37;margin:0 0 24px;">Three things I wish someone had told me before I shipped mine, in order of how expensive they were to learn.</p><a href="#" style="font-size:15px;font-weight:600;color:#b45309;text-decoration:none;">Continue reading →</a></div></section>',
+            '<section style="padding:16px 32px 64px;background:#faf9f6;font-family:Inter,sans-serif;"><div style="max-width:720px;margin:0 auto;"><h2 style="font-family:Fraunces,serif;font-size:22px;color:#1c1917;font-weight:600;margin:0 0 24px;padding-top:24px;border-top:1px solid #e7e2d8;">Recent posts</h2>'
+            + "".join([f'<article style="padding:20px 0;border-bottom:1px solid #e7e2d8;"><p style="font-size:12px;color:#78716c;margin:0 0 6px;">{d} · <a href="#" style="color:#b45309;text-decoration:none;">#{tag}</a></p><h3 style="font-family:Fraunces,serif;font-size:20px;font-weight:600;margin:0 0 8px;color:#1c1917;"><a href="#" style="color:inherit;text-decoration:none;">{t}</a></h3><p style="font-size:15px;line-height:1.65;color:#57534e;margin:0;">{ex}</p></article>' for d, tag, t, ex in [
+                ("Feb 26, 2026", "writing", "The one-paragraph rule I use for every draft", "If the idea can\'t survive being compressed to one paragraph, it isn\'t ready to be an article yet — a filter that\'s saved me more time than any outline template."),
+                ("Feb 18, 2026", "tools", "I deleted my task manager and nothing broke", "A month-long experiment in running a whole freelance practice off a single text file, and the two things I quietly rebuilt anyway."),
+                ("Feb 9, 2026", "process", "Slow is a feature, not a bug", "Why the projects I\'m proudest of all had a period where nothing visible happened for weeks — and how to tell that apart from actually being stuck."),
+            ]]) + '</div></section>',
+            '<section style="padding:40px 32px 72px;background:#f3f0e9;font-family:Inter,sans-serif;text-align:center;"><h2 style="font-family:Fraunces,serif;font-size:24px;margin:0 0 8px;color:#1c1917;">Get new posts by email</h2><p style="font-size:14px;color:#57534e;margin:0 0 20px;">No spam, just writing — unsubscribe whenever.</p><form style="display:flex;gap:8px;max-width:380px;margin:0 auto;"><input type="email" placeholder="you@example.com" style="flex:1;padding:12px 14px;border-radius:8px;border:1px solid #d6d0c4;font-size:14px;outline:none;"><button type="submit" style="padding:12px 22px;background:#1c1917;color:#faf9f6;border:0;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px;">Subscribe</button></form></section>',
+            _comments_section(
+                [
+                    {"id": 1, "author": "Devon R.", "date": "3 hours ago", "text": "The one-paragraph rule is stealing this immediately. I\'ve been outlining my way into paralysis for months."},
+                    {"id": 2, "author": "Anaya P.", "date": "5 hours ago", "text": "\"a decision from the outside\" is such a precise way to put it. Bookmarking this to send to my cofounder."},
+                ],
+                wrap_style="font-family:Inter,sans-serif;padding:8px 32px 72px;background:#faf9f6;",
+                heading_style="font-family:Fraunces,serif;font-size:20px;margin:0 0 16px;color:#1c1917;",
+            ),
+            '<footer style="padding:28px 32px;background:#1c1917;color:#a8a29e;font-family:Inter,sans-serif;font-size:13px;display:flex;justify-content:space-between;"><span>© 2026 The Long Way Round</span><span>RSS · About · Contact</span></footer>',
+        ],
+    ),
+    # 30. Xanga Throwback — glossy teal/purple 2000s journal: mood icons,
+    # eProps, a "now playing" widget, subscriptions, blogrings.
+    _tpl(
+        "starter-xanga-throwback",
+        "Xanga Throwback",
+        "A faithful 2000s Xanga-style journal — mood icons, eProps, a music widget, and working comments.",
+        "xanga-throwback",
+        "#eef7f7",
+        ["Comic Neue", "Nunito Sans"],
+        [
+            '<header style="padding:0;font-family:\'Comic Neue\',cursive;"><div style="background:linear-gradient(135deg,#1fb6b6 0%,#5a4fcf 100%);padding:36px 32px;color:#fff;"><div style="font-size:34px;font-weight:700;text-shadow:2px 2px 0 rgba(0,0,0,0.15);">✿ stardust diaries ✿</div><div style="font-size:13px;opacity:0.9;font-family:\'Nunito Sans\',sans-serif;margin-top:4px;">est. 2004 · site #4,281,902 · currently obsessed with: iced coffee</div></div><nav style="background:#0d3b3b;padding:10px 32px;display:flex;gap:18px;font-family:\'Nunito Sans\',sans-serif;font-size:13px;"><a href="#" style="color:#9ff0f0;text-decoration:none;font-weight:700;">Home</a><a href="#" style="color:#cdeeee;text-decoration:none;">Photos</a><a href="#" style="color:#cdeeee;text-decoration:none;">Guestbook</a><a href="#" style="color:#cdeeee;text-decoration:none;">Subscriptions</a><a href="#" style="color:#cdeeee;text-decoration:none;">About Me</a></nav></header>',
+            '<section style="padding:32px;background:#eef7f7;font-family:\'Nunito Sans\',sans-serif;"><div style="display:grid;grid-template-columns:1fr 260px;gap:24px;max-width:1000px;margin:0 auto;align-items:start;"><div style="background:#fff;border:2px solid #1fb6b6;border-radius:14px;padding:24px;box-shadow:4px 4px 0 rgba(31,182,182,0.25);"><div style="font-family:\'Comic Neue\',cursive;font-size:22px;font-weight:700;color:#0d3b3b;">omg it\'s finally spring break!!</div><div style="font-size:12px;color:#5a4fcf;margin:6px 0 14px;">posted march 14 · current mood: <strong>ecstatic ✧</strong> · listening to: paramore</div><p style="font-size:14px;line-height:1.7;color:#264d4d;margin:0 0 14px;">okay so i KNOW i said i was gonna study over break but that is not happening. me and jules are doing absolutely nothing for a week straight and i have never been more excited for anything in my life. gonna update with pics later i promise!!</p><div style="display:flex;align-items:center;gap:14px;padding-top:12px;border-top:1px dashed #b8e0e0;"><button style="background:#ffd23f;border:2px solid #0d3b3b;border-radius:999px;padding:6px 16px;font-family:\'Comic Neue\',cursive;font-weight:700;font-size:13px;color:#0d3b3b;cursor:pointer;">☆ eProps (12)</button><span style="font-size:12px;color:#5a4fcf;">2 comments</span></div></div><div style="display:flex;flex-direction:column;gap:16px;"><div style="background:#fff;border:2px solid #5a4fcf;border-radius:14px;padding:16px;box-shadow:3px 3px 0 rgba(90,79,207,0.2);"><div style="width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#ffd23f,#ff8fab);margin:0 auto 10px;"></div><div style="text-align:center;font-family:\'Comic Neue\',cursive;font-weight:700;color:#0d3b3b;">stardustgirl04</div><div style="text-align:center;font-size:11px;color:#78716c;margin-top:2px;">17 · Ohio · loves: paramore, thrifting, iced coffee</div></div><div style="background:#0d3b3b;border-radius:14px;padding:14px 16px;color:#cdeeee;"><div style="font-family:\'Comic Neue\',cursive;font-weight:700;font-size:13px;color:#9ff0f0;margin-bottom:4px;">♫ now playing</div><div style="font-size:13px;">Misery Business — Paramore</div></div><div style="background:#fff;border:2px solid #1fb6b6;border-radius:14px;padding:14px 16px;"><div style="font-family:\'Comic Neue\',cursive;font-weight:700;font-size:13px;color:#0d3b3b;margin-bottom:8px;">subscriptions</div>' + "".join([f'<div style="font-size:12px;color:#264d4d;padding:3px 0;">→ {n}</div>' for n in ["glitterxheart", "moonchild_diary", "punkrockprincess"]]) + '</div><div style="display:flex;gap:6px;flex-wrap:wrap;">' + "".join([f'<div style="width:88px;height:31px;background:{c};border:1px solid #0d3b3b;border-radius:3px;"></div>' for c in ["#ffd23f", "#ff8fab", "#9ff0f0"]]) + '</div></div></div></section>',
+            _comments_section(
+                [
+                    {"id": 1, "author": "glitterxheart", "mood": "jealous lol", "date": "2 hours ago", "text": "NO WAY have fun i\'m so jealous, take pics of everything!!"},
+                    {"id": 2, "author": "moonchild_diary", "mood": "happy for u", "date": "1 hour ago", "text": "eProps sent!! spring break masterlist when"},
+                ],
+                wrap_style="font-family:\'Nunito Sans\',sans-serif;padding:8px 32px 48px;background:#eef7f7;",
+                heading_style="font-family:\'Comic Neue\',cursive;font-size:18px;margin:0 0 14px;color:#0d3b3b;",
+            ),
+            '<footer style="padding:20px 32px;background:#0d3b3b;color:#9ff0f0;font-family:\'Nunito Sans\',sans-serif;font-size:12px;text-align:center;">✿ stardust diaries · powered by nothing but vibes ✿</footer>',
+        ],
+    ),
+    # 31. LiveJournal Throwback — understated purple/blue LJ-style friends
+    # stream: userpics, current mood/music line, tags, comments, a mini
+    # calendar widget.
+    _tpl(
+        "starter-livejournal-throwback",
+        "LiveJournal Throwback",
+        "A faithful LiveJournal-style journal — userpics, current mood/music, tags, and working comments.",
+        "livejournal-throwback",
+        "#ffffff",
+        ["Georgia", "Verdana"],
+        [
+            '<header style="background:#3b3480;padding:0;font-family:Verdana,sans-serif;"><div style="padding:16px 32px;display:flex;align-items:center;justify-content:space-between;"><div style="color:#fff;font-size:20px;font-weight:bold;">wanderer_notes</div><nav style="display:flex;gap:16px;font-size:12px;"><a href="#" style="color:#c9c4f0;text-decoration:none;">Recent Entries</a><a href="#" style="color:#c9c4f0;text-decoration:none;">Friends</a><a href="#" style="color:#c9c4f0;text-decoration:none;">Archive</a><a href="#" style="color:#c9c4f0;text-decoration:none;">Profile</a></nav></div><div style="background:#2b2560;padding:6px 32px;font-size:11px;color:#a89fe0;">viewing recent entries · <a href="#" style="color:#e0d8ff;">add to friends</a></div></header>',
+            '<section style="padding:28px 32px;background:#ffffff;font-family:Georgia,serif;"><div style="max-width:940px;margin:0 auto;display:grid;grid-template-columns:1fr 220px;gap:32px;align-items:start;">'
+            '<div style="display:grid;grid-template-columns:56px 1fr;gap:16px;padding-bottom:24px;border-bottom:1px solid #e0ddf0;"><div style="width:56px;height:56px;border-radius:4px;background:linear-gradient(135deg,#5a4fcf,#8b7fe0);flex:none;"></div><div><div style="font-family:Verdana,sans-serif;font-size:12px;color:#5a4fcf;margin-bottom:2px;"><strong style="color:#2b2560;">wanderer_notes</strong> wrote,</div><div style="font-family:Verdana,sans-serif;font-size:11px;color:#78716c;margin-bottom:10px;">@ 09:41 pm · current mood: <em>reflective</em> · current music: <em>Bon Iver — Holocene</em></div><h2 style="font-size:22px;margin:0 0 10px;color:#1c1a33;">the apartment finally feels like mine</h2><p style="font-size:15px;line-height:1.75;color:#2e2b45;margin:0 0 10px;">Six months in and I hung the last picture frame tonight, which is apparently the threshold at which a place stops being "where I\'m staying" and starts being "where I live." Small thing. Took longer than it should have to notice it happened.</p><p style="font-size:15px;line-height:1.75;color:#2e2b45;margin:0 0 14px;">Making tea in a kitchen that has opinions about where the mugs go now. I don\'t know when that started either.</p><div style="font-family:Verdana,sans-serif;font-size:11px;color:#5a4fcf;">Tags: <a href="#" style="color:#5a4fcf;">home</a>, <a href="#" style="color:#5a4fcf;">small-things</a>, <a href="#" style="color:#5a4fcf;">quiet</a></div></div></div>'
+            '<div style="display:flex;flex-direction:column;gap:14px;font-family:Verdana,sans-serif;"><div style="border:1px solid #e0ddf0;border-radius:6px;padding:14px;"><div style="font-size:11px;font-weight:bold;color:#2b2560;margin-bottom:8px;">FRIENDS</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">' + "".join([f'<div style="aspect-ratio:1;border-radius:3px;background:{c};"></div>' for c in ["#5a4fcf", "#8b7fe0", "#c9c4f0", "#3b3480", "#8b7fe0", "#5a4fcf", "#c9c4f0", "#3b3480"]]) + '</div></div><div style="border:1px solid #e0ddf0;border-radius:6px;padding:14px;"><div style="font-size:11px;font-weight:bold;color:#2b2560;margin-bottom:8px;">MARCH 2026</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-size:10px;text-align:center;color:#78716c;">' + "".join([f'<div style="{"background:#5a4fcf;color:#fff;border-radius:2px;" if d==14 else ""}padding:2px 0;">{d if d else ""}</div>' for d in ([0,0]+list(range(1,32)))]) + '</div></div><div style="border:1px solid #e0ddf0;border-radius:6px;padding:14px;font-size:11px;color:#57534e;">Member since 2019 · 412 entries · <a href="#" style="color:#5a4fcf;">view profile</a></div></div>'
+            '</div></section>',
+            _comments_section(
+                [
+                    {"id": 1, "author": "quietmornings", "date": "1 hour ago", "text": "the mug thing got me right in the chest, apartments really do decide these things for you eventually"},
+                    {"id": 2, "author": "faraway_kate", "date": "40 minutes ago", "text": "this is such a lovely small entry. hope the tea was good"},
+                ],
+                wrap_style="font-family:Georgia,serif;padding:8px 32px 48px;background:#ffffff;",
+                heading_style="font-family:Verdana,sans-serif;font-size:13px;font-weight:bold;color:#2b2560;margin:0 0 14px;text-transform:uppercase;letter-spacing:0.05em;",
+            ),
+            '<footer style="padding:18px 32px;background:#2b2560;color:#a89fe0;font-family:Verdana,sans-serif;font-size:11px;text-align:center;">wanderer_notes — powered by nothing in particular, hosted somewhere quiet</footer>',
+        ],
+    ),
+    # 32. Dreamcore
     _tpl(
         "starter-dreamcore",
         "Dreamcore",
@@ -442,6 +611,264 @@ STARTER_TEMPLATES: List[Dict[str, Any]] = [
             '<section style="min-height:76vh;padding:96px 56px;background:radial-gradient(ellipse at 30% 30%,#ffd6ec 0%,#f3e8ff 40%,#c9d8f8 100%);font-family:Fraunces,serif;color:#3a2a5a;position:relative;overflow:hidden;text-align:center;"><div style="position:absolute;left:15%;top:20%;width:180px;height:180px;background:radial-gradient(circle,#ffdc90,transparent 65%);filter:blur(30px);"></div><div style="position:absolute;right:20%;top:15%;width:120px;height:120px;background:radial-gradient(circle,#c8a4ff,transparent 65%);filter:blur(20px);"></div><div style="position:absolute;left:50%;bottom:10%;width:220px;height:220px;background:radial-gradient(circle,#a4d8ff,transparent 65%);filter:blur(40px);transform:translateX(-50%);"></div><div style="max-width:640px;margin:0 auto;position:relative;z-index:2;"><div style="font-family:Caveat,cursive;font-size:36px;color:#8a5aa8;margin-bottom:12px;">do you remember?</div><h1 style="font-size:78px;line-height:1;margin:0 0 24px;font-weight:400;font-style:italic;letter-spacing:-0.02em;color:#4a2a70;">A place, but not really<br>a place.</h1><p style="font-size:17px;line-height:1.75;max-width:500px;margin:0 auto;color:#6a5a80;">You were seven and you were on holiday and there was a hallway and a pink light and someone laughing very far away and you can\'t remember what happened next. This whole website is that hallway.</p><div style="margin-top:36px;"><a href="#" style="padding:14px 30px;background:rgba(255,255,255,0.6);color:#4a2a70;text-decoration:none;backdrop-filter:blur(10px);border-radius:999px;font-size:14px;letter-spacing:0.08em;border:1px solid rgba(255,255,255,0.5);">walk further in →</a></div></div></section>',
             '<section style="padding:72px 56px;background:#e8d8f8;font-family:Fraunces,serif;color:#3a2a5a;text-align:center;"><h2 style="font-family:Caveat,cursive;font-size:56px;margin:0 0 24px;color:#6a4a90;">rooms</h2><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:900px;margin:0 auto;">' + "".join([f'<div style="padding:32px 20px;background:linear-gradient(160deg,{c1} 0%,{c2} 100%);border-radius:24px;filter:blur(0.5px);"><div style="font-family:Caveat,cursive;font-size:28px;color:#3a2a5a;">{t}</div><p style="font-size:13px;line-height:1.7;margin:6px 0 0;color:#5a4a70;">{d}</p></div>' for c1, c2, t, d in [("#f8d8ec", "#e8c8f0", "the hallway", "carpet colour: unclear. lightbulb: warm."), ("#d0e0f8", "#c0d0f0", "the swimming pool room", "empty. echoing. tiled in pale mint."), ("#f8e8c8", "#e8d0b0", "the kitchen at 3pm", "everyone is upstairs. the fridge hums.")]]) + '</div></section>',
             '<footer style="padding:24px 56px;background:#f3e8ff;color:#8a6ab0;font-family:Caveat,cursive;font-size:22px;text-align:center;">please do not wake up yet</footer>',
+        ],
+    ),
+
+    # 33-42. Modern, color-agnostic templates — 5 categories x 2 layout
+    # variations. Unlike the aesthetic starters above (which ARE a fixed
+    # palette), every color here is var(--fc-*, fallback) — the same
+    # convention the block library (blocksExtra.js) already uses — so
+    # applying any theme via the Theme tab re-colors the whole page live.
+    # Fallback palette (what a fresh, no-theme-applied page looks like):
+    # bg #ffffff, surface #f8fafc, text #0f172a, muted #64748b,
+    # primary #2563eb, accent #7c3aed, border #e2e8f0.
+
+    # 33. SaaS — Minimal
+    _tpl(
+        "starter-saas-minimal",
+        "SaaS — Minimal",
+        "Clean, generous whitespace, one clear call to action. Colors bind to whatever theme is applied.",
+        "modern-saas-minimal",
+        "var(--fc-bg, #ffffff)",
+        ["Inter"],
+        [
+            '<section style="padding:120px 48px 100px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;text-align:center;"><div style="max-width:640px;margin:0 auto;"><div style="display:inline-block;padding:6px 14px;border:1px solid var(--fc-border, #e2e8f0);border-radius:999px;font-size:12px;color:var(--fc-muted, #64748b);margin-bottom:24px;">Now in open beta</div><h1 style="font-size:52px;line-height:1.1;margin:0 0 20px;font-weight:700;letter-spacing:-0.02em;color:var(--fc-text, #0f172a);">Software that gets out of your way.</h1><p style="font-size:18px;line-height:1.6;color:var(--fc-muted, #64748b);margin:0 0 32px;">One tool for the whole team, none of the setup tax. Start free, upgrade when it actually pays for itself.</p><div style="display:flex;gap:12px;justify-content:center;"><a href="#" style="padding:14px 28px;background:var(--fc-primary, #2563eb);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Start free</a><a href="#" style="padding:14px 28px;color:var(--fc-text, #0f172a);border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">See how it works</a></div></div></section>',
+            '<section style="padding:80px 48px;background:var(--fc-surface, #f8fafc);font-family:Inter,sans-serif;"><div style="max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:32px;">' + "".join([f'<div><div style="width:40px;height:40px;border-radius:10px;background:var(--fc-primary, #2563eb);margin-bottom:16px;"></div><h3 style="font-size:17px;margin:0 0 8px;color:var(--fc-text, #0f172a);">{t}</h3><p style="font-size:14px;line-height:1.6;color:var(--fc-muted, #64748b);margin:0;">{d}</p></div>' for t, d in [("Set up in minutes", "No consultant, no onboarding call. Connect your tools and go."), ("Scales with you", "Same price whether it is 3 people or 300 — usage-based, not seat-taxed."), ("Actually gets used", "Built around the workflow your team already has, not the one we wish they had.")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-bg, #ffffff);border-top:1px solid var(--fc-border, #e2e8f0);color:var(--fc-muted, #64748b);font-family:Inter,sans-serif;font-size:13px;text-align:center;">© 2026 Fieldnote — built by a small team that ships</footer>',
+        ],
+    ),
+    # 34. SaaS — Bold
+    _tpl(
+        "starter-saas-bold",
+        "SaaS — Bold",
+        "Larger type, a confident stat row, and a numbered case for switching. Colors bind to whatever theme is applied.",
+        "modern-saas-bold",
+        "var(--fc-bg, #ffffff)",
+        ["Space Grotesk"],
+        [
+            '<section style="padding:110px 48px 90px;background:var(--fc-text, #0f172a);font-family:\'Space Grotesk\',sans-serif;color:var(--fc-bg, #ffffff);"><div style="max-width:760px;margin:0 auto;text-align:center;"><h1 style="font-size:68px;line-height:1.02;margin:0 0 20px;font-weight:700;letter-spacing:-0.03em;">Stop paying for six tools to do one job.</h1><p style="font-size:19px;line-height:1.6;opacity:0.75;margin:0 0 36px;">Fieldnote replaces your spreadsheet, your tracker, and the Slack channel where you actually coordinate work.</p><a href="#" style="display:inline-block;padding:16px 34px;background:var(--fc-accent, #7c3aed);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;">Try it free for 14 days</a><div style="display:flex;justify-content:center;gap:56px;margin-top:56px;">' + "".join([f'<div><div style="font-size:36px;font-weight:700;">{n}</div><div style="font-size:13px;opacity:0.6;margin-top:4px;">{l}</div></div>' for n, l in [("12,400+", "teams onboard"), ("4.8/5", "average rating"), ("6 min", "average setup time")]]) + '</div></div></section>',
+            '<section style="padding:88px 48px;background:var(--fc-bg, #ffffff);font-family:\'Space Grotesk\',sans-serif;"><div style="max-width:760px;margin:0 auto;">' + "".join([f'<div style="display:flex;gap:24px;padding:24px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);"><div style="font-size:32px;font-weight:700;color:var(--fc-primary, #2563eb);flex:none;width:56px;">{n}</div><div><h3 style="font-size:19px;margin:0 0 6px;color:var(--fc-text, #0f172a);">{t}</h3><p style="font-size:15px;line-height:1.6;color:var(--fc-muted, #64748b);margin:0;">{d}</p></div></div>' for n, t, d in [("01", "One source of truth", "Everyone stops asking which spreadsheet is the real one."), ("02", "Built-in automation", "The busywork that used to eat Friday afternoons runs itself."), ("03", "Actually cancel anytime", "No call required. We would rather earn it every month.")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-surface, #f8fafc);color:var(--fc-muted, #64748b);font-family:\'Space Grotesk\',sans-serif;font-size:13px;text-align:center;">© 2026 Fieldnote</footer>',
+        ],
+    ),
+
+    # 35. Agency — Grid
+    _tpl(
+        "starter-agency-grid",
+        "Agency — Grid",
+        "Portfolio-forward studio site with a project grid. Colors bind to whatever theme is applied.",
+        "modern-agency-grid",
+        "var(--fc-bg, #ffffff)",
+        ["Manrope"],
+        [
+            '<section style="padding:96px 48px 72px;background:var(--fc-bg, #ffffff);font-family:Manrope,sans-serif;"><div style="max-width:800px;"><div style="font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:16px;">Brand & product studio</div><h1 style="font-size:48px;line-height:1.15;margin:0 0 20px;font-weight:700;color:var(--fc-text, #0f172a);">We build the identity, then the product that has to live up to it.</h1><p style="font-size:17px;line-height:1.65;color:var(--fc-muted, #64748b);max-width:560px;margin:0;">A small studio for founders who need both the brand and the thing itself done right, on the same timeline.</p></div></section>',
+            '<section style="padding:0 48px 96px;background:var(--fc-bg, #ffffff);font-family:Manrope,sans-serif;"><div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">' + "".join([f'<div><div style="aspect-ratio:4/3;background:var(--fc-surface, #f8fafc);border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;margin-bottom:12px;"></div><h3 style="font-size:15px;margin:0 0 2px;color:var(--fc-text, #0f172a);">{t}</h3><p style="font-size:13px;color:var(--fc-muted, #64748b);margin:0;">{d}</p></div>' for t, d in [("Northfield Coffee", "Brand identity + packaging"), ("Loom & Co.", "E-commerce + photography"), ("Verano Health", "Product design + design system"), ("Passage Books", "Web design + development"), ("Hearth Studio", "Brand identity + web"), ("Meridian Finance", "Product design + brand")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-surface, #f8fafc);border-top:1px solid var(--fc-border, #e2e8f0);color:var(--fc-muted, #64748b);font-family:Manrope,sans-serif;font-size:13px;display:flex;justify-content:space-between;"><span>© 2026 Fieldwork Studio</span><span>hello@fieldwork.studio</span></footer>',
+        ],
+    ),
+    # 36. Agency — Editorial
+    _tpl(
+        "starter-agency-editorial",
+        "Agency — Editorial",
+        "Big type, numbered services, a text-forward alternative to a project grid. Colors bind to whatever theme is applied.",
+        "modern-agency-editorial",
+        "var(--fc-bg, #ffffff)",
+        ["Fraunces", "Inter"],
+        [
+            '<section style="padding:100px 48px 80px;background:var(--fc-bg, #ffffff);font-family:Fraunces,serif;"><div style="max-width:760px;"><h1 style="font-size:58px;line-height:1.15;margin:0 0 24px;font-weight:500;color:var(--fc-text, #0f172a);">Strategy first. Everything else follows from that.</h1><p style="font-family:Inter,sans-serif;font-size:17px;line-height:1.7;color:var(--fc-muted, #64748b);max-width:540px;margin:0;">We turn down work that starts with "we need a website" before anyone has answered "for whom, saying what." Ask us why.</p></div></section>',
+            '<section style="padding:0 48px 96px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;"><div style="max-width:760px;">' + "".join([f'<div style="display:flex;gap:28px;padding:28px 0;border-top:1px solid var(--fc-border, #e2e8f0);"><div style="font-family:Fraunces,serif;font-size:15px;color:var(--fc-muted, #64748b);flex:none;width:32px;">{n}</div><div style="flex:1;"><h3 style="font-family:Fraunces,serif;font-size:22px;margin:0 0 8px;color:var(--fc-text, #0f172a);font-weight:500;">{t}</h3><p style="font-size:15px;line-height:1.65;color:var(--fc-muted, #64748b);margin:0;">{d}</p></div></div>' for n, t, d in [("01", "Positioning", "The one-sentence answer to why you, before any of it gets designed."), ("02", "Identity", "A visual system that survives contact with a hundred different use cases."), ("03", "Product", "The actual thing, built to the standard the brand now promises.")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-text, #0f172a);color:var(--fc-bg, #ffffff);opacity:0.85;font-family:Inter,sans-serif;font-size:13px;text-align:center;">Fieldwork Studio · est. 2019</footer>',
+        ],
+    ),
+
+    # 37. E-commerce — Single Product
+    _tpl(
+        "starter-shop-product",
+        "E-commerce — Single Product",
+        "Product-focused landing page: hero, specs, and a clear buy CTA. Colors bind to whatever theme is applied.",
+        "modern-shop-product",
+        "var(--fc-bg, #ffffff)",
+        ["Inter"],
+        [
+            '<section style="padding:80px 48px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;"><div style="max-width:1040px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;"><div style="aspect-ratio:1;background:var(--fc-surface, #f8fafc);border:1px solid var(--fc-border, #e2e8f0);border-radius:16px;"></div><div><div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:12px;">Field Series</div><h1 style="font-size:36px;margin:0 0 12px;font-weight:700;color:var(--fc-text, #0f172a);">The Field Jacket</h1><p style="font-size:15px;line-height:1.65;color:var(--fc-muted, #64748b);margin:0 0 20px;">Waxed cotton, brass hardware, made to be worn through a decade of weather rather than replaced after one season.</p><div style="font-size:26px;font-weight:700;color:var(--fc-text, #0f172a);margin-bottom:24px;">$228</div><button style="padding:15px 36px;background:var(--fc-primary, #2563eb);color:#fff;border:0;border-radius:8px;font-weight:600;font-size:15px;cursor:pointer;">Add to cart</button></div></div></section>',
+            '<section style="padding:64px 48px;background:var(--fc-surface, #f8fafc);font-family:Inter,sans-serif;"><div style="max-width:1040px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center;">' + "".join([f'<div><div style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:4px;">{t}</div><div style="font-size:12px;color:var(--fc-muted, #64748b);">{d}</div></div>' for t, d in [("Waxed cotton", "12oz, water-resistant"), ("Brass hardware", "YKK zip, solid buttons"), ("Made to order", "Ships in 5-7 days"), ("Free returns", "60-day window")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-bg, #ffffff);border-top:1px solid var(--fc-border, #e2e8f0);color:var(--fc-muted, #64748b);font-family:Inter,sans-serif;font-size:13px;text-align:center;">© 2026 Field Supply Co.</footer>',
+        ],
+    ),
+    # 38. E-commerce — Shop Grid
+    _tpl(
+        "starter-shop-grid",
+        "E-commerce — Shop Grid",
+        "Catalog-style storefront with a product grid. Colors bind to whatever theme is applied.",
+        "modern-shop-grid",
+        "var(--fc-bg, #ffffff)",
+        ["Inter"],
+        [
+            '<section style="padding:64px 48px 40px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;text-align:center;"><h1 style="font-size:34px;margin:0 0 10px;font-weight:700;color:var(--fc-text, #0f172a);">New arrivals</h1><p style="font-size:15px;color:var(--fc-muted, #64748b);margin:0;">Small-batch goods, restocked every Friday.</p></section>',
+            '<section style="padding:0 48px 80px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;"><div style="max-width:1040px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">' + "".join([f'<div><div style="aspect-ratio:1;background:var(--fc-surface, #f8fafc);border:1px solid var(--fc-border, #e2e8f0);border-radius:10px;margin-bottom:10px;"></div><div style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">{t}</div><div style="font-size:13px;color:var(--fc-muted, #64748b);">{p}</div></div>' for t, p in [("Ceramic mug", "$24"), ("Linen napkin set", "$38"), ("Oak cutting board", "$56"), ("Wool throw", "$92"), ("Cast iron pan", "$68"), ("Glass carafe", "$32"), ("Enamel bowl", "$18"), ("Bread box", "$74")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-surface, #f8fafc);border-top:1px solid var(--fc-border, #e2e8f0);color:var(--fc-muted, #64748b);font-family:Inter,sans-serif;font-size:13px;text-align:center;">© 2026 Fieldstone General</footer>',
+        ],
+    ),
+
+    # 39. Portfolio — Minimal Personal
+    _tpl(
+        "starter-portfolio-minimal",
+        "Portfolio — Minimal Personal",
+        "A quiet, centered personal site — name, role, selected work. Colors bind to whatever theme is applied.",
+        "modern-portfolio-minimal",
+        "var(--fc-bg, #ffffff)",
+        ["Inter"],
+        [
+            '<section style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;padding:80px 48px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;text-align:center;"><div style="width:64px;height:64px;border-radius:999px;background:var(--fc-surface, #f8fafc);border:1px solid var(--fc-border, #e2e8f0);margin:0 auto 24px;"></div><h1 style="font-size:30px;margin:0 0 6px;font-weight:700;color:var(--fc-text, #0f172a);">Maren Iida</h1><p style="font-size:16px;color:var(--fc-muted, #64748b);margin:0 0 20px;">Product designer, currently at Fieldnote</p><div style="display:flex;gap:16px;justify-content:center;font-size:13px;"><a href="#" style="color:var(--fc-primary, #2563eb);text-decoration:none;">Work</a><a href="#" style="color:var(--fc-primary, #2563eb);text-decoration:none;">Writing</a><a href="#" style="color:var(--fc-primary, #2563eb);text-decoration:none;">Contact</a></div></section>',
+            '<section style="padding:0 48px 88px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;"><div style="max-width:600px;margin:0 auto;">' + "".join([f'<div style="display:flex;justify-content:space-between;align-items:baseline;padding:18px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);"><div><div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);">{t}</div><div style="font-size:13px;color:var(--fc-muted, #64748b);">{d}</div></div><div style="font-size:13px;color:var(--fc-muted, #64748b);">{y}</div></div>' for t, d, y in [("Fieldnote", "Design system + onboarding redesign", "2025"), ("Verano Health", "Patient portal, ground up", "2024"), ("Passage Books", "Freelance — full site redesign", "2023")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-surface, #f8fafc);color:var(--fc-muted, #64748b);font-family:Inter,sans-serif;font-size:13px;text-align:center;">maren@example.com</footer>',
+        ],
+    ),
+    # 40. Portfolio — Creative Grid
+    _tpl(
+        "starter-portfolio-creative",
+        "Portfolio — Creative Grid",
+        "Image-forward portfolio grid for photographers, illustrators, and visual designers. Colors bind to whatever theme is applied.",
+        "modern-portfolio-creative",
+        "var(--fc-text, #0f172a)",
+        ["Manrope"],
+        [
+            '<section style="padding:72px 48px 40px;background:var(--fc-text, #0f172a);font-family:Manrope,sans-serif;color:var(--fc-bg, #ffffff);"><h1 style="font-size:38px;margin:0 0 8px;font-weight:700;">Devon Cole</h1><p style="font-size:15px;opacity:0.65;margin:0;">Illustration & motion, based in Portland</p></section>',
+            '<section style="padding:0 48px 80px;background:var(--fc-text, #0f172a);font-family:Manrope,sans-serif;"><div style="max-width:1040px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">' + "".join([f'<div style="aspect-ratio:{r};background:var(--fc-surface, #f8fafc);opacity:0.9;border-radius:8px;"></div>' for r in ["1/1", "3/4", "1/1", "4/3", "1/1", "3/4"]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-text, #0f172a);color:var(--fc-bg, #ffffff);opacity:0.85;font-family:Manrope,sans-serif;font-size:13px;text-align:center;">hello@devoncole.work</footer>',
+        ],
+    ),
+
+    # 41. Restaurant — Modern Bistro
+    _tpl(
+        "starter-restaurant-bistro",
+        "Restaurant — Modern Bistro",
+        "Menu-forward restaurant site with a reservation CTA. Colors bind to whatever theme is applied.",
+        "modern-restaurant-bistro",
+        "var(--fc-bg, #ffffff)",
+        ["Fraunces", "Inter"],
+        [
+            '<section style="padding:100px 48px 72px;background:var(--fc-bg, #ffffff);font-family:Fraunces,serif;text-align:center;"><div style="font-family:Inter,sans-serif;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:16px;">Est. 2019 · Neighborhood bistro</div><h1 style="font-size:52px;margin:0 0 20px;font-weight:500;color:var(--fc-text, #0f172a);">Seasonal, simple, cooked properly.</h1><a href="#" style="display:inline-block;padding:14px 30px;background:var(--fc-primary, #2563eb);color:#fff;border-radius:6px;text-decoration:none;font-family:Inter,sans-serif;font-weight:600;font-size:14px;">Reserve a table</a></section>',
+            '<section style="padding:64px 48px 88px;background:var(--fc-surface, #f8fafc);font-family:Fraunces,serif;"><div style="max-width:600px;margin:0 auto;"><h2 style="font-size:22px;text-align:center;margin:0 0 28px;font-weight:500;color:var(--fc-text, #0f172a);">From tonight\'s menu</h2>' + "".join([f'<div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px dashed var(--fc-border, #e2e8f0);"><div><div style="font-size:16px;color:var(--fc-text, #0f172a);">{t}</div><div style="font-family:Inter,sans-serif;font-size:12px;color:var(--fc-muted, #64748b);">{d}</div></div><div style="font-size:15px;color:var(--fc-text, #0f172a);">{p}</div></div>' for t, d, p in [("Roasted beet salad", "whipped feta, pistachio, mint", "$16"), ("Pan-seared trout", "brown butter, capers, charred lemon", "$29"), ("Brown butter tart", "toasted almond, sea salt", "$12")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-bg, #ffffff);border-top:1px solid var(--fc-border, #e2e8f0);color:var(--fc-muted, #64748b);font-family:Inter,sans-serif;font-size:13px;text-align:center;">Tue-Sun 5pm-10pm · 214 Alder St · (503) 555-0148</footer>',
+        ],
+    ),
+    # 42. Service Business — Studio/Salon/Clinic
+    _tpl(
+        "starter-service-business",
+        "Service Business",
+        "Booking-forward layout for a salon, studio, or clinic — services list with price and duration. Colors bind to whatever theme is applied.",
+        "modern-service-business",
+        "var(--fc-bg, #ffffff)",
+        ["Inter"],
+        [
+            '<section style="padding:96px 48px 72px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;text-align:center;"><h1 style="font-size:42px;margin:0 0 14px;font-weight:700;color:var(--fc-text, #0f172a);">Book your next session in under a minute.</h1><p style="font-size:16px;color:var(--fc-muted, #64748b);margin:0 0 28px;">Same-week availability, most Saturdays included.</p><a href="#" style="display:inline-block;padding:14px 30px;background:var(--fc-primary, #2563eb);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">Book now</a></section>',
+            '<section style="padding:0 48px 88px;background:var(--fc-bg, #ffffff);font-family:Inter,sans-serif;"><div style="max-width:640px;margin:0 auto;">' + "".join([f'<div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);"><div><div style="font-size:16px;font-weight:600;color:var(--fc-text, #0f172a);">{t}</div><div style="font-size:13px;color:var(--fc-muted, #64748b);">{d}</div></div><div style="font-size:16px;color:var(--fc-text, #0f172a);">{p}</div></div>' for t, d, p in [("Initial consultation", "45 min", "$65"), ("Standard session", "60 min", "$95"), ("Extended session", "90 min", "$135"), ("Follow-up", "30 min", "$45")]]) + '</div></section>',
+            '<footer style="padding:32px 48px;background:var(--fc-surface, #f8fafc);color:var(--fc-muted, #64748b);font-family:Inter,sans-serif;font-size:13px;text-align:center;">Mon-Fri 9am-6pm, Sat 10am-2pm · 88 Harbor Ave</footer>',
+        ],
+    ),
+
+    # 43. MySpace Throwback — the platform every other 2000s journal
+    # template has been standing in the shadow of: dark profile chrome,
+    # a Top 8, an autoplay-styled music banner, and comments.
+    _tpl(
+        "starter-myspace-throwback",
+        "MySpace Throwback",
+        "A faithful mid-2000s MySpace-style profile — Top 8, autoplay music banner, About Me box, and working comments.",
+        "myspace-throwback",
+        "#000000",
+        ["Arial", "Verdana"],
+        [
+            '<header style="background:#000000;font-family:Arial,sans-serif;"><div style="background:linear-gradient(180deg,#003399,#001a66);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;"><div style="color:#fff;font-size:22px;font-weight:bold;font-style:italic;">myspace.</div><nav style="display:flex;gap:14px;font-size:11px;">' + "".join([f'<a href="#" style="color:#cfe0ff;text-decoration:none;">{l}</a>' for l in ["Home", "Browse", "Search", "Invite", "Mail", "Blog", "Favorites"]]) + '</nav></div><div style="background:#001a66;color:#9db8e8;font-size:10px;padding:4px 24px;">You have 3 new friend requests and 12 new comments.</div></header>',
+            '<section style="padding:20px;background:#000000;font-family:Arial,sans-serif;"><div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:200px 1fr;gap:16px;"><div style="display:flex;flex-direction:column;gap:12px;"><div style="background:#0a0a1a;border:2px solid #336699;border-radius:4px;padding:10px;text-align:center;"><div style="width:170px;height:170px;background:linear-gradient(135deg,#003399,#6a0dad);border-radius:2px;margin:0 auto 8px;"></div><div style="color:#fff;font-size:15px;font-weight:bold;">xxjess_marievintagexx</div><div style="color:#88aadd;font-size:10px;margin-top:2px;">19 years old, Ohio, United States</div><div style="color:#88aadd;font-size:10px;margin-top:6px;">Last Login: Today</div></div><div style="background:#0a0a1a;border:2px solid #336699;border-radius:4px;padding:10px;color:#cfe0ff;font-size:10px;"><div style="color:#fff;font-weight:bold;margin-bottom:4px;">Mood: <span style="font-weight:normal;">bored</span></div><div>Status: In a relationship</div></div></div><div><div style="background:#0a0a1a;border:2px solid #336699;border-radius:4px;padding:14px;margin-bottom:12px;"><div style="color:#fff;font-weight:bold;font-size:13px;margin-bottom:8px;border-bottom:1px solid #336699;padding-bottom:6px;">xxjess_marievintagexx\'s Interests</div><div style="color:#cfe0ff;font-size:11px;line-height:1.7;"><strong style="color:#fff;">General:</strong> shows, thrifting, my dog<br><strong style="color:#fff;">Music:</strong> Fall Out Boy, Paramore, The Killers<br><strong style="color:#fff;">Movies:</strong> Mean Girls, Donnie Darko</div></div><div style="background:linear-gradient(180deg,#1a1a2e,#0a0a1a);border:2px solid #6a0dad;border-radius:4px;padding:12px;display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#888,#000);flex:none;"></div><div style="flex:1;"><div style="color:#c9a3ff;font-size:10px;">♫ Now Playing</div><div style="color:#fff;font-size:12px;">Sugar, We\'re Goin Down — Fall Out Boy</div></div><div style="color:#c9a3ff;font-size:16px;">▶</div></div></div></div></section>',
+            '<section style="padding:0 20px 20px;background:#000000;font-family:Arial,sans-serif;"><div style="max-width:1000px;margin:0 auto;background:#0a0a1a;border:2px solid #336699;border-radius:4px;padding:14px;"><div style="color:#fff;font-weight:bold;font-size:13px;margin-bottom:10px;border-bottom:1px solid #336699;padding-bottom:6px;">xxjess_marievintagexx\'s Top 8</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">' + "".join([f'<div style="text-align:center;"><div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,{c1},{c2});border-radius:2px;border:1px solid #336699;"></div><div style="color:#9db8e8;font-size:10px;margin-top:4px;">{n}</div></div>' for c1, c2, n in [("#ff6b9d", "#c44569", "hannah<3"), ("#4ecdc4", "#1a8a82", "mike_b"), ("#ffd93d", "#c9a000", "sophie.xo"), ("#a29bfe", "#6c5ce7", "tyler"), ("#ff9a3c", "#d9720a", "kayla__"), ("#55efc4", "#00997a", "brandon"), ("#fd79a8", "#c0396f", "emmaaa"), ("#74b9ff", "#3a7fd9", "chris_r")]]) + '</div></div></section>',
+            _comments_section(
+                [
+                    {"id": 1, "author": "hannah<3", "date": "3 hours ago", "text": "omg your top 8 changed again lol love you though"},
+                    {"id": 2, "author": "mike_b", "date": "yesterday", "text": "new layout is fire, hmu this weekend"},
+                ],
+                wrap_style="font-family:Arial,sans-serif;padding:0 20px 24px;background:#000000;",
+                heading_style="color:#fff;font-size:13px;font-weight:bold;border-bottom:1px solid #336699;padding-bottom:6px;",
+            ),
+            '<footer style="padding:16px 24px;background:#001a66;color:#88aadd;font-family:Arial,sans-serif;font-size:10px;text-align:center;">myspace throwback · a place for friends</footer>',
+        ],
+    ),
+
+    # 44. GeoCities / Angelfire Personal Homepage — maximalist late-90s
+    # chaos: tiled starfield, marquee ticker, hit counter, and a "best
+    # viewed in" badge. The loud, unpolished counterpart to the
+    # relatively put-together Xanga/LiveJournal/MySpace journal templates.
+    _tpl(
+        "starter-geocities-homepage",
+        "GeoCities Personal Homepage",
+        "Maximalist late-90s chaos — tiled starfield, scrolling marquee, hit counter, and a guestbook. The loud cousin of the journal throwbacks.",
+        "geocities-homepage",
+        "#000033",
+        ["Comic Sans MS", "Courier New"],
+        [
+            '<style>@keyframes wd-marquee{0%{transform:translateX(100%);}100%{transform:translateX(-100%);}}</style>'
+            '<header style="background:#000033 url(\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Ccircle cx=%225%22 cy=%228%22 r=%221%22 fill=%22white%22/%3E%3Ccircle cx=%2222%22 cy=%2220%22 r=%221%22 fill=%22white%22/%3E%3Ccircle cx=%2233%22 cy=%2233%22 r=%221%22 fill=%22white%22/%3E%3Ccircle cx=%2212%22 cy=%2230%22 r=%220.5%22 fill=%22white%22/%3E%3C/svg%3E\') repeat;padding:32px 20px;text-align:center;font-family:\'Comic Sans MS\',cursive;"><h1 style="font-size:34px;margin:0 0 6px;background:linear-gradient(90deg,#ff0000,#ff9900,#ffff00,#00ff00,#0099ff,#6633ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:2px 2px 0 rgba(0,0,0,.3);">*~*Welcome To My Homepage*~*</h1><p style="color:#ffff00;font-size:14px;margin:0 0 12px;">☆☆☆ under construction forever, thanks for stopping by!! ☆☆☆</p><div style="display:inline-block;background:#000;border:2px solid #ffff00;padding:4px 12px;color:#00ff00;font-family:\'Courier New\',monospace;font-size:12px;">You are visitor number: <strong>004217</strong></div></header>',
+            '<div style="background:#ffff00;color:#000033;font-family:\'Courier New\',monospace;font-size:13px;font-weight:bold;padding:6px 0;overflow:hidden;white-space:nowrap;border-top:2px dashed #000033;border-bottom:2px dashed #000033;"><div style="display:inline-block;animation:wd-marquee 16s linear infinite;">★ SIGN MY GUESTBOOK ★ BEST VIEWED IN NETSCAPE NAVIGATOR AT 800x600 ★ DO NOT STEAL MY GRAPHICS ★ EMAIL ME ANYTIME ★</div></div>',
+            '<section style="padding:36px 24px;background:#000033;font-family:\'Comic Sans MS\',cursive;color:#ccccff;"><div style="max-width:640px;margin:0 auto;background:rgba(0,0,50,.6);border:3px ridge #6699ff;border-radius:6px;padding:20px;"><h2 style="color:#ffff00;font-size:20px;margin:0 0 12px;">About Me!</h2><p style="font-size:14px;line-height:1.7;margin:0 0 12px;">Hiya!! Welcome to my corner of the web. This site is all about anime, my cats, and really good MIDI files. Feel free to sign my guestbook before you leave!!</p><div style="display:flex;gap:6px;flex-wrap:wrap;">' + "".join([f'<div style="width:88px;height:31px;background:{c};border:1px solid #6699ff;border-radius:2px;color:#000;font-size:9px;display:flex;align-items:center;justify-content:center;text-align:center;">{t}</div>' for c, t in [("#ffcc00", "Under Construction"), ("#00ffcc", "Powered by Notepad"), ("#ff99cc", "100% Anime Fan")]]) + '</div></div></section>',
+            _comments_section(
+                [
+                    {"id": 1, "author": "starlight_wolf", "date": "2 days ago", "text": "signed!! love the new background lol"},
+                    {"id": 2, "author": "webmaster_kai", "date": "1 week ago", "text": "your site loaded so fast, nice work on the graphics"},
+                ],
+                wrap_style="font-family:'Comic Sans MS',cursive;padding:0 24px 40px;background:#000033;",
+                heading_style="color:#ffff00;font-size:16px;",
+            ),
+            '<footer style="padding:16px 24px;background:#000000;color:#6699ff;font-family:\'Courier New\',monospace;font-size:10px;text-align:center;">this page last updated never · © 1999-2026</footer>',
+        ],
+    ),
+
+    # 45. Web Forum Throwback — classic phpBB/vBulletin-style thread view:
+    # per-post left rail (avatar, rank, join date, post count) beside the
+    # post body, exactly the layout every early-2000s forum shared. The
+    # reply box reuses the same working comment widget as the other
+    # throwbacks, just relabeled — a forum reply IS a comment.
+    _tpl(
+        "starter-forum-throwback",
+        "Web Forum Throwback",
+        "A classic phpBB/vBulletin-style forum thread — per-post user rail, quote/edit icons, and a working reply box.",
+        "forum-throwback",
+        "#e8ecf1",
+        ["Verdana", "Tahoma"],
+        [
+            '<header style="font-family:Verdana,sans-serif;"><div style="background:linear-gradient(180deg,#3b6ea5,#1d3d63);padding:14px 24px;"><div style="color:#fff;font-size:20px;font-weight:bold;">FieldworkForums.net</div><div style="color:#aecbe8;font-size:11px;margin-top:2px;">the only forum you will ever need, established 2003</div></div><div style="background:#dde6f0;border-bottom:1px solid #b8c8dc;padding:6px 24px;font-size:11px;color:#3b6ea5;">Forum Index » General Discussion » <strong>Anyone else still using this in 2026?</strong></div></header>',
+            '<section style="padding:16px 24px;background:#e8ecf1;font-family:Verdana,sans-serif;"><div style="max-width:900px;margin:0 auto;border:1px solid #b8c8dc;border-radius:3px;overflow:hidden;">'
+            + "".join([
+                f'<div style="display:grid;grid-template-columns:150px 1fr;background:{bg};border-bottom:1px solid #b8c8dc;">'
+                f'<div style="padding:12px;border-right:1px solid #b8c8dc;text-align:center;background:#f4f7fb;">'
+                f'<div style="width:64px;height:64px;background:linear-gradient(135deg,{c1},{c2});border:1px solid #b8c8dc;border-radius:3px;margin:0 auto 8px;"></div>'
+                f'<div style="font-size:12px;font-weight:bold;color:{namecolor};">{name}</div>'
+                f'<div style="font-size:10px;color:#7a8aa0;margin-top:2px;">{rank}</div>'
+                f'<div style="font-size:9px;color:#9aabc0;margin-top:8px;">Joined: {joined}<br>Posts: {posts}</div>'
+                f'</div>'
+                f'<div style="padding:12px 16px;">'
+                f'<div style="display:flex;justify-content:space-between;font-size:10px;color:#7a8aa0;border-bottom:1px dotted #cdd8e6;padding-bottom:6px;margin-bottom:8px;"><span>Posted: {when}</span><span>Post #{n} <a href="#" style="color:#3b6ea5;">Quote</a></span></div>'
+                f'<div style="font-size:13px;line-height:1.65;color:#28303d;">{body}</div>'
+                f'<div style="font-size:10px;color:#9aabc0;font-style:italic;margin-top:12px;border-top:1px dotted #cdd8e6;padding-top:6px;">{sig}</div>'
+                f'</div></div>'
+                for bg, c1, c2, namecolor, name, rank, joined, posts, when, n, body, sig in [
+                    ("#ffffff", "#3b6ea5", "#1d3d63", "#1d3d63", "forumveteran99", "Senior Member", "Mar 2004", "3,204", "Today, 9:14 AM", 1,
+                     "Honestly did not expect this thread to still be active but here we are. Anyone got the old install files still archived somewhere?",
+                     "\"The mods are asleep, post exploit threads\""),
+                    ("#f4f7fb", "#c44569", "#8a2b46", "#8a2b46", "lurker_since_02", "Member", "Jul 2002", "412", "Today, 9:41 AM", 2,
+                     "I have a backup from like 2011 on an external drive somewhere. Give me a day to dig it out of the closet.",
+                     ""),
+                    ("#ffffff", "#2e8b57", "#1c5636", "#1c5636", "mod_sarah", "Moderator", "Jan 2003", "8,910", "Today, 10:02 AM", 3,
+                     "Pinning this thread. Please keep the nostalgia coming, just no dead links per rule 4.",
+                     "Forum rules: fieldworkforums.net/rules"),
+                ]
+            ])
+            + '</div></section>',
+            _comments_section(
+                [],
+                wrap_style="font-family:Verdana,sans-serif;padding:0 24px 40px;background:#e8ecf1;",
+                heading_style="font-size:13px;font-weight:bold;color:#1d3d63;",
+            ),
+            '<footer style="padding:14px 24px;background:#1d3d63;color:#aecbe8;font-family:Verdana,sans-serif;font-size:10px;text-align:center;">All times are GMT. Page generated in 0.041 seconds.</footer>',
         ],
     ),
 ]
