@@ -270,6 +270,15 @@ class TestPublicCORSOverride:
         assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
 
     def test_get_submissions_not_exposed_to_foreign_origin(self, client, monkeypatch):
+        pw_hash = server._hash_password("test-pw-12345")
+        token = server._issue_dashboard_token("abc", pw_hash)
+
+        class FakeProjects:
+            async def find_one(self, filt, projection=None):
+                if filt.get("id") == "abc":
+                    return {"id": "abc", "dashboard_password_hash": pw_hash}
+                return None
+
         class FakeCursor:
             def sort(self, *a, **kw):
                 return self
@@ -282,10 +291,15 @@ class TestPublicCORSOverride:
                 return FakeCursor()
 
         monkeypatch.setattr(server.db, "submissions", FakeCollection())
-        # Round 2 (task 1) requires a project_id/form_name filter on this
-        # endpoint; supply one so this test still reaches a 200 and keeps
-        # verifying its actual concern — no CORS header leak to a foreign origin.
-        r = client.get("/api/submissions", params={"project_id": "abc"}, headers={"Origin": "https://evil.example"})
+        monkeypatch.setattr(server.db, "projects", FakeProjects())
+        # With token-based auth, a valid token is needed to reach 200.  The
+        # test's actual concern is that the CORS wildcard is NOT leaked to a
+        # foreign origin on the GET method.
+        r = client.get(
+            "/api/submissions",
+            params={"project_id": "abc"},
+            headers={"Origin": "https://evil.example", "X-Dashboard-Token": token},
+        )
         assert r.status_code == 200
         assert "access-control-allow-origin" not in {k.lower() for k in r.headers.keys()}
 

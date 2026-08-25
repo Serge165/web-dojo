@@ -37,14 +37,47 @@ import html
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-if os.environ.get("DB_BACKEND") == "sqlite":
-    from sqlite_compat import SqliteClient
-    client = SqliteClient(os.environ["SQLITE_PATH"])
-    db = client[os.environ.get("DB_NAME", "webdojo")]
-else:
-    mongo_url = os.environ['MONGO_URL']
-    client = AsyncIOMotorClient(mongo_url)
-    db = client[os.environ['DB_NAME']]
+
+def _build_client():
+    """Construct a fresh DB client + database handle for whichever backend is
+    configured. Kept as a factory so the process-global client can be rebuilt
+    when a prior event loop closed it (see _ensure_live_client)."""
+    if os.environ.get("DB_BACKEND") == "sqlite":
+        from sqlite_compat import SqliteClient
+        client = SqliteClient(os.environ["SQLITE_PATH"])
+    else:
+        client = AsyncIOMotorClient(os.environ['MONGO_URL'])
+    db = client[os.environ.get('DB_NAME', 'webdojo')]
+    return client, db
+
+
+client, db = _build_client()
+
+# The module-level `client`/`db` are process-global singletons. Motor clients
+# bind to the event loop they are *first* used on. Under pytest-xdist
+# (`pytest.ini` pins `-n 2 --dist loadscope`), several test modules share a
+# single worker process. A context-managed TestClient (e.g. test_zenero_*.py)
+# runs the app lifespan: startup binds + uses the shared client, then shutdown
+# closes it. Without recovery, the NEXT module scheduled on that worker would
+# reuse the same — now closed, loop-bound — client and fail with "Cannot use
+# AsyncIOMotorClient after close()". This flag tracks exactly that state so
+# the startup handler can hand every new module a clean client bound to its
+# own loop, instead of inheriting the closed one.
+_db_client_is_closed = False
+
+
+def _ensure_live_client():
+    """Return a usable (client, db), rebuilding the process-global pair when a
+    prior shutdown closed it. Each test module that starts a FastAPI lifespan
+    thus gets a fresh client bound to its OWN event loop — no inheritance from
+    a previous module on the same worker. No-op for unclosed/untouched
+    clients, so test files that swap `server.db` explicitly (e.g.
+    test_commerce_orders.py's SQLite override) are never clobbered."""
+    global client, db, _db_client_is_closed
+    if _db_client_is_closed:
+        client, db = _build_client()
+        _db_client_is_closed = False
+    return client, db
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -1242,7 +1275,16 @@ async def delete_publish_preset(preset_id: str):
 # ---------- Analytics ----------
 
 @api_router.get("/projects/{project_id}/analytics")
-async def project_analytics(project_id: str):
+async def project_analytics(
+    project_id: str,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    """Site-visit analytics for a published project. Requires a dashboard
+    token — the project_id is baked into the exported site's HTML, so it is
+    NOT secret; the token gate prevents anyone who views-source from reading
+    another project's analytics. (POST /submissions stays public so published
+    sites can POST form data without a token.)"""
+    await _require_dashboard_token(project_id, x_dashboard_token)
     exists = await db.projects.find_one({"id": project_id}, {"_id": 0, "id": 1})
     if not exists:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -2374,12 +2416,19 @@ async def create_submission(request: Request):
 
 
 @api_router.get("/submissions", response_model=List[Submission])
-async def list_submissions(project_id: Optional[str] = None, form_name: Optional[str] = None):
-    if not project_id and not form_name:
-        raise HTTPException(status_code=400, detail="project_id or form_name is required")
-    query: dict = {}
-    if project_id:
-        query["project_id"] = project_id
+async def list_submissions(
+    project_id: Optional[str] = None,
+    form_name: Optional[str] = None,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    """List stored form submissions for a project. Requires a valid dashboard
+    token for the project_id — without it, anyone who views-source the exported
+    site (project_id is in plaintext) could enumerate another project's form
+    data. form_name is an optional secondary filter within the project."""
+    if not project_id:
+        raise HTTPException(status_code=400, detail="project_id is required")
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    query: dict = {"project_id": project_id}
     if form_name:
         query["form_name"] = form_name
     cursor = db.submissions.find(query, {"_id": 0}).sort("created_at", -1)
@@ -2388,7 +2437,20 @@ async def list_submissions(project_id: Optional[str] = None, form_name: Optional
 
 
 @api_router.delete("/submissions/{submission_id}")
-async def delete_submission(submission_id: str):
+async def delete_submission(
+    submission_id: str,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    """Delete a single submission by ID. Requires a dashboard token for the
+    submission's owning project — without it, anyone who guesses/enumerates a
+    submission_id could delete another project's form data."""
+    doc = await db.submissions.find_one({"id": submission_id}, {"_id": 0, "project_id": 1})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    project_id = doc.get("project_id") or ""
+    if not project_id:
+        raise HTTPException(status_code=400, detail="Submission has no project_id — cannot verify dashboard token")
+    await _require_dashboard_token(project_id, x_dashboard_token)
     res = await db.submissions.delete_one({"id": submission_id})
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Submission not found")
@@ -2396,12 +2458,15 @@ async def delete_submission(submission_id: str):
 
 
 @api_router.delete("/submissions")
-async def clear_submissions(form_name: Optional[str] = None, project_id: Optional[str] = None):
-    if not form_name and not project_id:
-        raise HTTPException(status_code=400, detail="project_id or form_name is required")
-    query: dict = {}
-    if project_id:
-        query["project_id"] = project_id
+async def clear_submissions(
+    form_name: Optional[str] = None,
+    project_id: Optional[str] = None,
+    x_dashboard_token: Optional[str] = Header(default=None),
+):
+    if not project_id:
+        raise HTTPException(status_code=400, detail="project_id is required")
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    query: dict = {"project_id": project_id}
     if form_name:
         query["form_name"] = form_name
     res = await db.submissions.delete_many(query)
@@ -2600,6 +2665,14 @@ async def ensure_indexes():
     sqlite_compat's dev shim has no create_index, so the SQLite path keeps only
     the read-then-write guard — a known, accepted gap, since concurrent
     redelivery is a production (i.e. Mongo) concern."""
+
+    # Recover a clean DB client if a previous test module's lifespan shutdown
+    # closed the process-global client (pytest-xdist shares one worker process
+    # across several modules via --dist loadscope). Each new lifespan therefore
+    # binds its OWN fresh client to ITS OWN event loop — no inheritance of a
+    # closed, loop-bound Motor client from the previous module.
+    _ensure_live_client()
+
     if not hasattr(db.orders, "create_index"):
         return
     try:
@@ -2629,4 +2702,14 @@ async def seed_starter_templates():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    global _db_client_is_closed
+    try:
+        client.close()
+    except Exception:
+        pass
+    # Mark the process-global client closed so the NEXT module scheduled on
+    # this xdist worker rebuilds a fresh client in its own loop instead of
+    # reusing this closed, loop-bound one. Made explicit rather than inferred
+    # so a test file that later swaps `server.db` (e.g. the SQLite override in
+    # test_commerce_orders.py) stays authoritative.
+    _db_client_is_closed = True

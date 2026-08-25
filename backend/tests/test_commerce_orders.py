@@ -28,33 +28,44 @@ import server
 from sqlite_compat import SqliteClient, SqliteCursor
 
 # server.db is whatever backend happened to be live when `server` was first
-# imported in this pytest-xdist worker (pytest.ini pins -n 2 --dist loadscope,
-# so another test module — possibly on Mongo — may have imported it first,
-# making env-var-before-import unreliable). Overwrite it directly with a
-# fresh temp-file SQLite client (matches tests/test_sqlite_compat.py's
-# pattern; a literal ":memory:" path opens a fresh, empty DB on every
-# connection in sqlite_compat.py and would make writes invisible to reads),
-# so project-touching tests below get real persistence regardless of import
-# order.
-_fd, _sqlite_path = tempfile.mkstemp(suffix=".db")
-os.close(_fd)
-atexit.register(lambda: os.path.exists(_sqlite_path) and os.unlink(_sqlite_path))
-server.db = SqliteClient(_sqlite_path)["webdojo_test"]
+# imported in this pytest-xdist worker. conftest.py defaults to SQLite for all
+# tests, but this module needs its OWN isolated temp-file SQLite backend so
+# project/submission/order data doesn't contaminate (or get contaminated by)
+# other modules on the same worker. The override is scoped to this module's
+# run via the _commerce_test_env fixture below — which saves and restores
+# the original server.db / server.client / _db_client_is_closed on teardown.
 
-# Same import-order problem as server.db above, but unlike server.db (every
-# test file wants a working DB, so a permanent overwrite is harmless), other
-# modules have the OPPOSITE requirement here: test_security_fixes.py's
-# TestStripeNotConfigured class specifically needs STRIPE_SECRET_KEY empty to
-# exercise its "unconfigured" 503 path. A bare permanent assignment would
-# leak across files sharing an xdist worker and break that class. Scope the
-# override to just this module's test run instead, restoring the original
-# value afterward.
+# --- Scoped DB + Stripe overrides ---------------------------------------------
+
 @pytest.fixture(scope="module", autouse=True)
-def _stripe_configured_for_this_module():
-    original = server.STRIPE_SECRET_KEY
+def _commerce_test_env():
+    """Scope this module's DB + Stripe overrides so they don't leak to other
+    test modules on the same xdist worker.
+
+    Previously `server.db = SqliteClient(...)` ran at import time (permanent,
+    no teardown) — fine when commerce was the only SQLite module, but it
+    clobbered `server.db` for every subsequent module on the same worker,
+    including ones that expected the conftest-provided backend or needed to
+    rebuild via _ensure_live_client().  Wrapping both overrides in a single
+    module-scoped autouse fixture restores the originals on teardown."""
+    original_db = server.db
+    original_client = server.client
+    original_closed = server._db_client_is_closed
+
+    _fd, _sqlite_path = tempfile.mkstemp(suffix=".db")
+    os.close(_fd)
+    atexit.register(lambda: os.path.exists(_sqlite_path) and os.unlink(_sqlite_path))
+    server.db = SqliteClient(_sqlite_path)["webdojo_test"]
+
+    original_stripe_key = server.STRIPE_SECRET_KEY
     server.STRIPE_SECRET_KEY = "sk_test_dummy"
-    yield
-    server.STRIPE_SECRET_KEY = original
+    try:
+        yield
+    finally:
+        server.db = original_db
+        server.client = original_client
+        server._db_client_is_closed = original_closed
+        server.STRIPE_SECRET_KEY = original_stripe_key
 
 
 @pytest.fixture(scope="module")

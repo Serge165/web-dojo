@@ -18,15 +18,43 @@ def client():
 
 
 class TestSubmissionsScoping:
+    def _mock_project(self, monkeypatch, project_id="abc"):
+        """Mock server.db.projects so _require_dashboard_token can find the
+        project and verify a token.  Returns the password hash so the test
+        can mint a matching token with server._issue_dashboard_token."""
+        pw_hash = server._hash_password("test-pw-12345")
+        pw_hash = pw_hash  # 6+ chars, satisfies the 6-char minimum guard
+
+        class _FakeProjects:
+            async def find_one(self, filt, projection=None):
+                if filt.get("id") == project_id:
+                    return {"id": project_id, "dashboard_password_hash": pw_hash}
+                return None
+
+        monkeypatch.setattr(server.db, "projects", _FakeProjects())
+        return pw_hash
+
     def test_get_without_filter_400(self, client):
         r = client.get("/api/submissions")
         assert r.status_code == 400
 
+    def test_get_without_token_401(self, client, monkeypatch):
+        self._mock_project(monkeypatch)
+        r = client.get("/api/submissions", params={"project_id": "abc"})
+        assert r.status_code == 401
+
+    def test_get_with_invalid_token_401(self, client, monkeypatch):
+        self._mock_project(monkeypatch)
+        r = client.get("/api/submissions", params={"project_id": "abc"}, headers={"X-Dashboard-Token": "garbage"})
+        assert r.status_code == 401
+
     def test_get_with_project_id_200(self, client, monkeypatch):
+        pw_hash = self._mock_project(monkeypatch, "abc")
+        token = server._issue_dashboard_token("abc", pw_hash)
+
         class FakeCursor:
             def sort(self, *a, **kw):
                 return self
-
             async def to_list(self, *a, **kw):
                 return []
 
@@ -35,15 +63,19 @@ class TestSubmissionsScoping:
                 return FakeCursor()
 
         monkeypatch.setattr(server.db, "submissions", FakeCollection())
-        r = client.get("/api/submissions", params={"project_id": "abc"})
+        r = client.get("/api/submissions", params={"project_id": "abc"}, headers={"X-Dashboard-Token": token})
         assert r.status_code == 200
         assert r.json() == []
 
-    def test_get_with_form_name_200(self, client, monkeypatch):
+    def test_get_with_form_name_and_project_id_200(self, client, monkeypatch):
+        """form_name is now a secondary filter — project_id is required and
+        must be token-authenticated first, as in test_get_with_project_id_200."""
+        pw_hash = self._mock_project(monkeypatch, "abc")
+        token = server._issue_dashboard_token("abc", pw_hash)
+
         class FakeCursor:
             def sort(self, *a, **kw):
                 return self
-
             async def to_list(self, *a, **kw):
                 return []
 
@@ -52,14 +84,26 @@ class TestSubmissionsScoping:
                 return FakeCursor()
 
         monkeypatch.setattr(server.db, "submissions", FakeCollection())
-        r = client.get("/api/submissions", params={"form_name": "Contact"})
+        r = client.get(
+            "/api/submissions",
+            params={"project_id": "abc", "form_name": "Contact"},
+            headers={"X-Dashboard-Token": token},
+        )
         assert r.status_code == 200
 
     def test_delete_bulk_without_filter_400(self, client):
         r = client.delete("/api/submissions")
         assert r.status_code == 400
 
+    def test_delete_bulk_without_token_401(self, client, monkeypatch):
+        self._mock_project(monkeypatch, "abc")
+        r = client.delete("/api/submissions", params={"project_id": "abc"})
+        assert r.status_code == 401
+
     def test_delete_bulk_with_project_id_200(self, client, monkeypatch):
+        pw_hash = self._mock_project(monkeypatch, "abc")
+        token = server._issue_dashboard_token("abc", pw_hash)
+
         class FakeResult:
             deleted_count = 0
 
@@ -68,7 +112,7 @@ class TestSubmissionsScoping:
                 return FakeResult()
 
         monkeypatch.setattr(server.db, "submissions", FakeCollection())
-        r = client.delete("/api/submissions", params={"project_id": "abc"})
+        r = client.delete("/api/submissions", params={"project_id": "abc"}, headers={"X-Dashboard-Token": token})
         assert r.status_code == 200
 
 
