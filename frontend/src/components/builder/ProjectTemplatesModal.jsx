@@ -39,6 +39,19 @@ const AESTHETIC_PREVIEWS = {
   "swiss": { bg: "#f4f4f4", fg: "#e5001a" },
   "goblincore": { bg: "radial-gradient(circle at 30% 30%,#3a4a28 0%,#1a2412 70%)", fg: "#c8a848" },
   "dreamcore": { bg: "radial-gradient(ellipse at 30% 30%,#ffd6ec 0%,#f3e8ff 50%,#c9d8f8 100%)", fg: "#8a5aa8" },
+  "esports-mint": { bg: "#07080d", fg: "#15ffb5" },
+  "esports-crimson": { bg: "#0a0607", fg: "#ff2d55" },
+  "esports-cobalt": { bg: "#070a12", fg: "#3d7cff" },
+  "esports-violet": { bg: "#0a0710", fg: "#9d5cff" },
+  "esports-gold": { bg: "#0a0805", fg: "#f2b705" },
+  "esports-ember": { bg: "#0a0704", fg: "#ff6b1a" },
+  "esports-teal": { bg: "#06090a", fg: "#14c9a6" },
+  "esports-arctic": { bg: "#f7f9fb", fg: "#0ea5e9", border: "1px solid #e2e8f0" },
+  "esports-emerald": { bg: "#060a07", fg: "#22c55e" },
+  "esports-sky": { bg: "#06080d", fg: "#38bdf8" },
+  "esports-rose": { bg: "#0a0709", fg: "#fb6f92" },
+  "esports-mono": { bg: "#0a0a0c", fg: "#e7e9ec" },
+  "esports-agnostic": { bg: "#101018", fg: "#22d3ee" },
 };
 
 const StarterCard = ({ tpl, onPreview }) => {
@@ -175,7 +188,7 @@ const sectionsToProjectData = (name, headHtml, sections) => ({
 // (extractForgeCss) routes into globals.css's Components section — so an
 // imported template's styling lands in the right place automatically,
 // the same way a hand-built page's would.
-const ImportTemplatePanel = ({ onClose, onSaved }) => {
+const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose }) => {
   const [mode, setMode] = useState("paste");
   const [pasteHtml, setPasteHtml] = useState("");
   const [url, setUrl] = useState("");
@@ -220,6 +233,17 @@ const ImportTemplatePanel = ({ onClose, onSaved }) => {
     } catch { toast.error("Save failed"); } finally { setBusy(false); }
   };
 
+  // Loads the scanned import straight into the current project — same
+  // immediate path a built-in starter or a saved template gets via
+  // onLoadTemplate, so an imported template doesn't dead-end at "saved to
+  // your library" and require a second trip to go find and apply it.
+  const doUse = () => {
+    if (!previewTpl) return;
+    setPreviewOpen(false);
+    onLoadTemplate(previewTpl);
+    onModalClose();
+  };
+
   return (
     <>
       <div className="p-3 rounded border border-[#332D22] bg-[#15130E] space-y-3" data-testid="tpl-import-panel">
@@ -259,15 +283,16 @@ const ImportTemplatePanel = ({ onClose, onSaved }) => {
             <div className="text-[11px] text-[#A79C87]">{scanned.sections.length} section{scanned.sections.length === 1 ? "" : "s"} detected from {scanned.sourceLabel}{scanned.headHtml.includes("data-forge-imported-css") ? " · CSS consolidated" : ""}</div>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-name" />
             <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-desc" />
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button onClick={() => setPreviewOpen(true)} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1" data-testid="tpl-import-preview"><Eye size={12} /> Preview</button>
-              <button onClick={doSave} disabled={busy} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2]" data-testid="tpl-import-save">{busy ? "Saving…" : "Save as template"}</button>
+              <button onClick={doUse} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="tpl-import-use">Use this template</button>
+              <button onClick={doSave} disabled={busy} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-save">{busy ? "Saving…" : "Save as template"}</button>
             </div>
           </div>
         )}
       </div>
       {previewOpen && (
-        <TemplatePreviewModal tpl={previewTpl} onClose={() => setPreviewOpen(false)} onUse={() => setPreviewOpen(false)} />
+        <TemplatePreviewModal tpl={previewTpl} onClose={() => setPreviewOpen(false)} onUse={doUse} />
       )}
     </>
   );
@@ -411,6 +436,8 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
                 <ImportTemplatePanel
                   onClose={() => setImportOpen(false)}
                   onSaved={() => { setImportOpen(false); refresh(); }}
+                  onLoadTemplate={onLoadTemplate}
+                  onModalClose={onClose}
                 />
               </div>
             )}

@@ -1688,6 +1688,125 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
 })();</script>
 </section>`,
       },
+      {
+        id: "esports-roster-live",
+        label: "Esports · Roster (live)",
+        html: `<section data-forge-widget="roster" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #05050a);font-family:${F};">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:28px;letter-spacing:-.02em;margin:0 0 24px;color:var(--fc-text, #fff);">Roster</h2>
+    <div data-forge-roster-grid style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
+      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:20px 14px;text-align:center;">
+        <div style="font-size:11px;font-weight:800;color:var(--fc-accent, #22d3ee);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Add players in the Zenero dashboard</div>
+        <div style="font-weight:700;color:var(--fc-muted, #6b7280);font-size:13px;">No roster yet</div>
+      </div>
+    </div>
+  </div>
+  <script data-forge-js="roster.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-roster-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var grid=root.querySelector("[data-forge-roster-grid]");
+  if(!grid) return;
+  fetch("/api/"+pid+"/roster_players").then(function(r){return r.json();}).then(function(data){
+    var items=data.roster_players||[];
+    if(!items.length) return;
+    grid.innerHTML=items.map(function(p){
+      return '<div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:20px 14px;text-align:center;">'
+        + '<div style="width:56px;height:56px;border-radius:999px;background:linear-gradient(135deg,var(--fc-accent, #22d3ee),var(--fc-surface, #101018));margin:0 auto 14px;"></div>'
+        + '<div style="font-size:10px;font-weight:800;color:var(--fc-accent, #22d3ee);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+esc(p.role||"")+'</div>'
+        + '<div style="font-weight:800;color:var(--fc-text, #fff);font-size:15px;margin-bottom:10px;">'+esc(p.name)+'</div>'
+        + (p.stat_value ? '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--fc-muted, #6b7280);border-top:1px solid var(--fc-border, #22222e);padding-top:8px;"><span>'+esc(p.stat_label||"")+'</span><span style="color:var(--fc-text, #fff);font-weight:700;">'+esc(p.stat_value)+'</span></div>' : '')
+        + '</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='roster']:not([data-forge-roster-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "esports-fixtures-live",
+        label: "Esports · Fixtures (live)",
+        html: `<section data-forge-widget="fixtures" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #05050a);font-family:${F};">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:28px;letter-spacing:-.02em;margin:0 0 24px;color:var(--fc-text, #fff);">Fixtures</h2>
+    <div data-forge-fixtures-list style="display:flex;flex-direction:column;gap:10px;">
+      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:10px;padding:16px 22px;color:var(--fc-muted, #6b7280);font-size:13px;">Add fixtures in the Zenero dashboard.</div>
+    </div>
+  </div>
+  <script data-forge-js="fixtures.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-fixtures-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var list=root.querySelector("[data-forge-fixtures-list]");
+  if(!list) return;
+  fetch("/api/"+pid+"/fixtures").then(function(r){return r.json();}).then(function(data){
+    var items=data.fixtures||[];
+    if(!items.length) return;
+    list.innerHTML=items.map(function(f){
+      var meta=f.status==="final"
+        ? esc(f.competition||"")+' · Final'
+        : esc(f.competition||"")+(f.note?' · '+esc(f.note):'')+(f.scheduled_at?' · '+esc(f.scheduled_at):'');
+      var teams=f.status==="final"
+        ? 'vs '+esc(f.opponent)+' <span style="color:var(--fc-accent, #22d3ee);">'+esc(f.team_score||"0")+'–'+esc(f.opponent_score||"0")+'</span>'
+        : 'vs '+esc(f.opponent);
+      return '<div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:10px;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">'
+        + '<div style="font-weight:800;font-size:15px;color:var(--fc-text, #fff);">'+teams+'</div>'
+        + '<div style="color:var(--fc-muted, #6b7280);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">'+meta+'</div>'
+        + '</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='fixtures']:not([data-forge-fixtures-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
+      {
+        id: "esports-org-stats-live",
+        label: "Esports · Org Stats (live)",
+        html: `<section data-forge-widget="org-stats" data-forge-project-id="" style="padding:44px 32px;background:var(--fc-surface, #101018);border-top:1px solid var(--fc-border, #22222e);border-bottom:1px solid var(--fc-border, #22222e);font-family:${F};">
+  <div data-forge-org-stats-row style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;max-width:1000px;margin:0 auto;">
+    <div style="text-align:center;flex:1;min-width:120px;color:var(--fc-muted, #6b7280);font-size:12px;">Add stats in the Zenero dashboard.</div>
+  </div>
+  <script data-forge-js="org-stats.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function initWidget(root){
+  root.setAttribute("data-forge-org-stats-init","1");
+  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+  if(!pid) return;
+  var row=root.querySelector("[data-forge-org-stats-row]");
+  if(!row) return;
+  fetch("/api/"+pid+"/org_stats").then(function(r){return r.json();}).then(function(data){
+    var items=data.org_stats||[];
+    if(!items.length) return;
+    row.innerHTML=items.map(function(s){
+      return '<div style="text-align:center;flex:1;min-width:120px;">'
+        + '<div style="font-size:26px;font-weight:800;color:var(--fc-accent, #22d3ee);">'+esc(s.value)+'</div>'
+        + '<div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;">'+esc(s.label)+'</div>'
+        + '</div>';
+    }).join("");
+  }).catch(function(){});
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-widget='org-stats']:not([data-forge-org-stats-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+</section>`,
+      },
     ],
   },
 ];

@@ -27,6 +27,7 @@ const GROUPS = [
   { id: "forms", label: "Forms", categoryIds: ["newsletter", "contact"] },
   { id: "media", label: "Media", categoryIds: ["video", "portfolio"] },
   { id: "layouts", label: "Layouts", categoryIds: ["layout", "timelines"] },
+  { id: "dashboard", label: "Dashboard", categoryIds: ["zenero"] },
   { id: "esports", label: "Esports", categoryIds: ["esports"] },
   { id: "creator", label: "Creator", categoryIds: ["creator", "social"] },
   { id: "retro", label: "Moldy Oldies", categoryIds: ["retro"] },
@@ -38,7 +39,7 @@ export const LeftSidebar = ({
   savedComponents, onDeleteSavedComponent,
   onWrapSelection, hasSelection,
   selectedHtml, selectedId, onEditSelected,
-  pages = [], projectId = null,
+  pages = [], projectId = null, activePageId = null, onSwitchPage = null,
   onOpenFormBuilder,
   onOpenPaymentBuilder,
   onOpenSocialBuilder,
@@ -336,7 +337,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "files" && (
-        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onImportFile} />
+        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onImportFile} pages={pages} activePageId={activePageId} onSwitchPage={onSwitchPage} />
       )}
 
       {tab === "saved" && (

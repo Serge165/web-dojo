@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FolderPlus, FilePlus, Upload } from "lucide-react";
+import { FolderPlus, FilePlus, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { TreeNode } from "./TreeNode";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const uid = () => "f_" + Math.random().toString(36).slice(2, 10);
 
@@ -112,7 +113,7 @@ const readEntry = (entry, prefix = "") =>
     }
   });
 
-export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
+export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [], activePageId = null, onSwitchPage = null }) => {
   const tree = useMemo(() => buildTree(files), [files]);
   const [expanded, setExpanded] = useState({ "": true });
   const [dragging, setDragging] = useState(false);
@@ -128,11 +129,26 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
 
   const toggle = (path) => setExpanded((e) => ({ ...e, [path]: !e[path] }));
 
-  // Files ask for a name up front (same prompt() TreeNode's rename-on-
-  // double-click already uses) instead of always hardcoding .html, so
-  // typing "styles.css" or "app.js" just creates that type — no separate
-  // HTML/CSS/JS picker needed. Folders keep their old auto-naming since
-  // "New folder" has no meaningful type choice to make.
+  // Files ask for a name up front so typing "styles.css" or "app.js" just
+  // creates that type — no separate HTML/CSS/JS picker needed. This used
+  // to be a bare window.prompt(), which silently no-ops (returns null,
+  // same as Cancel) in contexts that don't support native blocking
+  // dialogs — Tauri's webview among them — so "New file" looked like it
+  // just did nothing. A real modal doesn't depend on that browser API.
+  // Folders keep their old auto-naming since "New folder" has no
+  // meaningful type choice to make.
+  const [newFileFolder, setNewFileFolder] = useState(null); // null = closed; "" or "a/b" = open, for that folder
+  const [newFileName, setNewFileName] = useState("untitled.html");
+  const openNewFile = (folderPath) => { setNewFileFolder(folderPath); setNewFileName("untitled.html"); };
+  const confirmNewFile = () => {
+    const name = newFileName.trim();
+    if (!name) return;
+    const paths = new Set(files.map((f) => f.path));
+    const candidate = newFileFolder ? `${newFileFolder}/${name}` : name;
+    onChange([...files, { id: uid(), path: uniquePath(candidate, paths), type: "file", content: "" }]);
+    setNewFileFolder(null);
+  };
+
   const uniquePath = (candidate, paths) => {
     if (!paths.has(candidate)) return candidate;
     let i = 1;
@@ -142,27 +158,22 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
   };
 
   const addAtRoot = (type) => {
-    const paths = new Set(files.map((f) => f.path));
     if (type === "folder") {
+      const paths = new Set(files.map((f) => f.path));
       onChange([...files, { id: uid(), path: uniquePath("new-folder", paths), type, content: "" }]);
       return;
     }
-    const name = prompt("New file name (e.g. styles.css, script.js, page.html)", "untitled.html");
-    if (!name || !name.trim()) return;
-    onChange([...files, { id: uid(), path: uniquePath(name.trim(), paths), type, content: "" }]);
+    openNewFile("");
   };
 
   const addUnder = (folderPath, type) => {
-    const paths = new Set(files.map((f) => f.path));
     if (type === "folder") {
+      const paths = new Set(files.map((f) => f.path));
       const candidate = folderPath ? `${folderPath}/folder` : "folder";
       onChange([...files, { id: uid(), path: uniquePath(candidate, paths), type, content: "" }]);
       return;
     }
-    const name = prompt("New file name (e.g. styles.css, script.js, page.html)", "untitled.html");
-    if (!name || !name.trim()) return;
-    const candidate = folderPath ? `${folderPath}/${name.trim()}` : name.trim();
-    onChange([...files, { id: uid(), path: uniquePath(candidate, paths), type, content: "" }]);
+    openNewFile(folderPath);
   };
 
   const remove = (path) => {
@@ -176,6 +187,19 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
       if (f.path.startsWith(path + "/")) return { ...f, path: next + f.path.slice(path.length) };
       return f;
     }));
+  };
+
+  // Same fix as "New file" above: double-clicking a file used to call
+  // window.prompt() directly from TreeNode, which silently no-ops in
+  // contexts without native blocking dialogs.
+  const [renamePath, setRenamePath] = useState(null); // null = closed; else the file path being renamed
+  const [renameValue, setRenameValue] = useState("");
+  const openRename = (path) => { setRenamePath(path); setRenameValue(path.split("/").pop()); };
+  const confirmRename = () => {
+    const nn = renameValue.trim();
+    if (!nn || !renamePath) { setRenamePath(null); return; }
+    rename(renamePath, renamePath.replace(/[^/]+$/, nn));
+    setRenamePath(null);
   };
 
   const handleDrop = async (e) => {
@@ -219,6 +243,25 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" data-testid="file-tree">
+      {pages.length > 0 && onSwitchPage && (
+        <div className="flex-none border-b border-[#332D22]" data-testid="filetree-pages">
+          <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-[#948C79]">Pages</div>
+          <div className="pb-1">
+            {pages.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => onSwitchPage(p.id)}
+                className={`w-full flex items-center gap-1.5 px-3 py-1 text-xs text-left ${p.id === activePageId ? "text-[#F1EDE2] bg-[#242019]" : "text-[#A79C87] hover:text-[#F1EDE2] hover:bg-[#242019]"}`}
+                data-testid={`filetree-page-${p.id}`}
+              >
+                <FileText size={12} className="flex-none" />
+                <span className="truncate flex-1">{p.name || "Untitled"}</span>
+                <span className="text-[10px] text-[#6B6353] flex-none">{p.slug === "index" ? "/" : `/${p.slug || ""}`}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="px-3 py-2 border-b border-[#332D22] flex items-center justify-between">
         <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Project files</div>
         <div className="flex items-center gap-1">
@@ -260,12 +303,56 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml }) => {
             onToggle={toggle}
             onAddUnder={addUnder}
             onRemove={remove}
-            onRename={rename}
+            onRequestRename={openRename}
             onFileClick={onFileClick}
             onInsertHtml={onInsertHtml}
           />
         )}
       </div>
+
+      <Dialog open={newFileFolder !== null} onOpenChange={(v) => !v && setNewFileFolder(null)}>
+        <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-sm" data-testid="new-file-modal">
+          <DialogHeader>
+            <DialogTitle className="text-sm">New file{newFileFolder ? ` in ${newFileFolder}/` : ""}</DialogTitle>
+            <DialogDescription className="text-xs text-[#948C79]">e.g. styles.css, script.js, page.html</DialogDescription>
+          </DialogHeader>
+          <input
+            autoFocus
+            value={newFileName}
+            onChange={(e) => setNewFileName(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => { if (e.key === "Enter") confirmNewFile(); if (e.key === "Escape") setNewFileFolder(null); }}
+            className="w-full bg-[#15130E] border border-[#332D22] rounded px-2.5 py-1.5 text-sm text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+            data-testid="new-file-name-input"
+          />
+          <div className="flex justify-end gap-2 mt-1">
+            <button onClick={() => setNewFileFolder(null)} className="text-xs py-1.5 px-3 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="new-file-cancel">Cancel</button>
+            <button onClick={confirmNewFile} className="text-xs py-1.5 px-3 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="new-file-create">Create</button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={renamePath !== null} onOpenChange={(v) => !v && setRenamePath(null)}>
+        <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-sm" data-testid="rename-file-modal">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Rename file</DialogTitle>
+            <DialogDescription className="text-xs text-[#948C79]">{renamePath}</DialogDescription>
+          </DialogHeader>
+          <input
+            autoFocus
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => { if (e.key === "Enter") confirmRename(); if (e.key === "Escape") setRenamePath(null); }}
+            className="w-full bg-[#15130E] border border-[#332D22] rounded px-2.5 py-1.5 text-sm text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+            data-testid="rename-file-input"
+          />
+          <div className="flex justify-end gap-2 mt-1">
+            <button onClick={() => setRenamePath(null)} className="text-xs py-1.5 px-3 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="rename-file-cancel">Cancel</button>
+            <button onClick={confirmRename} className="text-xs py-1.5 px-3 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="rename-file-confirm">Rename</button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

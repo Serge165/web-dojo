@@ -116,12 +116,107 @@ export const detectBlockKind = (html) => {
   if (/data-forge-widget=["']gallery["']/i.test(html)) return "gallery";
   if (/<nav\b/i.test(html)) return "navbar";
   if (/data-forge-portfolio-timeline/i.test(html)) return "timeline";
+  if (/<video\b/i.test(html)) return "video";
   const imgCount = (html.match(/<img\b/gi) || []).length;
   if (imgCount >= 3 && /(display:\s*grid|column-count)/i.test(html)) return "gallery";
   if (/<li[\s>]/i.test(html) && /(border-left:\s*2px|position:absolute;left:-\d+px)/i.test(html)) return "timeline";
   if (/display:\s*grid/i.test(html) && /<h3[\s>]/i.test(html)) return "bento";
+  // Hero/header blocks and anything else carrying exactly one photo (an
+  // <img>, or a CSS background-image — most header/hero variants in
+  // blocksExtra.js use the latter) — falls through to here since none of
+  // the more specific kinds above matched. Blocks with 2+ non-gallery
+  // images (e.g. a testimonial avatar next to a logo) are intentionally
+  // left undetected rather than guessing which one to expose.
+  if (imgCount === 1) return "image";
+  if (imgCount === 0 && /background(?:-image)?:\s*[^;"]*url\(/i.test(html)) return "image";
   return null;
 };
+
+// ============================================================
+// IMAGE (single photo — hero/header backgrounds, <img> heroes)
+// ============================================================
+
+export const parseImageBlock = (html) => {
+  const imgTag = (html.match(/<img\b[^>]*>/i) || [])[0];
+  if (imgTag) return { type: "img", src: readFirstAttr(imgTag, "src"), alt: readFirstAttr(imgTag, "alt") };
+  const bgMatch = html.match(/url\((['"]?)([^'")]+)\1\)/i);
+  if (bgMatch) return { type: "bg", src: bgMatch[2], alt: "" };
+  return null;
+};
+
+export const setImageBlockSrc = (html, src) => {
+  if (/<img\b/i.test(html)) {
+    return html.replace(/(<img\b[^>]*\bsrc=")[^"]*(")/i, (_m, a, b) => `${a}${escAttrLocal(src)}${b}`);
+  }
+  return html.replace(/url\((['"]?)[^'")]*\1\)/i, () => `url(${escAttrLocal(src)})`);
+};
+
+// ============================================================
+// VIDEO (video-hero / video-bg blocks — a <video><source>… tag)
+// ============================================================
+
+export const parseVideoBlock = (html) => {
+  const videoTag = (html.match(/<video\b[^>]*>/i) || [])[0];
+  if (!videoTag) return null;
+  const sourceTag = (html.match(/<source\b[^>]*>/i) || [])[0];
+  const src = sourceTag ? readFirstAttr(sourceTag, "src") : readFirstAttr(videoTag, "src");
+  return { src, poster: readFirstAttr(videoTag, "poster") };
+};
+
+const guessVideoMime = (src) => {
+  const ext = (src.split(/[?#]/)[0].split(".").pop() || "").toLowerCase();
+  return { webm: "video/webm", ogg: "video/ogg", ogv: "video/ogg" }[ext] || "video/mp4";
+};
+
+export const setVideoBlockSrc = (html, src, mimeType = guessVideoMime(src)) => {
+  if (/<source\b[^>]*\bsrc="/i.test(html)) {
+    return html
+      .replace(/(<source\b[^>]*\bsrc=")[^"]*(")/i, (_m, a, b) => `${a}${escAttrLocal(src)}${b}`)
+      .replace(/(<source\b[^>]*\btype=")[^"]*(")/i, (_m, a, b) => `${a}${escAttrLocal(mimeType)}${b}`);
+  }
+  return html.replace(/(<video\b[^>]*\bsrc=")[^"]*(")/i, (_m, a, b) => `${a}${escAttrLocal(src)}${b}`);
+};
+
+export const setVideoBlockPoster = (html, posterUrl) => {
+  if (/<video\b[^>]*\bposter="/i.test(html)) {
+    return html.replace(/(<video\b[^>]*\bposter=")[^"]*(")/i, (_m, a, b) => `${a}${escAttrLocal(posterUrl)}${b}`);
+  }
+  return html.replace(/<video\b/i, (m) => `${m} poster="${escAttrLocal(posterUrl)}"`);
+};
+
+// Grabs the video's first decoded frame onto an offscreen canvas and
+// returns it as a data URL — used so a freshly-set video shows a real
+// thumbnail immediately instead of a blank box while the file streams in.
+// Resolves null (never rejects) on decode failure or a cross-origin source
+// without CORS headers (canvas read-back is blocked either way) — callers
+// just leave the poster as-is when that happens.
+export const capturePosterFrame = (videoSrc) => new Promise((resolve) => {
+  try {
+    const video = document.createElement("video");
+    video.crossOrigin = "anonymous";
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    const cleanup = () => { video.removeAttribute("src"); video.load(); };
+    video.addEventListener("loadeddata", () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 1280;
+        canvas.height = video.videoHeight || 720;
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      } catch {
+        resolve(null);
+      } finally {
+        cleanup();
+      }
+    }, { once: true });
+    video.addEventListener("error", () => { cleanup(); resolve(null); }, { once: true });
+    video.src = videoSrc;
+  } catch {
+    resolve(null);
+  }
+});
 
 // ============================================================
 // GALLERY
@@ -735,11 +830,171 @@ const BentoEditor = ({ html, onChange }) => {
   );
 };
 
+const ImageBlockEditor = ({ html, onChange, projectId = null, blockId = null }) => {
+  const fileRef = useRef(null);
+  const [urlDraft, setUrlDraft] = useState("");
+  const image = useMemo(() => parseImageBlock(html), [html]);
+
+  const commit = (src) => onChange(setImageBlockSrc(html, src));
+
+  // Same asset pipeline as GalleryEditor: real upload lands in the
+  // project's asset store; a data URL is the offline/unsaved-project
+  // fallback so the image still shows either way.
+  const onUpload = async (e) => {
+    const file = (e.target.files || [])[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!projectId) {
+      commit(await readAsDataURL(file));
+      return;
+    }
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const API = process.env.REACT_APP_BACKEND_URL || "";
+      const res = await fetch(`${API}/api/projects/${projectId}/assets/upload?asset_type=image&asset_id=${encodeURIComponent(blockId || "1")}`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) throw new Error(`upload failed (${res.status})`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.detail || "upload failed");
+      commit(data.url);
+    } catch {
+      commit(await readAsDataURL(file));
+    }
+  };
+
+  if (!image) {
+    return <div className="text-[11px] text-[#948C79]" data-testid="block-edit-image-empty">No image detected in this block.</div>;
+  }
+
+  return (
+    <div className="space-y-2" data-testid="block-edit-image">
+      <div className="flex items-center gap-2">
+        <img src={image.src} alt="" className="w-12 h-12 object-cover rounded flex-none border border-[#332D22]" />
+        <div className="flex-1 flex gap-1">
+          <Btn onClick={() => fileRef.current?.click()} title="Upload image" testId="image-upload-btn"><Upload size={11} /> Upload</Btn>
+          <input ref={fileRef} type="file" accept="image/*" hidden onChange={onUpload} data-testid="image-upload-input" />
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <input
+          value={urlDraft}
+          onChange={(e) => setUrlDraft(e.target.value)}
+          placeholder="Paste an image URL"
+          aria-label="Image URL"
+          className={inputCls}
+          data-testid="image-url-input"
+        />
+        <Btn onClick={() => { if (urlDraft.trim()) { commit(urlDraft.trim()); setUrlDraft(""); } }} title="Use URL" testId="image-url-apply">Set</Btn>
+      </div>
+    </div>
+  );
+};
+
+const VideoBlockEditor = ({ html, onChange, projectId = null, blockId = null }) => {
+  const fileRef = useRef(null);
+  const [urlDraft, setUrlDraft] = useState("");
+  const [capturing, setCapturing] = useState(false);
+  const video = useMemo(() => parseVideoBlock(html), [html]);
+
+  // The poster (thumbnail shown while the video streams in) is derived
+  // automatically from the new video's own first frame — never asked of
+  // the user. Same upload-with-data-URL-fallback pipeline as the poster
+  // itself: a real project gets a hosted asset URL, an unsaved one gets a
+  // data URL so the frame still shows.
+  const applyPoster = async (htmlWithSrc, src) => {
+    setCapturing(true);
+    const frame = await capturePosterFrame(src);
+    setCapturing(false);
+    if (!frame) return htmlWithSrc;
+    if (!projectId) return setVideoBlockPoster(htmlWithSrc, frame);
+    try {
+      const blob = await (await fetch(frame)).blob();
+      const fd = new FormData();
+      fd.append("file", blob, "poster.jpg");
+      const API = process.env.REACT_APP_BACKEND_URL || "";
+      const res = await fetch(`${API}/api/projects/${projectId}/assets/upload?asset_type=image&asset_id=${encodeURIComponent(`${blockId || "1"}-poster`)}`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) throw new Error(`poster upload failed (${res.status})`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.detail || "poster upload failed");
+      return setVideoBlockPoster(htmlWithSrc, data.url);
+    } catch {
+      return setVideoBlockPoster(htmlWithSrc, frame);
+    }
+  };
+
+  const commit = async (src, mimeType) => {
+    onChange(await applyPoster(setVideoBlockSrc(html, src, mimeType), src));
+  };
+
+  const onUpload = async (e) => {
+    const file = (e.target.files || [])[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!projectId) {
+      commit(await readAsDataURL(file), file.type || "video/mp4");
+      return;
+    }
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const API = process.env.REACT_APP_BACKEND_URL || "";
+      const res = await fetch(`${API}/api/projects/${projectId}/assets/upload?asset_type=video&asset_id=${encodeURIComponent(blockId || "1")}`, {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) throw new Error(`upload failed (${res.status})`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.detail || "upload failed");
+      commit(data.url, file.type || "video/mp4");
+    } catch {
+      commit(await readAsDataURL(file), file.type || "video/mp4");
+    }
+  };
+
+  if (!video) {
+    return <div className="text-[11px] text-[#948C79]" data-testid="block-edit-video-empty">No video detected in this block.</div>;
+  }
+
+  return (
+    <div className="space-y-2" data-testid="block-edit-video">
+      <div className="flex items-center gap-2">
+        {video.poster
+          ? <img src={video.poster} alt="" className="w-12 h-12 object-cover rounded flex-none border border-[#332D22]" />
+          : <div className="w-12 h-12 rounded flex-none border border-[#332D22] bg-[#242019]" />}
+        <div className="flex-1 flex gap-1">
+          <Btn onClick={() => fileRef.current?.click()} title="Upload video" testId="video-upload-btn" disabled={capturing}>
+            <Upload size={11} /> {capturing ? "Capturing…" : "Upload"}
+          </Btn>
+          <input ref={fileRef} type="file" accept="video/*" hidden onChange={onUpload} data-testid="video-upload-input" />
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <input
+          value={urlDraft}
+          onChange={(e) => setUrlDraft(e.target.value)}
+          placeholder="Paste a video URL"
+          aria-label="Video URL"
+          className={inputCls}
+          data-testid="video-url-input"
+        />
+        <Btn onClick={() => { if (urlDraft.trim()) { commit(urlDraft.trim()); setUrlDraft(""); } }} title="Use URL" testId="video-url-apply" disabled={capturing}>Set</Btn>
+      </div>
+      <div className="text-[10px] text-[#6B6353]">Poster image is captured automatically from the video's first frame.</div>
+    </div>
+  );
+};
+
 // ============================================================
 // Root — renders the right editor for the selected block kind.
 // ============================================================
 
-const KIND_LABELS = { gallery: "Gallery", navbar: "Navbar", timeline: "Timeline", bento: "Bento Box" };
+const KIND_LABELS = { gallery: "Gallery", navbar: "Navbar", timeline: "Timeline", bento: "Bento Box", image: "Image", video: "Video" };
 
 export const BlockEditMenu = ({ selectedHtml, onChange, pages = [], projectId = null, blockId = null }) => {
   const kind = useMemo(() => detectBlockKind(selectedHtml), [selectedHtml]);
@@ -751,6 +1006,8 @@ export const BlockEditMenu = ({ selectedHtml, onChange, pages = [], projectId = 
       {kind === "navbar" && <NavbarEditor html={selectedHtml} onChange={onChange} pages={pages} />}
       {kind === "timeline" && <TimelineEditor html={selectedHtml} onChange={onChange} />}
       {kind === "bento" && <BentoEditor html={selectedHtml} onChange={onChange} />}
+      {kind === "image" && <ImageBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
+      {kind === "video" && <VideoBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
     </div>
   );
 };

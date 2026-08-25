@@ -17,6 +17,11 @@ import {
   setTimelineEntries,
   parseBentoItems,
   setBentoItems,
+  parseImageBlock,
+  setImageBlockSrc,
+  parseVideoBlock,
+  setVideoBlockSrc,
+  setVideoBlockPoster,
 } from "./BlockEditMenu";
 import { themes, applyTheme, getSavedThemeName } from "@/themes";
 
@@ -55,11 +60,39 @@ const timelineHtml = `<section>
   </ol>
 </section>`;
 
+const heroImgHtml = `<section style="padding:80px 32px;">
+  <h1>A canvas for the web.</h1>
+  <button>Start building</button>
+  <img src="https://x/hero.jpg" alt="hero" style="width:100%;" />
+</section>`;
+
+const heroBgHtml = `<section style="min-height:80vh;background-image:linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url(https://x/bg.jpg);background-size:cover;">
+  <h1>Welcome</h1>
+  <button>Get started</button>
+</section>`;
+
+const videoHeroHtml = `<section style="position:relative;">
+  <video autoplay muted loop playsinline poster="https://x/poster.jpg" style="position:absolute;inset:0;"><source src="https://x/clip.mp4" type="video/mp4" /></video>
+  <div style="position:relative;z-index:2;"><h1>Motion tells your story</h1></div>
+</section>`;
+
 describe("detectBlockKind", () => {
   test("detects each supported kind", () => {
     expect(detectBlockKind(galleryHtml)).toBe("gallery");
     expect(detectBlockKind(navHtml)).toBe("navbar");
     expect(detectBlockKind(timelineHtml)).toBe("timeline");
+  });
+
+  test("detects a hero block with a single <img> as image", () => {
+    expect(detectBlockKind(heroImgHtml)).toBe("image");
+  });
+
+  test("detects a hero block with a CSS background-image as image", () => {
+    expect(detectBlockKind(heroBgHtml)).toBe("image");
+  });
+
+  test("detects a hero block with a <video> as video", () => {
+    expect(detectBlockKind(videoHeroHtml)).toBe("video");
   });
 
   test("returns null for unknown or empty html", () => {
@@ -100,6 +133,65 @@ describe("gallery helpers", () => {
   test("style switch patches the grid container", () => {
     const out = setGalleryStyle(galleryHtml, "masonry");
     expect(out).toContain("column-count:3");
+  });
+});
+
+describe("image block helpers", () => {
+  test("parses a single <img>-based hero", () => {
+    expect(parseImageBlock(heroImgHtml)).toEqual({ type: "img", src: "https://x/hero.jpg", alt: "hero" });
+  });
+
+  test("parses a CSS background-image hero", () => {
+    expect(parseImageBlock(heroBgHtml)).toEqual({ type: "bg", src: "https://x/bg.jpg", alt: "" });
+  });
+
+  test("returns null when no image is present", () => {
+    expect(parseImageBlock("<section><h1>No photo here</h1></section>")).toBeNull();
+  });
+
+  test("replaces the <img> src, leaving the rest of the block intact", () => {
+    const out = setImageBlockSrc(heroImgHtml, "https://x/new-hero.jpg");
+    expect(parseImageBlock(out).src).toBe("https://x/new-hero.jpg");
+    expect(out).toContain("Start building");
+  });
+
+  test("replaces the background-image url(), leaving the gradient overlay intact", () => {
+    const out = setImageBlockSrc(heroBgHtml, "https://x/new-bg.jpg");
+    expect(parseImageBlock(out).src).toBe("https://x/new-bg.jpg");
+    expect(out).toContain("linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4))");
+  });
+});
+
+describe("video block helpers", () => {
+  test("parses the <source> src and the poster", () => {
+    expect(parseVideoBlock(videoHeroHtml)).toEqual({ src: "https://x/clip.mp4", poster: "https://x/poster.jpg" });
+  });
+
+  test("returns null when no video is present", () => {
+    expect(parseVideoBlock("<section><h1>No clip here</h1></section>")).toBeNull();
+  });
+
+  test("replaces the <source> src and infers type from the extension, leaving the rest intact", () => {
+    const out = setVideoBlockSrc(videoHeroHtml, "https://x/new-clip.webm");
+    expect(parseVideoBlock(out).src).toBe("https://x/new-clip.webm");
+    expect(out).toContain('type="video/webm"');
+    expect(out).toContain("Motion tells your story");
+  });
+
+  test("an explicit mime type wins over the guessed one", () => {
+    const out = setVideoBlockSrc(videoHeroHtml, "https://cdn.example/blob-id", "video/mp4");
+    expect(out).toContain('type="video/mp4"');
+  });
+
+  test("replaces the poster, leaving the video src intact", () => {
+    const out = setVideoBlockPoster(videoHeroHtml, "https://x/new-poster.jpg");
+    expect(parseVideoBlock(out)).toEqual({ src: "https://x/clip.mp4", poster: "https://x/new-poster.jpg" });
+  });
+
+  test("adds a poster attribute when the block has none yet", () => {
+    const noPoster = videoHeroHtml.replace(' poster="https://x/poster.jpg"', "");
+    const out = setVideoBlockPoster(noPoster, "https://x/captured.jpg");
+    expect(parseVideoBlock(out).poster).toBe("https://x/captured.jpg");
   });
 });
 

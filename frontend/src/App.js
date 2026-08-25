@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import Builder from "@/pages/Builder";
 import "@/App.css";
+// Full-UI skinning layer: remaps the hardcoded Dark Tailwind palette to
+// --wd-* CSS custom properties so editor themes repaint the entire interface.
+// Imported last so its equal-specificity rules win over Tailwind utilities.
+import "@/themes/skinning.css";
 
 function App() {
   return (

@@ -1030,7 +1030,9 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
 ASSETS_ROOT = Path(os.environ.get("WEBDOJO_ASSETS_DIR", Path(__file__).parent / "assets"))
 
 _ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+_ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm", "video/ogg"}
 _MAX_ASSET_BYTES = 10 * 1024 * 1024  # 10 MB
+_MAX_VIDEO_ASSET_BYTES = 50 * 1024 * 1024  # 50 MB — video files run bigger than images
 
 
 def _slugify_filename(name: str, fallback_ext: str = ".jpg") -> str:
@@ -1045,18 +1047,21 @@ def _slugify_filename(name: str, fallback_ext: str = ".jpg") -> str:
 async def upload_asset(
     project_id: str,
     file: UploadFile = File(...),
-    asset_type: str = Query(..., pattern="^(gallery|bento|timeline)$"),
+    asset_type: str = Query(..., pattern="^(gallery|bento|timeline|image|video)$"),
     asset_id: str = Query("1"),
 ):
-    if (file.content_type or "") not in _ALLOWED_IMAGE_TYPES:
-        raise HTTPException(status_code=400, detail="Only image files allowed")
+    is_video = asset_type == "video"
+    allowed_types = _ALLOWED_VIDEO_TYPES if is_video else _ALLOWED_IMAGE_TYPES
+    max_bytes = _MAX_VIDEO_ASSET_BYTES if is_video else _MAX_ASSET_BYTES
+    if (file.content_type or "") not in allowed_types:
+        raise HTTPException(status_code=400, detail=f"Only {'video' if is_video else 'image'} files allowed")
     block_slug = re.sub(r"[^a-z0-9-]+", "-", (asset_id or "1").lower()).strip("-") or "1"
     rel_dir = f"projects/{project_id}/imgs/{asset_type}-{block_slug}"
     dest_dir = ASSETS_ROOT / rel_dir
     filename = _slugify_filename(file.filename, f".{(file.content_type or 'image/jpeg').split('/')[1]}")
     content = await file.read()
-    if len(content) > _MAX_ASSET_BYTES:
-        raise HTTPException(status_code=413, detail="Asset too large (max 10 MB)")
+    if len(content) > max_bytes:
+        raise HTTPException(status_code=413, detail=f"Asset too large (max {max_bytes // (1024 * 1024)} MB)")
     try:
         dest_dir.mkdir(parents=True, exist_ok=True)
         (dest_dir / filename).write_bytes(content)

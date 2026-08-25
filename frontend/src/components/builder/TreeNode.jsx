@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronDown, ChevronRight, FileText, Folder, FolderPlus, FilePlus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Folder, FolderPlus, FilePlus, Trash2, Pencil } from "lucide-react";
 
 export function TreeNode(props) {
   const node = props.node;
@@ -8,7 +8,7 @@ export function TreeNode(props) {
   const onToggle = props.onToggle;
   const onAddUnder = props.onAddUnder;
   const onRemove = props.onRemove;
-  const onRename = props.onRename;
+  const onRequestRename = props.onRequestRename;
   const onFileClick = props.onFileClick;
   const onInsertHtml = props.onInsertHtml;
 
@@ -62,7 +62,7 @@ export function TreeNode(props) {
             onToggle: onToggle,
             onAddUnder: onAddUnder,
             onRemove: onRemove,
-            onRename: onRename,
+            onRequestRename: onRequestRename,
             onFileClick: onFileClick,
             onInsertHtml: onInsertHtml,
           })
@@ -79,10 +79,7 @@ export function TreeNode(props) {
       e.dataTransfer.effectAllowed = "copy";
     }
   };
-  const onDbl = () => {
-    const nn = prompt("Rename file", node.path.split("/").pop());
-    if (nn) onRename(node.path, node.path.replace(/[^/]+$/, nn));
-  };
+  const onDbl = () => onRequestRename(node.path);
 
   return (
     <div
@@ -99,10 +96,13 @@ export function TreeNode(props) {
         <FileText size={12} className={isHtml ? "text-emerald-400" : "text-[#A79C87]"} />
       )}
       <button
-        onDoubleClick={onDbl}
         // Images skip the code editor entirely — dumping a data: URI's
         // raw base64 into Monaco isn't useful; the thumbnail above is
-        // the preview.
+        // the preview. Rename used to be bound to onDoubleClick here too,
+        // but a double-click fires two `click` events before the
+        // `dblclick`, so it always opened the file editor first and the
+        // rename dialog never got a chance to show — moved to its own
+        // button instead of racing two handlers on one element.
         onClick={() => !isImage && onFileClick && onFileClick(node)}
         className="flex-1 truncate text-left"
       >
@@ -118,6 +118,14 @@ export function TreeNode(props) {
           insert
         </button>
       ) : null}
+      <button
+        onClick={onDbl}
+        className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-[#F1EDE2]"
+        title="Rename"
+        data-testid={`tree-rename-${node.path}`}
+      >
+        <Pencil size={11} />
+      </button>
       <button
         onClick={() => onRemove(node.path)}
         className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-red-400"

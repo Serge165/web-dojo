@@ -17,6 +17,9 @@ const TABS = [
   { id: "portfolio", label: "Portfolio" },
   { id: "timeline", label: "Timeline" },
   { id: "bento", label: "Bento" },
+  { id: "roster", label: "Roster" },
+  { id: "fixtures", label: "Fixtures" },
+  { id: "org-stats", label: "Org Stats" },
   { id: "social", label: "Social" },
 ];
 
@@ -70,6 +73,28 @@ export default function ZeneroDashboardPanel({ projectId }) {
   const [bentoDesc, setBentoDesc] = useState("");
   const [bentoHref, setBentoHref] = useState("");
 
+  // Roster state
+  const [rosterPlayers, setRosterPlayers] = useState([]);
+  const [rName, setRName] = useState("");
+  const [rRole, setRRole] = useState("");
+  const [rStatLabel, setRStatLabel] = useState("K/D");
+  const [rStatValue, setRStatValue] = useState("");
+
+  // Fixtures state
+  const [fixtures, setFixtures] = useState([]);
+  const [fxOpponent, setFxOpponent] = useState("");
+  const [fxCompetition, setFxCompetition] = useState("");
+  const [fxNote, setFxNote] = useState("");
+  const [fxScheduledAt, setFxScheduledAt] = useState("");
+  const [fxStatus, setFxStatus] = useState("upcoming");
+  const [fxTeamScore, setFxTeamScore] = useState("");
+  const [fxOpponentScore, setFxOpponentScore] = useState("");
+
+  // Org stats state
+  const [orgStats, setOrgStats] = useState([]);
+  const [osLabel, setOsLabel] = useState("");
+  const [osValue, setOsValue] = useState("");
+
   // Social tab — reuses the dashboard token already unlocked above instead
   // of prompting for a second password just to reach the same connect form.
   const [socialOpen, setSocialOpen] = useState(false);
@@ -100,13 +125,16 @@ export default function ZeneroDashboardPanel({ projectId }) {
   const loadAll = async (tok) => {
     const headers = { "X-Dashboard-Token": tok };
     try {
-      const [u, g, b, p, t, bt] = await Promise.all([
+      const [u, g, b, p, t, bt, rp, fx, os] = await Promise.all([
         fetch(`${API}/api/${projectId}/updates`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/gallery_items`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/blog_posts`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/portfolio_items`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/timeline_entries`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/bento_tiles`, { headers }).then((r) => r.json()),
+        fetch(`${API}/api/${projectId}/roster_players`, { headers }).then((r) => r.json()),
+        fetch(`${API}/api/${projectId}/fixtures`, { headers }).then((r) => r.json()),
+        fetch(`${API}/api/${projectId}/org_stats`, { headers }).then((r) => r.json()),
       ]);
       setUpdates(u.updates || []);
       setGalleryItems(g.gallery_items || []);
@@ -114,6 +142,9 @@ export default function ZeneroDashboardPanel({ projectId }) {
       setPortfolioItems(p.portfolio_items || []);
       setTimelineEntries(t.timeline_entries || []);
       setBentoTiles(bt.bento_tiles || []);
+      setRosterPlayers(rp.roster_players || []);
+      setFixtures(fx.fixtures || []);
+      setOrgStats(os.org_stats || []);
     } catch {
       setError("Couldn't load content. Please try again.");
     }
@@ -285,6 +316,84 @@ export default function ZeneroDashboardPanel({ projectId }) {
     [newItems[index], newItems[target]] = [newItems[target], newItems[index]];
     setBentoTiles(newItems);
     await api("/bento_tiles/reorder", { method: "POST", body: { ordered_ids: newItems.map((i) => i.id) } });
+  };
+
+  // ---------- Roster ----------
+  const createRosterPlayer = async () => {
+    if (!rName.trim()) return;
+    await api("/roster_players", { method: "POST", body: { name: rName, role: rRole, stat_label: rStatLabel, stat_value: rStatValue } });
+    setRName("");
+    setRRole("");
+    setRStatValue("");
+    await loadAll(token);
+  };
+
+  const deleteRosterPlayer = async (id) => {
+    await api(`/roster_players/${id}`, { method: "DELETE" });
+    await loadAll(token);
+  };
+
+  const moveRosterPlayer = async (index, dir) => {
+    const newItems = [...rosterPlayers];
+    const target = index + dir;
+    if (target < 0 || target >= newItems.length) return;
+    [newItems[index], newItems[target]] = [newItems[target], newItems[index]];
+    setRosterPlayers(newItems);
+    await api("/roster_players/reorder", { method: "POST", body: { ordered_ids: newItems.map((i) => i.id) } });
+  };
+
+  // ---------- Fixtures ----------
+  const createFixture = async () => {
+    if (!fxOpponent.trim()) return;
+    await api("/fixtures", {
+      method: "POST",
+      body: { opponent: fxOpponent, competition: fxCompetition, note: fxNote, scheduled_at: fxScheduledAt, status: fxStatus, team_score: fxTeamScore, opponent_score: fxOpponentScore },
+    });
+    setFxOpponent("");
+    setFxCompetition("");
+    setFxNote("");
+    setFxScheduledAt("");
+    setFxStatus("upcoming");
+    setFxTeamScore("");
+    setFxOpponentScore("");
+    await loadAll(token);
+  };
+
+  const deleteFixture = async (id) => {
+    await api(`/fixtures/${id}`, { method: "DELETE" });
+    await loadAll(token);
+  };
+
+  const moveFixture = async (index, dir) => {
+    const newItems = [...fixtures];
+    const target = index + dir;
+    if (target < 0 || target >= newItems.length) return;
+    [newItems[index], newItems[target]] = [newItems[target], newItems[index]];
+    setFixtures(newItems);
+    await api("/fixtures/reorder", { method: "POST", body: { ordered_ids: newItems.map((i) => i.id) } });
+  };
+
+  // ---------- Org stats ----------
+  const createOrgStat = async () => {
+    if (!osLabel.trim() || !osValue.trim()) return;
+    await api("/org_stats", { method: "POST", body: { label: osLabel, value: osValue } });
+    setOsLabel("");
+    setOsValue("");
+    await loadAll(token);
+  };
+
+  const deleteOrgStat = async (id) => {
+    await api(`/org_stats/${id}`, { method: "DELETE" });
+    await loadAll(token);
+  };
+
+  const moveOrgStat = async (index, dir) => {
+    const newItems = [...orgStats];
+    const target = index + dir;
+    if (target < 0 || target >= newItems.length) return;
+    [newItems[index], newItems[target]] = [newItems[target], newItems[index]];
+    setOrgStats(newItems);
+    await api("/org_stats/reorder", { method: "POST", body: { ordered_ids: newItems.map((i) => i.id) } });
   };
 
   if (!token) {
@@ -615,6 +724,168 @@ export default function ZeneroDashboardPanel({ projectId }) {
               </div>
             ))}
             {bentoTiles.length === 0 && <p className="text-xs text-[#948C79] col-span-2">No bento tiles yet.</p>}
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Roster Tab ---------- */}
+      {tab === "roster" && (
+        <div className="space-y-4" data-testid="zenero-roster-tab">
+          <div className="space-y-2 border border-[#332D22] rounded p-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={labelCls}>Name</label>
+                <input value={rName} onChange={(e) => setRName(e.target.value)} className={inputCls} data-testid="roster-name" />
+              </div>
+              <div>
+                <label className={labelCls}>Role</label>
+                <input value={rRole} onChange={(e) => setRRole(e.target.value)} className={inputCls} placeholder="IGL / Captain" data-testid="roster-role" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={labelCls}>Stat label</label>
+                <input value={rStatLabel} onChange={(e) => setRStatLabel(e.target.value)} className={inputCls} data-testid="roster-stat-label" />
+              </div>
+              <div>
+                <label className={labelCls}>Stat value</label>
+                <input value={rStatValue} onChange={(e) => setRStatValue(e.target.value)} className={inputCls} placeholder="1.48" data-testid="roster-stat-value" />
+              </div>
+            </div>
+            <button onClick={createRosterPlayer} className={btnPrimary} data-testid="roster-add">
+              <Plus size={12} className="inline mr-1" />Add Player
+            </button>
+          </div>
+          <div className="space-y-2">
+            {rosterPlayers.map((p, idx) => (
+              <div key={p.id} className="flex items-start justify-between border border-[#332D22] rounded p-3" data-testid={`roster-item-${p.id}`}>
+                <div className="flex items-start gap-2">
+                  <GripVertical size={14} className="text-[#6B6455] mt-1 cursor-grab" />
+                  <div>
+                    <div className="text-sm font-medium text-[#F1EDE2]">{p.name}</div>
+                    <div className="text-xs text-[#948C79] mt-1">{p.role}</div>
+                    <div className="text-xs text-[#948C79] mt-1">{p.stat_label}: {p.stat_value}</div>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button onClick={() => moveRosterPlayer(idx, -1)} className={btnGhost} title="Move up">↑</button>
+                  <button onClick={() => moveRosterPlayer(idx, 1)} className={btnGhost} title="Move down">↓</button>
+                  <button onClick={() => deleteRosterPlayer(p.id)} className={btnDanger} data-testid={`roster-delete-${p.id}`}><Trash2 size={12} /></button>
+                </div>
+              </div>
+            ))}
+            {rosterPlayers.length === 0 && <p className="text-xs text-[#948C79]">No roster players yet.</p>}
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Fixtures Tab ---------- */}
+      {tab === "fixtures" && (
+        <div className="space-y-4" data-testid="zenero-fixtures-tab">
+          <div className="space-y-2 border border-[#332D22] rounded p-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={labelCls}>Opponent</label>
+                <input value={fxOpponent} onChange={(e) => setFxOpponent(e.target.value)} className={inputCls} data-testid="fixture-opponent" />
+              </div>
+              <div>
+                <label className={labelCls}>Competition</label>
+                <input value={fxCompetition} onChange={(e) => setFxCompetition(e.target.value)} className={inputCls} placeholder="VCT Playoffs" data-testid="fixture-competition" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={labelCls}>Note</label>
+                <input value={fxNote} onChange={(e) => setFxNote(e.target.value)} className={inputCls} placeholder="BO3" data-testid="fixture-note" />
+              </div>
+              <div>
+                <label className={labelCls}>Scheduled at</label>
+                <input value={fxScheduledAt} onChange={(e) => setFxScheduledAt(e.target.value)} className={inputCls} placeholder="Fri 19:00 CET" data-testid="fixture-scheduled-at" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className={labelCls}>Status</label>
+                <select value={fxStatus} onChange={(e) => setFxStatus(e.target.value)} className={inputCls} data-testid="fixture-status">
+                  <option value="upcoming">Upcoming</option>
+                  <option value="live">Live</option>
+                  <option value="final">Final</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>Team score</label>
+                <input value={fxTeamScore} onChange={(e) => setFxTeamScore(e.target.value)} className={inputCls} data-testid="fixture-team-score" />
+              </div>
+              <div>
+                <label className={labelCls}>Opponent score</label>
+                <input value={fxOpponentScore} onChange={(e) => setFxOpponentScore(e.target.value)} className={inputCls} data-testid="fixture-opponent-score" />
+              </div>
+            </div>
+            <button onClick={createFixture} className={btnPrimary} data-testid="fixture-add">
+              <Plus size={12} className="inline mr-1" />Add Fixture
+            </button>
+          </div>
+          <div className="space-y-2">
+            {fixtures.map((f, idx) => (
+              <div key={f.id} className="flex items-start justify-between border border-[#332D22] rounded p-3" data-testid={`fixture-item-${f.id}`}>
+                <div className="flex items-start gap-2">
+                  <GripVertical size={14} className="text-[#6B6455] mt-1 cursor-grab" />
+                  <div>
+                    <div className="text-sm font-medium text-[#F1EDE2]">
+                      vs {f.opponent} {f.status === "final" && <span>· {f.team_score}–{f.opponent_score}</span>}
+                    </div>
+                    <div className="text-xs text-[#948C79] mt-1">{f.competition} {f.note && `· ${f.note}`}</div>
+                    <div className="text-xs text-[#948C79] mt-1">{f.scheduled_at} · {f.status}</div>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button onClick={() => moveFixture(idx, -1)} className={btnGhost} title="Move up">↑</button>
+                  <button onClick={() => moveFixture(idx, 1)} className={btnGhost} title="Move down">↓</button>
+                  <button onClick={() => deleteFixture(f.id)} className={btnDanger} data-testid={`fixture-delete-${f.id}`}><Trash2 size={12} /></button>
+                </div>
+              </div>
+            ))}
+            {fixtures.length === 0 && <p className="text-xs text-[#948C79]">No fixtures yet.</p>}
+          </div>
+        </div>
+      )}
+
+      {/* ---------- Org Stats Tab ---------- */}
+      {tab === "org-stats" && (
+        <div className="space-y-4" data-testid="zenero-org-stats-tab">
+          <div className="space-y-2 border border-[#332D22] rounded p-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={labelCls}>Label</label>
+                <input value={osLabel} onChange={(e) => setOsLabel(e.target.value)} className={inputCls} placeholder="Global rank" data-testid="org-stat-label" />
+              </div>
+              <div>
+                <label className={labelCls}>Value</label>
+                <input value={osValue} onChange={(e) => setOsValue(e.target.value)} className={inputCls} placeholder="#4" data-testid="org-stat-value" />
+              </div>
+            </div>
+            <button onClick={createOrgStat} className={btnPrimary} data-testid="org-stat-add">
+              <Plus size={12} className="inline mr-1" />Add Stat
+            </button>
+          </div>
+          <div className="space-y-2">
+            {orgStats.map((s, idx) => (
+              <div key={s.id} className="flex items-start justify-between border border-[#332D22] rounded p-3" data-testid={`org-stat-item-${s.id}`}>
+                <div className="flex items-start gap-2">
+                  <GripVertical size={14} className="text-[#6B6455] mt-1 cursor-grab" />
+                  <div>
+                    <div className="text-sm font-medium text-[#F1EDE2]">{s.value}</div>
+                    <div className="text-xs text-[#948C79] mt-1">{s.label}</div>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button onClick={() => moveOrgStat(idx, -1)} className={btnGhost} title="Move up">↑</button>
+                  <button onClick={() => moveOrgStat(idx, 1)} className={btnGhost} title="Move down">↓</button>
+                  <button onClick={() => deleteOrgStat(s.id)} className={btnDanger} data-testid={`org-stat-delete-${s.id}`}><Trash2 size={12} /></button>
+                </div>
+              </div>
+            ))}
+            {orgStats.length === 0 && <p className="text-xs text-[#948C79]">No org stats yet.</p>}
           </div>
         </div>
       )}

@@ -10,6 +10,7 @@ import { RightSidebar } from "@/components/builder/RightSidebar";
 import { Canvas } from "@/components/builder/Canvas";
 import { CodeView } from "@/components/builder/CodeView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
 import {
   Trash2, Eye, MousePointer2, Code2, Columns2, Presentation,
   FilePlus2, FolderOpen, Save, Download, Upload, Search, Palette, BarChart3, LayoutTemplate, Inbox, Store, HelpCircle, Megaphone,
@@ -434,9 +435,15 @@ export default function Builder() {
   const zoomIn = () => setZoom((z) => Math.min(150, z + 10));
   const zoomOut = () => setZoom((z) => Math.max(50, z - 10));
   const zoomReset = () => setZoom(100);
+  // Same fix as FileTree's "New file"/rename dialogs: window.confirm()
+  // silently no-ops in contexts without native blocking dialogs (Tauri's
+  // webview among them), which made "New project" look like it did
+  // nothing when there were unsaved changes. A real modal doesn't depend
+  // on that browser API.
+  const [newProjectConfirmOpen, setNewProjectConfirmOpen] = useState(false);
   const newProject = () => {
     const hasUnsaved = saveStatus === "unsaved" || saveStatus === "error";
-    if (hasUnsaved && !window.confirm("Discard unsaved changes and start a new project?")) return;
+    if (hasUnsaved) { setNewProjectConfirmOpen(true); return; }
     window.location.reload();
   };
   const focusLibrarySearch = () => {
@@ -1055,6 +1062,8 @@ export default function Builder() {
                 selectedHtml={selected?.html || ""}
                 selectedId={selectedId}
                 pages={pages}
+                activePageId={activePageId}
+                onSwitchPage={switchPage}
                 projectId={projectId}
                 onEditSelected={(html) => selected && editHtml(selected.id, html)}
                 onOpenFormBuilder={() => setFormBuilderOpen(true)}
@@ -1348,6 +1357,19 @@ export default function Builder() {
         onAddBlank={newPage}
         onAddLayout={addPageFromLayout}
       />
+
+      <AlertDialog open={newProjectConfirmOpen} onOpenChange={setNewProjectConfirmOpen}>
+        <AlertDialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2]" data-testid="new-project-confirm-modal">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#948C79]">Starting a new project will discard your unsaved changes to this one.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="new-project-confirm-cancel">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => window.location.reload()} className="bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="new-project-confirm-discard">Discard & start new</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <PaymentButtonModal
         open={paymentBuilderOpen}

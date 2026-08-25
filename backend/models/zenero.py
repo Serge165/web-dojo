@@ -8,6 +8,10 @@ Collections (each scoped by project_id):
   - portfolio_items:{id, title, description, date, category, image_url, link, sort_order}
   - timeline_entries:{id, date, title, description, sort_order}
   - bento_tiles:    {id, icon, title, description, href, sort_order}
+  - roster_players: {id, name, role, stat_label, stat_value, sort_order}
+  - fixtures:       {id, opponent, competition, note, scheduled_at, status,
+                      team_score, opponent_score, sort_order}
+  - org_stats:      {id, label, value, sort_order}
 
 All write endpoints are gated by the same _require_dashboard_token pattern
 as the e-commerce dashboard. Read endpoints are public (the live page's
@@ -171,6 +175,87 @@ class BentoTileUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     href: Optional[str] = None
+    sort_order: Optional[int] = None
+
+
+class RosterPlayer(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    role: str = ""
+    stat_label: str = "K/D"
+    stat_value: str = ""
+    sort_order: int = 0
+
+
+class RosterPlayerCreate(BaseModel):
+    name: str
+    role: str = ""
+    stat_label: str = "K/D"
+    stat_value: str = ""
+    sort_order: int = 0
+
+
+class RosterPlayerUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+    stat_label: Optional[str] = None
+    stat_value: Optional[str] = None
+    sort_order: Optional[int] = None
+
+
+class Fixture(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    opponent: str
+    competition: str = ""
+    note: str = ""
+    scheduled_at: str = ""
+    status: str = "upcoming"  # upcoming | live | final
+    team_score: str = ""
+    opponent_score: str = ""
+    sort_order: int = 0
+
+
+class FixtureCreate(BaseModel):
+    opponent: str
+    competition: str = ""
+    note: str = ""
+    scheduled_at: str = ""
+    status: str = "upcoming"
+    team_score: str = ""
+    opponent_score: str = ""
+    sort_order: int = 0
+
+
+class FixtureUpdate(BaseModel):
+    opponent: Optional[str] = None
+    competition: Optional[str] = None
+    note: Optional[str] = None
+    scheduled_at: Optional[str] = None
+    status: Optional[str] = None
+    team_score: Optional[str] = None
+    opponent_score: Optional[str] = None
+    sort_order: Optional[int] = None
+
+
+class OrgStat(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    label: str
+    value: str
+    sort_order: int = 0
+
+
+class OrgStatCreate(BaseModel):
+    label: str
+    value: str
+    sort_order: int = 0
+
+
+class OrgStatUpdate(BaseModel):
+    label: Optional[str] = None
+    value: Optional[str] = None
     sort_order: Optional[int] = None
 
 
@@ -466,6 +551,141 @@ async def delete_bento_tile(project_id: str, item_id: str, x_dashboard_token: Op
     return {"ok": True}
 
 
+# ---------- Roster CRUD ----------
+
+@zenero_router.get("/{project_id}/roster_players")
+async def list_roster_players(project_id: str, limit: int = 100):
+    """Public read — the live page's Roster block fetches this."""
+    cursor = db.roster_players.find({"project_id": project_id}, {"_id": 0})
+    items = await cursor.to_list(limit)
+    items = [_serialize(it) for it in items]
+    items.sort(key=lambda it: (it.get("sort_order", 0), it.get("name", "")))
+    return {"roster_players": items}
+
+
+@zenero_router.post("/{project_id}/roster_players")
+async def create_roster_player(project_id: str, payload: RosterPlayerCreate, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    item = RosterPlayer(**payload.model_dump())
+    doc = item.model_dump()
+    doc["project_id"] = project_id  # extra="ignore": must not go through ctor
+    doc = _serialize(doc)
+    await db.roster_players.insert_one(doc.copy())
+    return item
+
+
+@zenero_router.put("/{project_id}/roster_players/{item_id}")
+async def update_roster_player(project_id: str, item_id: str, payload: RosterPlayerUpdate, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    existing = await db.roster_players.find_one({"id": item_id, "project_id": project_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Roster player not found")
+    updates = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.roster_players.update_one({"id": item_id, "project_id": project_id}, {"$set": updates})
+    doc = await db.roster_players.find_one({"id": item_id, "project_id": project_id}, {"_id": 0})
+    return _deserialize(doc)
+
+
+@zenero_router.delete("/{project_id}/roster_players/{item_id}")
+async def delete_roster_player(project_id: str, item_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    if not await db.roster_players.find_one({"id": item_id, "project_id": project_id}, {"_id": 0}):
+        raise HTTPException(status_code=404, detail="Roster player not found")
+    await db.roster_players.delete_one({"id": item_id, "project_id": project_id})
+    return {"ok": True}
+
+
+# ---------- Fixtures CRUD ----------
+
+@zenero_router.get("/{project_id}/fixtures")
+async def list_fixtures(project_id: str, limit: int = 100):
+    """Public read — the live page's Fixtures block fetches this."""
+    cursor = db.fixtures.find({"project_id": project_id}, {"_id": 0})
+    items = await cursor.to_list(limit)
+    items = [_serialize(it) for it in items]
+    items.sort(key=lambda it: (it.get("sort_order", 0), it.get("scheduled_at", "")))
+    return {"fixtures": items}
+
+
+@zenero_router.post("/{project_id}/fixtures")
+async def create_fixture(project_id: str, payload: FixtureCreate, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    item = Fixture(**payload.model_dump())
+    doc = item.model_dump()
+    doc["project_id"] = project_id  # extra="ignore": must not go through ctor
+    doc = _serialize(doc)
+    await db.fixtures.insert_one(doc.copy())
+    return item
+
+
+@zenero_router.put("/{project_id}/fixtures/{item_id}")
+async def update_fixture(project_id: str, item_id: str, payload: FixtureUpdate, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    existing = await db.fixtures.find_one({"id": item_id, "project_id": project_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Fixture not found")
+    updates = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.fixtures.update_one({"id": item_id, "project_id": project_id}, {"$set": updates})
+    doc = await db.fixtures.find_one({"id": item_id, "project_id": project_id}, {"_id": 0})
+    return _deserialize(doc)
+
+
+@zenero_router.delete("/{project_id}/fixtures/{item_id}")
+async def delete_fixture(project_id: str, item_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    if not await db.fixtures.find_one({"id": item_id, "project_id": project_id}, {"_id": 0}):
+        raise HTTPException(status_code=404, detail="Fixture not found")
+    await db.fixtures.delete_one({"id": item_id, "project_id": project_id})
+    return {"ok": True}
+
+
+# ---------- Org stats CRUD ----------
+
+@zenero_router.get("/{project_id}/org_stats")
+async def list_org_stats(project_id: str, limit: int = 50):
+    """Public read — the live page's Org Stats strip fetches this."""
+    cursor = db.org_stats.find({"project_id": project_id}, {"_id": 0})
+    items = await cursor.to_list(limit)
+    items = [_serialize(it) for it in items]
+    items.sort(key=lambda it: (it.get("sort_order", 0), it.get("label", "")))
+    return {"org_stats": items}
+
+
+@zenero_router.post("/{project_id}/org_stats")
+async def create_org_stat(project_id: str, payload: OrgStatCreate, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    item = OrgStat(**payload.model_dump())
+    doc = item.model_dump()
+    doc["project_id"] = project_id  # extra="ignore": must not go through ctor
+    doc = _serialize(doc)
+    await db.org_stats.insert_one(doc.copy())
+    return item
+
+
+@zenero_router.put("/{project_id}/org_stats/{item_id}")
+async def update_org_stat(project_id: str, item_id: str, payload: OrgStatUpdate, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    existing = await db.org_stats.find_one({"id": item_id, "project_id": project_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Org stat not found")
+    updates = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.org_stats.update_one({"id": item_id, "project_id": project_id}, {"$set": updates})
+    doc = await db.org_stats.find_one({"id": item_id, "project_id": project_id}, {"_id": 0})
+    return _deserialize(doc)
+
+
+@zenero_router.delete("/{project_id}/org_stats/{item_id}")
+async def delete_org_stat(project_id: str, item_id: str, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    if not await db.org_stats.find_one({"id": item_id, "project_id": project_id}, {"_id": 0}):
+        raise HTTPException(status_code=404, detail="Org stat not found")
+    await db.org_stats.delete_one({"id": item_id, "project_id": project_id})
+    return {"ok": True}
+
+
 # ---------- Reorder (drag-to-reorder persistence) ----------
 
 class ReorderRequest(BaseModel):
@@ -499,6 +719,39 @@ async def reorder_bento_tiles(project_id: str, payload: ReorderRequest, x_dashbo
     await _require_dashboard_token(project_id, x_dashboard_token)
     for idx, item_id in enumerate(payload.ordered_ids):
         await db.bento_tiles.update_one(
+            {"id": item_id, "project_id": project_id},
+            {"$set": {"sort_order": idx}},
+        )
+    return {"ok": True}
+
+
+@zenero_router.post("/{project_id}/roster_players/reorder")
+async def reorder_roster_players(project_id: str, payload: ReorderRequest, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    for idx, item_id in enumerate(payload.ordered_ids):
+        await db.roster_players.update_one(
+            {"id": item_id, "project_id": project_id},
+            {"$set": {"sort_order": idx}},
+        )
+    return {"ok": True}
+
+
+@zenero_router.post("/{project_id}/fixtures/reorder")
+async def reorder_fixtures(project_id: str, payload: ReorderRequest, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    for idx, item_id in enumerate(payload.ordered_ids):
+        await db.fixtures.update_one(
+            {"id": item_id, "project_id": project_id},
+            {"$set": {"sort_order": idx}},
+        )
+    return {"ok": True}
+
+
+@zenero_router.post("/{project_id}/org_stats/reorder")
+async def reorder_org_stats(project_id: str, payload: ReorderRequest, x_dashboard_token: Optional[str] = Header(default=None)):
+    await _require_dashboard_token(project_id, x_dashboard_token)
+    for idx, item_id in enumerate(payload.ordered_ids):
+        await db.org_stats.update_one(
             {"id": item_id, "project_id": project_id},
             {"$set": {"sort_order": idx}},
         )

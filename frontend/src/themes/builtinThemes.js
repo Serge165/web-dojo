@@ -18,6 +18,12 @@ export const defaultTheme = t("Default", "The classic Web Dojo look", {
   primary: "#C9A227", secondary: "#332D22", accent: "#F1EDE2",
   background: "#14120E", surface: "#242019", text: "#F1EDE2",
   textSecondary: "#A79C87", border: "#332D22",
+  // Pin every chrome token to the historical Dark palette exactly so the
+  // Default look is preserved byte-for-byte. Other themes may omit these
+  // and src/themes/chrome.js derives sensible values from the base colors.
+  panel: "#1C1A15", well: "#15130E", textDim: "#E4DECE", textMuted: "#948C79",
+  textFaint: "#6B6353", gold: "#E8C34A", goldBorder: "#4A3F1E",
+  primarySurface: "#2A2416",
 });
 
 export const winampModern = t("Winamp Modern", "Sleek modern take on Winamp", {
