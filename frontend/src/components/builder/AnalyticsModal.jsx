@@ -3,6 +3,7 @@ import axios from "axios";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Eye, UploadCloud } from "lucide-react";
 import { ANALYTICS_FIELDS } from "@/lib/analyticsSnippets";
+import { useDashboardToken, dashHeaders, DashboardUnlockGate } from "@/lib/dashboardToken";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2.5 py-1.5 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]";
@@ -12,14 +13,22 @@ export const AnalyticsModal = ({ open, onClose, projectId, projectName, analytic
   const [data, setData] = useState(null);
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState(analytics || {});
+  const { token, unlocking, error: unlockError, unlock, signOut } = useDashboardToken(projectId);
 
   useEffect(() => { if (open) setDraft(analytics || {}); }, [open, analytics]);
 
   useEffect(() => {
-    if (!open || !projectId) return;
+    if (!open || !projectId || !token) return;
     setBusy(true);
-    axios.get(`${API}/projects/${projectId}/analytics`).then((r) => setData(r.data)).catch(() => setData(null)).finally(() => setBusy(false));
-  }, [open, projectId]);
+    axios
+      .get(`${API}/projects/${projectId}/analytics`, { headers: dashHeaders(token) })
+      .then((r) => setData(r.data))
+      .catch((e) => {
+        if (e.response?.status === 401) signOut();
+        setData(null);
+      })
+      .finally(() => setBusy(false));
+  }, [open, projectId, token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const max = Math.max(1, ...(data?.by_day || []).map((d) => d.count));
 
@@ -57,7 +66,16 @@ export const AnalyticsModal = ({ open, onClose, projectId, projectName, analytic
           </div>
         )}
         {!projectId && tab === "overview" && <div className="text-xs text-[#A79C87]">Save the project first to view analytics.</div>}
-        {busy && tab === "overview" && <div className="text-xs text-[#A79C87]">Loading…</div>}
+        {projectId && !token && tab === "overview" && (
+          <DashboardUnlockGate
+            title="Analytics are locked"
+            description="Pageview stats are protected by this project's dashboard password — the same one that unlocks orders and the submissions inbox."
+            error={unlockError}
+            unlocking={unlocking}
+            onUnlock={(pw) => unlock(pw)}
+          />
+        )}
+        {busy && token && tab === "overview" && <div className="text-xs text-[#A79C87]">Loading…</div>}
         {tab === "overview" && data && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">

@@ -2,28 +2,35 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Inbox, RefreshCw, Trash2, Mail, FileText, ExternalLink, Download } from "lucide-react";
+import { Inbox, RefreshCw, Trash2, Mail, FileText, ExternalLink, Download, Lock } from "lucide-react";
+import { useDashboardToken, dashHeaders, DashboardUnlockGate } from "@/lib/dashboardToken";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Lightweight form-backend inbox. Every form built in Web Dojo posts here, so
 // deployed/previewed demo sites capture real submissions the user can read.
+// Reads are token-gated server-side (same dashboard password as e-commerce),
+// so the modal shows an unlock gate until a valid token is present.
 export const SubmissionsModal = ({ open, onClose, projectId }) => {
   const [subs, setSubs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [group, setGroup] = useState("__all__");
+  const { token, unlocking, error: unlockError, unlock, signOut } = useDashboardToken(projectId);
 
   const load = async () => {
-    if (!projectId) { setSubs([]); return; }
+    if (!projectId || !token) { setSubs([]); return; }
     setLoading(true);
     try {
-      const r = await axios.get(`${API}/submissions`, { params: { project_id: projectId } });
+      const r = await axios.get(`${API}/submissions`, { params: { project_id: projectId }, headers: dashHeaders(token) });
       setSubs(r.data || []);
-    } catch { toast.error("Failed to load submissions"); }
+    } catch (e) {
+      toast.error(e.response?.status === 401 ? "Dashboard session expired — unlock again" : "Failed to load submissions");
+      if (e.response?.status === 401) signOut();
+    }
     setLoading(false);
   };
 
-  useEffect(() => { if (open) { load(); setGroup("__all__"); } }, [open, projectId]);
+  useEffect(() => { if (open) { load(); setGroup("__all__"); } /* eslint-disable-line react-hooks/exhaustive-deps */ }, [open, projectId, token]);
 
   const groups = useMemo(() => {
     const m = new Map();
@@ -41,10 +48,10 @@ export const SubmissionsModal = ({ open, onClose, projectId }) => {
 
   const del = async (id) => {
     try {
-      await axios.delete(`${API}/submissions/${id}`);
+      await axios.delete(`${API}/submissions/${id}`, { headers: dashHeaders(token) });
       setSubs((s) => s.filter((x) => x.id !== id));
       toast.success("Submission deleted");
-    } catch { toast.error("Delete failed"); }
+    } catch (e) { toast.error(e.response?.status === 401 ? "Dashboard session expired — unlock again" : "Delete failed"); }
   };
 
   const csvEscape = (v) => {
@@ -88,6 +95,15 @@ export const SubmissionsModal = ({ open, onClose, projectId }) => {
           <DialogDescription className="text-xs text-[#948C79]">Every form you build posts here automatically — deployed and previewed demo sites capture real entries.</DialogDescription>
         </DialogHeader>
 
+        {!token ? (
+          <DashboardUnlockGate
+            title="This inbox is locked"
+            description={`Submissions are protected by this project's dashboard password${projectId ? "" : " — save the project first"}. The same password unlocks orders, analytics, and this inbox.`}
+            error={unlockError}
+            unlocking={unlocking}
+            onUnlock={(pw) => unlock(pw)}
+          />
+        ) : (
         <div className="grid grid-cols-[220px_1fr] max-h-[calc(86vh-76px)]">
           {/* Form groups */}
           <div className="border-r border-[#332D22] overflow-y-auto p-2 space-y-1">
@@ -157,6 +173,7 @@ export const SubmissionsModal = ({ open, onClose, projectId }) => {
             ))}
           </div>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );
