@@ -54,8 +54,50 @@ const AESTHETIC_PREVIEWS = {
   "esports-agnostic": { bg: "#101018", fg: "#22d3ee" },
 };
 
+// Real mini-preview of the template's home page, rendered into a sandboxed
+// iframe scaled down to card size. Iframes are heavy (each boots a full
+// document), so rendering is deferred until the card actually scrolls into
+// view via IntersectionObserver — opening the picker renders only the dozen
+// or so visible cards, not all 57.
+const TemplateThumb = ({ tpl }) => {
+  const [visible, setVisible] = useState(false);
+  const ref = React.useRef(null);
+
+  useEffect(() => {
+    if (!ref.current || typeof IntersectionObserver === "undefined") { setVisible(true); return; }
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }),
+      { rootMargin: "200px" }
+    );
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, []);
+
+  const html = useMemo(() => (visible ? buildTemplatePreviewHtml(tpl) : ""), [visible, tpl]);
+
+  return (
+    <div ref={ref} className="h-24 relative overflow-hidden bg-[#242019]">
+      {html ? (
+        <iframe
+          title={`${tpl.name} preview`}
+          srcDoc={html}
+          sandbox="allow-same-origin"
+          scrolling="no"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="absolute top-0 left-0 border-0 origin-top-left pointer-events-none select-none"
+          style={{ width: 900, height: 1200, transform: "scale(0.3)" }}
+          data-testid={`tpl-thumb-iframe-${tpl.id}`}
+        />
+      ) : null}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[#F1EDE2] text-xs font-medium flex items-center gap-1.5"><Eye size={12} /> Preview</span>
+      </div>
+    </div>
+  );
+};
+
 const StarterCard = ({ tpl, onPreview }) => {
-  const preview = AESTHETIC_PREVIEWS[tpl.aesthetic] || { bg: "#242019", fg: "#ffffff" };
   return (
     <button
       onClick={() => onPreview(tpl)}
@@ -64,15 +106,13 @@ const StarterCard = ({ tpl, onPreview }) => {
     >
       <div
         className="h-24 flex items-end p-3 relative"
-        style={{ background: preview.bg, border: preview.border }}
+        style={{ background: AESTHETIC_PREVIEWS[tpl.aesthetic]?.bg || "#242019", border: AESTHETIC_PREVIEWS[tpl.aesthetic]?.border }}
       >
         <span
-          style={{ color: preview.fg }}
+          style={{ color: AESTHETIC_PREVIEWS[tpl.aesthetic]?.fg || "#ffffff" }}
           className="text-[11px] font-semibold uppercase tracking-widest opacity-90"
         >{tpl.aesthetic}</span>
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-[#F1EDE2] text-xs font-medium flex items-center gap-1.5"><Eye size={12} /> Preview</span>
-        </div>
+        <TemplateThumb tpl={tpl} />
       </div>
       <div className="p-3">
         <div className="flex items-center gap-1.5 text-sm text-[#F1EDE2] truncate">

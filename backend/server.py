@@ -2304,6 +2304,76 @@ async def import_url(payload: UrlImport):
         raise HTTPException(status_code=502, detail=f"Could not fetch that URL ({type(e).__name__})")
 
 
+# ---------- Client diagnostics log ----------
+# The builder frontend's diagnostics layer (frontend/src/lib/diagnostics.js)
+# batches client-side errors, API timings, and memory samples here. These are
+# operational telemetry for the *builder app itself*, not site-visitor data:
+# the poster is the developer/user's own browser session. Kept deliberately
+# small — bounded batch size, capped per-event size, and old entries are
+# trimmed on write so the collection can't grow without bound.
+
+_MAX_CLIENT_LOG_BATCH = 100
+_MAX_CLIENT_LOG_EVENT_BYTES = 8_000
+_CLIENT_LOG_KEEP = 500
+
+
+@api_router.post("/client-logs")
+async def receive_client_logs(request: Request):
+    try:
+        await _cap_request_body(request, 256_000)  # 256 KB per flush, hard cap
+        body = await request.json()
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Could not read log payload: {type(e).__name__}")
+    events = body.get("events") if isinstance(body, dict) else None
+    if not isinstance(events, list) or not events:
+        raise HTTPException(status_code=400, detail="events must be a non-empty list")
+    docs = []
+    now = datetime.now(timezone.utc).isoformat()
+    for ev in events[:_MAX_CLIENT_LOG_BATCH]:
+        if not isinstance(ev, dict):
+            continue
+        doc = {"received_at": now}
+        for k in ("kind", "ts", "seq", "message", "stack", "source", "url", "status", "ms", "slow"):
+            v = ev.get(k)
+            if isinstance(v, str) and len(v) > _MAX_CLIENT_LOG_EVENT_BYTES:
+                v = v[:_MAX_CLIENT_LOG_EVENT_BYTES]
+            if v is not None:
+                doc[k] = v
+        docs.append(doc)
+    if not docs:
+        return {"ok": True, "stored": 0}
+    for i, doc in enumerate(docs):
+        # The SQLite shim keys rows on doc["id"] — every stored document needs
+        # one (server.py's other collections use uuid4 the same way).
+        doc["id"] = str(uuid.uuid4())
+        # Shim-compatible identity for trimming: an integer sequence assigned
+        # at write time (the shim stores its own row id separately from the
+        # document, so Mongo-style _id deletion isn't available).
+        doc["n"] = i + 1
+        await db.client_logs.insert_one(doc)
+    # Trim oldest beyond the retention window. Rare (only past 500 entries);
+    # done as equality deletions since the shim has no $in.
+    total = await db.client_logs.count_documents({})
+    if total > _CLIENT_LOG_KEEP:
+        rows = await db.client_logs.find({}, {"_id": 0, "received_at": 1, "n": 1}).to_list(length=None)
+        rows.sort(key=lambda r: (r.get("received_at", ""), r.get("n", 0)))
+        excess = total - _CLIENT_LOG_KEEP
+        for r in rows[:excess]:
+            await db.client_logs.delete_many({"received_at": r.get("received_at"), "n": r.get("n")})
+    return {"ok": True, "stored": len(docs)}
+
+
+@api_router.get("/client-logs")
+async def list_client_logs(limit: int = 50):
+    """Most recent client diagnostics, newest first (bounded page)."""
+    limit = min(max(limit, 1), 200)
+    cursor = db.client_logs.find({}, {"_id": 0}).sort("received_at", -1).limit(limit)
+    items = await cursor.to_list(limit)
+    return [_deserialize(it) for it in items]
+
+
 # ---------- Form Submissions Inbox ----------
 # Deployed/exported static sites POST their form data here so Web Dojo acts as a
 # lightweight form backend. The generated form block sends multipart FormData via

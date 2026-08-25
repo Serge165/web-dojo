@@ -223,6 +223,44 @@ class TestSubmissionBodySizeLimit:
         assert r.json()["ok"] is True
 
 
+class TestClientLogs:
+    """Builder-telemetry endpoint: the frontend diagnostics layer batches
+    client-side errors/API timings here."""
+
+    def test_post_and_list_roundtrip(self, client):
+        r = client.post("/api/client-logs", json={"events": [
+            {"kind": "error", "message": "boom", "stack": "Error: boom\n at x"},
+            {"kind": "api_ok", "url": "/api/projects", "status": 200, "ms": 42},
+        ]})
+        assert r.status_code == 200
+        assert r.json()["stored"] == 2
+        items = client.get("/api/client-logs").json()
+        assert len(items) == 2
+        kinds = {i["kind"] for i in items}
+        assert {"error", "api_ok"} <= kinds
+
+    def test_rejects_missing_events(self, client):
+        assert client.post("/api/client-logs", json={}).status_code == 400
+        assert client.post("/api/client-logs", json={"events": []}).status_code == 400
+        assert client.post("/api/client-logs", json={"events": "nope"}).status_code == 400
+
+    def test_non_dict_events_skipped_and_batch_capped(self, client, monkeypatch):
+        monkeypatch.setattr(server, "_MAX_CLIENT_LOG_BATCH", 3)
+        events = [{"kind": f"e{i}"} for i in range(10)] + ["junk", 42, None]
+        r = client.post("/api/client-logs", json={"events": events})
+        assert r.status_code == 200
+        assert r.json()["stored"] == 3  # capped before junk entries are even considered
+
+    def test_oversized_stack_truncated(self, client, monkeypatch):
+        monkeypatch.setattr(server, "_MAX_CLIENT_LOG_EVENT_BYTES", 50)
+        r = client.post("/api/client-logs", json={"events": [
+            {"kind": "error", "message": "x" * 500},
+        ]})
+        assert r.status_code == 200
+        item = client.get("/api/client-logs").json()[0]
+        assert len(item["message"]) == 50
+
+
 class TestProjectIdInjection:
     def test_project_to_html_injects_project_id(self):
         doc = {"id": "proj-123", "name": "Test", "elements": [], "fonts": [], "pages": []}
