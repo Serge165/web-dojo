@@ -23,18 +23,27 @@ sys.path.insert(0, str(backend_dir))
 # MongoDB can still set DB_BACKEND=mongodb before importing server.
 # ---------------------------------------------------------------------------
 if os.environ.get("DB_BACKEND", "").lower() not in ("sqlite", "mongo", "mongodb", "mongodb+srv"):
-    # One SQLite file PER xdist worker — two worker processes sharing a single
-    # SQLite file race on writes and leak rows across modules, producing
-    # order-dependent flakes (observed as intermittent zenero timeline/bento
-    # failures only under `-n 2`).
-    _worker = os.environ.get("PYTEST_XDIST_WORKER", "main")
-    _test_sqlite_path = os.path.join(tempfile.gettempdir(), f"webdojo_pytest_{_worker}.sqlite")
+    # NOTE: the file itself is named per-worker in pytest_configure below —
+    # PYTEST_XDIST_WORKER is NOT reliably set while this module-level code
+    # executes (it runs in the controller pre-fork), so resolving it here
+    # would silently give every worker the same "main" file.
+    _test_sqlite_path = os.path.join(tempfile.gettempdir(), "webdojo_pytest_unresolved.sqlite")
     os.environ["DB_BACKEND"] = "sqlite"
-    os.environ["SQLITE_PATH"] = _test_sqlite_path
     os.environ.setdefault("MONGO_URL", "mongodb://localhost:27017")
     os.environ.setdefault("DB_NAME", "webdojo_test")
 
 import pytest
+
+
+def pytest_configure(config):
+    """Runs once per process — including each xdist worker, where
+    config.workerinput exists. Resolve the SQLite file HERE so every worker
+    gets its own database file before any test module imports server."""
+    if os.environ.get("DB_BACKEND") == "sqlite":
+        worker = getattr(config, "workerinput", {}).get("workerid", "main") \
+            if hasattr(config, "workerinput") else "main"
+        path = os.path.join(tempfile.gettempdir(), f"webdojo_pytest_{worker}.sqlite")
+        os.environ["SQLITE_PATH"] = path
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -42,6 +51,8 @@ def _cleanup_test_sqlite():
     """Remove this worker's SQLite file at the end of the session so repeated
     test runs don't carry stale rows between runs."""
     yield
+    if os.environ.get("WD_KEEP_DB"):
+        return
     path = os.environ.get("SQLITE_PATH")
     if path and os.path.exists(path):
         try:

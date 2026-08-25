@@ -6,6 +6,7 @@ import os
 import stat
 import tempfile
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
@@ -73,9 +74,24 @@ def client():
     return TestClient(server.app)
 
 
+_auth_cache = {}
+
+
+@pytest.fixture(scope="module")
+def auth(client):
+    """One registered builder user per module; every project this module
+    creates is owned by it (Phase 1 requires auth on project creation)."""
+    email = f"commerce-{uuid.uuid4().hex[:8]}@test.dev"
+    r = client.post("/api/auth/register", json={"email": email, "password": "password123"})
+    assert r.status_code == 200
+    _auth_cache["headers"] = {"Authorization": f"Bearer {r.json()['token']}"}
+    _auth_cache["email"] = email
+    return _auth_cache
+
+
 @pytest.fixture()
-def project_id(client):
-    r = client.post("/api/projects", json={"name": "Test Project"})
+def project_id(client, auth):
+    r = client.post("/api/projects", json={"name": "Test Project"}, headers=auth["headers"])
     return r.json()["id"]
 
 
@@ -237,23 +253,23 @@ class TestSetPasswordTakeoverIsBlocked:
         assert r.status_code == 200
         assert client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "rotated-pw"}).status_code == 200
 
-    def test_project_update_cannot_set_the_password_hash(self, client, project_id, db):
+    def test_project_update_cannot_set_the_password_hash(self, client, project_id, db, auth):
         # The second takeover path: PUT /api/projects/{id} used to $set whatever
         # the payload carried, including a hand-crafted salt$digest.
         forged = server._hash_password("attacker-pw")
-        r = client.put(f"/api/projects/{project_id}", json={"name": "Renamed", "dashboard_password_hash": forged})
+        r = client.put(f"/api/projects/{project_id}", json={"name": "Renamed", "dashboard_password_hash": forged}, headers=auth["headers"])
         assert r.status_code == 200
         assert not db.projects.find_one({"id": project_id}).get("dashboard_password_hash")
         assert client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "attacker-pw"}).status_code == 401
 
-    def test_project_update_cannot_set_the_paypal_secret(self, client, project_id, db):
-        r = client.put(f"/api/projects/{project_id}", json={"name": "Renamed", "paypal_secret_enc": "forged"})
+    def test_project_update_cannot_set_the_paypal_secret(self, client, project_id, db, auth):
+        r = client.put(f"/api/projects/{project_id}", json={"name": "Renamed", "paypal_secret_enc": "forged"}, headers=auth["headers"])
         assert r.status_code == 200
         assert not db.projects.find_one({"id": project_id}).get("paypal_secret_enc")
 
-    def test_project_create_cannot_set_the_password_hash(self, client, db):
+    def test_project_create_cannot_set_the_password_hash(self, client, db, auth):
         forged = server._hash_password("attacker-pw")
-        pid = client.post("/api/projects", json={"name": "Seeded", "dashboard_password_hash": forged}).json()["id"]
+        pid = client.post("/api/projects", json={"name": "Seeded", "dashboard_password_hash": forged}, headers=auth["headers"]).json()["id"]
         assert not db.projects.find_one({"id": pid}).get("dashboard_password_hash")
 
     def test_a_token_issued_before_a_password_change_stops_working(self, client, project_id):

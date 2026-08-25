@@ -15,13 +15,16 @@ import server
 
 @pytest.fixture()
 def project(client):
-    r = client.post("/api/projects", json={"name": f"test-{uuid.uuid4().hex[:8]}"})
+    r = client.post("/api/auth/register", json={"email": f"z{uuid.uuid4().hex[:8]}@test.dev", "password": "password123"})
+    assert r.status_code == 200
+    headers = {"Authorization": f"Bearer {r.json()['token']}"}
+    r = client.post("/api/projects", json={"name": f"test-{uuid.uuid4().hex[:8]}"}, headers=headers)
     assert r.status_code == 200
     project_id = r.json()["id"]
     r = client.post(f"/api/dashboard/{project_id}/set-password", json={"password": "correct-horse"})
     assert r.status_code == 200
     r = client.post(f"/api/dashboard/{project_id}/unlock", json={"password": "correct-horse"})
-    assert r.status_code == 200
+    assert r.status_code == 200, r.text
     token = r.json()["token"]
     return project_id, token
 

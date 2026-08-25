@@ -127,17 +127,19 @@ class SqliteCollection:
 
     async def update_one(self, filt: dict, update: dict, upsert: bool = False):
         patch = update.get("$set", {})
+        matched = 0
         async with aiosqlite.connect(self._db_path) as conn:
             await self._ensure_table(conn)
             rows = await conn.execute_fetchall(f'SELECT id, doc FROM "{self._name}"')
             for row_id, raw in rows:
                 doc = json.loads(raw)
                 if _matches(doc, filt):
+                    matched = 1
                     doc.update(patch)
                     await conn.execute(f'UPDATE "{self._name}" SET doc = ? WHERE id = ?', (json.dumps(doc, default=str), row_id))
                     await conn.commit()
-                    return
-            if upsert:
+                    break
+            if upsert and not matched:
                 # No match: insert a new doc from the filter's equality
                 # fields plus the $set patch, mirroring Mongo's upsert
                 # behavior. The patch normally already carries every
@@ -152,9 +154,18 @@ class SqliteCollection:
                     (new_doc["id"], json.dumps(new_doc, default=str)),
                 )
                 await conn.commit()
-        return
+                matched = 1  # upsert counts as a match, mirroring Mongo
+        # Mongo-shaped UpdateResult so callers can inspect matched_count /
+        # modified_count regardless of which backend is live.
+        class _UpdateResult:
+            pass
+        result = _UpdateResult()
+        result.matched_count = matched
+        result.modified_count = matched
+        return result
 
     async def delete_one(self, filt: dict):
+        deleted = 0
         async with aiosqlite.connect(self._db_path) as conn:
             await self._ensure_table(conn)
             rows = await conn.execute_fetchall(f'SELECT id, doc FROM "{self._name}"')
@@ -162,9 +173,18 @@ class SqliteCollection:
                 if _matches(json.loads(raw), filt):
                     await conn.execute(f'DELETE FROM "{self._name}" WHERE id = ?', (row_id,))
                     await conn.commit()
-                    return
+                    deleted = 1
+                    break
+        # Mongo-shaped result: callers rely on .deleted_count (Mongo returns
+        # DeleteResult; bare None here used to crash them under this backend).
+        class _DeleteResult:
+            pass
+        result = _DeleteResult()
+        result.deleted_count = deleted
+        return result
 
     async def delete_many(self, filt: dict):
+        deleted = 0
         async with aiosqlite.connect(self._db_path) as conn:
             await self._ensure_table(conn)
             rows = await conn.execute_fetchall(f'SELECT id, doc FROM "{self._name}"')
@@ -172,6 +192,12 @@ class SqliteCollection:
             for row_id in ids:
                 await conn.execute(f'DELETE FROM "{self._name}" WHERE id = ?', (row_id,))
             await conn.commit()
+            deleted = len(ids)
+        class _DeleteResult:
+            pass
+        result = _DeleteResult()
+        result.deleted_count = deleted
+        return result
 
     async def count_documents(self, filt: dict) -> int:
         return sum(1 for doc in await self._all_docs() if _matches(doc, filt))

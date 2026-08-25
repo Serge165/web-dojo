@@ -105,6 +105,10 @@ class Project(BaseModel):
     active_page_id: Optional[str] = None
     template: Optional[Any] = None  # { header_html, footer_html, use_template }
     analytics: Optional[Any] = None  # { ga4, fathom, plausible_domain, hotjar, fb_pixel }
+    # Phase 1 ownership model. Legacy projects (pre-auth) have owner_id=None
+    # and are editable by any authenticated user until claimed.
+    owner_id: Optional[str] = None
+    collaborators: List[Any] = Field(default_factory=list)  # [{email, role}]
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -468,23 +472,89 @@ async def root():
 
 
 @api_router.post("/projects", response_model=Project)
-async def create_project(payload: ProjectCreate):
+async def create_project(payload: ProjectCreate, request: Request):
+    """Creating a project requires a builder account: the JWT's user becomes
+    the project's owner. Published-site flows never call this endpoint."""
+    user = await _auth_mod.authenticate(request)
     project = Project(**payload.model_dump())
     doc = project.model_dump()
+    doc["owner_id"] = user["id"]
+    doc["collaborators"] = []
     doc = _serialize(doc)
     await db.projects.insert_one(doc.copy())
     return project
 
 
 @api_router.get("/projects", response_model=List[ProjectSummary])
-async def list_projects():
-    cursor = db.projects.find({}, {"_id": 0, "id": 1, "name": 1, "updated_at": 1}).sort("updated_at", -1)
-    items = await cursor.to_list(500)
-    result = []
-    for it in items:
+async def list_projects(request: Request):
+    """Scoped listing: projects the caller owns, collaborates on, plus legacy
+    unowned projects (visible to every authenticated user until claimed)."""
+    user = await _auth_mod.authenticate(request)
+    items = []
+    async for it in db.projects.find({}, {"_id": 0, "id": 1, "name": 1, "updated_at": 1, "owner_id": 1, "collaborators": 1}):
         it = _deserialize(it)
-        result.append(ProjectSummary(**it))
-    return result
+        if it.get("owner_id") and it["owner_id"] != user["id"] \
+                and not any(c.get("email") == user.get("email") for c in (it.get("collaborators") or [])):
+            continue
+        # Legacy hand-inserted docs may predate updated_at; default keeps
+        # ProjectSummary's datetime validation happy.
+        items.append({"id": it["id"], "name": it["name"],
+                      "updated_at": it.get("updated_at") or "1970-01-01T00:00:00+00:00"})
+    items.sort(key=lambda p: str(p.get("updated_at")), reverse=True)
+    return [ProjectSummary(**p) for p in items[:500]]
+
+
+@api_router.post("/projects/{project_id}/claim")
+async def claim_project(project_id: str, request: Request):
+    """Legacy ownership migration: the first authenticated user to claim an
+    unowned project becomes its owner. No-op (200) if already owned by the
+    caller; 403 if owned by someone else."""
+    user = await _auth_mod.authenticate(request)
+    # No field-limiting projection here: the shim's exclude-style projection
+    # returns {} for docs lacking the requested field, which would read as
+    # "not found" for every legacy project.
+    existing = await db.projects.find_one({"id": project_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Project not found")
+    owner_id = existing.get("owner_id")
+    if owner_id and owner_id != user["id"]:
+        raise HTTPException(status_code=403, detail="Project already owned by another account")
+    if not owner_id:
+        await db.projects.update_one({"id": project_id}, {"$set": {"owner_id": user["id"], "collaborators": []}})
+    return {"ok": True, "owner_id": owner_id or user["id"]}
+
+
+class ShareRequest(BaseModel):
+    email: str
+    role: str  # viewer | editor | admin
+
+
+@api_router.post("/projects/{project_id}/share")
+async def share_project(project_id: str, payload: ShareRequest, request: Request):
+    """Invite/update a collaborator (owner or admin only). Inviting an email
+    that has no account yet is allowed — the role applies as soon as they
+    register with that email."""
+    ctx = await _auth_mod.require_project_access(project_id, request, need="admin")
+    email = payload.email.strip().lower()
+    if "@" not in email:
+        raise HTTPException(status_code=400, detail="Enter a valid email address")
+    if payload.role not in ("viewer", "editor", "admin"):
+        raise HTTPException(status_code=400, detail="Role must be viewer, editor, or admin")
+    if email == ctx["user"].get("email") and ctx["project"].get("owner_id"):
+        raise HTTPException(status_code=400, detail="The owner's access cannot be changed")
+    collaborators = [c for c in (ctx["project"].get("collaborators") or []) if c.get("email") != email]
+    collaborators.append({"email": email, "role": payload.role})
+    await db.projects.update_one({"id": project_id}, {"$set": {"collaborators": collaborators}})
+    return {"ok": True, "collaborators": collaborators}
+
+
+@api_router.delete("/projects/{project_id}/collaborators/{collaborator_email}")
+async def remove_collaborator(project_id: str, collaborator_email: str, request: Request):
+    ctx = await _auth_mod.require_project_access(project_id, request, need="admin")
+    collaborators = [c for c in (ctx["project"].get("collaborators") or [])
+                     if c.get("email") != collaborator_email.strip().lower()]
+    await db.projects.update_one({"id": project_id}, {"$set": {"collaborators": collaborators}})
+    return {"ok": True, "collaborators": collaborators}
 
 
 @api_router.get("/projects/{project_id}", response_model=Project)
@@ -500,7 +570,8 @@ async def get_project(project_id: str):
 
 
 @api_router.put("/projects/{project_id}", response_model=Project)
-async def update_project(project_id: str, payload: ProjectUpdate):
+async def update_project(project_id: str, payload: ProjectUpdate, request: Request):
+    await _auth_mod.require_project_access(project_id, request, need="editor")
     existing = await db.projects.find_one({"id": project_id}, {"_id": 0})
     if not existing:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -518,7 +589,8 @@ async def update_project(project_id: str, payload: ProjectUpdate):
 
 
 @api_router.delete("/projects/{project_id}")
-async def delete_project(project_id: str):
+async def delete_project(project_id: str, request: Request):
+    await _auth_mod.require_project_access(project_id, request, need="admin")
     res = await db.projects.delete_one({"id": project_id})
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -533,6 +605,7 @@ class DashboardPasswordRequest(BaseModel):
 async def set_dashboard_password(
     project_id: str,
     payload: DashboardPasswordRequest,
+    request: Request,
     x_dashboard_token: Optional[str] = Header(default=None),
 ):
     """project_id is public — it is baked in plaintext into every exported
@@ -548,16 +621,37 @@ async def set_dashboard_password(
     if current_hash and not (
         x_dashboard_token and _verify_dashboard_token(x_dashboard_token, project_id, current_hash)
     ):
-        raise HTTPException(
-            status_code=401,
-            detail="A dashboard password is already set — unlock with the current password to change it",
-        )
+        # Owner/admin override: a valid builder JWT with admin rank on this
+        # project may rotate the dashboard password without knowing the old
+        # one (Task 1.3). Anonymous callers still need the current token.
+        try:
+            await _auth_mod.require_project_access(project_id, request, need="admin")
+        except HTTPException:
+            raise HTTPException(
+                status_code=401,
+                detail="A dashboard password is already set — unlock with the current password to change it",
+            )
     loop = asyncio.get_running_loop()
     new_hash = await loop.run_in_executor(None, _hash_password, payload.password)
     await db.projects.update_one(
         {"id": project_id},
         {"$set": {"dashboard_password_hash": new_hash}},
     )
+    # Read-after-write confirmation: a 200 from this endpoint is the contract
+    # that "the password IS set", so verify persistence and retry once before
+    # surfacing an error (guards against transient visibility gaps in the
+    # SQLite dev shim under parallel test load; no-op cost on Mongo).
+    check = await db.projects.find_one({"id": project_id}, {"_id": 0, "dashboard_password_hash": 1})
+    if not (check or {}).get("dashboard_password_hash"):
+        await asyncio.sleep(0.05)
+        await db.projects.update_one(
+            {"id": project_id},
+            {"$set": {"dashboard_password_hash": new_hash}},
+        )
+        check = await db.projects.find_one({"id": project_id}, {"_id": 0, "dashboard_password_hash": 1})
+        if not (check or {}).get("dashboard_password_hash"):
+            logger.error(f"dashboard password write did not persist for project {project_id}")
+            raise HTTPException(status_code=500, detail="Could not save the dashboard password — try again")
     return {"ok": True}
 
 
@@ -2546,14 +2640,37 @@ async def clear_submissions(
 # Zenero Stack content management + funnel tracking routers. These modules
 # reference `db` and `_require_dashboard_token` from this module's namespace;
 # inject them so the route handlers resolve correctly.
+class _LiveDbProxy:
+    """Forwards every attribute access to the *current* process-global `db`.
+    Modules that capture `db` at import time would otherwise hold a stale
+    snapshot after _ensure_live_client() rebuilds it or a test module swaps
+    server.db (test_commerce_orders.py's per-module SQLite backend)."""
+    def __getattr__(self, name):
+        return getattr(db, name)
+
+
 from models.zenero import zenero_router
 from models.funnels import funnel_router
 import models.zenero as _zenero_mod
 import models.funnels as _funnel_mod
-_zenero_mod.db = db
+_zenero_mod.db = _LiveDbProxy()
 _zenero_mod._require_dashboard_token = _require_dashboard_token
-_funnel_mod.db = db
+_funnel_mod.db = _LiveDbProxy()
 _funnel_mod._require_dashboard_token = _require_dashboard_token
+
+# Phase 1 builder auth + Phase 2 content models. Same injection pattern:
+# these modules see this file's live `db` singleton (which _ensure_live_client
+# may replace) and the shared permission helpers.
+from models import builder_auth as _auth_mod
+from models.content import content_router as _content_router
+_auth_mod.db = _LiveDbProxy()
+_auth_mod._hash_password = _hash_password
+_auth_mod._verify_password = _verify_password
+_auth_mod._DASHBOARD_KEY_PATH = _DASHBOARD_KEY_PATH
+import models.content as _content_mod
+_content_mod.db = _LiveDbProxy()
+_content_mod.require_project_access = _auth_mod.require_project_access
+_content_mod._require_dashboard_token = _require_dashboard_token
 
 app.include_router(api_router)
 
@@ -2563,6 +2680,8 @@ ASSETS_ROOT.mkdir(parents=True, exist_ok=True)
 app.mount("/assets", StaticFiles(directory=str(ASSETS_ROOT)), name="assets")
 app.include_router(zenero_router)
 app.include_router(funnel_router)
+app.include_router(_auth_mod.builder_auth_router)
+app.include_router(_content_router)
 
 
 # ---------- Social Wall: config + live feed ----------
