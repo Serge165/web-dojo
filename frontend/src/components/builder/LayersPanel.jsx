@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick, Filter, ClipboardPaste, CheckSquare, Wand2 } from "lucide-react";
+import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2, Sparkles, MousePointerClick, Filter, ClipboardPaste, CheckSquare, Wand2, ChevronRight, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { getFxClip, subscribeFxClip } from "@/lib/fxClipboard";
 import { getAnimClip, subscribeAnimClip } from "@/lib/animClipboard";
@@ -9,6 +9,43 @@ const labelFor = (html) => {
   const tag = (html.match(/<([a-zA-Z][a-zA-Z0-9]*)/) || [])[1] || "el";
   const text = (html.replace(/<[^>]+>/g, " ").trim() || "").slice(0, 26);
   return `${tag}${text ? " · " + text : ""}`;
+};
+
+// Flatten the meaningful "child layers" inside a block: its media (images,
+// video), icons (svg / <i class=…>), and text-bearing tags (headings,
+// paragraphs, links, buttons, inputs). Wrapper divs/sections are skipped —
+// they're the block's own scaffolding, not distinct layers. Each child is a
+// { kind, label, src } object so the Layers panel can show a block as an
+// expandable folder with its bg-images / icons / text as nested layers.
+const childLayersFor = (html) => {
+  const out = [];
+  // Iterate over the meaningful child tag openings once. Attrs are matched
+  // greedily up to the tag's closing `>` (quoted attribute values — including
+  // self-closing markers — are consumed fine for this codebase's markup).
+  const tagRe = /<\s*(img|video|svg|i|h1|h2|h3|h4|h5|h6|p|a|button|label|input|span)\b[^>]*>/gi;
+  let m;
+  while ((m = tagRe.exec(html))) {
+    const tag = m[1];
+    const attrs = m[2] || "";
+    if (tag === "div" || tag === "section" || tag === "header" || tag === "nav" || tag === "footer" || tag === "main" || tag === "figure" || tag === "ul" || tag === "ol" || tag === "li") continue;
+    // Skip self-closing generic tags with no payload (e.g. empty <span>).
+    let kind = "text";
+    let label = "";
+    if (tag === "img" || tag === "video" || tag === "svg") {
+      kind = tag === "img" ? "image" : tag === "video" ? "video" : "icon";
+      const src = (attrs.match(/(?:src|icon|data-icon|href)="([^"]*)"/) || [])[1] || "";
+      label = kind === "image" ? (src.split("/").pop() || "image").slice(0, 20) : kind === "video" ? "video" : "svg icon";
+      if (kind === "image" && src && !src.startsWith("data:") && !src.startsWith("http")) label = `<${src}>`;
+    } else {
+      // Inline text-bearing tag: capture inner text up to the matching close.
+      const after = html.slice(m.index + m[0].length);
+      const closeIdx = after.search(new RegExp(`</${tag}>`));
+      const text = closeIdx >= 0 ? after.slice(0, closeIdx).replace(/<[^>]+>/g, " ").trim() : "";
+      label = `${tag}${text ? " · " + text.slice(0, 14) : ""}`;
+    }
+    out.push({ kind, tag, label });
+  }
+  return out.slice(0, 12); // cap: a block rarely has more meaningful children
 };
 
 // Detect Text FX / hover effects carried by an element so the row can flag them.
@@ -39,6 +76,15 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
   const rev = [...elements].map((e, i) => ({ ...e, idx: i })).reverse();
   const [onlyFx, setOnlyFx] = useState(false);
   const [checked, setChecked] = useState(new Set());
+  // Blocks behave as folders: which block rows have their child layers
+  // (bg-images / icons / text) revealed. Auto-expanded for the selected
+  // block so its children are visible on selection.
+  const [openFolders, setOpenFolders] = useState(new Set());
+  useEffect(() => {
+    if (!selectedId) return;
+    setOpenFolders((s) => { const n = new Set(s); n.add(selectedId); return n; });
+  }, [selectedId]);
+  const toggleFolder = (id) => setOpenFolders((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const [clipReady, setClipReady] = useState(!!getFxClip());
   useEffect(() => subscribeFxClip((v) => setClipReady(!!v)), []);
   const [animClipReady, setAnimClipReady] = useState(!!getAnimClip());
@@ -122,12 +168,20 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
         {list.map((el) => {
           const hidden = /(^|;)\s*display\s*:\s*none/i.test(el.html);
           const fx = fxOf(el.html);
+          const children = childLayersFor(el.html);
+          const open = openFolders.has(el.id);
           return (
+            <div key={el.id} data-testid={`layer-folder-${el.id}`}>
             <div
-              key={el.id}
               className={`flex items-center gap-1 p-1.5 rounded border ${selectedId === el.id ? "border-[#C9A227] bg-[#2A2416]" : "border-[#332D22] bg-[#15130E]"}`}
               data-testid={`layer-row-${el.id}`}
             >
+              <button
+                onClick={() => toggleFolder(el.id)}
+                className="p-0.5 text-[#A79C87] hover:text-[#F1EDE2]"
+                title={open ? "Hide block's child layers" : `Show block's child layers${children.length ? ` (${children.length})` : ""}`}
+                data-testid={`layer-fold-toggle-${el.id}`}
+              >{open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}</button>
               <input
                 type="checkbox"
                 checked={checked.has(el.id)}
@@ -175,6 +229,26 @@ export const LayersPanel = ({ elements, selectedId, onSelect, onMove, onDelete, 
               <button onClick={() => onMove(el.id, 1)} className="p-1 text-[#A79C87] hover:text-[#F1EDE2]" title="Move up" data-testid={`layer-up-${el.id}`}><ArrowUp size={12} /></button>
               <button onClick={() => onMove(el.id, -1)} className="p-1 text-[#A79C87] hover:text-[#F1EDE2]" title="Move down" data-testid={`layer-down-${el.id}`}><ArrowDown size={12} /></button>
               <button onClick={() => onDelete(el.id)} className="p-1 text-[#A79C87] hover:text-red-400" title="Delete" data-testid={`layer-del-${el.id}`}><Trash2 size={12} /></button>
+            </div>
+              {open && children.length > 0 && (
+                <div className="ml-4 mt-0.5 space-y-0.5 border-l border-[#332D22] pl-1.5" data-testid={`layer-children-${el.id}`}>
+                  {children.map((child, ci) => (
+                    <button
+                      key={`${el.id}-child-${ci}`}
+                      onClick={() => { onSelect(el.id); const n = document.querySelector(`[data-testid="canvas-el-${el.id}"]`); if (n) n.scrollIntoView({ behavior: "smooth", block: "center" }); }}
+                      className="flex items-center gap-1 w-full text-left text-[10px] px-1.5 py-0.5 rounded border border-[#2A2416] bg-[#1C1A15] text-[#A79C87] hover:text-[#F1EDE2] hover:border-[#C9A227]/50 truncate"
+                      title={`${child.kind} layer inside ${el.id}`}
+                      data-testid={`layer-child-${el.id}-${ci}`}
+                    >
+                      {child.kind === "image" && <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" className="w-2 h-2 flex-none rounded-[2px]" style={{ background: "repeating-linear-gradient(45deg,#6B6353 0 1px,transparent 1px 3px)" }} />}
+                      {child.kind === "icon" && <Sparkles size={9} className="flex-none text-indigo-300" />}
+                      {child.kind === "video" && <span className="w-2 h-2 flex-none rounded-[2px] bg-[#8B5CF6]" />}
+                      {child.kind === "text" && <span className="flex-none text-[9px] uppercase tracking-wider text-[#948C79] font-mono">{child.tag}</span>}
+                      <span className="truncate">{child.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

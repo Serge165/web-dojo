@@ -1102,6 +1102,11 @@ RESPONSIVE_CSS_BODY = (
 RESPONSIVE_CSS = f"<style>{RESPONSIVE_CSS_BODY}</style>"
 
 _SCRIPT_CLOSE_RE = re.compile(r'</script', re.IGNORECASE)
+# Phase 6: complete <script>…</script> segments, captured so re.split()
+# keeps them as list items. Used by _strip_inline_styles to leave script
+# payloads (form widgets, players) verbatim — mirrors frontend
+# stripInlineStyles.js's SCRIPT_SEG_RE — keep both in sync.
+_SCRIPT_SEG_RE = re.compile(r"(<script\b[^>]*>[\s\S]*?</script\s*>)", re.IGNORECASE)
 
 
 def _esc_raw_script(code: str) -> str:
@@ -1121,26 +1126,54 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
     use_tpl = bool(template.get("use_template"))
     header = template.get("header_html", "") if use_tpl else ""
     footer = template.get("footer_html", "") if use_tpl else ""
-    body_parts = [e.get("html", "") for e in (p.get("elements") or [])]
-    body = "\n".join([header] + body_parts + [footer])
+    # Phase 5 (Issue #2): the preview/single-file path must strip inline
+    # styles too — previously only the site/publish bundle did, which is
+    # exactly the "some blocks clean, some still inline" mixed-path report.
+    # The lifted declarations ride the consolidated style block below.
+    body_html, component_css, strip_media = _strip_inline_styles(p.get("elements") or [])
+    body = "\n".join([header, body_html, footer])
     fonts_link = _build_google_fonts_link(p.get("fonts") or doc.get("fonts") or [])
     head_extra = p.get("head_html") or doc.get("head_html") or ""
+    # Phase 5 (Issue #7): route the Theme editor's <style data-forge-*>
+    # blocks (theme vars, per-element picks, fonts, animations, responsive
+    # overrides, imported CSS) out of the head into ONE consolidated style
+    # block — the self-contained-preview equivalent of the site export's
+    # globals.css sections. Whatever's left of head_html (CDN embeds,
+    # analytics snippets, user-authored tags) stays in the head.
+    forge = _extract_forge_css(head_extra)
+    head_extra = forge["remaining_head"]
+    theme_css = "\n".join(
+        blk for blk in [*forge["theme_vars"], *forge["base"], component_css,
+                        *forge["imported_css"], *forge["animations"],
+                        *forge["media_queries"],
+                        *[r for r in strip_media.split("\n") if r]] if blk
+    )
+    forge_style = f'<style data-forge-theme="preview">{theme_css}</style>\n' if theme_css.strip() else ""
     canvas_bg = p.get("canvas_bg") or doc.get("canvas_bg") or "#ffffff"
     custom_js = p.get("custom_js") or doc.get("custom_js") or ""
     custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
     seo = p.get("seo") or {}
     seo_head = _seo_head(seo)
     title = seo.get("title") or p.get("name") or doc.get("name") or "Untitled"
+    # Phase 5 (Issues #3/#7): <head> is boilerplate only — meta/title/
+    # fonts/SEO/user content plus the responsive baseline. The project-id
+    # bootstrap lives at the top of <body> (reading its data-wd-project
+    # attribute) instead of a <script> tag in the head; the canvas
+    # background stays the one tiny body rule a self-contained preview
+    # needs (the site/publish export routes it into globals.css instead).
+    project_id = json.dumps(doc.get('id') or '')
     return (
         "<!doctype html>\n<html lang=\"en\">\n<head>\n"
         "<meta charset=\"utf-8\" />\n"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
         f"<title>{title}</title>\n"
-        f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
         f"{RESPONSIVE_CSS}\n"
-        f"{fonts_link}\n{seo_head}\n{head_extra}\n"
+        f"{fonts_link}\n{seo_head}\n"
+        f"{forge_style}{head_extra}\n"
         f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
-        "</head>\n<body>\n"
+        "</head>\n"
+        f"<body data-wd-project={project_id}>\n"
+        "<script>window.__WD_PROJECT_ID=window.__WD_PROJECT_ID||document.body.getAttribute('data-wd-project')||'';</script>\n"
         f"{body}\n"
         f"{custom_js_tag}"
         "</body>\n</html>"
@@ -1436,19 +1469,86 @@ def _tag_name_at(s, offset):
     m = re.match(r"[a-zA-Z][a-zA-Z0-9]*", s[lt_idx + 1:])
     return m.group(0).lower() if m else "el"
 
+# Per-category prefix to strip from a block id to get its slug. The
+# semantic class name is block-<categoryId>-<slug>. Mirrors the frontend's
+# BLOCK_PREFIX_BY_CAT in stripInlineStyles.js verbatim — keep both in
+# sync. See docs/PHASE_4_BLOCK_AUDIT.md §3.
+_BLOCK_PREFIX_BY_CAT = {
+    "components": "cmp-",
+    "timelines": "cmp-timeline-",
+    "navbars": "nav-",
+    "headers": "hdr-",
+    "footers": "ft-",
+    "video": "video-",
+    "heroes": "hero-",
+    "sections": "section-",
+    "containers": "container-",
+    "text": "text-",
+    "toolbox": "tb-",
+    "pricing": "pricing-",
+    "team": "team-",
+    "faq": "faq-",
+    "newsletter": "newsletter-",
+    "portfolio": "portfolio-",
+    "layout": "layout-",
+    "services": "services-",
+    "contact": "contact-",
+    "testimonials": "testimonial-",
+    "esports": "esports-",
+    "creator": "creator-",
+    "retro": "retro-",
+    "parallax": "parallax-",
+    "social": "social-",
+    "comments": "comments-",
+    "zenero": "",
+}
+
+_BLOCK_CAT_RE = re.compile(r'data-wd-cat="([^"]*)"')
+_BLOCK_ID_RE = re.compile(r'data-wd-block="([^"]*)"')
+
+
+def _read_block_meta(html):
+    """Reads the data-wd-cat / data-wd-block pair the frontend's
+    variants.js::stampVariant stamps onto a block's root tag. Returns
+    {"catId": ..., "blockId": ...} or None. Mirrors stripInlineStyles.js's
+    readBlockMeta."""
+    if not html:
+        return None
+    cat = _BLOCK_CAT_RE.search(html)
+    block = _BLOCK_ID_RE.search(html)
+    if cat and block:
+        return {"catId": cat.group(1), "blockId": block.group(1)}
+    return None
+
+
+def _block_class_name(cat_id, block_id):
+    """block-<catId>-<slug>; slug = blockId with the category's prefix
+    stripped (if the block id starts with it), else the full blockId.
+    Unknown catIds still work — slug is just the full blockId. Mirrors
+    stripInlineStyles.js's blockClassName."""
+    p = _BLOCK_PREFIX_BY_CAT.get(cat_id)
+    slug = block_id[len(p):] if (p and block_id.startswith(p)) else block_id
+    return f"block-{cat_id}-{slug}"
+
 
 def _strip_inline_styles(elements, prefix=""):
     """Extract inline style attributes into deduplicated CSS classes, one
-    class per style="..." occurrence (mirrors frontend/src/lib/exportHtml.js's
-    stripInlineStyles — keep both in sync). `prefix` (e.g. "about-") is only
-    for multi-page exports sharing one stylesheet — each page's classes
-    would otherwise collide by name despite the counter being page-local
-    either way. Classes are named semantically
-    from the owning tag name plus a running counter scoped to the whole
-    export (not per-element/per-parent): the first <section> anywhere
-    becomes .section-1, the second .section-2, the first <h2> becomes
-    .h2-1, etc., in document/encounter order.
-    Returns (html_with_classes, css_string)."""
+    class per style="..." occurrence (mirrors frontend/src/lib/stripInlineStyles.js
+    — keep both in sync, including _BLOCK_PREFIX_BY_CAT and _read_block_meta).
+    Two paths:
+      • Semantic path (Phase 4a): if the element's root tag carries the
+        data-wd-cat/data-wd-block pair the frontend's variants.js::stampVariant
+        stamps at insert time, every style occurrence gets a class
+        f"{prefix}block-<catId>-<slug>-<occ>" (1-based occurrence within the
+        element) plus a shared unprefixed marker "block-<catId>-<slug>" (the
+        Avalon-GEMS override hook; no rule emitted for it).
+      • Fallback path (no data-wd-* pair): tag + running counter scoped to
+        the whole export — .section-1, .h2-1, etc. Byte-identical to pre-4a.
+    `prefix` (e.g. "about-") prefixes the suffixed semantic class (and the
+    fallback class) for multi-page exports sharing one stylesheet; the marker
+    stays unprefixed so a cross-page override is one rule. A rule setting
+    grid-template-columns also gets a companion responsive override.
+    Returns (html_with_classes, component_css, media_css)."""
     # component_rules and media_rules are tracked separately (both tiers,
     # matching RESPONSIVE_CSS's tablet/mobile breakpoints) so callers that
     # route CSS into labeled globals.css sections (_build_multi_page_bundle)
@@ -1457,12 +1557,26 @@ def _strip_inline_styles(elements, prefix=""):
     media_rules = []
     out_html_parts = []
     tag_counters = {}
+    block_class = None     # per-element, set in the loop (closure-read by repl)
+    occurrence = 0          # per-element, reset in the loop (nonlocal in repl)
 
     def repl(match):
+        nonlocal occurrence
         tag = _tag_name_at(match.string, match.start())
+        declarations = match.group(1)
+        if block_class:
+            # Semantic path: block-<catId>-<slug>-<occ> + shared unprefixed marker.
+            occurrence += 1
+            cls = f"{prefix}{block_class}-{occurrence}"
+            marker = block_class
+            component_rules.append(f".{cls} {{ {declarations} }}")
+            if "grid-template-columns" in declarations:
+                media_rules.append(f"@media (max-width: 1024px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
+                media_rules.append(f"@media (max-width: 767px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
+            return f'class="block {cls} {marker}"'
+        # Fallback path: tag + running counter (byte-identical to pre-4a).
         tag_counters[tag] = tag_counters.get(tag, 0) + 1
         cls = f"{prefix}{tag}-{tag_counters[tag]}"
-        declarations = match.group(1)
         component_rules.append(f".{cls} {{ {declarations} }}")
         if "grid-template-columns" in declarations:
             media_rules.append(f"@media (max-width: 1024px) {{ .{cls} {{ grid-template-columns: 1fr !important; }} }}")
@@ -1471,7 +1585,21 @@ def _strip_inline_styles(elements, prefix=""):
 
     for el in elements:
         html = el.get("html", "")
-        out_html_parts.append(re.sub(r'style="([^"]*)"', repl, html))
+        meta = _read_block_meta(html)
+        block_class = _block_class_name(meta["catId"], meta["blockId"]) if meta else None
+        occurrence = 0
+        # Phase 6: <script> payloads (form widgets, embedded players) carry
+        # literal style="..." inside JS strings — code, not markup. Script
+        # segments pass through verbatim; only real markup is substituted
+        # (mirrors frontend stripInlineStyles.js's protectScriptPayloads —
+        # keep both in sync).
+        chunks = []
+        for seg in _SCRIPT_SEG_RE.split(html):
+            if seg[:7].lower() == "<script":
+                chunks.append(seg)
+            else:
+                chunks.append(re.sub(r'style="([^"]*)"', repl, seg))
+        out_html_parts.append("".join(chunks))
 
     return "\n".join(out_html_parts), "\n".join(component_rules), "\n".join(media_rules)
 
@@ -1694,6 +1822,12 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
                 all_js_files[name] = code
         remaining_head = head_js_result["remaining"]
         canvas_bg = page.get("canvas_bg") or "#ffffff"
+        # Phase 5 (Issues #3/#7): the page's type ("page" | "layout") rides
+        # on <body data-wd-page-type>, and the canvas background becomes a
+        # [data-wd-page] CSS variable routed into globals.css's Base section
+        # — no per-page <style> tags in the exported head.
+        page_type = "layout" if page.get("type") == "layout" else "page"
+        all_base.append(f'[data-wd-page="{filename[:-5]}"] {{ --wd-canvas-bg: {canvas_bg}; }}')
         custom_js = page.get("custom_js") or ""
         custom_js_tag = f"<script>{_esc_raw_script(custom_js)}</script>\n" if custom_js.strip() else ""
         html = (
@@ -1701,12 +1835,13 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
             "<meta charset=\"utf-8\" />\n"
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n"
             f"<title>{_esc_text(title)}</title>\n"
-            f"<script>window.__WD_PROJECT_ID={json.dumps(doc.get('id') or '')};</script>\n"
             f"{_seo_head(seo)}\n{_build_json_ld(page.get('name') or doc.get('name'), seo)}\n"
             f"{fonts_link}\n{remaining_head}\n"
             f'<link rel="stylesheet" href="{css_filename}" />\n'
-            f"<style>body{{margin:0;background:{canvas_bg};}}</style>\n"
-            "</head>\n<body>\n"
+            "</head>\n"
+            f"<body data-wd-project={json.dumps(doc.get('id') or '')} "
+            f"data-wd-page=\"{filename[:-5]}\" data-wd-page-type=\"{page_type}\">\n"
+            "<script>window.__WD_PROJECT_ID=window.__WD_PROJECT_ID||document.body.getAttribute('data-wd-project')||'';</script>\n"
             f"{body}\n"
             f"{custom_js_tag}"
             "</body>\n</html>"
@@ -1719,6 +1854,9 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
         all_animations.extend(forge["animations"])
         all_media_queries.extend([r for r in media_css.split("\n") if r] + forge["media_queries"])
 
+    # One shared rule paints every page's canvas from its [data-wd-page]
+    # variable (Phase 5, Issue #7 — replaces the per-page <style> tags).
+    all_base.append("body { margin: 0; background: var(--wd-canvas-bg, #ffffff); }")
     files[css_filename] = _build_organized_stylesheet(
         all_theme_vars, all_base,
         "\n".join(p for p in component_css_parts if p),
@@ -2468,7 +2606,99 @@ async def list_client_logs(limit: int = 50):
     return [_deserialize(it) for it in items]
 
 
-# ---------- Form Submissions Inbox ----------
+# ---------- Dynamic block bridge (Phase 3.2) ----------
+# Smart blocks carry data-dynamic-type="blog-posts|social-posts|portfolio"
+# plus optional data-dynamic-limit. Stored HTML keeps static placeholder
+# markup; the PREVIEW endpoint hydrates those blocks with live data at
+# request time. Export stays fully static by design: exported pages keep the
+# stored placeholder markup, so exports remain portable snapshots (the
+# trade-off is documented in WEB_DOJO_OVERVIEW.md §7 rather than shipping
+# half-live hybrids).
+
+_DYNAMIC_TYPES = ("blog-posts", "social-posts", "portfolio")
+_DYNAMIC_OPEN_RE = re.compile(
+    r"<(\w+)\b([^>]*?\bdata-dynamic-type=[\"']([\w-]+)[\"'][^>]*)>", re.IGNORECASE)
+
+
+def _esc_html(text) -> str:
+    return (text or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _fmt_day(iso) -> str:
+    return (iso or "")[:10]
+
+
+_CARD = ("border:1px solid #e2e8f0;border-radius:12px;padding:18px;"
+         "background:#ffffff;font-family:system-ui,sans-serif;margin-bottom:14px;")
+_META = "font-size:12px;color:#64748b;margin:0 0 6px;"
+_TITLE = "font-size:19px;font-weight:700;margin:0 0 8px;color:#0f172a;"
+_BODY = "font-size:14px;line-height:1.6;color:#334155;margin:0;"
+_EMPTY = '<p style="font-size:14px;color:#64748b;font-family:system-ui,sans-serif;">{}</p>'
+
+
+async def _dynamic_inner(project_id: str, dtype: str, limit: int) -> str:
+    """Live-rendered inner HTML for one dynamic block kind."""
+    if dtype == "blog-posts":
+        items = []
+        async for it in db.posts.find({"project_id": project_id}, {"_id": 0}):
+            if not it.get("draft"):
+                items.append(it)
+        items.sort(key=lambda p: p.get("published_at") or p.get("created_at") or "", reverse=True)
+        cards = []
+        for p in items[:limit]:
+            excerpt = p.get("excerpt") or re.sub(r"<[^>]+>", " ", p.get("content") or "")[:180]
+            tags = "".join(
+                f'<span style="display:inline-block;background:#eef2ff;color:#4338ca;'
+                f'border-radius:999px;padding:2px 10px;font-size:11px;margin-right:6px;">{_esc_html(t)}</span>'
+                for t in (p.get("tags") or [])[:4])
+            cards.append(
+                f'<article style="{_CARD}">'
+                f'<p style="{_META}">{_fmt_day(p.get("published_at") or p.get("created_at"))}</p>'
+                f'<h3 style="{_TITLE}">{_esc_html(p.get("title"))}</h3>'
+                f'<p style="{_BODY}">{_esc_html(excerpt.strip())}</p>'
+                f'<div style="margin-top:10px;">{tags}</div></article>')
+        return "".join(cards) or _EMPTY.format("No posts published yet.")
+
+    if dtype == "social-posts":
+        items = []
+        async for it in db.social_posts.find({"project_id": project_id}, {"_id": 0}):
+            items.append(it)
+        items.sort(key=lambda p: p.get("created_at") or "", reverse=True)
+        cards = []
+        for p in items[:limit]:
+            initial = _esc_html((p.get("author_name") or "?")[:1].upper())
+            cards.append(
+                f'<article style="{_CARD}">'
+                f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+                f'<div style="width:34px;height:34px;border-radius:50%;background:#c7d2fe;'
+                f'display:flex;align-items:center;justify-content:center;font-weight:700;color:#3730a3;">{initial}</div>'
+                f'<div><div style="font-weight:600;font-size:14px;color:#0f172a;">{_esc_html(p.get("author_name"))}</div>'
+                f'<div style="font-size:11px;color:#64748b;">{_fmt_day(p.get("created_at"))}</div></div></div>'
+                f'<p style="{_BODY}">{_esc_html(p.get("content"))}</p>'
+                f'<p style="{_META};margin-top:8px;">&#9825; {p.get("likes_count") or 0}</p></article>')
+        return "".join(cards) or _EMPTY.format("The wall is empty for now.")
+
+    if dtype == "portfolio":
+        items = []
+        async for it in db.portfolio_projects.find({"project_id": project_id}, {"_id": 0}):
+            items.append(it)
+        items.sort(key=lambda p: p.get("created_at") or "", reverse=True)
+        cards = []
+        for p in items[:limit]:
+            demo = (f' <a href="{_esc_html(p["demo_url"])}" rel="noreferrer" '
+                    f'style="color:#4338ca;">demo</a>') if p.get("demo_url") else ""
+            repo = (f' &#183; <a href="{_esc_html(p["github_url"])}" rel="noreferrer" '
+                    f'style="color:#4338ca;">code</a>') if p.get("github_url") else ""
+            cards.append(
+                f'<article style="{_CARD}">'
+                f'<span style="display:inline-block;background:#dcfce7;color:#166534;'
+                f'border-radius:999px;padding:2px 10px;font-size:11px;margin-bottom:8px;">{_esc_html(p.get("category"))}</span>'
+                f'<h3 style="{_TITLE}">{_esc_html(p.get("title"))}</h3>'
+                f'<p style="{_BODY}">{_esc_html(p.get("description"))}</p>'
+                f'<p style="{_META};margin-top:8px;">{demo}{repo}</p></article>')
+        return "".join(cards) or _EMPTY.format("No projects yet.")
+
+    return ""
 # Deployed/exported static sites POST their form data here so Web Dojo acts as a
 # lightweight form backend. The generated form block sends multipart FormData via
 # fetch (Accept: application/json) and shows an inline success message. Native

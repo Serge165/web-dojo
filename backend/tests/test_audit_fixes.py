@@ -265,9 +265,19 @@ class TestProjectIdInjection:
     def test_project_to_html_injects_project_id(self):
         doc = {"id": "proj-123", "name": "Test", "elements": [], "fonts": [], "pages": []}
         html = server._project_to_html(doc)
-        assert '<script>window.__WD_PROJECT_ID="proj-123";</script>' in html
+        # Phase 5: the id still reaches window.__WD_PROJECT_ID, but via a
+        # body-top bootstrap reading <body data-wd-project> — never from a
+        # <script> tag inside <head>.
+        assert '<body data-wd-project="proj-123">' in html
+        assert (
+            "<script>window.__WD_PROJECT_ID=window.__WD_PROJECT_ID||"
+            "document.body.getAttribute('data-wd-project')||'';</script>"
+        ) in html
+        assert html.index("window.__WD_PROJECT_ID") > html.index("</head>")
 
     def test_build_project_bundle_injects_project_id(self):
         doc = {"id": "proj-456", "name": "Test", "elements": [], "fonts": []}
         html, _css = server._build_project_bundle(doc, "index.html", "styles.css")
-        assert '<script>window.__WD_PROJECT_ID="proj-456";</script>' in html
+        assert '<body data-wd-project="proj-456"' in html
+        # The bootstrap script must sit after </head> — head is boilerplate.
+        assert html.index("window.__WD_PROJECT_ID") > html.index("</head>")

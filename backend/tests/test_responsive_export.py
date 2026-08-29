@@ -115,3 +115,43 @@ class TestCleanExportGridResponsive:
         assert ".section-1 { padding:64px; }" in component_css
         assert ".h2-1 { font-size:32px; }" in component_css
         assert ".p-1 { margin:0; }" in component_css
+
+    # ===== Phase 4a: semantic block-<cat>-<slug> classes for data-wd-* blocks =====
+
+    def test_strip_inline_styles_emits_semantic_classes_for_data_wd_block(self):
+        # An element stamped with data-wd-cat/data-wd-block (as the frontend's
+        # variants.js::stampVariant does) gets semantic block-<cat>-<slug>-<occ>
+        # classes plus a shared unprefixed marker, mirroring the frontend.
+        elements = [{
+            "id": "el_hero",
+            "html": '<section data-wd-cat="heroes" data-wd-block="hero-centered" style="padding:64px;"><h2 style="color:#111;">T</h2></section>',
+        }]
+        transformed, component_css, _media_css = server._strip_inline_styles(elements)
+        assert 'class="block block-heroes-centered-1 block-heroes-centered"' in transformed
+        assert 'class="block block-heroes-centered-2 block-heroes-centered"' in transformed
+        assert ".block-heroes-centered-1 { padding:64px; }" in component_css
+        assert ".block-heroes-centered-2 { color:#111; }" in component_css
+        # No rule for the bare marker — it's an override hook only.
+        assert ".block-heroes-centered {" not in component_css
+
+    def test_strip_inline_styles_semantic_strips_category_prefix_for_slug(self):
+        elements = [{"id": "el_nav", "html": '<nav data-wd-cat="navbars" data-wd-block="nav-mega" style="padding:8px;">N</nav>'}]
+        transformed, component_css, _media_css = server._strip_inline_styles(elements)
+        assert 'class="block block-navbars-mega-1 block-navbars-mega"' in transformed
+        assert ".block-navbars-mega-1 { padding:8px; }" in component_css
+
+    def test_strip_inline_styles_semantic_prefixes_suffixed_class_keeps_marker_unprefixed(self):
+        elements = [{"id": "el_h", "html": '<section data-wd-cat="heroes" data-wd-block="hero-centered" style="padding:64px;">H</section>'}]
+        transformed, component_css, _media_css = server._strip_inline_styles(elements, "about-")
+        assert 'class="block about-block-heroes-centered-1 block-heroes-centered"' in transformed
+        assert ".about-block-heroes-centered-1 { padding:64px; }" in component_css
+        # Marker stays unprefixed.
+        assert ' block-heroes-centered"' in transformed
+        assert 'about-block-heroes-centered"' not in transformed
+
+    def test_strip_inline_styles_semantic_grid_responsive_targets_suffixed_class(self):
+        elements = [{"id": "el_b", "html": '<div data-wd-cat="layout" data-wd-block="layout-bento" style="display:grid;grid-template-columns:repeat(3,1fr);">B</div>'}]
+        _t, _c, media_css = server._strip_inline_styles(elements)
+        assert "@media (max-width: 1024px) { .block-layout-bento-1 { grid-template-columns: 1fr !important; } }" in media_css
+        assert "@media (max-width: 767px) { .block-layout-bento-1 { grid-template-columns: 1fr !important; } }" in media_css
+

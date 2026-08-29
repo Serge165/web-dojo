@@ -9,7 +9,7 @@ const STATUS = [
 
 // Horizontal strip of page tabs shown between the top bar and the workspace.
 export const PagesBar = ({
-  pages, activePageId, onSwitch, onAdd, onRemove, onRename, onSetStatus, onOpenSeo, onOpenTemplate,
+  pages, activePageId, onSwitch, onAdd, onRemove, onRename, onSetStatus, onSetType, onOpenSeo, onOpenTemplate,
 }) => {
   const [editingId, setEditingId] = useState(null);
   return (
@@ -26,6 +26,15 @@ export const PagesBar = ({
           data-testid={`page-tab-${p.id}`}
         >
           <span title={status.label} style={{ background: status.color, width: 7, height: 7, borderRadius: 999 }} />
+          {/* Phase 5 (Issue #3): layouts are reusable templates — visually
+              distinct from pages and switchable via the type select. */}
+          {p.type === "layout" && (
+            <span
+              title="Layout template"
+              className="text-[9px] leading-none px-1 py-0.5 rounded bg-indigo-600/30 text-indigo-300 uppercase select-none"
+              data-testid={`page-layout-badge-${p.id}`}
+            >L</span>
+          )}
           {isEditing ? (
             <input
               autoFocus
@@ -55,6 +64,17 @@ export const PagesBar = ({
             title="Workflow status"
           >
             {STATUS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+          </select>
+          <select
+            value={p.type || "page"}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => onSetType && onSetType(p.id, e.target.value)}
+            className="bg-transparent text-[10px] text-[#A79C87] outline-none border-0 opacity-0 group-hover:opacity-100"
+            data-testid={`page-type-${p.id}`}
+            title="Page type — pages are unique content; layouts are reusable templates"
+          >
+            <option value="page">Page</option>
+            <option value="layout">Layout</option>
           </select>
           {pages.length > 1 && (
             <button

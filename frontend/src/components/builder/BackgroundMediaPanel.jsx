@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Music } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Music, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { escAttr, escText, escJsAttr } from "@/lib/escapeHtml";
 
@@ -47,6 +47,13 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
   const [position, setPosition] = useState("center");
   const [repeat, setRepeat] = useState("no-repeat");
 
+  // Phase 6 Task 6: solid fill + gradient backgrounds (element level).
+  const [fillColor, setFillColor] = useState("#ffffff");
+  const [gradientType, setGradientType] = useState("linear");
+  const [gradFrom, setGradFrom] = useState("#5b7fdb");
+  const [gradTo, setGradTo] = useState("#8b7fdb");
+  const [gradAngle, setGradAngle] = useState(180);
+
   // Background music (page-level)
   const [musicType, setMusicType] = useState("mp3");
   const [musicUrl, setMusicUrl] = useState("");
@@ -66,6 +73,37 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
     });
   };
   const clearBg = () => selected && onPatch({ "background-image": "none", background: "transparent" });
+  // Phase 6 Task 6: upload a local image as the background — same style
+  // patch as applyImage, but the source is a self-contained data URL so it
+  // survives export without any external hosting.
+  const imgFileRef = useRef(null);
+  const handleImgFile = (e) => {
+    const f = e.target.files?.[0];
+    if (!f || !selected) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      onPatch({
+        "background-image": `url('${String(reader.result)}')`,
+        "background-size": size,
+        "background-position": position,
+        "background-repeat": repeat,
+      });
+      toast.success("Background image applied");
+    };
+    reader.readAsDataURL(f);
+    e.target.value = "";
+  };
+  // Phase 6 Task 6: fill/gradient go through the same style patch as the
+  // image background, so the canvas updates live AND the export hoists the
+  // declarations into per-block class rules (stripInlineStyles).
+  const applyFill = () => { if (selected) onPatch({ "background-image": "none", background: fillColor }); };
+  const applyGradient = () => {
+    if (!selected) return;
+    const gradient = gradientType === "linear"
+      ? `linear-gradient(${gradAngle}deg, ${gradFrom}, ${gradTo})`
+      : `radial-gradient(circle, ${gradFrom}, ${gradTo})`;
+    onPatch({ background: gradient });
+  };
   const applyVideo = () => {
     if (!videoUrl.trim() || !selected) return;
     const inner = selected.html;
@@ -124,6 +162,43 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
         <p className="text-[10px] text-[#948C79] leading-relaxed">Adds a floating player fixed to the page corner. {musicType === "mp3" ? "Most browsers block silent autoplay, so the play button is the reliable option." : "MIDI plays via a small web player loaded from a CDN — host the .mid file somewhere that allows cross-origin (CORS) access, e.g. your own domain or a public CDN."}</p>
       </div>
 
+      {/* Background fill — element level (Phase 6 Task 6) */}
+      <div className="pt-3 border-t border-[#332D22] space-y-2">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Fill</div>
+        {!selected && <div className="text-[11px] text-[#948C79]">Select an element to set a solid fill.</div>}
+        <div className="flex items-center gap-2">
+          <input type="color" value={fillColor} onChange={(e) => setFillColor(e.target.value)} disabled={!selected} className="w-8 h-7 rounded bg-transparent border border-[#332D22] disabled:opacity-40" data-testid="bg-fill-color" title="Fill colour" />
+          <button onClick={applyFill} disabled={!selected} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40" data-testid="apply-bg-fill">Apply fill</button>
+          <button onClick={() => selected && onPatch({ background: "transparent" })} disabled={!selected} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] disabled:opacity-40" data-testid="clear-bg-fill">Clear</button>
+        </div>
+      </div>
+
+      {/* Background gradient — element level (Phase 6 Task 6) */}
+      <div className="pt-3 border-t border-[#332D22] space-y-2">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Gradient</div>
+        {!selected && <div className="text-[11px] text-[#948C79]">Select an element to set a gradient.</div>}
+        <div className="grid grid-cols-2 gap-1.5">
+          <select value={gradientType} onChange={(e) => setGradientType(e.target.value)} disabled={!selected} className={selCls} data-testid="bg-gradient-type">
+            <option value="linear">Linear</option>
+            <option value="radial">Radial</option>
+          </select>
+          {gradientType === "linear" ? (
+            <div className="flex items-center gap-1.5">
+              <input type="range" min="0" max="360" value={gradAngle} onChange={(e) => setGradAngle(Number(e.target.value))} disabled={!selected} className="flex-1 accent-[#C9A227]" data-testid="bg-gradient-angle" title={`Angle: ${gradAngle}°`} />
+              <span className="text-[10px] text-[#948C79] w-8 text-right">{gradAngle}°</span>
+            </div>
+          ) : (
+            <div className="text-[10px] text-[#948C79] flex items-center">Radial: centre outward</div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <input type="color" value={gradFrom} onChange={(e) => setGradFrom(e.target.value)} disabled={!selected} className="w-8 h-7 rounded bg-transparent border border-[#332D22] disabled:opacity-40" data-testid="bg-gradient-from" title="From colour" />
+          <span className="text-[10px] text-[#948C79]">→</span>
+          <input type="color" value={gradTo} onChange={(e) => setGradTo(e.target.value)} disabled={!selected} className="w-8 h-7 rounded bg-transparent border border-[#332D22] disabled:opacity-40" data-testid="bg-gradient-to" title="To colour" />
+          <button onClick={applyGradient} disabled={!selected} className="ml-auto text-xs py-1.5 px-2 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40" data-testid="apply-bg-gradient">Apply</button>
+        </div>
+      </div>
+
       {/* Background image — element level */}
       <div className="pt-3 border-t border-[#332D22] space-y-2">
         <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Background image</div>
@@ -140,10 +215,14 @@ export const BackgroundMediaPanel = ({ selected, onPatch, onReplaceHtml, onAddBl
             {["no-repeat", "repeat", "repeat-x", "repeat-y"].map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <button onClick={applyImage} disabled={!selected} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40" data-testid="apply-bg-image">Apply image</button>
+          <button onClick={() => imgFileRef.current?.click()} disabled={!selected} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] disabled:opacity-40 flex items-center justify-center gap-1" data-testid="upload-bg-image" title="Upload a local image (embedded as a data URL)">
+            <Upload size={11} /> Upload…
+          </button>
           <button onClick={clearBg} disabled={!selected} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] disabled:opacity-40" data-testid="clear-bg">Clear</button>
         </div>
+        <input ref={imgFileRef} type="file" accept="image/*" onChange={handleImgFile} className="hidden" data-testid="bg-image-file-input" />
       </div>
 
       {/* Background video — element level */}

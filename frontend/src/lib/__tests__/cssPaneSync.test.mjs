@@ -92,3 +92,31 @@ test("round-trips through the real stripInlineStyles output", () => {
   assert.match(next[0].html, /color:#222222;/);
   assert.match(next[0].html, /padding:64px;/); // untouched occurrence preserved
 });
+
+// ===== Phase 4a: semantic block-* class round-trips =====
+
+test("round-trips semantic block-* classes back to the right occurrence", () => {
+  const elements = [{
+    id: "el_block",
+    html: '<section data-wd-cat="heroes" data-wd-block="hero-centered" style="padding:64px;"><h2 style="color:#111111;">Title</h2></section>',
+  }];
+  const { html: cleanedHtml, css } = stripInlineStyles(elements);
+  assert.match(cleanedHtml, /class="block block-heroes-centered-1 block-heroes-centered"/);
+  assert.match(cleanedHtml, /class="block block-heroes-centered-2 block-heroes-centered"/);
+
+  // Edit the SECOND occurrence's color in the pane; occurrence 0 must stay intact.
+  const editedCss = css.replace("color:#111111;", "color:#222222;");
+  const next = reconcileElementsFromCss(elements, editedCss);
+  assert.match(next[0].html, /color:#222222;/);   // h2 updated
+  assert.match(next[0].html, /padding:64px;/);     // section (occurrence 0) untouched
+});
+
+test("parseCssPane skips a hand-typed bare marker rule (the override hook has no write-back)", () => {
+  const elements = [{ id: "el_b", html: '<section data-wd-cat="heroes" data-wd-block="hero-centered" style="padding:8px;">H</section>' }];
+  // The suffixed class maps to occurrence 0; the bare marker is NOT in classMap.
+  const css = ".block-heroes-centered { color: red; }\n.block-heroes-centered-1 { padding: 8px; }";
+  const parsed = parseCssPane(css, elements);
+  assert.deepEqual(parsed.get("el_b"), ["padding: 8px;"]); // only the suffixed rule wrote back
+  assert.equal(parsed.size, 1);                            // the marker rule was skipped
+});
+

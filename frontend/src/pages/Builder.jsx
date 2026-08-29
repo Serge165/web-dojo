@@ -21,7 +21,7 @@ import { OutlineView } from "@/components/builder/OutlineView";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
 import { ThemeGallery } from "@/components/builder/ThemeGallery";
-import { applyTheme, getSavedThemeName } from "@/themes";
+import { applyTheme as applyEditorTheme, getSavedThemeName } from "@/themes";
 import { PagesBar } from "@/components/builder/PagesBar";
 import { TemplateEditor } from "@/components/builder/TemplateEditor";
 import { SeoPanel } from "@/components/builder/SeoPanel";
@@ -30,8 +30,12 @@ import { FileEditorModal } from "@/components/builder/FileEditorModal";
 import { AssetsLibrary } from "@/components/builder/AssetsLibrary";
 import { AnalyticsModal } from "@/components/builder/AnalyticsModal";
 import { ProjectTemplatesModal } from "@/components/builder/ProjectTemplatesModal";
+import { TemplateApplyModal } from "@/components/builder/TemplateApplyModal";
+import { applyTemplate } from "@/lib/projectManager";
 import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
 import { AddPageModal } from "@/components/builder/AddPageModal";
+import { NewProjectModal } from "@/components/builder/NewProjectModal";
+import { NewProjectWizard } from "@/components/builder/NewProjectWizard";
 import { PaymentButtonModal } from "@/components/builder/PaymentButtonModal";
 import { StreamEmbedModal } from "@/components/builder/StreamEmbedModal";
 import { SocialShareModal } from "@/components/builder/SocialShareModal";
@@ -40,6 +44,9 @@ import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
 import { EcommerceDashboardModal } from "@/components/builder/EcommerceDashboardModal";
 import { ZeneroDashboardModal } from "@/components/builder/ZeneroDashboardModal";
 import { buildStandaloneHtml, downloadStandalone, downloadZip } from "@/lib/exportHtml";
+import { scaffoldProjectFiles } from "@/lib/projectScaffold";
+import { STANDARD_LAYOUT_SECTIONS } from "@/lib/standardLayout";
+import { linkJsInHtml, unlinkJsInHtml, relinkJsInHtml } from "@/lib/jsAutoLink";
 import { buildCartRuntimeHtml } from "@/lib/cart";
 import { scanHtml, inlineLocalStylesheets } from "@/lib/importHtml";
 import { hasZeneroWidget } from "@/lib/zeneroWidgets";
@@ -48,6 +55,7 @@ import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
 import { upsertResponsiveOverridesCss } from "@/lib/responsiveOverrides";
 import { upsertAnalyticsHead } from "@/lib/analyticsSnippets";
 import { buildAppliedAnimation, buildOnScrollBootstrapScript, ONSCROLL_BOOTSTRAP_MARKER } from "@/lib/animations";
+import { buildFontsStyleBlock, fontFamilyFromFilename } from "@/lib/fonts";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -123,6 +131,11 @@ export default function Builder() {
   const [projectName, setProjectName] = useState("Untitled");
   const [elements, setElements] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  // Ctrl+Shift+A in Design mode highlights every element that shares the
+  // currently selected block's data-wd-block id (the design-window analogue
+  // of Monaco's "select all occurrences"). Off by default; toggled by the
+  // keybinding — a small array of element ids so the Canvas can outline them.
+  const [sameBlockHighlight, setSameBlockHighlight] = useState([]);
   const [canvasBg, setCanvasBg] = useState("#ffffff");
   const [headHtml, setHeadHtml] = useState("");
   const [customJs, setCustomJs] = useState("");
@@ -146,6 +159,9 @@ export default function Builder() {
   const [assetsOpen, setAssetsOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null); // template object awaiting apply mode choice
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [formBuilderOpen, setFormBuilderOpen] = useState(false);
   const [addPageOpen, setAddPageOpen] = useState(false);
   const [paymentBuilderOpen, setPaymentBuilderOpen] = useState(false);
@@ -160,7 +176,7 @@ export default function Builder() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [themeGalleryOpen, setThemeGalleryOpen] = useState(false);
   // Restore the saved editor skin (View → 🎨 Themes) on load.
-  useEffect(() => { applyTheme(getSavedThemeName()); }, []);
+  useEffect(() => { applyEditorTheme(getSavedThemeName()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [zoom, setZoom] = useState(100);
   // Sidebar collapse — remembered per-browser (workspace preference, not
   // project data, so it isn't part of the saved project or undo history).
@@ -288,12 +304,19 @@ export default function Builder() {
     setCustomJs(target.custom_js || "");
     setSelectedId(null);
   };
+  // Phase 5 (Issue #3): every page carries a type — "page" (unique content,
+  // ships in the site) vs "layout" (reusable template, marked as such in
+  // exports via data-wd-page-type). Defaults to "page"; PagesBar's type
+  // select flips it.
+  const setPageType = (pageId, type) => {
+    setPages((ps) => ps.map((p) => (p.id === pageId ? { ...p, type } : p)));
+  };
   const newPage = () => {
     const id = uid();
     const name = `Page ${pages.length + 1}`;
     setPages((ps) => {
       const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
-      return [...persisted, { id, name, slug: name.toLowerCase().replace(/\s+/g, "-"), status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" }];
+      return [...persisted, { id, name, slug: name.toLowerCase().replace(/\s+/g, "-"), type: "page", status: "draft", seo: {}, elements: [], head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" }];
     });
     setActivePageId(id);
     setElements([]);
@@ -310,7 +333,7 @@ export default function Builder() {
     const fnts = layout.fonts || [];
     setPages((ps) => {
       const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
-      return [...persisted, { id, name: layout.label, slug: layout.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: bg, fonts: fnts, custom_js: "" }];
+      return [...persisted, { id, name: layout.label, slug: layout.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), type: "page", status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: bg, fonts: fnts, custom_js: "" }];
     });
     setActivePageId(id);
     setElements(els);
@@ -332,7 +355,7 @@ export default function Builder() {
         els.push({ id: uid(), html: `<p style="font-family:Manrope,sans-serif;font-size:16px;color:var(--fc-muted, #475569);margin:12px 32px;max-width:700px;line-height:1.6;">${escText(s.body)}</p>` });
       }
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || uid();
-      return { id: uid(), name: title, slug, status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" };
+      return { id: uid(), name: title, slug, type: "page", status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "" };
     });
     setPages((ps) => {
       const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
@@ -444,7 +467,7 @@ export default function Builder() {
   const newProject = () => {
     const hasUnsaved = saveStatus === "unsaved" || saveStatus === "error";
     if (hasUnsaved) { setNewProjectConfirmOpen(true); return; }
-    window.location.reload();
+    setNewProjectOpen(true);
   };
   const focusLibrarySearch = () => {
     document.querySelector('[data-testid="left-tab-library"]')?.click();
@@ -596,7 +619,7 @@ export default function Builder() {
     setHeadHtml(usedOnScroll ? ensureOnScrollBootstrap(head) : head);
   }, [headHtml]);
 
-  const applyTheme = ({ headHtml: themeHead, canvasBg: themeBg, googleFont, allPages }) => {
+  const applyTheme = useCallback(({ headHtml: themeHead, canvasBg: themeBg, googleFont, allPages }) => {
     // Strip any prior forge-theme style block, then append new.
     const rethemeHead = (h) => (h || "").replace(/<link[^>]*fonts\.googleapis[^>]*>|<style data-forge-theme=[^>]*>[\s\S]*?<\/style>/g, "").trim() + (h ? "\n" : "") + themeHead;
     setHeadHtml(rethemeHead);
@@ -614,7 +637,7 @@ export default function Builder() {
         fonts: googleFont && !(p.fonts || []).includes(googleFont) ? [...(p.fonts || []), googleFont] : p.fonts,
       }));
     }
-  };
+  }, [fonts, activePageId]);
 
   // Tracking snippets are always site-wide (unlike theme, no allPages
   // toggle needed — a GA4/Pixel/etc. tag on only one page isn't a real
@@ -638,6 +661,24 @@ export default function Builder() {
       document.head.appendChild(link);
     }
     toast.success(`Added ${label}`);
+  };
+
+  // Uploaded local font (Phase 4a, Task 3): reads the file as a data URI,
+  // appends a <style data-forge-fonts> block (with @font-face + --font-<slug>
+  // vars) to the active page's head_html — which the exporter lifts into
+  // globals.css — and records the file under fonts/ in the project tree.
+  const addFontFile = (file) => {
+    const family = fontFamilyFromFilename(file && file.name);
+    if (!family) { toast.error("Unsupported font file"); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUri = reader.result;
+      setHeadHtml((h) => `${h ? h.trim() + "\n" : ""}${buildFontsStyleBlock([{ family, file: dataUri }])}`);
+      setFiles((fs) => [...fs, { id: uid(), path: `fonts/${file.name}`, type: "file", content: dataUri }]);
+      toast.success(`Font added: ${family}`);
+    };
+    reader.onerror = () => toast.error("Could not read font file");
+    reader.readAsDataURL(file);
   };
 
   const onImportSections = ({ headHtml: h, sections }) => {
@@ -747,22 +788,70 @@ export default function Builder() {
   // interrupt typing; the manual Save button (silent=false) keeps them.
   const persist = async (silent) => {
     setSaveStatus("saving");
+    // Build a save payload that merges the active page's current edits
+    // into `pages`. The top-level `project` object above is a fresh literal
+    // every render, but `pages` in state is only updated during page-switch
+    // operations. If we saved `project` directly, any unsynced edits on the
+    // active page would be lost on next load. Merging here ensures manual
+    // Save and autosave both capture the user's latest work.
+    const mergedPages = pages.map((p) =>
+      p.id === activePageId
+        ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs }
+        : p
+    );
+    const savePayload = {
+      id: projectId,
+      name: projectName,
+      elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files, custom_js: customJs,
+      seo: activePage?.seo || {},
+      pages: mergedPages, active_page_id: activePageId, template, analytics,
+    };
     try {
       if (projectId) {
-        await axios.put(`${API}/projects/${projectId}`, project);
+        await axios.put(`${API}/projects/${projectId}`, savePayload);
       } else {
-        const res = await axios.post(`${API}/projects`, project);
+        const res = await axios.post(`${API}/projects`, savePayload);
         setProjectId(res.data.id);
       }
       setSaveStatus("saved");
       if (!silent) toast.success("Project saved");
     } catch (e) {
       setSaveStatus("error");
-      if (!silent) toast.error("Save failed");
-      console.error(e);
+      if (!silent) toast.error(`Save failed${e.response ? ` (${e.response.status})` : ""}`);
+      console.error("Save error:", e?.response?.data || e?.message || e);
     }
   };
   const save = () => { clearTimeout(autosaveTimerRef.current); persist(false); };
+
+  const saveAs = async () => {
+    const newName = prompt("Save a copy as…", projectName + " (copy)");
+    if (!newName) return;
+    clearTimeout(autosaveTimerRef.current);
+    const mergedPages = pages.map((p) =>
+      p.id === activePageId
+        ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs }
+        : p
+    );
+    const savePayload = {
+      id: null,
+      name: newName,
+      elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files, custom_js: customJs,
+      seo: activePage?.seo || {},
+      pages: mergedPages, active_page_id: activePageId, template, analytics,
+    };
+    setSaveStatus("saving");
+    try {
+      const res = await axios.post(`${API}/projects`, savePayload);
+      setProjectId(res.data.id);
+      setProjectName(newName);
+      setSaveStatus("saved");
+      toast.success(`Saved as "${newName}"`);
+    } catch (e) {
+      setSaveStatus("error");
+      toast.error(`Save As failed${e.response ? ` (${e.response.status})` : ""}`);
+      console.error("Save As error:", e?.response?.data || e?.message || e);
+    }
+  };
 
   const openLoad = async () => {
     try {
@@ -845,6 +934,64 @@ export default function Builder() {
     toast.success(`Started new project from “${tpl.name}”`);
   };
 
+  // New File wizard: fork a starter template, override the project name and
+  // the home page's SEO with the wizard's inputs, and replace the file tree
+  // with a scaffolded static-site layout (index.html + css/ + js/ + imgs/).
+  // Mirrors loadFromTemplate for the page/element/head reset, then layers the
+  // name/SEO/scaffold on top. The project snapshot handed to the scaffolder
+  // matches the shape exportHtml.buildMultiPageExport expects.
+  const startFromWizard = ({ tpl, name, seo }) => {
+    const data = (tpl && tpl.data) || {};
+    const projName = (name || (tpl && tpl.name) || "Untitled").trim();
+    setProjectId(null);
+    setProjectName(projName);
+    const templatePages = (data.pages && data.pages.length) ? data.pages : [{
+      id: uid(), name: "Home", slug: "index", status: "draft", seo: {},
+      elements: data.elements || [], head_html: data.head_html || "",
+      canvas_bg: data.canvas_bg || "#ffffff", fonts: data.fonts || [], custom_js: data.custom_js || "",
+    }];
+    const nextPages = templatePages.map((pg, i) => ({
+      ...pg,
+      id: uid(),
+      seo: i === 0 ? { ...(pg.seo || {}), ...seo } : (pg.seo || {}),
+    }));
+    // Phase 4a (Task 4): a truly blank selection (template data with no
+    // seeded elements) starts from the standard semantic layout skeleton
+    // instead of an empty canvas, and opts the scaffold into injecting the
+    // matching site-layout CSS into css/globals.css. Themed starter templates
+    // keep their own structures untouched.
+    const isBlankCanvas = !(nextPages[0].elements || []).length;
+    if (isBlankCanvas) {
+      nextPages[0] = {
+        ...nextPages[0],
+        elements: [{ id: uid(), html: STANDARD_LAYOUT_SECTIONS }],
+      };
+    }
+    setPages(nextPages);
+    setActivePageId(nextPages[0].id);
+    setElements(nextPages[0].elements || []);
+    setHeadHtml(nextPages[0].head_html || "");
+    setCanvasBg(nextPages[0].canvas_bg || "#ffffff");
+    setFonts(nextPages[0].fonts || []);
+    setCustomJs(nextPages[0].custom_js || "");
+    setTemplate(data.template || { header_html: "", footer_html: "", use_template: false });
+    setAnalytics(data.analytics || {});
+    setSelectedId(null); setPast([]); setFuture([]);
+    const projectSnapshot = {
+      id: null, name: projName,
+      pages: nextPages, active_page_id: nextPages[0].id,
+      elements: nextPages[0].elements || [], head_html: nextPages[0].head_html || "",
+      canvas_bg: nextPages[0].canvas_bg || "#ffffff", fonts: nextPages[0].fonts || [],
+      custom_js: nextPages[0].custom_js || "", files: [],
+      seo: nextPages[0].seo,
+      template: data.template || { header_html: "", footer_html: "", use_template: false },
+      analytics: data.analytics || {},
+    };
+    setFiles(scaffoldProjectFiles(projectSnapshot, { standardLayout: isBlankCanvas }));
+    setSaveStatus("unsaved");
+    toast.success(`Scaffolded “${projName}” from “${(tpl && tpl.name) || "template"}”`);
+  };
+
   const deleteProject = async (id) => {
     try {
       await axios.delete(`${API}/projects/${id}`);
@@ -854,13 +1001,29 @@ export default function Builder() {
     } catch { toast.error("Delete failed"); }
   };
 
+  // Phase 4a (Task 5): JS auto-linking. FileTree js/ create/rename/delete
+  // events keep the <script src="js/..."> tags in the active page's head_html
+  // in sync so the author never hand-edits HTML for this.
+  const handleJsChange = ({ type, name, oldName }) => {
+    setHeadHtml((h) =>
+      type === "create" ? linkJsInHtml(h, [name])
+      : type === "rename" ? relinkJsInHtml(h, oldName, name)
+      : unlinkJsInHtml(h, [name])
+    );
+    setSaveStatus("unsaved");
+  };
+
   const share = async () => {
     try {
       let id = projectId;
+      const mp = pages.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
+      const payload = { id: projectId, name: projectName,
+        elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files, custom_js: customJs,
+        seo: activePage?.seo || {}, pages: mp, active_page_id: activePageId, template, analytics };
       if (!id) {
-        const res = await axios.post(`${API}/projects`, project); id = res.data.id; setProjectId(id);
+        const res = await axios.post(`${API}/projects`, payload); id = res.data.id; setProjectId(id);
       } else {
-        await axios.put(`${API}/projects/${id}`, project);
+        await axios.put(`${API}/projects/${id}`, payload);
       }
       const url = `${process.env.REACT_APP_BACKEND_URL}/api/preview/${id}`;
       await navigator.clipboard.writeText(url);
@@ -871,26 +1034,45 @@ export default function Builder() {
   // Ensures the project is saved on the backend and returns its id so the
   // Publish modal can POST to /api/projects/{id}/publish.
   const ensureSaved = async () => {
+    const mp = pages.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
+    const p = { id: projectId, name: projectName,
+      elements, head_html: headHtml, canvas_bg: canvasBg, fonts, files, custom_js: customJs,
+      seo: activePage?.seo || {}, pages: mp, active_page_id: activePageId, template, analytics };
     try {
-      if (projectId) {
-        await axios.put(`${API}/projects/${projectId}`, project);
-        return projectId;
-      }
-      const res = await axios.post(`${API}/projects`, project);
+      if (projectId) { await axios.put(`${API}/projects/${projectId}`, p); return projectId; }
+      const res = await axios.post(`${API}/projects`, p);
       setProjectId(res.data.id);
       return res.data.id;
     } catch (e) {
-      console.error(e);
+      console.error("ensureSaved error:", e?.response?.data || e?.message || e);
       return null;
     }
   };
+
+  // Ctrl+Shift+A in Design mode: highlight all block occurrences that share
+  // the currently selected block's data-wd-block id — the Design-window
+  // analogue of Monaco's "select all occurrences" (whose CodeEditor binding
+  // handles this when the Monaco editor is focused). Pure view state: it
+  // never mutates elements, so it's safe to run inside this re-attaching
+  // keydown effect against the latest `elements`/`selectedId` closures.
+  // Returns the ids to highlight, or [] to clear.
+  const toggleSameBlockHighlight = useCallback(() => {
+    const selected = elements.find((e) => e.id === selectedId);
+    if (!selected) { setSameBlockHighlight([]); return; }
+    const blockId = (selected.html.match(/data-wd-block="([^"]*)"/) || [])[1];
+    if (!blockId) { setSameBlockHighlight(elements.map((e) => e.id)); return; } // fallback: highlight everything
+    const matches = elements.filter((e) => (e.html.match(/data-wd-block="([^"]*)"/) || [])[1] === blockId).map((e) => e.id);
+    setSameBlockHighlight((cur) => (cur.length > 0 ? [] : matches));
+  }, [elements, selectedId]);
 
   // Global keyboard shortcuts
   useEffect(() => {
     const onKey = (e) => {
       const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.shiftKey && (e.key === "A" || e.key === "a") && document.activeElement === document.body) { e.preventDefault(); toggleSameBlockHighlight(); return; }
       if (meta && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
       if (meta && (e.key.toLowerCase() === "z" && e.shiftKey || e.key.toLowerCase() === "y")) { e.preventDefault(); redo(); return; }
+      if (meta && e.key.toLowerCase() === "s" && e.shiftKey) { e.preventDefault(); saveAs(); return; }
       if (meta && e.key.toLowerCase() === "s") { e.preventDefault(); save(); return; }
       if (meta && e.key.toLowerCase() === "f") { e.preventDefault(); setFindOpen(true); return; }
       if (meta && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen((v) => !v); return; }
@@ -918,6 +1100,7 @@ export default function Builder() {
         { id: "new", label: "New project", icon: FilePlus2, onRun: newProject },
         { id: "open", label: "Open project…", icon: FolderOpen, onRun: openLoad },
         { id: "save", label: "Save", shortcut: "Ctrl+S", icon: Save, onRun: save },
+        { id: "save-as", label: "Save As…", shortcut: "Ctrl+Shift+S", icon: Save, onRun: saveAs },
         { id: "export-html", label: "Export standalone .html", icon: Download, onRun: () => downloadStandalone(project) },
         { id: "export-zip", label: "Export HTML + CSS (.zip)", icon: Download, onRun: () => downloadZip(project) },
         { id: "share", label: "Copy shareable preview URL", icon: Upload, onRun: share },
@@ -982,7 +1165,7 @@ export default function Builder() {
         onImportSections={onImportSections}
         project={project}
         onOpenTransfer={() => setTransferOpen(true)}
-        onSave={save} saveStatus={saveStatus} onOpenLoad={openLoad} onShare={share}
+        onSave={save} onSaveAs={saveAs} saveStatus={saveStatus} onOpenLoad={openLoad} onShare={share}
         onPublish={() => setPublishOpen(true)}
         onStartTour={() => setTourForce((v) => v + 1)}
         onFind={() => setFindOpen(true)}
@@ -999,7 +1182,7 @@ export default function Builder() {
 
       <MenuBar
         project={project}
-        onNew={newProject} onOpen={openLoad} onSave={save}
+        onNew={newProject} onOpen={openLoad} onSave={save} onSaveAs={saveAs}
         onUndo={undo} onRedo={redo} canUndo={past.length > 0} canRedo={future.length > 0}
         onCut={cutEl} onCopy={copyEl} onPaste={pasteEl} hasSelection={!!selected}
         onSearchBlocks={focusLibrarySearch} onFindReplace={() => setFindOpen(true)}
@@ -1019,6 +1202,7 @@ export default function Builder() {
         onRemove={removePage}
         onRename={renamePage}
         onSetStatus={setPageStatus}
+        onSetType={setPageType}
         onOpenSeo={() => setSeoOpen(true)}
         onOpenTemplate={() => setTemplateEditorOpen(true)}
       />
@@ -1049,7 +1233,7 @@ export default function Builder() {
             <div className="relative flex-none flex">
               <LeftSidebar
                 onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
-                onAddFont={addFont}
+                onAddFont={addFont} onAddFontFile={addFontFile}
                 fonts={fonts}
                 files={files}
                 onFilesChange={setFiles}
@@ -1064,6 +1248,7 @@ export default function Builder() {
                 pages={pages}
                 activePageId={activePageId}
                 onSwitchPage={switchPage}
+                onJsChange={handleJsChange}
                 projectId={projectId}
                 onEditSelected={(html) => selected && editHtml(selected.id, html)}
                 onOpenFormBuilder={() => setFormBuilderOpen(true)}
@@ -1092,6 +1277,7 @@ export default function Builder() {
           <Canvas
             elements={elements}
             selectedId={selectedId}
+            sameBlockHighlight={sameBlockHighlight}
             onSelect={setSelectedId}
             onDrop={(html, idx) => addBlock(html, idx)}
             onDelete={removeEl}
@@ -1154,6 +1340,8 @@ export default function Builder() {
             slides={outlineSlides}
             onChange={setOutlineSlides}
             onGenerate={generatePagesFromOutline}
+            pageElements={elements}
+            pageName={(pages.find((p) => p.id === activePageId) || {}).name || ""}
           />
         )}
           </div>
@@ -1336,7 +1524,28 @@ export default function Builder() {
         open={templatesOpen}
         onClose={() => setTemplatesOpen(false)}
         currentProject={project}
-        onLoadTemplate={loadFromTemplate}
+        onLoadTemplate={(tpl) => setSelectedTemplate(tpl)}
+      />
+
+      <TemplateApplyModal
+        template={selectedTemplate}
+        onWrap={(tpl) => {
+          const changes = applyTemplate(project, tpl, "wrap");
+          if (changes) {
+            setHeadHtml(changes.head_html);
+            setCanvasBg(changes.canvas_bg);
+            setFonts(changes.fonts);
+            toast.success(`Wrapped “${tpl.name}” styles into current project`);
+          }
+          setSelectedTemplate(null);
+        }}
+        onNew={(tpl) => {
+          setSelectedTemplate(null);
+          loadFromTemplate(tpl);
+        }}
+        onCancel={() => {
+          setSelectedTemplate(null);
+        }}
       />
 
       <FormBuilderModal
@@ -1370,6 +1579,20 @@ export default function Builder() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <NewProjectModal
+        open={newProjectOpen}
+        onClose={() => setNewProjectOpen(false)}
+        onBlank={() => window.location.reload()}
+        onFromTemplate={() => setTemplatesOpen(true)}
+        onFromWizard={() => setWizardOpen(true)}
+      />
+
+      <NewProjectWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onCreate={startFromWizard}
+      />
 
       <PaymentButtonModal
         open={paymentBuilderOpen}

@@ -89,9 +89,9 @@ pricing monthly/yearly toggle).
 
 ## SECTION 8: CODE GENERATION CHANGES
 - [ ] 8.1 Monaco generates globals.css only (not inline styles)
-- [ ] 8.2 Export includes link tag for globals.css in head
-- [ ] 8.3 Blocks use semantic HTML with class names
-- [ ] 8.4 No style attributes on any block element
+- [x] 8.2 Export includes link tag for globals.css in head (also relocated to css/globals.css by the scaffolder)
+- [ ] 8.3 Blocks use semantic HTML with class names (Phase 4b: author-time; export-time semantic classes shipped in Phase 4a)
+- [x] 8.4 No style attributes on any block element — in EXPORTED output (stripInlineStyles emits block-<catId>-<slug> classes; author-time inline styles remain by design in Path B, Phase 4b for canvas editing)
 - [ ] 8.5 All styling from globals.css
 
 ## SECTION 9: INTEGRATION POINTS
@@ -138,3 +138,31 @@ pricing monthly/yearly toggle).
 - [ ] 13.6 Abstract/organic shapes
 - [ ] 13.7 Blended photos + graphical elements
 - [ ] 13.8 AI-accelerated production patterns
+
+---
+
+## PHASE 4a COMPLETION SUMMARY (block architecture & infrastructure — export-time, Path B)
+
+Shipped in this phase (all tests green: 30 FE suites / 249 jest + 11 node + 14 BE pytest):
+
+- Block audit: docs/PHASE_4_BLOCK_AUDIT.md — all 91 blocks / 26 categories mapped to semantic
+  classes (block-<catId>-<slug>), reconciliation vs the 12-section handoff spec.
+- Semantic export-time class naming: stripInlineStyles.js (+ backend server.py mirror) emits
+  block-<catId>-<slug>-<occ> per style occurrence + shared marker class for elements stamped by
+  variants.js; legacy .section-N fallback kept for user/imported markup.
+- globals.css organization: buildOrganizedStylesheet emits labeled "Blocks: <Category>" sections
+  generated from CATEGORIES; fonts (@font-face via data-forge-fonts) land in Theme Variables;
+  uploaded font files ship into the zip at fonts/<name>.
+- Fonts infra: lib/fonts.js (buildFontFaceRules/addFontToProject/googleFontCssVars), fonts/ folder
+  scaffolded on every new project, LeftSidebar font-file upload path (onAddFontFile).
+- Standard layout: lib/standardLayout.js skeleton (site-header/site-nav/hero-section/site-main/
+  content-section/container/site-footer) + layout CSS w/ responsive .container; seeded on blank
+  wizard projects (templates keep their own structure).
+- JS auto-linking: lib/jsAutoLink.js + FileTree js/ create/rename/delete hook → <script src="js/...">
+  synced into active page head_html with toasts.
+
+Deferred to Phase 4b (Path A — author-time refactor):
+- Class-based block templates in blocks.js/blocksExtra.js/pageLayouts.js; BlockEditMenu rework;
+  Avalon GEMS cascade in the design canvas; numbered taxonomy (rejected in favor of semantic names);
+  visual regression suite.
+

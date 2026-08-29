@@ -6,7 +6,7 @@ import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 // handlers TopBar already uses rather than duplicating logic.
 export const MenuBar = ({
   project,
-  onNew, onOpen, onSave,
+  onNew, onOpen, onSave, onSaveAs,
   onUndo, onRedo, canUndo, canRedo,
   onCut, onCopy, onPaste, hasSelection,
   onSearchBlocks, onFindReplace,
@@ -33,6 +33,7 @@ export const MenuBar = ({
         { label: "New", onClick: onNew },
         { label: "Open…", onClick: onOpen },
         { label: "Save", shortcut: "Ctrl+S", onClick: onSave },
+        { label: "Save As…", shortcut: "Ctrl+Shift+S", onClick: onSaveAs },
         { sep: true },
         { label: "Export standalone .html", onClick: () => downloadStandalone(project) },
         { label: "Export HTML + CSS (.zip)", onClick: () => downloadZip(project) },

@@ -1,4 +1,4 @@
-import { buildMultiPageExport, buildStandaloneHtml } from "./exportHtml";
+import { buildMultiPageExport, buildCleanExport, buildStandaloneHtml, deduplicateHeadTags, sanitizeHeadVars } from "./exportHtml";
 
 const page = (overrides) => ({
   id: "p1", name: "Home", slug: "index", elements: [], head_html: "", canvas_bg: "#ffffff",
@@ -109,4 +109,151 @@ test("buildMultiPageExport routes an imported page's data-forge-imported-css int
   const componentsSection = css.split("/* ===== Components ===== */")[1].split("/* =====")[0];
   expect(componentsSection).toContain(".hero{color:red}");
   expect(files["index.html"]).not.toContain("data-forge-imported-css");
+});
+
+// Phase 4b Task 2: deduplicate repeated <link>/<meta> tags in the head.
+test("deduplicateHeadTags removes duplicate <link> and <meta> tags, keeping first occurrence", () => {
+  const headHtml = [
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+    '<link rel="preconnect" href="https://fonts.googleapis.com">',
+    '<link rel="preconnect" href="https://fonts.googleapis.com">',
+    '<link href="https://fonts.googleapis.com/css2?family=Inter" rel="stylesheet">',
+    '<link href="https://fonts.googleapis.com/css2?family=Inter" rel="stylesheet">',
+    '<meta name="description" content="test">',
+    '<meta name="description" content="test">',
+  ].join("\n");
+
+  const result = deduplicateHeadTags(headHtml);
+  expect((result.match(/<link /g) || []).length).toBe(3);
+  expect((result.match(/<meta name="description"/g) || []).length).toBe(1);
+});
+
+test("deduplicateHeadTags leaves non-link/meta content untouched", () => {
+  const headHtml = '<script>console.log("keep me")</script>\n<link rel="stylesheet" href="globals.css">';
+  const result = deduplicateHeadTags(headHtml);
+  expect(result).toContain('<script>console.log("keep me")</script>');
+  expect(result).toContain('href="globals.css"');
+});
+
+// Phase 4b Task 3: strip leftover template placeholders and undefined/null tokens from head.
+test("sanitizeHeadVars removes unresolved placeholders ${{...}} and ${...}", () => {
+  const headHtml = '<title>${{projectName}}</title>\n<meta name="description" content="${projectDescription}">';
+  const result = sanitizeHeadVars(headHtml);
+  expect(result).not.toContain("${{projectName}}");
+  expect(result).not.toContain("${projectDescription}");
+});
+
+test("sanitizeHeadVars strips literal undefined/null tokens from attribute values", () => {
+  const headHtml = '<meta name="undefined" content="test">\n<link rel="stylesheet" href="undefined">\n<title>undefined</title>';
+  const result = sanitizeHeadVars(headHtml);
+  expect(result).not.toMatch(/\bundefined\b/);
+  expect(result).not.toMatch(/\bnull\b/);
+});
+
+test("buildStandaloneHtml export head has no duplicate links or undefined variables", () => {
+  const html = buildStandaloneHtml({
+    id: "proj1",
+    name: "Test",
+    elements: [],
+    seo: {},
+    head_html: '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<meta name="undefined">',
+    fonts: ["Inter", "400"],
+  });
+  // Only one preconnect link for fonts.gstatic.com.
+  expect((html.match(/fonts\.gstatic\.com/g) || []).length).toBe(1);
+  // No raw `undefined` left in the head.
+  expect(html).not.toMatch(/\bundefined\b/);
+});
+// ===== Phase 5 smoke-test remediation (Issues #2, #3, #7) =====
+
+test("buildStandaloneHtml strips inline style attributes from block markup into class rules (Issue #2)", () => {
+  const html = '<nav data-wd-cat="navbars" data-wd-block="nav-mega" style="font-family:Manrope,system-ui,sans-serif;background:var(--fc-bg, #fff1f1);border-bottom:1px solid var(--fc-border, #e2e8e0);">content</nav>';
+  const out = buildStandaloneHtml({ id: "p1", name: "T", elements: [{ id: "e1", html }] });
+  expect(out).not.toContain('style="font-family:Manrope');
+  expect(out).toContain('class="block block-navbars-mega-1');
+  // The lifted declarations land in the consolidated <style> block.
+  expect(out).toContain(".block-navbars-mega-1 { font-family:Manrope");
+});
+
+test("buildStandaloneHtml routes <style data-forge-vars> out of the head into the consolidated style block (Issue #7)", () => {
+  const headHtml = '<style data-forge-vars>\n:root {\n  --fc-el_mx3owqxt-bg: url("data:image/svg+xml,...") bottom / 100% 120px no-repeat;\n}\n</style>';
+  const out = buildStandaloneHtml({ id: "p1", name: "T", elements: [], head_html: headHtml });
+  // The forge-vars tag itself is gone from the head...
+  expect(out).not.toContain("data-forge-vars");
+  // ...and the variables live on inside the single consolidated style block
+  // (the single-file equivalent of the site export's globals.css sections),
+  // alongside the responsive baseline — not as a duplicated second <style>.
+  expect(out).toContain("--fc-el_mx3owqxt-bg");
+  expect((out.match(/<style>/g) || []).length).toBe(1);
+  expect(out).toContain("@media (max-width: 1024px)");
+});
+
+test("buildStandaloneHtml keeps the head free of the project-id bootstrap (rides on <body data-wd-project>)", () => {
+  const out = buildStandaloneHtml({ id: "p1", name: "T", elements: [] });
+  const head = out.split("</head>")[0];
+  expect(head).not.toContain("__WD_PROJECT_ID");
+  expect(out).toContain('<body data-wd-project="p1">');
+  expect(out.indexOf("window.__WD_PROJECT_ID")).toBeGreaterThan(out.indexOf("</head>"));
+});
+
+test("buildCleanExport keeps the head boilerplate-only (Issues #2/#7)", () => {
+  const { html, css } = buildCleanExport({
+    id: "proj1",
+    name: "T",
+    elements: [{ id: "e1", html: '<section data-wd-cat="heroes" data-wd-block="hero-centered" style="padding:64px;">H</section>' }],
+    head_html: '<style data-forge-vars>\n:root { --fc-primary: #111; }\n</style>',
+  });
+  const head = html.split("</head>")[0];
+  expect(head).not.toContain("__WD_PROJECT_ID");
+  expect(head).not.toContain("data-forge-vars");
+  expect(head).toContain('<link rel="stylesheet" href="globals.css"');
+  expect(html).not.toContain('style="padding:64px');
+  expect(html).toContain('<body data-wd-project="proj1">');
+  expect(html.indexOf("window.__WD_PROJECT_ID")).toBeGreaterThan(html.indexOf("</head>"));
+  expect(css).toContain(".block-heroes-centered-1 { padding:64px; }");
+  expect(css).toContain("--fc-primary: #111");
+  expect(css).toContain("@media (max-width: 1024px)");
+});
+
+test("buildMultiPageExport emits typed <body> tags and per-page canvas vars instead of <style> tags (Issues #3/#7)", () => {
+  const { files } = buildMultiPageExport({
+    id: "proj1",
+    name: "T",
+    pages: [
+      page({ id: "p1", slug: "index", canvas_bg: "#101418" }),
+      page({ id: "p2", slug: "about", type: "layout", canvas_bg: "#ffffff" }),
+    ],
+  });
+  expect(files["index.html"]).toContain('data-wd-page="index" data-wd-page-type="page"');
+  expect(files["about.html"]).toContain('data-wd-page="about" data-wd-page-type="layout"');
+  for (const f of ["index.html", "about.html"]) {
+    const head = files[f].split("</head>")[0];
+    expect(head).not.toContain("body{margin:0;background:");
+    expect(head).not.toContain("__WD_PROJECT_ID");
+    expect(files[f].indexOf("window.__WD_PROJECT_ID")).toBeGreaterThan(files[f].indexOf("</head>"));
+  }
+  const css = files["globals.css"];
+  expect(css).toContain('[data-wd-page="index"] { --wd-canvas-bg: #101418; }');
+  expect(css).toContain("body { margin: 0; background: var(--wd-canvas-bg, #ffffff); }");
+});
+
+test("buildMultiPageExport strips inline styles from body markup across pages (Issue #2)", () => {
+  const html = '<nav data-wd-cat="navbars" data-wd-block="nav-mega" style="font-family:Manrope;background:var(--fc-bg, #fff);">N</nav>';
+  const { files } = buildMultiPageExport({
+    id: "proj1",
+    name: "T",
+    pages: [page({ id: "p1", slug: "index", elements: [{ id: "e1", html }] })],
+  });
+  expect(files["index.html"]).not.toContain('style="font-family:Manrope');
+  // The multi-page bundle prefixes per-page class rules with the page name.
+  expect(files["globals.css"]).toContain(".index-block-navbars-mega-1");
+  expect(files["globals.css"]).toContain("Blocks: Navbars");
+});
+
+test("sanitizeHeadVars drops style tags emptied by the cleanup (no dead <style> shells)", () => {
+  const result = sanitizeHeadVars('<style data-forge-vars>\n${{projectVars}}\n</style>\n<link rel="stylesheet" href="globals.css">');
+  expect(result).not.toContain("<style");
+  expect(result).toContain("globals.css");
 });

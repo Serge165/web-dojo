@@ -129,6 +129,17 @@ export const detectBlockKind = (html) => {
   // left undetected rather than guessing which one to expose.
   if (imgCount === 1) return "image";
   if (imgCount === 0 && /background(?:-image)?:\s*[^;"]*url\(/i.test(html)) return "image";
+  // Appended AFTER every image/nav/video/grid check above so the existing
+  // null assertions for "" and "<p>hello</p>" still hold. These cover the
+  // common text-forward blocks (a card/feature grid with several <h3>s, a
+  // hero headline section, a CTA band) that previously fell through to
+  // null and showed no editor. A bare paragraph / empty string has no
+  // <section>/<h1>/<h3> and still returns null here — the generic editor
+  // then handles it via the kind===null branch in BlockEditMenu below.
+  const h3Count = (html.match(/<h3\b/gi) || []).length;
+  if (h3Count >= 2) return "card";
+  if (/<section\b/i.test(html) && /<h1\b/i.test(html)) return "hero";
+  if (/<section\b/i.test(html) && /<(button|a)\b/i.test(html)) return "cta";
   return null;
 };
 
@@ -991,23 +1002,185 @@ const VideoBlockEditor = ({ html, onChange, projectId = null, blockId = null }) 
 };
 
 // ============================================================
+// GENERIC CONTENT EDITOR — the safety-net editor for any block that
+// isn't one of the bespoke kinds above (hero / CTA / card / feature
+// sections, or anything detectBlockKind returns null for, including
+// bare text). It walks the fragment for editable text nodes (h1-h6,
+// p, li), links (<a>), buttons, and images (<img>), exposing each as
+// a labeled field. Edits rewrite that one node in place by character
+// offset, so duplicate markup never collides. Pure helpers are
+// exported for unit testing without rendering React.
+// ============================================================
+
+const EDITABLE_RE = /<(h[1-6]|p|li|button|a|img)\b([^>]*)(?:>([\s\S]*?)<\/\1>|[\s/]*>)/gi;
+
+const stripTags = (s) => String(s ?? "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+const decodeEntities = (s) => String(s ?? "")
+  .replace(/&nbsp;/g, " ")
+  .replace(/&quot;/g, '"')
+  .replace(/&#39;/g, "'")
+  .replace(/&lt;/g, "<")
+  .replace(/&gt;/g, ">")
+  .replace(/&amp;/g, "&");
+
+const headingLabel = (t) =>
+  t === "h1" ? "Heading 1" : t === "h2" ? "Heading 2" : t === "h3" ? "Heading 3" :
+  t === "h4" ? "Heading 4" : t === "h5" ? "Heading 5" : t === "h6" ? "Heading 6" :
+  t === "li" ? "List item" : "Paragraph";
+
+export const parseEditableNodes = (html, limit = 24) => {
+  if (!html) return [];
+  const out = [];
+  EDITABLE_RE.lastIndex = 0;
+  let m;
+  while ((m = EDITABLE_RE.exec(html)) && out.length < limit) {
+    const tag = m[1];
+    const outer = m[0];
+    const inner = m[3] ?? "";
+    const node = { id: out.length, tag, outer, start: m.index };
+    if (tag.toLowerCase() === "img") {
+      node.kind = "image";
+      node.src = readFirstAttr(outer, "src");
+      node.alt = readFirstAttr(outer, "alt");
+      node.label = "Image";
+    } else if (tag.toLowerCase() === "a") {
+      node.kind = "link";
+      node.href = readFirstAttr(outer, "href");
+      node.text = decodeEntities(stripTags(inner));
+      node.label = node.text || "Link";
+    } else if (tag.toLowerCase() === "button") {
+      node.kind = "button";
+      node.text = decodeEntities(stripTags(inner));
+      node.label = node.text || "Button";
+    } else {
+      node.kind = "text";
+      node.text = decodeEntities(stripTags(inner));
+      node.label = headingLabel(tag.toLowerCase());
+    }
+    out.push(node);
+  }
+  return out;
+};
+
+const rebuildContainer = (outer, tag, text) => {
+  const openTag = (outer.match(/^<[^>]*>/) || [""])[0];
+  return `${openTag}${escTextLocal(text)}</${tag}>`;
+};
+
+const rebuildLink = (outer, href, text) => {
+  const openTag = (outer.match(/^<[^>]*>/) || [""])[0];
+  const withHref = readFirstAttr(openTag, "href") !== ""
+    ? openTag.replace(/(href=")[^"]*(")/i, `$1${escAttrLocal(href)}$2`)
+    : openTag.replace(/^<a\b/i, `<a href="${escAttrLocal(href)}"`);
+  return `${withHref}${escTextLocal(text)}</a>`;
+};
+
+const rebuildImg = (outer, src, alt) => {
+  let next = outer;
+  if (/\bsrc="/i.test(next)) next = next.replace(/(src=")[^"]*(")/i, `$1${escAttrLocal(src)}$2`);
+  else next = next.replace(/<img\b/i, `<img src="${escAttrLocal(src)}"`);
+  if (/\balt="/i.test(next)) next = next.replace(/(alt=")[^"]*(")/i, `$1${escAttrLocal(alt)}$2`);
+  else next = next.replace(/<img\b/i, `<img alt="${escAttrLocal(alt)}"`);
+  return next;
+};
+
+export const setEditableNode = (html, id, patch) => {
+  const nodes = parseEditableNodes(html);
+  const node = nodes[id];
+  if (!node) return html;
+  let newOuter;
+  if (node.tag.toLowerCase() === "img") newOuter = rebuildImg(node.outer, patch.src ?? node.src, patch.alt ?? node.alt);
+  else if (node.tag.toLowerCase() === "a") newOuter = rebuildLink(node.outer, patch.href ?? node.href, patch.text ?? node.text);
+  else if (node.tag.toLowerCase() === "button") newOuter = rebuildContainer(node.outer, "button", patch.text ?? node.text);
+  else newOuter = rebuildContainer(node.outer, node.tag, patch.text ?? node.text);
+  return html.slice(0, node.start) + newOuter + html.slice(node.start + node.outer.length);
+};
+
+const GenericBlockEditor = ({ html, onChange, projectId = null, blockId = null }) => {
+  const nodes = useMemo(() => parseEditableNodes(html), [html]);
+  const fileInputs = useRef({});
+  if (nodes.length === 0) {
+    return (
+      <div className="text-[11px] text-[#948C79]" data-testid="block-edit-generic-empty">
+        No editable text, links, or images detected in this block.
+      </div>
+    );
+  }
+  const onUpload = async (id, e) => {
+    const file = (e.target.files || [])[0];
+    e.target.value = "";
+    if (!file) return;
+    let url;
+    if (!projectId) {
+      url = await readAsDataURL(file);
+    } else {
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const API = process.env.REACT_APP_BACKEND_URL || "";
+        const res = await fetch(`${API}/api/projects/${projectId}/assets/upload?asset_type=image&asset_id=${encodeURIComponent(blockId || "1")}`, { method: "POST", body: fd });
+        if (!res.ok) throw new Error(`upload failed (${res.status})`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.detail || "upload failed");
+        url = data.url;
+      } catch {
+        url = await readAsDataURL(file);
+      }
+    }
+    onChange(setEditableNode(html, id, { src: url, alt: baseName(file.name) }));
+  };
+  return (
+    <div className="space-y-2" data-testid="block-edit-generic">
+      {nodes.map((n) => (
+        <div key={n.id} className="space-y-1 p-1.5 rounded border border-[#332D22]" data-testid={`generic-node-${n.id}`}>
+          <div className={labelCls}>{n.label}</div>
+          {n.kind === "image" ? (
+            <>
+              <div className="flex items-center gap-2">
+                {n.src ? <img src={n.src} alt="" className="w-10 h-10 object-cover rounded flex-none border border-[#332D22]" /> : null}
+                <div className="flex-1 flex gap-1">
+                  <Btn onClick={() => fileInputs.current[n.id]?.click()} title="Upload image" testId={`generic-upload-${n.id}`}><Upload size={11} /> Upload</Btn>
+                  <input ref={(el) => { fileInputs.current[n.id] = el; }} type="file" accept="image/*" hidden onChange={(e) => onUpload(n.id, e)} data-testid={`generic-upload-input-${n.id}`} />
+                </div>
+              </div>
+              <input value={n.src} aria-label={`${n.label} URL`} className={inputCls} data-testid={`generic-src-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { src: e.target.value }))} />
+              <input value={n.alt} placeholder="alt text" aria-label={`${n.label} alt`} className={inputCls} data-testid={`generic-alt-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { alt: e.target.value }))} />
+            </>
+          ) : n.kind === "link" ? (
+            <>
+              <input value={n.text} aria-label={`${n.label} text`} className={inputCls} data-testid={`generic-text-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { text: e.target.value }))} />
+              <input value={n.href} aria-label={`${n.label} URL`} className={inputCls} data-testid={`generic-href-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { href: e.target.value }))} />
+            </>
+          ) : (
+            <input value={n.text} aria-label={`${n.label} text`} className={inputCls} data-testid={`generic-text-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { text: e.target.value }))} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ============================================================
 // Root — renders the right editor for the selected block kind.
 // ============================================================
 
-const KIND_LABELS = { gallery: "Gallery", navbar: "Navbar", timeline: "Timeline", bento: "Bento Box", image: "Image", video: "Video" };
+const KIND_LABELS = { gallery: "Gallery", navbar: "Navbar", timeline: "Timeline", bento: "Bento Box", image: "Image", video: "Video", hero: "Hero", cta: "Call to Action", card: "Cards" };
+const GENERIC_KINDS = new Set(["hero", "cta", "card", null]);
 
 export const BlockEditMenu = ({ selectedHtml, onChange, pages = [], projectId = null, blockId = null }) => {
   const kind = useMemo(() => detectBlockKind(selectedHtml), [selectedHtml]);
-  if (!selectedHtml || !kind) return null;
+  if (!selectedHtml) return null;
+  const menuKey = kind || "generic";
   return (
-    <div className="space-y-2" data-testid={`block-edit-menu-${kind}`}>
-      <div className="text-[11px] font-semibold text-[#D9BC55]">{KIND_LABELS[kind]} — edit menu</div>
+    <div className="space-y-2" data-testid={`block-edit-menu-${menuKey}`}>
+      <div className="text-[11px] font-semibold text-[#D9BC55]">{(kind && KIND_LABELS[kind]) || "Block"} — edit menu</div>
       {kind === "gallery" && <GalleryEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
       {kind === "navbar" && <NavbarEditor html={selectedHtml} onChange={onChange} pages={pages} />}
       {kind === "timeline" && <TimelineEditor html={selectedHtml} onChange={onChange} />}
       {kind === "bento" && <BentoEditor html={selectedHtml} onChange={onChange} />}
       {kind === "image" && <ImageBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
       {kind === "video" && <VideoBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
+      {GENERIC_KINDS.has(kind) && <GenericBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
     </div>
   );
 };

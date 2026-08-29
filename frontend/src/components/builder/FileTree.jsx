@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FolderPlus, FilePlus, Upload, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { TreeNode } from "./TreeNode";
+import { isJsFilePath, fileNameOf } from "@/lib/jsAutoLink";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const uid = () => "f_" + Math.random().toString(36).slice(2, 10);
@@ -113,7 +114,7 @@ const readEntry = (entry, prefix = "") =>
     }
   });
 
-export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [], activePageId = null, onSwitchPage = null }) => {
+export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [], activePageId = null, onSwitchPage = null, onJsChange = null }) => {
   const tree = useMemo(() => buildTree(files), [files]);
   const [expanded, setExpanded] = useState({ "": true });
   const [dragging, setDragging] = useState(false);
@@ -144,8 +145,13 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [
     const name = newFileName.trim();
     if (!name) return;
     const paths = new Set(files.map((f) => f.path));
-    const candidate = newFileFolder ? `${newFileFolder}/${name}` : name;
-    onChange([...files, { id: uid(), path: uniquePath(candidate, paths), type: "file", content: "" }]);
+    const finalPath = uniquePath(newFileFolder ? `${newFileFolder}/${name}` : name, paths);
+    onChange([...files, { id: uid(), path: finalPath, type: "file", content: "" }]);
+    // Phase 4a (Task 5): a new file under js/ auto-links <script src="js/..."></script>
+    if (onJsChange && isJsFilePath(finalPath)) {
+      onJsChange({ type: "create", name: fileNameOf(finalPath) });
+      toast.success(`Script link added: js/${fileNameOf(finalPath)}`);
+    }
     setNewFileFolder(null);
   };
 
@@ -178,6 +184,11 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [
 
   const remove = (path) => {
     onChange(files.filter((f) => f.path !== path && !f.path.startsWith(path + "/")));
+    // Phase 4a (Task 5): deleting a js/ file removes its auto-linked script tag.
+    if (onJsChange && isJsFilePath(path)) {
+      onJsChange({ type: "delete", name: fileNameOf(path) });
+      toast.success(`Script link removed: ${path}`);
+    }
   };
 
   const rename = (path, next) => {
@@ -187,6 +198,21 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [
       if (f.path.startsWith(path + "/")) return { ...f, path: next + f.path.slice(path.length) };
       return f;
     }));
+    // Phase 4a (Task 5): renaming in/out of js/ re-points the script tag.
+    if (onJsChange) {
+      const before = isJsFilePath(path) ? fileNameOf(path) : null;
+      const after = isJsFilePath(next) ? fileNameOf(next) : null;
+      if (before && after && before !== after) {
+        onJsChange({ type: "rename", oldName: before, name: after });
+        toast.success(`Script link updated: js/${after}`);
+      } else if (before && !after) {
+        onJsChange({ type: "delete", name: before });
+        toast.info(`Script link removed (file left js/): ${before}`);
+      } else if (!before && after) {
+        onJsChange({ type: "create", name: after });
+        toast.success(`Script link added: js/${after}`);
+      }
+    }
   };
 
   // Same fix as "New file" above: double-clicking a file used to call

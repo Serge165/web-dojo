@@ -5,6 +5,13 @@ import { toast } from "sonner";
 import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone, Upload, Link2 } from "lucide-react";
 import { buildTemplatePreviewHtml } from "@/lib/exportHtml";
 import { scanHtml } from "@/lib/importHtml";
+// Offline mirror of backend/starter_templates.py STARTER_TEMPLATES, generated
+// by backend/_serialize_starters.py. Used as a fetch-failure fallback in
+// refresh() so the picker isn't empty when the backend is down or
+// REACT_APP_BACKEND_URL is unset. Shape is identical to the /api/templates
+// response, so every existing template consumer (preview, load, filters)
+// works against it unchanged.
+import starterTemplatesFallback from "@/data/starterTemplates.json";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -356,7 +363,16 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
     try {
       const r = await axios.get(`${API}/templates`);
       setTemplates(r.data);
-    } catch { toast.error("Failed to load templates"); }
+    } catch {
+      // Backend unreachable — most commonly REACT_APP_BACKEND_URL unset (API
+      // becomes "undefined/api") or the backend process isn't running. Fall
+      // back to the bundled 1:1 mirror of the backend's seeded starters so the
+      // gallery stays usable offline. Only starters ship in the fallback;
+      // user-saved templates require the backend, so they're simply absent
+      // here (and reappear once the backend is reachable again).
+      setTemplates(starterTemplatesFallback);
+      toast.message("Backend offline — showing bundled starter templates");
+    }
   };
 
   const { starters, userTemplates, aesthetics } = useMemo(() => {

@@ -7,7 +7,7 @@ import { LayoutBuilder } from "./LayoutBuilder";
 import { SnippetsTab } from "./SnippetsTab";
 import { FormsTab } from "./FormsTab";
 import { CommerceTab } from "./CommerceTab";
-import { BlockEditMenu, detectBlockKind } from "./BlockEditMenu";
+import { BlockEditMenu } from "./BlockEditMenu";
 import { cdnComponentGroups } from "@/lib/cdnComponents";
 import { stampVariant } from "@/lib/variants";
 import { useHoverPreview } from "./HoverPreview";
@@ -34,12 +34,13 @@ const GROUPS = [
 ];
 
 export const LeftSidebar = ({
-  onAddBlock, onAddFont, fonts,
+  onAddBlock, onAddFont, onAddFontFile, fonts,
   files, onFilesChange, onFileClick, onImportFile,
   savedComponents, onDeleteSavedComponent,
   onWrapSelection, hasSelection,
   selectedHtml, selectedId, onEditSelected,
   pages = [], projectId = null, activePageId = null, onSwitchPage = null,
+  onJsChange = null,
   onOpenFormBuilder,
   onOpenPaymentBuilder,
   onOpenSocialBuilder,
@@ -60,8 +61,11 @@ export const LeftSidebar = ({
   const filteredCategories = useMemo(() => {
     const query = q.trim().toLowerCase();
     if (!query) return CATEGORIES;
+    // Phase 6 (Issue #1): match the block label OR its category label, so
+    // searching "zenero" / "dashboard" surfaces those whole categories
+    // even when individual block labels don't contain the term.
     return CATEGORIES
-      .map((c) => ({ ...c, blocks: c.blocks.filter((b) => b.label.toLowerCase().includes(query)) }))
+      .map((c) => ({ ...c, blocks: c.blocks.filter((b) => b.label.toLowerCase().includes(query) || (c.label || "").toLowerCase().includes(query)) }))
       .filter((c) => c.blocks.length > 0);
   }, [q]);
 
@@ -85,9 +89,12 @@ export const LeftSidebar = ({
   const onDragStart = (e, html) => { e.dataTransfer.setData("text/html-block", html); e.dataTransfer.effectAllowed = "copy"; };
   const { previewProps, previewNode } = useHoverPreview();
 
-  // When the user selects an editable block (gallery/bento/timeline/navbar)
-  // on canvas, automatically surface its edit menu in this sidebar.
-  const selectedIsEditable = useMemo(() => !!detectBlockKind(selectedHtml), [selectedHtml]);
+  // When the user selects any block on canvas, automatically surface an
+  // edit menu in this sidebar. Bespoke editors cover gallery/bento/
+  // timeline/navbar/image/video; the generic content editor covers
+  // hero/cta/card and bare text — so dropping any block always opens
+  // something useful instead of a "select an editable block" hint.
+  const selectedIsEditable = useMemo(() => !!selectedHtml, [selectedHtml]);
   useEffect(() => {
     if (selectedIsEditable && selectedId) setTab("edit");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,12 +108,12 @@ export const LeftSidebar = ({
       onDragStart={(e) => onDragStart(e, stamped)}
       onDoubleClick={() => onAddBlock(stamped)}
       {...previewProps(stamped)}
-      className="rounded bg-[#242019] border border-[#332D22] p-2 flex items-center gap-2 cursor-grab hover:border-[#C9A227]/60 hover:bg-[#332D22] transition-colors group"
+      className="rounded bg-[#242019] border border-[#332D22] p-3 flex items-center gap-2.5 cursor-grab hover:border-[#C9A227]/60 hover:bg-[#332D22] transition-colors group"
       data-testid={testId}
       title="Drag to canvas or double-click to insert"
     >
       <div className="w-1 h-4 bg-[#C9A227]/60 rounded-full" />
-      <span className="text-xs text-[#F1EDE2] flex-1 truncate">{label}</span>
+      <span className="text-sm text-[#F1EDE2] flex-1 truncate">{label}</span>
       {onDelete && (
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
@@ -121,7 +128,9 @@ export const LeftSidebar = ({
 
   return (
     <aside className="w-64 flex-none border-r border-[#332D22] bg-[#1C1A15] flex flex-col overflow-hidden" data-testid="left-sidebar">
-      <div className="grid grid-cols-8 border-b border-[#332D22] text-[10px]">
+      {/* Phase 5 (Issue #6) polish: bigger, clearly separated tabs with an
+          active accent underline instead of the cramped 10px flat bar. */}
+      <div className="grid grid-cols-8 border-b border-[#332D22] divide-x divide-[#332D22] text-[11px] tracking-tight">
         {[
           { id: "edit", label: "Edit" },
           { id: "library", label: "Library" },
@@ -135,19 +144,19 @@ export const LeftSidebar = ({
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`py-2 ${tab === t.id ? "text-[#F1EDE2] bg-[#242019]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
+            className={`py-2.5 whitespace-nowrap overflow-hidden ${tab === t.id ? "text-[#F1EDE2] bg-[#242019] border-b-2 border-[#C9A227] -mb-px" : "text-[#A79C87] hover:text-[#F1EDE2] border-b-2 border-transparent"}`}
             data-testid={`left-tab-${t.id}`}
           >{t.label}</button>
         ))}
       </div>
 
       {tab === "edit" && (
-        <div className="flex-1 overflow-y-auto p-2 space-y-2" data-testid="left-tab-edit">
-          {selectedHtml && selectedIsEditable ? (
+        <div className="flex-1 overflow-y-auto p-2 space-y-2 [scrollbar-width:thin] [scrollbar-color:#6B6353_transparent]" data-testid="left-tab-edit">
+          {selectedHtml ? (
             <BlockEditMenu selectedHtml={selectedHtml} onChange={(html) => onEditSelected && onEditSelected(html)} pages={pages} projectId={projectId} blockId={selectedId} />
           ) : (
             <div className="text-[11px] text-[#948C79] p-3 text-center">
-              Select a gallery, bento, timeline, or navbar block on the canvas to edit it here.
+              Select any block on the canvas to edit its text, links, and images here.
             </div>
           )}
         </div>
@@ -155,7 +164,7 @@ export const LeftSidebar = ({
 
       {tab === "library" && (
         <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#6B6353_transparent]">
           <div className="px-2 pt-2 pb-1.5 sticky top-0 bg-[#1C1A15] z-10 border-b border-[#332D22]">
             <div className="relative">
               <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-[#948C79]" />
@@ -179,7 +188,7 @@ export const LeftSidebar = ({
             <div key={g.id} data-testid={`group-${g.id}`}>
               <button
                 onClick={() => toggleGroup(g.id)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#948C79] bg-[#15130E] hover:text-[#E4DECE] sticky top-[42px] z-[5]"
+                className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-[#948C79] bg-[#15130E] hover:text-[#E4DECE] sticky top-[42px] z-[5]"
                 data-testid={`group-toggle-${g.id}`}
               >
                 <span>{g.label}</span>
@@ -189,7 +198,7 @@ export const LeftSidebar = ({
                 <div key={cat.id} className="border-b border-[#332D22]">
                   <button
                     onClick={() => toggle(cat.id)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-[11px] uppercase tracking-wider text-[#E4DECE] hover:bg-[#242019]"
+                    className="w-full flex items-center justify-between px-3 py-2.5 text-[13px] uppercase tracking-wider text-[#E4DECE] hover:bg-[#242019]"
                     data-testid={`cat-toggle-${cat.id}`}
                   >
                     <span>{cat.label} <span className="text-[#948C79] normal-case">· {cat.blocks.length}</span></span>
@@ -305,7 +314,7 @@ export const LeftSidebar = ({
               </div>
               {fonts.length > 0 && (
                 <div className="pt-1">
-                  <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1">Loaded</div>
+                  <div className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Loaded</div>
                   <div className="flex flex-wrap gap-1">
                     {fonts.map((f) => (
                       <span key={f} className="text-[10px] px-1.5 py-0.5 rounded bg-[#242019] border border-[#332D22] text-[#E4DECE]">{f}</span>
@@ -313,6 +322,19 @@ export const LeftSidebar = ({
                   </div>
                 </div>
               )}
+              <div>
+                <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Local font file (.ttf/.otf/.woff(2))</label>
+                <label className="flex items-center justify-center gap-1.5 w-full rounded bg-[#242019] border border-[#332D22] px-2 py-1.5 text-xs text-[#E4DECE] cursor-pointer hover:bg-[#332D22]" data-testid="font-upload-label">
+                  <input
+                    type="file"
+                    accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files && e.target.files[0]; if (f && onAddFontFile) onAddFontFile(f); e.target.value = ""; }}
+                    data-testid="font-upload-input"
+                  />
+                  Upload font
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -337,7 +359,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "files" && (
-        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onImportFile} pages={pages} activePageId={activePageId} onSwitchPage={onSwitchPage} />
+        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onImportFile} pages={pages} activePageId={activePageId} onSwitchPage={onSwitchPage} onJsChange={onJsChange} />
       )}
 
       {tab === "saved" && (

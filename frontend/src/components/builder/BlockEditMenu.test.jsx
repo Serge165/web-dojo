@@ -22,6 +22,8 @@ import {
   parseVideoBlock,
   setVideoBlockSrc,
   setVideoBlockPoster,
+  parseEditableNodes,
+  setEditableNode,
 } from "./BlockEditMenu";
 import { themes, applyTheme, getSavedThemeName } from "@/themes";
 
@@ -339,5 +341,97 @@ describe("bento helpers", () => {
     expect(out).toHaveLength(3);
     expect(out[0].title).toBe("Title B");
     expect(out[2].title).toBe("New");
+  });
+});
+
+describe("detectBlockKind (hero / cta / card)", () => {
+  const heroTextHtml = `<section style="padding:80px 32px;">
+  <h1>Build the web.</h1>
+  <p>Drag blocks onto the canvas.</p>
+  <button>Start</button>
+</section>`;
+  const ctaHtml = `<section style="padding:40px;">
+  <h2>Ready to ship?</h2>
+  <a href="#go" style="color:inherit;">Get started</a>
+</section>`;
+  const cardsHtml = `<section>
+  <h3>Fast</h3><p>Quick edits.</p>
+  <h3>Easy</h3><p>No code needed.</p>
+</section>`;
+
+  test("detects a text-only hero as hero", () => {
+    expect(detectBlockKind(heroTextHtml)).toBe("hero");
+  });
+  test("detects a CTA band as cta", () => {
+    expect(detectBlockKind(ctaHtml)).toBe("cta");
+  });
+  test("detects a multi-card features section as card", () => {
+    expect(detectBlockKind(cardsHtml)).toBe("card");
+  });
+  test("still returns null for a bare paragraph and empty string", () => {
+    expect(detectBlockKind("<p>hello</p>")).toBeNull();
+    expect(detectBlockKind("")).toBeNull();
+  });
+  test("a grid of 2+ h3 still detects as bento, not card", () => {
+    const bento = `<section><div style="display:grid;grid-template-columns:repeat(2,1fr);"><div><h3>A</h3></div><div><h3>B</h3></div></div></section>`;
+    expect(detectBlockKind(bento)).toBe("bento");
+  });
+});
+
+describe("generic editable-node helpers", () => {
+  const hero = `<section><h1>Build the web.</h1><p>Drag blocks.</p><button>Start</button></section>`;
+  const cta = `<section><h2>Ready?</h2><a href="#go">Get started</a></section>`;
+  const imgBlock = `<section><h2>Hi</h2><img src="https://x/a.jpg" alt="a" /></section>`;
+
+  test("parseEditableNodes collects text, button nodes in document order", () => {
+    const nodes = parseEditableNodes(hero);
+    expect(nodes).toHaveLength(3);
+    expect(nodes[0]).toMatchObject({ kind: "text", tag: "h1", text: "Build the web." });
+    expect(nodes[1]).toMatchObject({ kind: "text", tag: "p", text: "Drag blocks." });
+    expect(nodes[2]).toMatchObject({ kind: "button", tag: "button", text: "Start" });
+  });
+
+  test("parseEditableNodes parses links with href + text", () => {
+    const nodes = parseEditableNodes(cta);
+    expect(nodes).toHaveLength(2);
+    expect(nodes[1]).toMatchObject({ kind: "link", tag: "a", href: "#go", text: "Get started" });
+  });
+
+  test("parseEditableNodes parses images with src + alt", () => {
+    const nodes = parseEditableNodes(imgBlock);
+    expect(nodes).toHaveLength(2);
+    expect(nodes[1]).toMatchObject({ kind: "image", tag: "img", src: "https://x/a.jpg", alt: "a" });
+  });
+
+  test("setEditableNode rewrites a heading's text by offset", () => {
+    const out = setEditableNode(hero, 0, { text: "Build the web now." });
+    expect(out).toContain("<h1>Build the web now.</h1>");
+    expect(out).toContain("<p>Drag blocks.</p>");
+  });
+
+  test("setEditableNode rewrites a link's href, preserving text", () => {
+    const out = setEditableNode(cta, 1, { href: "#start" });
+    expect(out).toContain('href="#start"');
+    expect(out).toContain(">Get started</a>");
+  });
+
+  test("setEditableNode rewrites a link's text, preserving href", () => {
+    const out = setEditableNode(cta, 1, { text: "Go" });
+    expect(out).toContain('href="#go"');
+    expect(out).toContain(">Go</a>");
+  });
+
+  test("setEditableNode rewrites an image src, preserving alt", () => {
+    const out = setEditableNode(imgBlock, 1, { src: "https://x/b.jpg" });
+    expect(out).toContain('src="https://x/b.jpg"');
+    expect(out).toContain('alt="a"');
+  });
+
+  test("setEditableNode is a no-op for an out-of-range id", () => {
+    expect(setEditableNode(hero, 99, { text: "x" })).toBe(hero);
+  });
+
+  test("parseEditableNodes returns [] for empty input", () => {
+    expect(parseEditableNodes("")).toEqual([]);
   });
 });

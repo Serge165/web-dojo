@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Download, Upload, Save, FolderOpen, ChevronDown, Undo2, Redo2, Monitor, Tablet, Smartphone, Link2, Server, HelpCircle, Search, Palette, BarChart3, LayoutTemplate, Inbox, Store, Loader2, Check, AlertCircle, Megaphone } from "lucide-react";
 import { scanHtml } from "@/lib/importHtml";
 import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
@@ -9,7 +9,7 @@ export const TopBar = ({
   projectName, setProjectName,
   onImportSections,
   project,
-  onSave,
+  onSave, onSaveAs,
   saveStatus,
   onOpenLoad,
   onUndo, onRedo, canUndo, canRedo,
@@ -24,6 +24,20 @@ export const TopBar = ({
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
+  const [saveDropdownOpen, setSaveDropdownOpen] = useState(false);
+  const saveDropdownRef = useRef(null);
+
+  // Close save-as dropdown on outside click.
+  useEffect(() => {
+    if (!saveDropdownOpen) return;
+    const onDocDown = (e) => {
+      if (saveDropdownRef.current && !saveDropdownRef.current.contains(e.target)) setSaveDropdownOpen(false);
+    };
+    const onKey = (e) => { if (e.key === "Escape") setSaveDropdownOpen(false); };
+    document.addEventListener("mousedown", onDocDown);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDocDown); document.removeEventListener("keydown", onKey); };
+  }, [saveDropdownOpen]);
 
   const handleFile = (e) => {
     const f = e.target.files?.[0];
@@ -141,7 +155,17 @@ export const TopBar = ({
         {saveStatus === "saved" && <span className="flex items-center gap-1 text-[11px] text-emerald-500/80" data-testid="save-status-saved"><Check size={12} /> Saved</span>}
         {saveStatus === "unsaved" && <span className="text-[11px] text-[#948C79]" data-testid="save-status-unsaved">Unsaved changes</span>}
         {saveStatus === "error" && <span className="flex items-center gap-1 text-[11px] text-red-400" data-testid="save-status-error"><AlertCircle size={12} /> Save failed</span>}
-        <button onClick={onSave} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="save-btn"><Save size={12} /> Save</button>
+        <div className="relative inline-flex rounded-md" ref={saveDropdownRef}>
+          <button onClick={onSave} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-l-md bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="save-btn"><Save size={12} /> Save</button>
+          <button onClick={() => setSaveDropdownOpen(!saveDropdownOpen)} className="flex items-center text-xs px-1.5 py-1.5 rounded-r-md bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] border-l border-[#C9A227]" data-testid="save-dropdown-btn"><ChevronDown size={12} /></button>
+          {saveDropdownOpen && (
+            <div className="absolute top-9 right-0 bg-[#1C1A15] border border-[#332D22] rounded-md py-1 z-50 shadow-2xl min-w-[130px]">
+              <button onClick={() => { setSaveDropdownOpen(false); onSaveAs && onSaveAs(); }} className="w-full flex items-center gap-2 text-left text-xs px-3 py-1.5 text-[#F1EDE2] hover:bg-[#242019]" data-testid="save-as-btn">
+                <Save size={12} /> Save As…
+              </button>
+            </div>
+          )}
+        </div>
         <button onClick={onOpenLoad} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="load-btn"><FolderOpen size={12} /> Open</button>
         <button onClick={onStartTour} className="p-1.5 rounded-md hover:bg-[#242019] text-[#E4DECE]" title="Restart onboarding tour" data-testid="help-btn"><HelpCircle size={14} /></button>
       </div>

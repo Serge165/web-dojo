@@ -31,7 +31,7 @@ const FIELDS = [
 ];
 
 export const SeoPanel = ({ open, onClose, seo, onChange, pageName, elements }) => {
-  const s = seo || {};
+  const s = useMemo(() => seo || {}, [seo]);
   const update = (patch) => onChange({ ...s, ...patch });
   const { checks, score } = useMemo(() => computeSeoChecks({ seo: s, elements }), [s, elements]);
   const suggestion = useMemo(() => suggestSeoFromContent(elements), [elements]);

@@ -9,6 +9,7 @@ const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 export const Canvas = ({
   elements, selectedId, onSelect, onDrop, onDelete, onMove, onDuplicate,
   onEditHtml, onSaveComponent, canvasBg, headHtml, viewport = "desktop", zoom = 100,
+  sameBlockHighlight = [],
 }) => {
   const dropRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
@@ -95,7 +96,8 @@ export const Canvas = ({
                     // element here, in Preview, and in real exports —
                     // putting it on this wrapper too would double-match
                     // it in the canvas alone.
-                    className={`relative group ${selectedId === el.id ? "outline outline-2 outline-[#C9A227]" : ""}`}
+                    className={`relative group ${selectedId === el.id ? "outline outline-2 outline-[#C9A227]" : ""} ${sameBlockHighlight.includes(el.id) ? "outline outline-2 outline-indigo-400 outline-dashed" : ""}`}
+                    data-wd-highlight={sameBlockHighlight.includes(el.id) ? "on" : undefined}
                     style={{ zIndex: el.zIndex || undefined, display: el.hidden ? "none" : undefined }}
                     onClick={(e) => { e.stopPropagation(); onSelect(el.id); }}
                     onContextMenu={() => onSelect(el.id)}

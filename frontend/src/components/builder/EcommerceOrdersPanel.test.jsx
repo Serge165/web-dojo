@@ -62,7 +62,10 @@ test("changing the fulfillment dropdown calls PATCH and updates the row", async 
 
   await waitFor(() => expect(screen.getByLabelText(/fulfillment status/i)).toHaveValue("shipped"));
   const patchCall = global.fetch.mock.calls[2];
-  expect(patchCall[0]).toBe("/api/dashboard/proj-123/orders/o1/fulfillment");
+  // The component builds `${REACT_APP_BACKEND_URL}/api/dashboard/...`; the
+  // base URL is injected at compile time and may be set (e.g. via .env) or
+  // empty, so assert the relative path is the URL's suffix, not an exact match.
+  expect(patchCall[0]).toMatch(/\/api\/dashboard\/proj-123\/orders\/o1\/fulfillment$/);
   expect(patchCall[1].method).toBe("PATCH");
   expect(JSON.parse(patchCall[1].body)).toEqual({ fulfillment_status: "shipped" });
 });
