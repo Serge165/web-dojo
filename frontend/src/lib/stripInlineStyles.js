@@ -1,5 +1,6 @@
-// Pure, dependency-free — deliberately has no imports (not even from
-// escapeHtml.js/responsiveCss.js/variants.js) so it can be imported by
+// Pure, dependency-free (aside from the sibling blockClassName.js, which is
+// itself import-free) — deliberately has no imports from
+// escapeHtml.js/responsiveCss.js/variants.js so it can be imported by
 // cssPaneSync.js and by Node-run tests without dragging in exportHtml.js's
 // jszip/file-saver imports, which are CommonJS packages that don't resolve
 // under plain Node ESM (only under webpack's bundler, which the browser
@@ -23,38 +24,10 @@
 // keep both in sync, including BLOCK_PREFIX_BY_CAT and readBlockMeta.
 // See docs/PHASE_4_BLOCK_AUDIT.md §3 for the full scheme + per-block map.
 
-// Per-category prefix to strip from a block id to get its slug. The
-// semantic class name is block-<categoryId>-<slug>. Single source of
-// truth — the backend mirror duplicates this table verbatim.
-const BLOCK_PREFIX_BY_CAT = {
-  components: "cmp-",
-  timelines: "cmp-timeline-",
-  navbars: "nav-",
-  headers: "hdr-",
-  footers: "ft-",
-  video: "video-",
-  heroes: "hero-",
-  sections: "section-",
-  containers: "container-",
-  text: "text-",
-  toolbox: "tb-",
-  pricing: "pricing-",
-  team: "team-",
-  faq: "faq-",
-  newsletter: "newsletter-",
-  portfolio: "portfolio-",
-  layout: "layout-",
-  services: "services-",
-  contact: "contact-",
-  testimonials: "testimonial-",
-  esports: "esports-",
-  creator: "creator-",
-  retro: "retro-",
-  parallax: "parallax-",
-  social: "social-",
-  comments: "comments-",
-  zenero: "",
-};
+// block-<catId>-<slug> naming scheme lives in blockClassName.js — Phase 4b's
+// author-time block templates import that same function so the naming never
+// drifts between export-time and author-time. See that file's header.
+import { blockClassName } from "./blockClassName.js";
 
 // Reads the data-wd-cat / data-wd-block pair variants.js::stampVariant
 // stamps onto a block's root tag. Returns {catId, blockId} or null.
@@ -65,15 +38,6 @@ const readBlockMeta = (html) => {
   const cat = html.match(/data-wd-cat="([^"]*)"/);
   const block = html.match(/data-wd-block="([^"]*)"/);
   return cat && block ? { catId: cat[1], blockId: block[1] } : null;
-};
-
-// block-<catId>-<slug>; slug = blockId with the category's prefix
-// stripped (if the block id starts with it), else the full blockId.
-// Unknown catIds still work — slug is just the full blockId.
-const blockClassName = (catId, blockId) => {
-  const p = BLOCK_PREFIX_BY_CAT[catId];
-  const slug = p && blockId.startsWith(p) ? blockId.slice(p.length) : blockId;
-  return `block-${catId}-${slug}`;
 };
 
 // Given the full HTML string being scanned and the offset of a
