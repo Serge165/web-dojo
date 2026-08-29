@@ -135,17 +135,17 @@ export const EXTRA_CATEGORIES = [
       {
         id: "nav-mega",
         label: "Mega-menu Nav",
-        html: `<nav class="wd-mega" style="font-family:${F};background:var(--fc-bg, #fff);border-bottom:1px solid var(--fc-border, #ececec);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:relative;">
-  <div style="font-weight:700;font-size:18px;color:var(--fc-text, #0f172a);">Northwind</div>
-  <div style="display:flex;gap:26px;font-size:14px;color:var(--fc-muted, #334155);">
-    <div class="wd-mega-item" style="position:relative;"><a href="#" style="color:inherit;text-decoration:none;">Products ▾</a>
-      <div class="wd-mega-panel" style="position:absolute;top:32px;left:-20px;width:520px;background:var(--fc-surface, #fff);border:1px solid var(--fc-border, #ececec);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.12);padding:20px;display:none;grid-template-columns:1fr 1fr;gap:14px;z-index:20;">
-        ${[["Analytics","Understand your traffic"],["Automations","Set it and forget it"],["Inbox","One place for messages"],["Reports","Beautiful dashboards"]].map(([t,d])=>`<a href="#" style="text-decoration:none;color:var(--fc-text, #0f172a);padding:10px;border-radius:10px;display:block;"><div style="font-weight:600;font-size:14px;">${t}</div><div style="font-size:12px;color:var(--fc-muted, #64748b);">${d}</div></a>`).join("")}
+        html: `<nav class="wd-mega block-navbars-mega-1 block-navbars-mega">
+  <div class="block block-navbars-mega-2 block-navbars-mega">Northwind</div>
+  <div class="block block-navbars-mega-3 block-navbars-mega">
+    <div class="wd-mega-item block-navbars-mega-4 block-navbars-mega"><a href="#" class="block block-navbars-mega-5 block-navbars-mega">Products ▾</a>
+      <div class="wd-mega-panel block-navbars-mega-6 block-navbars-mega">
+        <a href="#" class="block block-navbars-mega-7 block-navbars-mega"><div class="block block-navbars-mega-8 block-navbars-mega">Analytics</div><div class="block block-navbars-mega-9 block-navbars-mega">Understand your traffic</div></a><a href="#" class="block block-navbars-mega-10 block-navbars-mega"><div class="block block-navbars-mega-11 block-navbars-mega">Automations</div><div class="block block-navbars-mega-12 block-navbars-mega">Set it and forget it</div></a><a href="#" class="block block-navbars-mega-13 block-navbars-mega"><div class="block block-navbars-mega-14 block-navbars-mega">Inbox</div><div class="block block-navbars-mega-15 block-navbars-mega">One place for messages</div></a><a href="#" class="block block-navbars-mega-16 block-navbars-mega"><div class="block block-navbars-mega-17 block-navbars-mega">Reports</div><div class="block block-navbars-mega-18 block-navbars-mega">Beautiful dashboards</div></a>
       </div>
     </div>
-    <a href="#" style="color:inherit;text-decoration:none;">Pricing</a><a href="#" style="color:inherit;text-decoration:none;">Docs</a>
+    <a href="#" class="block block-navbars-mega-19 block-navbars-mega">Pricing</a><a href="#" class="block block-navbars-mega-20 block-navbars-mega">Docs</a>
   </div>
-  <button style="background:var(--fc-primary, #0f172a);color:#fff;border:0;padding:9px 18px;border-radius:8px;font-size:13px;cursor:pointer;">Get started</button>
+  <button class="block block-navbars-mega-21 block-navbars-mega">Get started</button>
   <style>.wd-mega .wd-mega-item:hover .wd-mega-panel{display:grid;}</style>
 </nav>`,
       },
@@ -207,17 +207,17 @@ export const EXTRA_CATEGORIES = [
       {
         id: "hdr-dropdown",
         label: "Header + Dropdown",
-        html: `<header class="wd-hd" style="font-family:${F};background:var(--fc-bg, #fff);border-bottom:1px solid var(--fc-border, #ececec);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:relative;">
-  <div style="font-weight:700;font-size:19px;color:var(--fc-text, #0f172a);">Vertex</div>
-  <nav style="display:flex;gap:26px;font-size:14px;color:var(--fc-muted, #334155);">
-    <div class="wd-hd-item" style="position:relative;"><a href="#" style="color:inherit;text-decoration:none;">Solutions ▾</a>
-      <div class="wd-hd-menu" style="position:absolute;top:28px;left:0;background:var(--fc-surface, #fff);border:1px solid var(--fc-border, #ececec);border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.1);padding:8px;min-width:200px;display:none;z-index:20;">
-        ${["For startups","For agencies","For enterprise"].map(t=>`<a href="#" style="display:block;padding:9px 12px;border-radius:8px;text-decoration:none;color:var(--fc-text, #0f172a);font-size:14px;">${t}</a>`).join("")}
+        html: `<header class="wd-hd block-headers-dropdown-1 block-headers-dropdown">
+  <div class="block block-headers-dropdown-2 block-headers-dropdown">Vertex</div>
+  <nav class="block block-headers-dropdown-3 block-headers-dropdown">
+    <div class="wd-hd-item block-headers-dropdown-4 block-headers-dropdown"><a href="#" class="block block-headers-dropdown-5 block-headers-dropdown">Solutions ▾</a>
+      <div class="wd-hd-menu block-headers-dropdown-6 block-headers-dropdown">
+        <a href="#" class="block block-headers-dropdown-7 block-headers-dropdown">For startups</a><a href="#" class="block block-headers-dropdown-8 block-headers-dropdown">For agencies</a><a href="#" class="block block-headers-dropdown-9 block-headers-dropdown">For enterprise</a>
       </div>
     </div>
-    <a href="#" style="color:inherit;text-decoration:none;">Pricing</a><a href="#" style="color:inherit;text-decoration:none;">Company</a>
+    <a href="#" class="block block-headers-dropdown-10 block-headers-dropdown">Pricing</a><a href="#" class="block block-headers-dropdown-11 block-headers-dropdown">Company</a>
   </nav>
-  <button style="background:var(--fc-primary, #4f46e5);color:#fff;border:0;padding:9px 18px;border-radius:8px;font-size:13px;cursor:pointer;">Sign up</button>
+  <button class="block block-headers-dropdown-12 block-headers-dropdown">Sign up</button>
   <style>.wd-hd .wd-hd-item:hover .wd-hd-menu{display:block;}</style>
 </header>`,
       },
@@ -390,28 +390,44 @@ export const EXTRA_CATEGORIES = [
       {
         id: "pricing-toggle",
         label: "Pricing · Monthly/Yearly Toggle",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
-  <div class="wd-pricing" style="max-width:1120px;margin:0 auto;text-align:center;">
-    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 8px;color:var(--fc-text, #0f172a);">Simple pricing</h2>
-    <p style="margin:0 0 28px;color:var(--fc-muted, #64748b);font-size:15px;">Switch between monthly and yearly billing.</p>
-    <input type="checkbox" id="wd-pt" class="wd-pt-toggle" style="display:none;" />
-    <label for="wd-pt" style="display:inline-flex;align-items:center;gap:10px;margin-bottom:36px;cursor:pointer;font-size:14px;color:var(--fc-muted, #64748b);">
+        html: `<section class="block block-pricing-toggle-1 block-pricing-toggle">
+  <div class="wd-pricing block-pricing-toggle-2 block-pricing-toggle">
+    <h2 class="block block-pricing-toggle-3 block-pricing-toggle">Simple pricing</h2>
+    <p class="block block-pricing-toggle-4 block-pricing-toggle">Switch between monthly and yearly billing.</p>
+    <input type="checkbox" id="wd-pt" class="wd-pt-toggle block-pricing-toggle-5 block-pricing-toggle" />
+    <label for="wd-pt" class="block block-pricing-toggle-6 block-pricing-toggle">
       <span>Monthly</span>
-      <span style="width:44px;height:24px;border-radius:999px;background:var(--fc-border, #e2e8f0);position:relative;display:inline-block;">
-        <span class="wd-pt-dot" style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:999px;background:var(--fc-primary, #4f46e5);transition:transform .2s;"></span>
+      <span class="block block-pricing-toggle-7 block-pricing-toggle">
+        <span class="wd-pt-dot block-pricing-toggle-8 block-pricing-toggle"></span>
       </span>
-      <span>Yearly <span style="color:#16a34a;font-weight:600;">(save 20%)</span></span>
+      <span>Yearly <span class="block block-pricing-toggle-9 block-pricing-toggle">(save 20%)</span></span>
     </label>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:left;">
-      ${[["Starter","9","86"],["Growth","29","278"],["Scale","79","758"]].map(([n,m,y],i)=>`
-      <div style="padding:28px;border-radius:16px;border:1px solid var(--fc-border, #e2e8f0);${i===1?"box-shadow:0 20px 50px rgba(0,0,0,.08);border-color:var(--fc-primary, #4f46e5);":""}background:var(--fc-surface, #fff);">
-        <div style="font-weight:700;font-size:16px;color:var(--fc-text, #0f172a);margin-bottom:6px;">${n}</div>
-        <div style="font-size:38px;font-weight:800;color:var(--fc-text, #0f172a);margin-bottom:4px;"><span class="wd-price-m">$${m}</span><span class="wd-price-y">$${y}</span><span style="font-size:14px;font-weight:500;color:var(--fc-muted, #64748b);">/mo</span></div>
-        <ul style="list-style:none;padding:0;margin:18px 0 22px;font-size:13px;color:var(--fc-muted, #64748b);line-height:2;">
+    <div class="block block-pricing-toggle-10 block-pricing-toggle">
+      
+      <div class="block block-pricing-toggle-11 block-pricing-toggle">
+        <div class="block block-pricing-toggle-12 block-pricing-toggle">Starter</div>
+        <div class="block block-pricing-toggle-13 block-pricing-toggle"><span class="wd-price-m">$9</span><span class="wd-price-y">$86</span><span class="block block-pricing-toggle-14 block-pricing-toggle">/mo</span></div>
+        <ul class="block block-pricing-toggle-15 block-pricing-toggle">
           <li>✓ Full feature access</li><li>✓ Priority support</li><li>✓ Unlimited projects</li>
         </ul>
-        <a href="#" style="display:block;text-align:center;padding:11px;border-radius:10px;background:${i===1?"var(--fc-primary, #4f46e5)":"transparent"};color:${i===1?"#fff":"var(--fc-text, #0f172a)"};border:1px solid var(--fc-border, #e2e8f0);text-decoration:none;font-weight:600;font-size:14px;">Choose ${n}</a>
-      </div>`).join("")}
+        <a href="#" class="block block-pricing-toggle-16 block-pricing-toggle">Choose Starter</a>
+      </div>
+      <div class="block block-pricing-toggle-17 block-pricing-toggle">
+        <div class="block block-pricing-toggle-18 block-pricing-toggle">Growth</div>
+        <div class="block block-pricing-toggle-19 block-pricing-toggle"><span class="wd-price-m">$29</span><span class="wd-price-y">$278</span><span class="block block-pricing-toggle-20 block-pricing-toggle">/mo</span></div>
+        <ul class="block block-pricing-toggle-21 block-pricing-toggle">
+          <li>✓ Full feature access</li><li>✓ Priority support</li><li>✓ Unlimited projects</li>
+        </ul>
+        <a href="#" class="block block-pricing-toggle-22 block-pricing-toggle">Choose Growth</a>
+      </div>
+      <div class="block block-pricing-toggle-23 block-pricing-toggle">
+        <div class="block block-pricing-toggle-24 block-pricing-toggle">Scale</div>
+        <div class="block block-pricing-toggle-25 block-pricing-toggle"><span class="wd-price-m">$79</span><span class="wd-price-y">$758</span><span class="block block-pricing-toggle-26 block-pricing-toggle">/mo</span></div>
+        <ul class="block block-pricing-toggle-27 block-pricing-toggle">
+          <li>✓ Full feature access</li><li>✓ Priority support</li><li>✓ Unlimited projects</li>
+        </ul>
+        <a href="#" class="block block-pricing-toggle-28 block-pricing-toggle">Choose Scale</a>
+      </div>
     </div>
     <style>
       .wd-pricing .wd-price-y{display:none;}
@@ -485,17 +501,38 @@ export const EXTRA_CATEGORIES = [
       {
         id: "faq-accordion",
         label: "FAQ · Accordion",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
-  <div class="wd-faq" style="max-width:760px;margin:0 auto;">
-    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #0f172a);text-align:center;">Frequently asked</h2>
-    ${[["Can I cancel anytime?","Yes, cancel from your account settings with no fees or lock-in period."],["Do you offer a free trial?","Every plan starts with a 14-day free trial, no card required."],["Is my data secure?","All data is encrypted in transit and at rest, with daily backups."],["Can I change plans later?","Upgrade or downgrade anytime — billing prorates automatically."]].map(([q,a])=>`
-    <details style="border-bottom:1px solid var(--fc-border, #e2e8f0);padding:18px 0;">
-      <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:15px;color:var(--fc-text, #0f172a);">
-        ${q}
-        <span class="wd-chev" style="transition:transform .2s;color:var(--fc-muted, #94a3b8);">⌄</span>
+        html: `<section class="block block-faq-accordion-1 block-faq-accordion">
+  <div class="wd-faq block-faq-accordion-2 block-faq-accordion">
+    <h2 class="block block-faq-accordion-3 block-faq-accordion">Frequently asked</h2>
+    
+    <details class="block block-faq-accordion-4 block-faq-accordion">
+      <summary class="block block-faq-accordion-5 block-faq-accordion">
+        Can I cancel anytime?
+        <span class="wd-chev block-faq-accordion-6 block-faq-accordion">⌄</span>
       </summary>
-      <p style="margin:12px 0 0;font-size:14px;line-height:1.7;color:var(--fc-muted, #64748b);">${a}</p>
-    </details>`).join("")}
+      <p class="block block-faq-accordion-7 block-faq-accordion">Yes, cancel from your account settings with no fees or lock-in period.</p>
+    </details>
+    <details class="block block-faq-accordion-8 block-faq-accordion">
+      <summary class="block block-faq-accordion-9 block-faq-accordion">
+        Do you offer a free trial?
+        <span class="wd-chev block-faq-accordion-10 block-faq-accordion">⌄</span>
+      </summary>
+      <p class="block block-faq-accordion-11 block-faq-accordion">Every plan starts with a 14-day free trial, no card required.</p>
+    </details>
+    <details class="block block-faq-accordion-12 block-faq-accordion">
+      <summary class="block block-faq-accordion-13 block-faq-accordion">
+        Is my data secure?
+        <span class="wd-chev block-faq-accordion-14 block-faq-accordion">⌄</span>
+      </summary>
+      <p class="block block-faq-accordion-15 block-faq-accordion">All data is encrypted in transit and at rest, with daily backups.</p>
+    </details>
+    <details class="block block-faq-accordion-16 block-faq-accordion">
+      <summary class="block block-faq-accordion-17 block-faq-accordion">
+        Can I change plans later?
+        <span class="wd-chev block-faq-accordion-18 block-faq-accordion">⌄</span>
+      </summary>
+      <p class="block block-faq-accordion-19 block-faq-accordion">Upgrade or downgrade anytime — billing prorates automatically.</p>
+    </details>
     <style>.wd-faq details[open] .wd-chev{transform:rotate(180deg);} .wd-faq summary::-webkit-details-marker{display:none;}</style>
   </div>
 </section>`,
@@ -509,15 +546,15 @@ export const EXTRA_CATEGORIES = [
       {
         id: "newsletter-signup",
         label: "Newsletter · Signup + Validation",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #f8fafc);">
-  <form class="wd-nl" novalidate style="max-width:480px;margin:0 auto;text-align:center;">
-    <h2 style="font-size:28px;letter-spacing:-.02em;margin:0 0 8px;color:var(--fc-text, #0f172a);">Join the newsletter</h2>
-    <p style="margin:0 0 24px;font-size:14px;color:var(--fc-muted, #64748b);">Product updates and design notes, twice a month.</p>
-    <div style="display:flex;gap:8px;">
-      <input type="email" required placeholder="you@example.com" style="flex:1;padding:13px 16px;border-radius:10px;border:1px solid var(--fc-border, #cbd5e1);font-size:14px;outline:none;" />
-      <button type="submit" style="padding:13px 22px;background:var(--fc-primary, #0f172a);color:#fff;border:0;border-radius:10px;font-weight:600;cursor:pointer;">Subscribe</button>
+        html: `<section class="block block-newsletter-signup-1 block-newsletter-signup">
+  <form novalidate class="wd-nl block-newsletter-signup-2 block-newsletter-signup">
+    <h2 class="block block-newsletter-signup-3 block-newsletter-signup">Join the newsletter</h2>
+    <p class="block block-newsletter-signup-4 block-newsletter-signup">Product updates and design notes, twice a month.</p>
+    <div class="block block-newsletter-signup-5 block-newsletter-signup">
+      <input type="email" required placeholder="you@example.com" class="block block-newsletter-signup-6 block-newsletter-signup" />
+      <button type="submit" class="block block-newsletter-signup-7 block-newsletter-signup">Subscribe</button>
     </div>
-    <p class="wd-nl-err" style="display:none;color:#dc2626;font-size:12px;margin:8px 0 0;text-align:left;">Please enter a valid email address.</p>
+    <p class="wd-nl-err block-newsletter-signup-8 block-newsletter-signup">Please enter a valid email address.</p>
     <style>
       .wd-nl:has(input:invalid:not(:placeholder-shown)) .wd-nl-err{display:block;}
       .wd-nl:has(input:invalid:not(:placeholder-shown)) input{border-color:#dc2626;}
@@ -534,18 +571,23 @@ export const EXTRA_CATEGORIES = [
       {
         id: "portfolio-filter",
         label: "Portfolio · Filterable Gallery",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
-  <div class="wd-portfolio" style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 20px;color:var(--fc-text, #0f172a);text-align:center;">Selected work</h2>
-    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;">
-      ${["all","branding","product","web"].map((c,i)=>`<input type="radio" name="wd-pf" id="wd-pf-${c}" ${i===0?"checked":""} style="display:none;" /><label for="wd-pf-${c}" style="cursor:pointer;padding:8px 18px;border-radius:999px;border:1px solid var(--fc-border, #e2e8f0);font-size:13px;color:var(--fc-muted, #64748b);text-transform:capitalize;">${c}</label>`).join("")}
+        html: `<section class="block block-portfolio-filter-1 block-portfolio-filter">
+  <div class="wd-portfolio block-portfolio-filter-2 block-portfolio-filter">
+    <h2 class="block block-portfolio-filter-3 block-portfolio-filter">Selected work</h2>
+    <div class="block block-portfolio-filter-4 block-portfolio-filter">
+      <input type="radio" name="wd-pf" id="wd-pf-all" checked class="block block-portfolio-filter-5 block-portfolio-filter" /><label for="wd-pf-all" class="block block-portfolio-filter-6 block-portfolio-filter">all</label><input type="radio" name="wd-pf" id="wd-pf-branding"  class="block block-portfolio-filter-7 block-portfolio-filter" /><label for="wd-pf-branding" class="block block-portfolio-filter-8 block-portfolio-filter">branding</label><input type="radio" name="wd-pf" id="wd-pf-product"  class="block block-portfolio-filter-9 block-portfolio-filter" /><label for="wd-pf-product" class="block block-portfolio-filter-10 block-portfolio-filter">product</label><input type="radio" name="wd-pf" id="wd-pf-web"  class="block block-portfolio-filter-11 block-portfolio-filter" /><label for="wd-pf-web" class="block block-portfolio-filter-12 block-portfolio-filter">web</label>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
-      ${[[PORT[0],"branding"],[PORT[1],"product"],[PORT[2],"web"],[PORT[3],"branding"],[PORT[4],"product"],[PORT[5],"web"]].map(([src,cat])=>`<div class="wd-pf-item" data-cat="${cat}" style="border-radius:12px;overflow:hidden;aspect-ratio:4/3;"><img src="${src}" style="width:100%;height:100%;object-fit:cover;" alt="" /></div>`).join("")}
+    <div class="block block-portfolio-filter-13 block-portfolio-filter">
+      <div data-cat="branding" class="wd-pf-item block-portfolio-filter-14 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" class="block block-portfolio-filter-15 block-portfolio-filter" alt="" /></div><div data-cat="product" class="wd-pf-item block-portfolio-filter-16 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" class="block block-portfolio-filter-17 block-portfolio-filter" alt="" /></div><div data-cat="web" class="wd-pf-item block-portfolio-filter-18 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" class="block block-portfolio-filter-19 block-portfolio-filter" alt="" /></div><div data-cat="branding" class="wd-pf-item block-portfolio-filter-20 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" class="block block-portfolio-filter-21 block-portfolio-filter" alt="" /></div><div data-cat="product" class="wd-pf-item block-portfolio-filter-22 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" class="block block-portfolio-filter-23 block-portfolio-filter" alt="" /></div><div data-cat="web" class="wd-pf-item block-portfolio-filter-24 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" class="block block-portfolio-filter-25 block-portfolio-filter" alt="" /></div>
     </div>
     <style>
-      ${["all","branding","product","web"].map(c=>`.wd-portfolio:has(#wd-pf-${c}:checked) label[for="wd-pf-${c}"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}`).join("\n      ")}
-      ${["branding","product","web"].map(c=>`.wd-portfolio:has(#wd-pf-${c}:checked) .wd-pf-item:not([data-cat="${c}"]){display:none;}`).join("\n      ")}
+      .wd-portfolio:has(#wd-pf-all:checked) label[for="wd-pf-all"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+      .wd-portfolio:has(#wd-pf-branding:checked) label[for="wd-pf-branding"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+      .wd-portfolio:has(#wd-pf-product:checked) label[for="wd-pf-product"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+      .wd-portfolio:has(#wd-pf-web:checked) label[for="wd-pf-web"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+      .wd-portfolio:has(#wd-pf-branding:checked) .wd-pf-item:not([data-cat="branding"]){display:none;}
+      .wd-portfolio:has(#wd-pf-product:checked) .wd-pf-item:not([data-cat="product"]){display:none;}
+      .wd-portfolio:has(#wd-pf-web:checked) .wd-pf-item:not([data-cat="web"]){display:none;}
     </style>
   </div>
 </section>`,
@@ -618,18 +660,18 @@ export const EXTRA_CATEGORIES = [
       {
         id: "contact-recaptcha",
         label: "Contact Form · reCAPTCHA",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #f8fafc);">
+        html: `<section class="block block-contact-recaptcha-1 block-contact-recaptcha">
   <!-- reCAPTCHA: add <script src="https://www.google.com/recaptcha/api.js" async defer></script> to the page head and replace YOUR_SITE_KEY below -->
-  <form style="max-width:520px;margin:0 auto;background:var(--fc-surface, #fff);border:1px solid var(--fc-border, #e2e8f0);border-radius:16px;padding:32px;">
-    <h2 style="font-size:24px;margin:0 0 20px;color:var(--fc-text, #0f172a);">Get in touch</h2>
-    <label style="display:block;font-size:12px;color:var(--fc-muted, #64748b);margin-bottom:6px;">Name</label>
-    <input required style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);margin-bottom:14px;font-size:14px;" />
-    <label style="display:block;font-size:12px;color:var(--fc-muted, #64748b);margin-bottom:6px;">Email</label>
-    <input type="email" required style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);margin-bottom:14px;font-size:14px;" />
-    <label style="display:block;font-size:12px;color:var(--fc-muted, #64748b);margin-bottom:6px;">Message</label>
-    <textarea required rows="4" style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid var(--fc-border, #cbd5e1);margin-bottom:16px;font-size:14px;resize:vertical;"></textarea>
-    <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY" style="margin-bottom:16px;"></div>
-    <button type="submit" style="width:100%;padding:13px;background:var(--fc-primary, #0f172a);color:#fff;border:0;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">Send message</button>
+  <form class="block block-contact-recaptcha-2 block-contact-recaptcha">
+    <h2 class="block block-contact-recaptcha-3 block-contact-recaptcha">Get in touch</h2>
+    <label class="block block-contact-recaptcha-4 block-contact-recaptcha">Name</label>
+    <input required class="block block-contact-recaptcha-5 block-contact-recaptcha" />
+    <label class="block block-contact-recaptcha-6 block-contact-recaptcha">Email</label>
+    <input type="email" required class="block block-contact-recaptcha-7 block-contact-recaptcha" />
+    <label class="block block-contact-recaptcha-8 block-contact-recaptcha">Message</label>
+    <textarea required rows="4" class="block block-contact-recaptcha-9 block-contact-recaptcha"></textarea>
+    <div data-sitekey="YOUR_SITE_KEY" class="g-recaptcha block-contact-recaptcha-10 block-contact-recaptcha"></div>
+    <button type="submit" class="block block-contact-recaptcha-11 block-contact-recaptcha">Send message</button>
   </form>
 </section>`,
       },
