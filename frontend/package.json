@@ -70,7 +70,9 @@
     "start": "craco start",
     "build": "craco build",
     "build:tauri": "REACT_APP_BACKEND_URL=http://127.0.0.1:8787 craco build",
-    "test": "craco test"
+    "test": "craco test",
+    "test:visual": "playwright test --config=playwright.visual.config.js",
+    "test:visual:update": "playwright test --config=playwright.visual.config.js --update-snapshots"
   },
   "jest": {
     "moduleNameMapper": {
