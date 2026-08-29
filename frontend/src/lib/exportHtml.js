@@ -4,6 +4,7 @@ import { escAttr, escText, escRawScript } from "./escapeHtml.js";
 import { RESPONSIVE_CSS_BODY } from "./responsiveCss.js";
 import { stripInlineStyles, protectScriptPayloads } from "./stripInlineStyles.js";
 import { CATEGORIES } from "./blocks.js";
+import { BLOCK_STYLES_BY_CATEGORY, BLOCK_STYLES_MEDIA_CSS, BLOCK_STYLES_CSS } from "./blockStyles.generated.js";
 
 export { stripInlineStyles };
 
@@ -179,7 +180,7 @@ const buildOrganizedStylesheet = ({ themeVars, base, componentBuckets, genericCo
     ["Base", dedupe(base).join("\n")],
     ...buildComponentSections(componentBuckets, genericComponentCss),
     ["Animations", dedupe(animations).join("\n\n")],
-    ["Media Queries", [RESPONSIVE_CSS_BODY, ...dedupe(mediaQueries)].join("\n")],
+    ["Media Queries", [RESPONSIVE_CSS_BODY, BLOCK_STYLES_MEDIA_CSS, ...dedupe(mediaQueries)].join("\n")],
     // A11y: users with a reduced-motion OS preference get a static site.
     ["Reduced Motion", "@media (prefers-reduced-motion: reduce) {\n  *, *::before, *::after {\n    animation-duration: 0.01ms !important;\n    animation-iteration-count: 1 !important;\n    transition-duration: 0.01ms !important;\n  }\n}"],
   ];
@@ -265,6 +266,12 @@ export const buildStandaloneHtml = (project) => {
     `body { margin: 0; background: var(--wd-canvas-bg); }`,
     ...forge.themeVars,
     ...forge.base,
+    // Phase 4b Task 3: static per-block CSS for the 105 author-time-classed
+    // blocks (blockStyles.generated.js) — placed before `css` so anything
+    // stripInlineStyles still extracts (the 7 unconverted blocks, or a block
+    // re-styled live after insertion) cascades on top rather than getting
+    // shadowed by the base rule.
+    BLOCK_STYLES_CSS,
     css, // block-<cat>-<slug>-<occ> + .block rules lifted out of inline styles
     ...forge.importedCss,
     ...forge.animations,
@@ -363,6 +370,8 @@ ${customJsTag}</body>
     `body { margin: 0; background: var(--wd-canvas-bg); }`,
     ...forge.themeVars,
     ...forge.base,
+    // Phase 4b Task 3: see buildStandaloneHtml's comment above BLOCK_STYLES_CSS.
+    BLOCK_STYLES_CSS,
     css,
     ...forge.importedCss,
     ...forge.animations,
@@ -493,7 +502,14 @@ ${customJsTag}</body>
   const componentBuckets = [];
   CATEGORIES.forEach((c) => {
     const chunks = allComponentByCat.get(c.id);
-    if (chunks && chunks.length) componentBuckets.push({ label: c.label, css: chunks.filter(Boolean).join("\n") });
+    // Phase 4b Task 3: static generated CSS is the base for this category's
+    // author-time-classed blocks; any export-time extraction (the 7 blocks
+    // still using inline styles, or a block re-styled live after insertion)
+    // is appended after it so it cascades on top instead of being shadowed.
+    const generated = BLOCK_STYLES_BY_CATEGORY[c.id] || "";
+    const extracted = (chunks && chunks.length) ? chunks.filter(Boolean).join("\n") : "";
+    const css = [generated, extracted].filter(Boolean).join("\n");
+    if (css) componentBuckets.push({ label: c.label, css });
   });
   const genericCss = genericCssParts.filter(Boolean).join("\n");
 

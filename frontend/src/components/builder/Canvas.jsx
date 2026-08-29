@@ -3,6 +3,7 @@ import { Trash2, ArrowUp, ArrowDown, Copy, Pencil, Save } from "lucide-react";
 import { InlineToolbar } from "./InlineToolbar";
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { RESPONSIVE_CSS_BODY } from "@/lib/responsiveCss.js";
+import { BLOCK_STYLES_CSS } from "@/lib/blockStyles.generated.js";
 
 const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 
@@ -21,9 +22,14 @@ export const Canvas = ({
   // stacked flex rows here even after the @container fix above. It's
   // project-independent, so this runs once and stays for the component's
   // lifetime rather than re-running per headHtml change.
+  // Phase 4b Task 3: BLOCK_STYLES_CSS is the static per-block CSS extracted
+  // from the 105 author-time-classed block templates (blockStyles.generated.js)
+  // — same "static, project-independent, mount once" story as RESPONSIVE_CSS_BODY
+  // above, so it's folded into the same <style> tag/effect rather than a
+  // second one.
   useEffect(() => {
     const style = document.createElement("style");
-    style.textContent = RESPONSIVE_CSS_BODY;
+    style.textContent = RESPONSIVE_CSS_BODY + "\n" + BLOCK_STYLES_CSS;
     document.head.appendChild(style);
     return () => style.parentNode && style.parentNode.removeChild(style);
   }, []);
