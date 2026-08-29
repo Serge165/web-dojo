@@ -122,13 +122,13 @@ export const EXTRA_CATEGORIES = [
       {
         id: "nav-centered-logo",
         label: "Centered Logo Nav",
-        html: `<nav style="font-family:${F};background:var(--fc-bg, #fff);border-bottom:1px solid var(--fc-border, #ececec);padding:18px 32px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;">
-  <div style="display:flex;gap:22px;font-size:14px;color:var(--fc-muted, #334155);">
-    <a href="#" style="color:inherit;text-decoration:none;">Shop</a><a href="#" style="color:inherit;text-decoration:none;">New</a><a href="#" style="color:inherit;text-decoration:none;">About</a>
+        html: `<nav class="block block-navbars-centered-logo-1 block-navbars-centered-logo">
+  <div class="block block-navbars-centered-logo-2 block-navbars-centered-logo">
+    <a href="#" class="block block-navbars-centered-logo-3 block-navbars-centered-logo">Shop</a><a href="#" class="block block-navbars-centered-logo-4 block-navbars-centered-logo">New</a><a href="#" class="block block-navbars-centered-logo-5 block-navbars-centered-logo">About</a>
   </div>
-  <div style="text-align:center;font-weight:800;font-size:20px;letter-spacing:.04em;color:var(--fc-text, #0f172a);">MAISON</div>
-  <div style="display:flex;gap:22px;justify-content:flex-end;font-size:14px;color:var(--fc-muted, #334155);">
-    <a href="#" style="color:inherit;text-decoration:none;">Journal</a><a href="#" style="color:inherit;text-decoration:none;">Cart (0)</a>
+  <div class="block block-navbars-centered-logo-6 block-navbars-centered-logo">MAISON</div>
+  <div class="block block-navbars-centered-logo-7 block-navbars-centered-logo">
+    <a href="#" class="block block-navbars-centered-logo-8 block-navbars-centered-logo">Journal</a><a href="#" class="block block-navbars-centered-logo-9 block-navbars-centered-logo">Cart (0)</a>
   </div>
 </nav>`,
       },
@@ -152,38 +152,38 @@ export const EXTRA_CATEGORIES = [
       {
         id: "nav-ecommerce",
         label: "E-commerce Nav + Search",
-        html: `<nav style="font-family:${F};background:var(--fc-bg, #fff);border-bottom:1px solid var(--fc-border, #ececec);padding:14px 28px;display:flex;align-items:center;gap:20px;">
-  <div style="font-weight:800;font-size:19px;color:var(--fc-text, #0f172a);">STORE</div>
-  <div style="flex:1;max-width:520px;display:flex;align-items:center;background:var(--fc-surface, #f4f5f7);border-radius:10px;padding:9px 14px;gap:8px;">
+        html: `<nav class="block block-navbars-ecommerce-1 block-navbars-ecommerce">
+  <div class="block block-navbars-ecommerce-2 block-navbars-ecommerce">STORE</div>
+  <div class="block block-navbars-ecommerce-3 block-navbars-ecommerce">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-    <input placeholder="Search products…" style="border:0;background:transparent;outline:none;font-size:14px;width:100%;color:var(--fc-text, #0f172a);" />
+    <input placeholder="Search products…" class="block block-navbars-ecommerce-4 block-navbars-ecommerce" />
   </div>
-  <div style="display:flex;gap:18px;align-items:center;color:var(--fc-muted, #334155);">
-    <a href="#" style="color:inherit;text-decoration:none;font-size:14px;">Account</a>
-    <a href="#" style="color:inherit;text-decoration:none;font-size:14px;position:relative;">Cart <span style="position:absolute;top:-8px;right:-14px;background:#ef4444;color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;">3</span></a>
+  <div class="block block-navbars-ecommerce-5 block-navbars-ecommerce">
+    <a href="#" class="block block-navbars-ecommerce-6 block-navbars-ecommerce">Account</a>
+    <a href="#" class="block block-navbars-ecommerce-7 block-navbars-ecommerce">Cart <span class="block block-navbars-ecommerce-8 block-navbars-ecommerce">3</span></a>
   </div>
 </nav>`,
       },
       {
         id: "nav-transparent",
         label: "Transparent Overlay Nav",
-        html: `<nav style="font-family:${F};position:absolute;top:0;left:0;right:0;z-index:20;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;color:#fff;">
-  <div style="font-weight:700;font-size:19px;letter-spacing:.02em;">AURORA</div>
-  <div style="display:flex;gap:26px;font-size:14px;">
-    <a href="#" style="color:#fff;text-decoration:none;opacity:.9;">Home</a><a href="#" style="color:#fff;text-decoration:none;opacity:.9;">Rooms</a><a href="#" style="color:#fff;text-decoration:none;opacity:.9;">Dining</a>
+        html: `<nav class="block block-navbars-transparent-1 block-navbars-transparent">
+  <div class="block block-navbars-transparent-2 block-navbars-transparent">AURORA</div>
+  <div class="block block-navbars-transparent-3 block-navbars-transparent">
+    <a href="#" class="block block-navbars-transparent-4 block-navbars-transparent">Home</a><a href="#" class="block block-navbars-transparent-5 block-navbars-transparent">Rooms</a><a href="#" class="block block-navbars-transparent-6 block-navbars-transparent">Dining</a>
   </div>
-  <button style="background:rgba(255,255,255,.16);backdrop-filter:blur(8px);color:#fff;border:1px solid rgba(255,255,255,.4);padding:9px 20px;border-radius:999px;font-size:13px;cursor:pointer;">Book now</button>
+  <button class="block block-navbars-transparent-7 block-navbars-transparent">Book now</button>
 </nav>`,
       },
       {
         id: "nav-app-tabs",
         label: "App Pill-tabs Nav",
-        html: `<nav style="font-family:${F};background:var(--fc-bg, #0b0b12);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
-  <div style="font-weight:700;color:var(--fc-text, #fff);font-size:17px;">◐ Flowly</div>
-  <div style="display:flex;gap:4px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);border-radius:999px;padding:4px;">
-    ${["Overview","Projects","Team","Settings"].map((t,i)=>`<a href="#" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:999px;${i===0?"background:var(--fc-primary, #4f46e5);color:#fff;":"color:var(--fc-muted, #9ca3af);"}">${t}</a>`).join("")}
+        html: `<nav class="block block-navbars-app-tabs-1 block-navbars-app-tabs">
+  <div class="block block-navbars-app-tabs-2 block-navbars-app-tabs">◐ Flowly</div>
+  <div class="block block-navbars-app-tabs-3 block-navbars-app-tabs">
+    <a href="#" class="block block-navbars-app-tabs-4 block-navbars-app-tabs">Overview</a><a href="#" class="block block-navbars-app-tabs-5 block-navbars-app-tabs">Projects</a><a href="#" class="block block-navbars-app-tabs-6 block-navbars-app-tabs">Team</a><a href="#" class="block block-navbars-app-tabs-7 block-navbars-app-tabs">Settings</a>
   </div>
-  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80" style="width:32px;height:32px;border-radius:999px;object-fit:cover;" alt="" />
+  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80" class="block block-navbars-app-tabs-8 block-navbars-app-tabs" alt="" />
 </nav>`,
       },
     ],
@@ -195,12 +195,12 @@ export const EXTRA_CATEGORIES = [
       {
         id: "hdr-announcement",
         label: "Announcement + Header",
-        html: `<div style="font-family:${F};">
-  <div style="background:var(--fc-primary, #4f46e5);color:#fff;text-align:center;font-size:13px;padding:9px 16px;">✦ Free shipping on orders over $50 — <a href="#" style="color:#fff;text-decoration:underline;">Shop now</a></div>
-  <header style="background:var(--fc-bg, #fff);border-bottom:1px solid var(--fc-border, #ececec);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="font-weight:800;font-size:20px;color:var(--fc-text, #0f172a);">Brand</div>
-    <nav style="display:flex;gap:26px;font-size:14px;color:var(--fc-muted, #334155);"><a href="#" style="color:inherit;text-decoration:none;">Home</a><a href="#" style="color:inherit;text-decoration:none;">Shop</a><a href="#" style="color:inherit;text-decoration:none;">Blog</a></nav>
-    <button style="background:var(--fc-primary, #0f172a);color:#fff;border:0;padding:9px 18px;border-radius:8px;font-size:13px;cursor:pointer;">Contact</button>
+        html: `<div class="block block-headers-announcement-1 block-headers-announcement">
+  <div class="block block-headers-announcement-2 block-headers-announcement">✦ Free shipping on orders over $50 — <a href="#" class="block block-headers-announcement-3 block-headers-announcement">Shop now</a></div>
+  <header class="block block-headers-announcement-4 block-headers-announcement">
+    <div class="block block-headers-announcement-5 block-headers-announcement">Brand</div>
+    <nav class="block block-headers-announcement-6 block-headers-announcement"><a href="#" class="block block-headers-announcement-7 block-headers-announcement">Home</a><a href="#" class="block block-headers-announcement-8 block-headers-announcement">Shop</a><a href="#" class="block block-headers-announcement-9 block-headers-announcement">Blog</a></nav>
+    <button class="block block-headers-announcement-10 block-headers-announcement">Contact</button>
   </header>
 </div>`,
       },
@@ -224,31 +224,31 @@ export const EXTRA_CATEGORIES = [
       {
         id: "hdr-minimal-serif",
         label: "Minimal Serif Header",
-        html: `<header style="font-family:Georgia,'Times New Roman',serif;background:var(--fc-bg, #f7f3ec);padding:26px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--fc-border, #e4dccc);">
-  <div style="font-size:24px;font-style:italic;color:var(--fc-text, #1c1a17);">The Quarterly</div>
-  <nav style="display:flex;gap:28px;font-size:15px;color:var(--fc-muted, #6b6459);">
-    <a href="#" style="color:inherit;text-decoration:none;">Essays</a><a href="#" style="color:inherit;text-decoration:none;">Interviews</a><a href="#" style="color:inherit;text-decoration:none;">Archive</a><a href="#" style="color:inherit;text-decoration:none;">Subscribe</a>
+        html: `<header class="block block-headers-minimal-serif-1 block-headers-minimal-serif">
+  <div class="block block-headers-minimal-serif-2 block-headers-minimal-serif">The Quarterly</div>
+  <nav class="block block-headers-minimal-serif-3 block-headers-minimal-serif">
+    <a href="#" class="block block-headers-minimal-serif-4 block-headers-minimal-serif">Essays</a><a href="#" class="block block-headers-minimal-serif-5 block-headers-minimal-serif">Interviews</a><a href="#" class="block block-headers-minimal-serif-6 block-headers-minimal-serif">Archive</a><a href="#" class="block block-headers-minimal-serif-7 block-headers-minimal-serif">Subscribe</a>
   </nav>
 </header>`,
       },
       {
         id: "hdr-dark-cta",
         label: "Dark Header + CTA",
-        html: `<header style="font-family:${F};background:var(--fc-bg, #0a0a12);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;">
-  <div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;background:linear-gradient(135deg,#f43f5e,#fb923c);border-radius:8px;"></div><span style="color:var(--fc-text, #fff);font-weight:700;font-size:18px;">Ignite</span></div>
-  <nav style="display:flex;gap:26px;font-size:14px;color:var(--fc-muted, #9ca3af);"><a href="#" style="color:inherit;text-decoration:none;">Product</a><a href="#" style="color:inherit;text-decoration:none;">Customers</a><a href="#" style="color:inherit;text-decoration:none;">Pricing</a></nav>
-  <div style="display:flex;gap:10px;"><button style="background:transparent;color:#fff;border:1px solid var(--fc-border, #26263a);padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer;">Log in</button><button style="background:var(--fc-primary, #f43f5e);color:#fff;border:0;padding:9px 18px;border-radius:8px;font-size:13px;cursor:pointer;">Start free</button></div>
+        html: `<header class="block block-headers-dark-cta-1 block-headers-dark-cta">
+  <div class="block block-headers-dark-cta-2 block-headers-dark-cta"><div class="block block-headers-dark-cta-3 block-headers-dark-cta"></div><span class="block block-headers-dark-cta-4 block-headers-dark-cta">Ignite</span></div>
+  <nav class="block block-headers-dark-cta-5 block-headers-dark-cta"><a href="#" class="block block-headers-dark-cta-6 block-headers-dark-cta">Product</a><a href="#" class="block block-headers-dark-cta-7 block-headers-dark-cta">Customers</a><a href="#" class="block block-headers-dark-cta-8 block-headers-dark-cta">Pricing</a></nav>
+  <div class="block block-headers-dark-cta-9 block-headers-dark-cta"><button class="block block-headers-dark-cta-10 block-headers-dark-cta">Log in</button><button class="block block-headers-dark-cta-11 block-headers-dark-cta">Start free</button></div>
 </header>`,
       },
       {
         id: "hdr-search-actions",
         label: "Header + Search + Icons",
-        html: `<header style="font-family:${F};background:var(--fc-bg, #fff);border-bottom:1px solid var(--fc-border, #ececec);padding:14px 28px;display:flex;align-items:center;gap:20px;">
-  <div style="font-weight:800;font-size:19px;color:var(--fc-text, #0f172a);">Docs</div>
-  <nav style="display:flex;gap:22px;font-size:14px;color:var(--fc-muted, #334155);"><a href="#" style="color:inherit;text-decoration:none;">Guides</a><a href="#" style="color:inherit;text-decoration:none;">API</a><a href="#" style="color:inherit;text-decoration:none;">Examples</a></nav>
-  <div style="flex:1;"></div>
-  <div style="display:flex;align-items:center;background:var(--fc-surface, #f4f5f7);border-radius:8px;padding:8px 12px;gap:8px;min-width:220px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="Search docs ⌘K" style="border:0;background:transparent;outline:none;font-size:13px;width:100%;" /></div>
-  <a href="#" style="color:var(--fc-muted, #334155);">◔</a>
+        html: `<header class="block block-headers-search-actions-1 block-headers-search-actions">
+  <div class="block block-headers-search-actions-2 block-headers-search-actions">Docs</div>
+  <nav class="block block-headers-search-actions-3 block-headers-search-actions"><a href="#" class="block block-headers-search-actions-4 block-headers-search-actions">Guides</a><a href="#" class="block block-headers-search-actions-5 block-headers-search-actions">API</a><a href="#" class="block block-headers-search-actions-6 block-headers-search-actions">Examples</a></nav>
+  <div class="block block-headers-search-actions-7 block-headers-search-actions"></div>
+  <div class="block block-headers-search-actions-8 block-headers-search-actions"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="Search docs ⌘K" class="block block-headers-search-actions-9 block-headers-search-actions" /></div>
+  <a href="#" class="block block-headers-search-actions-10 block-headers-search-actions">◔</a>
 </header>`,
       },
     ],
@@ -260,78 +260,78 @@ export const EXTRA_CATEGORIES = [
       {
         id: "ft-minimal",
         label: "Minimal Footer",
-        html: `<footer style="font-family:${F};background:var(--fc-bg, #fff);border-top:1px solid var(--fc-border, #ececec);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-  <div style="font-size:14px;color:var(--fc-muted, #64748b);">© 2026 Brand — All rights reserved.</div>
-  <div style="display:flex;gap:20px;font-size:14px;color:var(--fc-muted, #64748b);"><a href="#" style="color:inherit;text-decoration:none;">Privacy</a><a href="#" style="color:inherit;text-decoration:none;">Terms</a><a href="#" style="color:inherit;text-decoration:none;">Contact</a></div>
+        html: `<footer class="block block-footers-minimal-1 block-footers-minimal">
+  <div class="block block-footers-minimal-2 block-footers-minimal">© 2026 Brand — All rights reserved.</div>
+  <div class="block block-footers-minimal-3 block-footers-minimal"><a href="#" class="block block-footers-minimal-4 block-footers-minimal">Privacy</a><a href="#" class="block block-footers-minimal-5 block-footers-minimal">Terms</a><a href="#" class="block block-footers-minimal-6 block-footers-minimal">Contact</a></div>
 </footer>`,
       },
       {
         id: "ft-newsletter",
         label: "Newsletter Footer",
-        html: `<footer style="font-family:${F};background:var(--fc-bg, #0f172a);color:var(--fc-muted, #cbd5e1);padding:56px 32px;">
-  <div style="max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;">
-    <div><h3 style="color:var(--fc-text, #fff);font-size:24px;margin:0 0 8px;">Stay in the loop</h3><p style="margin:0;font-size:14px;color:var(--fc-muted, #94a3b8);">One thoughtful email a week. No spam.</p></div>
-    <form style="display:flex;gap:10px;"><input placeholder="you@example.com" style="flex:1;padding:13px 16px;border-radius:10px;border:1px solid var(--fc-border, #1e293b);background:var(--fc-surface, #0b1220);color:var(--fc-text, #fff);font-size:14px;" /><button style="padding:13px 22px;background:var(--fc-primary, #4f46e5);color:#fff;border:0;border-radius:10px;font-weight:600;cursor:pointer;">Subscribe</button></form>
+        html: `<footer class="block block-footers-newsletter-1 block-footers-newsletter">
+  <div class="block block-footers-newsletter-2 block-footers-newsletter">
+    <div><h3 class="block block-footers-newsletter-3 block-footers-newsletter">Stay in the loop</h3><p class="block block-footers-newsletter-4 block-footers-newsletter">One thoughtful email a week. No spam.</p></div>
+    <form class="block block-footers-newsletter-5 block-footers-newsletter"><input placeholder="you@example.com" class="block block-footers-newsletter-6 block-footers-newsletter" /><button class="block block-footers-newsletter-7 block-footers-newsletter">Subscribe</button></form>
   </div>
-  <div style="max-width:900px;margin:28px auto 0;padding-top:20px;border-top:1px solid var(--fc-border, #1e293b);font-size:12px;color:var(--fc-muted, #64748b);">© 2026 Brand.</div>
+  <div class="block block-footers-newsletter-8 block-footers-newsletter">© 2026 Brand.</div>
 </footer>`,
       },
       {
         id: "ft-social-dark",
         label: "Social Footer",
-        html: `<footer style="font-family:${F};background:var(--fc-bg, #0a0a12);color:var(--fc-muted, #9ca3af);padding:48px 32px;text-align:center;">
-  <div style="font-weight:800;color:var(--fc-text, #fff);font-size:22px;letter-spacing:.04em;margin-bottom:16px;">AURORA</div>
-  <div style="display:flex;gap:16px;justify-content:center;margin-bottom:22px;">
-    ${["Instagram","X","YouTube","TikTok"].map(s=>`<a href="#" style="color:var(--fc-muted, #9ca3af);text-decoration:none;font-size:13px;border:1px solid var(--fc-border, #26263a);padding:8px 16px;border-radius:999px;">${s}</a>`).join("")}
+        html: `<footer class="block block-footers-social-dark-1 block-footers-social-dark">
+  <div class="block block-footers-social-dark-2 block-footers-social-dark">AURORA</div>
+  <div class="block block-footers-social-dark-3 block-footers-social-dark">
+    <a href="#" class="block block-footers-social-dark-4 block-footers-social-dark">Instagram</a><a href="#" class="block block-footers-social-dark-5 block-footers-social-dark">X</a><a href="#" class="block block-footers-social-dark-6 block-footers-social-dark">YouTube</a><a href="#" class="block block-footers-social-dark-7 block-footers-social-dark">TikTok</a>
   </div>
-  <div style="font-size:12px;color:var(--fc-muted, #4b5563);">© 2026 Aurora Studio. Made with care.</div>
+  <div class="block block-footers-social-dark-8 block-footers-social-dark">© 2026 Aurora Studio. Made with care.</div>
 </footer>`,
       },
       {
         id: "ft-columns-light",
         label: "4-column Light Footer",
-        html: `<footer style="font-family:${F};background:var(--fc-bg, #f8fafc);border-top:1px solid var(--fc-border, #ececec);padding:56px 32px 36px;">
-  <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;">
-    <div><div style="font-weight:800;font-size:20px;color:var(--fc-text, #0f172a);margin-bottom:10px;">Brand</div><p style="font-size:13px;color:var(--fc-muted, #64748b);max-width:240px;margin:0;">Design and ship beautiful sites, fast.</p></div>
-    ${[["Product",["Features","Pricing","Roadmap"]],["Resources",["Blog","Guides","Support"]],["Company",["About","Careers","Legal"]]].map(([h,ls])=>`<div><div style="font-weight:600;color:var(--fc-text, #0f172a);font-size:13px;margin-bottom:12px;">${h}</div>${ls.map(l=>`<a href="#" style="display:block;color:var(--fc-muted, #64748b);text-decoration:none;font-size:13px;padding:4px 0;">${l}</a>`).join("")}</div>`).join("")}
+        html: `<footer class="block block-footers-columns-light-1 block-footers-columns-light">
+  <div class="block block-footers-columns-light-2 block-footers-columns-light">
+    <div><div class="block block-footers-columns-light-3 block-footers-columns-light">Brand</div><p class="block block-footers-columns-light-4 block-footers-columns-light">Design and ship beautiful sites, fast.</p></div>
+    <div><div class="block block-footers-columns-light-5 block-footers-columns-light">Product</div><a href="#" class="block block-footers-columns-light-6 block-footers-columns-light">Features</a><a href="#" class="block block-footers-columns-light-7 block-footers-columns-light">Pricing</a><a href="#" class="block block-footers-columns-light-8 block-footers-columns-light">Roadmap</a></div><div><div class="block block-footers-columns-light-9 block-footers-columns-light">Resources</div><a href="#" class="block block-footers-columns-light-10 block-footers-columns-light">Blog</a><a href="#" class="block block-footers-columns-light-11 block-footers-columns-light">Guides</a><a href="#" class="block block-footers-columns-light-12 block-footers-columns-light">Support</a></div><div><div class="block block-footers-columns-light-13 block-footers-columns-light">Company</div><a href="#" class="block block-footers-columns-light-14 block-footers-columns-light">About</a><a href="#" class="block block-footers-columns-light-15 block-footers-columns-light">Careers</a><a href="#" class="block block-footers-columns-light-16 block-footers-columns-light">Legal</a></div>
   </div>
 </footer>`,
       },
       {
         id: "ft-contact",
         label: "Contact Footer",
-        html: `<footer style="font-family:${F};background:var(--fc-bg, #111827);color:var(--fc-muted, #d1d5db);padding:52px 32px;">
-  <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;">
-    <div><div style="font-weight:700;color:var(--fc-text, #fff);font-size:18px;margin-bottom:10px;">Get in touch</div><p style="font-size:14px;margin:0;line-height:1.9;">hello@example.com<br/>+1 (555) 019-2834<br/>24 Harbour St, Suite 400</p></div>
-    <div><div style="font-weight:600;color:var(--fc-text, #fff);font-size:13px;margin-bottom:12px;">Hours</div><p style="font-size:14px;margin:0;line-height:1.9;">Mon–Fri · 9–6<br/>Sat · 10–4<br/>Sun · Closed</p></div>
-    <div><div style="font-weight:600;color:var(--fc-text, #fff);font-size:13px;margin-bottom:12px;">Follow</div><p style="font-size:14px;margin:0;line-height:1.9;">Instagram<br/>LinkedIn<br/>YouTube</p></div>
+        html: `<footer class="block block-footers-contact-1 block-footers-contact">
+  <div class="block block-footers-contact-2 block-footers-contact">
+    <div><div class="block block-footers-contact-3 block-footers-contact">Get in touch</div><p class="block block-footers-contact-4 block-footers-contact">hello@example.com<br/>+1 (555) 019-2834<br/>24 Harbour St, Suite 400</p></div>
+    <div><div class="block block-footers-contact-5 block-footers-contact">Hours</div><p class="block block-footers-contact-6 block-footers-contact">Mon–Fri · 9–6<br/>Sat · 10–4<br/>Sun · Closed</p></div>
+    <div><div class="block block-footers-contact-7 block-footers-contact">Follow</div><p class="block block-footers-contact-8 block-footers-contact">Instagram<br/>LinkedIn<br/>YouTube</p></div>
   </div>
-  <div style="max-width:1000px;margin:28px auto 0;padding-top:18px;border-top:1px solid var(--fc-border, #1f2937);font-size:12px;color:var(--fc-muted, #6b7280);">© 2026 Brand.</div>
+  <div class="block block-footers-contact-9 block-footers-contact">© 2026 Brand.</div>
 </footer>`,
       },
       {
         id: "ft-app-download",
         label: "App Download Footer",
-        html: `<footer style="font-family:${F};background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;padding:52px 32px;text-align:center;">
-  <h3 style="font-size:26px;margin:0 0 10px;">Take it everywhere</h3>
-  <p style="margin:0 0 22px;opacity:.9;font-size:15px;">Download the app for iOS and Android.</p>
-  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-    <a href="#" style="background:var(--fc-primary, #0f172a);color:#fff;text-decoration:none;padding:12px 22px;border-radius:12px;font-size:14px;">↧ App Store</a>
-    <a href="#" style="background:var(--fc-primary, #0f172a);color:#fff;text-decoration:none;padding:12px 22px;border-radius:12px;font-size:14px;">↧ Google Play</a>
+        html: `<footer class="block block-footers-app-download-1 block-footers-app-download">
+  <h3 class="block block-footers-app-download-2 block-footers-app-download">Take it everywhere</h3>
+  <p class="block block-footers-app-download-3 block-footers-app-download">Download the app for iOS and Android.</p>
+  <div class="block block-footers-app-download-4 block-footers-app-download">
+    <a href="#" class="block block-footers-app-download-5 block-footers-app-download">↧ App Store</a>
+    <a href="#" class="block block-footers-app-download-6 block-footers-app-download">↧ Google Play</a>
   </div>
 </footer>`,
       },
       {
         id: "ft-mega-multicol",
         label: "Mega 5-column Footer",
-        html: `<footer style="font-family:${F};background:var(--fc-bg, #0b0b12);color:var(--fc-muted, #9ca3af);padding:60px 32px 32px;">
-  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1.2fr;gap:28px;">
-    <div><div style="font-weight:800;font-size:20px;color:var(--fc-text, #fff);margin-bottom:10px;">Brand</div><p style="font-size:13px;line-height:1.7;margin:0;max-width:220px;">Tools for teams who ship fast and design well.</p></div>
-    ${[["Product",["Features","Integrations","Changelog"]],["Solutions",["Agencies","Startups","Enterprise"]],["Resources",["Blog","Guides","API Docs"]],["Company",["About","Careers","Press"]]].map(([h,ls])=>`<div><div style="font-weight:600;color:var(--fc-text, #fff);font-size:13px;margin-bottom:12px;">${h}</div>${ls.map(l=>`<a href="#" style="display:block;color:var(--fc-muted, #9ca3af);text-decoration:none;font-size:13px;padding:4px 0;">${l}</a>`).join("")}</div>`).join("")}
+        html: `<footer class="block block-footers-mega-multicol-1 block-footers-mega-multicol">
+  <div class="block block-footers-mega-multicol-2 block-footers-mega-multicol">
+    <div><div class="block block-footers-mega-multicol-3 block-footers-mega-multicol">Brand</div><p class="block block-footers-mega-multicol-4 block-footers-mega-multicol">Tools for teams who ship fast and design well.</p></div>
+    <div><div class="block block-footers-mega-multicol-5 block-footers-mega-multicol">Product</div><a href="#" class="block block-footers-mega-multicol-6 block-footers-mega-multicol">Features</a><a href="#" class="block block-footers-mega-multicol-7 block-footers-mega-multicol">Integrations</a><a href="#" class="block block-footers-mega-multicol-8 block-footers-mega-multicol">Changelog</a></div><div><div class="block block-footers-mega-multicol-9 block-footers-mega-multicol">Solutions</div><a href="#" class="block block-footers-mega-multicol-10 block-footers-mega-multicol">Agencies</a><a href="#" class="block block-footers-mega-multicol-11 block-footers-mega-multicol">Startups</a><a href="#" class="block block-footers-mega-multicol-12 block-footers-mega-multicol">Enterprise</a></div><div><div class="block block-footers-mega-multicol-13 block-footers-mega-multicol">Resources</div><a href="#" class="block block-footers-mega-multicol-14 block-footers-mega-multicol">Blog</a><a href="#" class="block block-footers-mega-multicol-15 block-footers-mega-multicol">Guides</a><a href="#" class="block block-footers-mega-multicol-16 block-footers-mega-multicol">API Docs</a></div><div><div class="block block-footers-mega-multicol-17 block-footers-mega-multicol">Company</div><a href="#" class="block block-footers-mega-multicol-18 block-footers-mega-multicol">About</a><a href="#" class="block block-footers-mega-multicol-19 block-footers-mega-multicol">Careers</a><a href="#" class="block block-footers-mega-multicol-20 block-footers-mega-multicol">Press</a></div>
   </div>
-  <div style="max-width:1200px;margin:32px auto 0;padding-top:20px;border-top:1px solid var(--fc-border, #26263a);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--fc-muted, #6b7280);">
+  <div class="block block-footers-mega-multicol-21 block-footers-mega-multicol">
     <span>© 2026 Brand. All rights reserved.</span>
-    <div style="display:flex;gap:16px;"><a href="#" style="color:inherit;text-decoration:none;">Privacy</a><a href="#" style="color:inherit;text-decoration:none;">Terms</a><a href="#" style="color:inherit;text-decoration:none;">Cookies</a></div>
+    <div class="block block-footers-mega-multicol-22 block-footers-mega-multicol"><a href="#" class="block block-footers-mega-multicol-23 block-footers-mega-multicol">Privacy</a><a href="#" class="block block-footers-mega-multicol-24 block-footers-mega-multicol">Terms</a><a href="#" class="block block-footers-mega-multicol-25 block-footers-mega-multicol">Cookies</a></div>
   </div>
 </footer>`,
       },
@@ -344,27 +344,27 @@ export const EXTRA_CATEGORIES = [
       {
         id: "video-hero",
         label: "Hero · Video Background",
-        html: `<section style="position:relative;min-height:82vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;font-family:${F};">
-  <video autoplay muted loop playsinline poster="${VPOSTER}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"><source src="${VID}" type="video/mp4" /></video>
-  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.7));z-index:1;"></div>
-  <div style="position:relative;z-index:2;color:#fff;max-width:720px;padding:32px;">
-    <h1 style="font-size:60px;line-height:1.05;letter-spacing:-.03em;margin:0 0 18px;">Motion tells your story</h1>
-    <p style="font-size:19px;opacity:.9;margin:0 0 28px;">A cinematic hero with a looping background video. Muted, auto-playing, mobile-friendly.</p>
-    <a href="#" style="display:inline-block;background:#fff;color:#0f172a;text-decoration:none;padding:14px 30px;border-radius:999px;font-weight:700;">Watch the film</a>
+        html: `<section class="block block-video-hero-1 block-video-hero">
+  <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-hero-2 block-video-hero"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
+  <div class="block block-video-hero-3 block-video-hero"></div>
+  <div class="block block-video-hero-4 block-video-hero">
+    <h1 class="block block-video-hero-5 block-video-hero">Motion tells your story</h1>
+    <p class="block block-video-hero-6 block-video-hero">A cinematic hero with a looping background video. Muted, auto-playing, mobile-friendly.</p>
+    <a href="#" class="block block-video-hero-7 block-video-hero">Watch the film</a>
   </div>
 </section>`,
       },
       {
         id: "video-section",
         label: "Section · Video + Text",
-        html: `<section style="font-family:${F};background:var(--fc-bg, #0b0b12);color:var(--fc-text, #fff);padding:72px 32px;">
-  <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;">
-    <div style="position:relative;border-radius:18px;overflow:hidden;aspect-ratio:16/10;"><video autoplay muted loop playsinline poster="${VPOSTER}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"><source src="${VID}" type="video/mp4" /></video></div>
+        html: `<section class="block block-video-section-1 block-video-section">
+  <div class="block block-video-section-2 block-video-section">
+    <div class="block block-video-section-3 block-video-section"><video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-section-4 block-video-section"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video></div>
     <div>
-      <div style="color:var(--fc-accent, #22d3ee);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;">See it in action</div>
-      <h2 style="font-size:38px;letter-spacing:-.02em;margin:0 0 16px;">Built to move</h2>
-      <p style="font-size:17px;line-height:1.7;color:var(--fc-muted, #9ca3af);margin:0 0 24px;">Pair looping product footage with crisp copy. The video autoplays muted and loops seamlessly on every device.</p>
-      <a href="#" style="display:inline-block;background:var(--fc-primary, #4f46e5);color:#fff;text-decoration:none;padding:13px 26px;border-radius:10px;font-weight:600;">Learn more</a>
+      <div class="block block-video-section-5 block-video-section">See it in action</div>
+      <h2 class="block block-video-section-6 block-video-section">Built to move</h2>
+      <p class="block block-video-section-7 block-video-section">Pair looping product footage with crisp copy. The video autoplays muted and loops seamlessly on every device.</p>
+      <a href="#" class="block block-video-section-8 block-video-section">Learn more</a>
     </div>
   </div>
 </section>`,
@@ -372,12 +372,12 @@ export const EXTRA_CATEGORIES = [
       {
         id: "video-banner",
         label: "Video Banner Strip",
-        html: `<section style="position:relative;height:280px;display:flex;align-items:center;overflow:hidden;font-family:${F};">
-  <video autoplay muted loop playsinline poster="${VPOSTER}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;"><source src="${VID}" type="video/mp4" /></video>
-  <div style="position:absolute;inset:0;background:rgba(15,23,42,.55);z-index:1;"></div>
-  <div style="position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:0 32px;color:#fff;">
-    <h2 style="font-size:36px;letter-spacing:-.02em;margin:0 0 8px;">Adventure awaits</h2>
-    <p style="margin:0;opacity:.9;font-size:16px;">A compact full-bleed video banner for section breaks.</p>
+        html: `<section class="block block-video-banner-1 block-video-banner">
+  <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-banner-2 block-video-banner"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
+  <div class="block block-video-banner-3 block-video-banner"></div>
+  <div class="block block-video-banner-4 block-video-banner">
+    <h2 class="block block-video-banner-5 block-video-banner">Adventure awaits</h2>
+    <p class="block block-video-banner-6 block-video-banner">A compact full-bleed video banner for section breaks.</p>
   </div>
 </section>`,
       },
@@ -431,20 +431,47 @@ export const EXTRA_CATEGORIES = [
       {
         id: "team-cards",
         label: "Team · Member Cards",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 32px;color:var(--fc-text, #0f172a);text-align:center;">Meet the team</h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;">
-      ${[["Ava Chen","Product Lead"],["Marcus Reed","Engineering"],["Priya Nair","Design"],["Tom Vidal","Growth"]].map(([n,r],i)=>`
-      <div style="text-align:center;">
-        <img src="${AVA[i]}" style="width:100px;height:100px;border-radius:999px;object-fit:cover;margin:0 auto 14px;" alt="${n}" />
-        <div style="font-weight:700;font-size:15px;color:var(--fc-text, #0f172a);">${n}</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-bottom:10px;">${r}</div>
-        <div style="display:flex;gap:10px;justify-content:center;">
-          <a href="#" style="color:var(--fc-muted, #94a3b8);" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
-          <a href="#" style="color:var(--fc-muted, #94a3b8);" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+        html: `<section class="block block-team-cards-1 block-team-cards">
+  <div class="block block-team-cards-2 block-team-cards">
+    <h2 class="block block-team-cards-3 block-team-cards">Meet the team</h2>
+    <div class="block block-team-cards-4 block-team-cards">
+      
+      <div class="block block-team-cards-5 block-team-cards">
+        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="block block-team-cards-6 block-team-cards" alt="Ava Chen" />
+        <div class="block block-team-cards-7 block-team-cards">Ava Chen</div>
+        <div class="block block-team-cards-8 block-team-cards">Product Lead</div>
+        <div class="block block-team-cards-9 block-team-cards">
+          <a href="#" class="block block-team-cards-10 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="block block-team-cards-11 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
         </div>
-      </div>`).join("")}
+      </div>
+      <div class="block block-team-cards-12 block-team-cards">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="block block-team-cards-13 block-team-cards" alt="Marcus Reed" />
+        <div class="block block-team-cards-14 block-team-cards">Marcus Reed</div>
+        <div class="block block-team-cards-15 block-team-cards">Engineering</div>
+        <div class="block block-team-cards-16 block-team-cards">
+          <a href="#" class="block block-team-cards-17 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="block block-team-cards-18 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+        </div>
+      </div>
+      <div class="block block-team-cards-19 block-team-cards">
+        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="block block-team-cards-20 block-team-cards" alt="Priya Nair" />
+        <div class="block block-team-cards-21 block-team-cards">Priya Nair</div>
+        <div class="block block-team-cards-22 block-team-cards">Design</div>
+        <div class="block block-team-cards-23 block-team-cards">
+          <a href="#" class="block block-team-cards-24 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="block block-team-cards-25 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+        </div>
+      </div>
+      <div class="block block-team-cards-26 block-team-cards">
+        <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" class="block block-team-cards-27 block-team-cards" alt="Tom Vidal" />
+        <div class="block block-team-cards-28 block-team-cards">Tom Vidal</div>
+        <div class="block block-team-cards-29 block-team-cards">Growth</div>
+        <div class="block block-team-cards-30 block-team-cards">
+          <a href="#" class="block block-team-cards-31 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="block block-team-cards-32 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+        </div>
+      </div>
     </div>
   </div>
 </section>`,
@@ -532,14 +559,14 @@ export const EXTRA_CATEGORIES = [
       {
         id: "layout-bento",
         label: "Bento Grid",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #0b0b12);">
-  <div style="max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:14px;">
-    <div style="grid-column:span 2;grid-row:span 2;border-radius:18px;padding:24px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);display:flex;flex-direction:column;justify-content:flex-end;"><div style="color:var(--fc-text, #fff);font-weight:700;font-size:20px;margin-bottom:6px;">Design system</div><div style="color:var(--fc-muted, #9ca3af);font-size:13px;">Tokens, components, and docs in one place.</div></div>
-    <div style="grid-column:span 2;border-radius:18px;padding:22px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;display:flex;flex-direction:column;justify-content:flex-end;"><div style="font-weight:700;font-size:17px;">Ship faster</div></div>
-    <div style="border-radius:18px;padding:20px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);color:var(--fc-muted, #9ca3af);font-size:13px;display:flex;align-items:flex-end;">Analytics</div>
-    <div style="border-radius:18px;padding:20px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);color:var(--fc-muted, #9ca3af);font-size:13px;display:flex;align-items:flex-end;">Integrations</div>
-    <div style="grid-column:span 2;grid-row:span 2;border-radius:18px;overflow:hidden;"><img src="${PORT[0]}" style="width:100%;height:100%;object-fit:cover;" alt="" /></div>
-    <div style="grid-column:span 2;border-radius:18px;padding:22px;background:var(--fc-surface, #161622);border:1px solid var(--fc-border, #232335);color:var(--fc-text, #fff);font-weight:700;font-size:16px;display:flex;align-items:flex-end;">99.99% uptime</div>
+        html: `<section class="block block-layout-bento-1 block-layout-bento">
+  <div class="block block-layout-bento-2 block-layout-bento">
+    <div class="block block-layout-bento-3 block-layout-bento"><div class="block block-layout-bento-4 block-layout-bento">Design system</div><div class="block block-layout-bento-5 block-layout-bento">Tokens, components, and docs in one place.</div></div>
+    <div class="block block-layout-bento-6 block-layout-bento"><div class="block block-layout-bento-7 block-layout-bento">Ship faster</div></div>
+    <div class="block block-layout-bento-8 block-layout-bento">Analytics</div>
+    <div class="block block-layout-bento-9 block-layout-bento">Integrations</div>
+    <div class="block block-layout-bento-10 block-layout-bento"><img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" class="block block-layout-bento-11 block-layout-bento" alt="" /></div>
+    <div class="block block-layout-bento-12 block-layout-bento">99.99% uptime</div>
   </div>
 </section>`,
       },
@@ -552,18 +579,32 @@ export const EXTRA_CATEGORIES = [
       {
         id: "services-icons",
         label: "Services · Icon Grid",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 32px;color:var(--fc-text, #0f172a);text-align:center;">What we do</h2>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
-      ${[["Strategy","Positioning, research and roadmaps that align teams.","M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"],["Design","Interfaces and systems that feel effortless to use.","M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v6l4 2"],["Engineering","Reliable, scalable builds shipped on schedule.","M8 3L2 12l6 9M16 3l6 9-6 9"]].map(([t,d,p])=>`
-      <div style="padding:6px;">
-        <div style="width:48px;height:48px;border-radius:12px;background:var(--fc-primary, #0f172a);display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${p}"/></svg>
+        html: `<section class="block block-services-icons-1 block-services-icons">
+  <div class="block block-services-icons-2 block-services-icons">
+    <h2 class="block block-services-icons-3 block-services-icons">What we do</h2>
+    <div class="block block-services-icons-4 block-services-icons">
+      
+      <div class="block block-services-icons-5 block-services-icons">
+        <div class="block block-services-icons-6 block-services-icons">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
         </div>
-        <div style="font-weight:700;font-size:17px;color:var(--fc-text, #0f172a);margin-bottom:8px;">${t}</div>
-        <p style="margin:0;font-size:14px;line-height:1.7;color:var(--fc-muted, #64748b);">${d}</p>
-      </div>`).join("")}
+        <div class="block block-services-icons-7 block-services-icons">Strategy</div>
+        <p class="block block-services-icons-8 block-services-icons">Positioning, research and roadmaps that align teams.</p>
+      </div>
+      <div class="block block-services-icons-9 block-services-icons">
+        <div class="block block-services-icons-10 block-services-icons">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v6l4 2"/></svg>
+        </div>
+        <div class="block block-services-icons-11 block-services-icons">Design</div>
+        <p class="block block-services-icons-12 block-services-icons">Interfaces and systems that feel effortless to use.</p>
+      </div>
+      <div class="block block-services-icons-13 block-services-icons">
+        <div class="block block-services-icons-14 block-services-icons">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3L2 12l6 9M16 3l6 9-6 9"/></svg>
+        </div>
+        <div class="block block-services-icons-15 block-services-icons">Engineering</div>
+        <p class="block block-services-icons-16 block-services-icons">Reliable, scalable builds shipped on schedule.</p>
+      </div>
     </div>
   </div>
 </section>`,
@@ -601,19 +642,33 @@ export const EXTRA_CATEGORIES = [
       {
         id: "testimonial-carousel",
         label: "Testimonial · Carousel",
-        html: `<section style="font-family:${F};padding:64px 0;background:var(--fc-bg, #0f172a);">
-  <div style="max-width:1120px;margin:0 auto 24px;padding:0 32px;">
-    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0;color:var(--fc-text, #fff);">Loved by teams</h2>
+        html: `<section class="block block-testimonials-carousel-1 block-testimonials-carousel">
+  <div class="block block-testimonials-carousel-2 block-testimonials-carousel">
+    <h2 class="block block-testimonials-carousel-3 block-testimonials-carousel">Loved by teams</h2>
   </div>
-  <div style="display:flex;gap:16px;overflow-x:auto;padding:0 32px 12px;scroll-snap-type:x mandatory;">
-    ${[["This tool cut our build time in half.","Jordan Lee","VP Design, Nova"],["Support is fast and the product just works.","Sam Okafor","Founder, Loop"],["Our whole team switched in a week.","Rae Kim","Head of Product, Fera"]].map(([q,n,r],i)=>`
-    <div style="scroll-snap-align:start;min-width:380px;background:var(--fc-surface, #1e293b);border-radius:16px;padding:28px;color:var(--fc-text, #e2e8f0);">
-      <p style="font-size:16px;line-height:1.7;margin:0 0 20px;">"${q}"</p>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <img src="${AVA[i]}" style="width:40px;height:40px;border-radius:999px;object-fit:cover;" alt="" />
-        <div><div style="font-weight:600;font-size:14px;">${n}</div><div style="font-size:12px;color:var(--fc-muted, #94a3b8);">${r}</div></div>
+  <div class="block block-testimonials-carousel-4 block-testimonials-carousel">
+    
+    <div class="block block-testimonials-carousel-5 block-testimonials-carousel">
+      <p class="block block-testimonials-carousel-6 block-testimonials-carousel">"This tool cut our build time in half."</p>
+      <div class="block block-testimonials-carousel-7 block-testimonials-carousel">
+        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="block block-testimonials-carousel-8 block-testimonials-carousel" alt="" />
+        <div><div class="block block-testimonials-carousel-9 block-testimonials-carousel">Jordan Lee</div><div class="block block-testimonials-carousel-10 block-testimonials-carousel">VP Design, Nova</div></div>
       </div>
-    </div>`).join("")}
+    </div>
+    <div class="block block-testimonials-carousel-11 block-testimonials-carousel">
+      <p class="block block-testimonials-carousel-12 block-testimonials-carousel">"Support is fast and the product just works."</p>
+      <div class="block block-testimonials-carousel-13 block-testimonials-carousel">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="block block-testimonials-carousel-14 block-testimonials-carousel" alt="" />
+        <div><div class="block block-testimonials-carousel-15 block-testimonials-carousel">Sam Okafor</div><div class="block block-testimonials-carousel-16 block-testimonials-carousel">Founder, Loop</div></div>
+      </div>
+    </div>
+    <div class="block block-testimonials-carousel-17 block-testimonials-carousel">
+      <p class="block block-testimonials-carousel-18 block-testimonials-carousel">"Our whole team switched in a week."</p>
+      <div class="block block-testimonials-carousel-19 block-testimonials-carousel">
+        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="block block-testimonials-carousel-20 block-testimonials-carousel" alt="" />
+        <div><div class="block block-testimonials-carousel-21 block-testimonials-carousel">Rae Kim</div><div class="block block-testimonials-carousel-22 block-testimonials-carousel">Head of Product, Fera</div></div>
+      </div>
+    </div>
   </div>
 </section>`,
       },
@@ -626,16 +681,32 @@ export const EXTRA_CATEGORIES = [
       {
         id: "esports-roster",
         label: "Esports · Team Roster",
-        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 4px;color:var(--fc-text, #fff);">Roster</h2>
-    <p style="margin:0 0 28px;color:var(--fc-accent, #22d3ee);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Season 2026</p>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
-      ${[["Viper","IGL",AVA[0]],["Ashen","Duelist",AVA[1]],["Kudo","Support",AVA[2]],["Frost","Sentinel",AVA[3]],["Ronin","Flex",AVA[4]]].map(([n,role,img])=>`
-      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:14px;overflow:hidden;text-align:center;">
-        <img src="${img}" style="width:100%;height:140px;object-fit:cover;filter:grayscale(.2);" alt="${n}" />
-        <div style="padding:12px;"><div style="font-weight:800;color:var(--fc-text, #fff);font-size:14px;letter-spacing:.02em;">${n}</div><div style="font-size:11px;color:var(--fc-accent, #22d3ee);text-transform:uppercase;letter-spacing:.06em;">${role}</div></div>
-      </div>`).join("")}
+        html: `<section class="block block-esports-roster-1 block-esports-roster">
+  <div class="block block-esports-roster-2 block-esports-roster">
+    <h2 class="block block-esports-roster-3 block-esports-roster">Roster</h2>
+    <p class="block block-esports-roster-4 block-esports-roster">Season 2026</p>
+    <div class="block block-esports-roster-5 block-esports-roster">
+      
+      <div class="block block-esports-roster-6 block-esports-roster">
+        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="block block-esports-roster-7 block-esports-roster" alt="Viper" />
+        <div class="block block-esports-roster-8 block-esports-roster"><div class="block block-esports-roster-9 block-esports-roster">Viper</div><div class="block block-esports-roster-10 block-esports-roster">IGL</div></div>
+      </div>
+      <div class="block block-esports-roster-11 block-esports-roster">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="block block-esports-roster-12 block-esports-roster" alt="Ashen" />
+        <div class="block block-esports-roster-13 block-esports-roster"><div class="block block-esports-roster-14 block-esports-roster">Ashen</div><div class="block block-esports-roster-15 block-esports-roster">Duelist</div></div>
+      </div>
+      <div class="block block-esports-roster-16 block-esports-roster">
+        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="block block-esports-roster-17 block-esports-roster" alt="Kudo" />
+        <div class="block block-esports-roster-18 block-esports-roster"><div class="block block-esports-roster-19 block-esports-roster">Kudo</div><div class="block block-esports-roster-20 block-esports-roster">Support</div></div>
+      </div>
+      <div class="block block-esports-roster-21 block-esports-roster">
+        <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" class="block block-esports-roster-22 block-esports-roster" alt="Frost" />
+        <div class="block block-esports-roster-23 block-esports-roster"><div class="block block-esports-roster-24 block-esports-roster">Frost</div><div class="block block-esports-roster-25 block-esports-roster">Sentinel</div></div>
+      </div>
+      <div class="block block-esports-roster-26 block-esports-roster">
+        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" class="block block-esports-roster-27 block-esports-roster" alt="Ronin" />
+        <div class="block block-esports-roster-28 block-esports-roster"><div class="block block-esports-roster-29 block-esports-roster">Ronin</div><div class="block block-esports-roster-30 block-esports-roster">Flex</div></div>
+      </div>
     </div>
   </div>
 </section>`,
@@ -643,19 +714,51 @@ export const EXTRA_CATEGORIES = [
       {
         id: "esports-bracket",
         label: "Esports · Tournament Bracket",
-        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);overflow-x:auto;">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 32px;color:var(--fc-text, #fff);">Bracket</h2>
-    <div style="display:flex;gap:48px;min-width:680px;">
-      ${[["Quarterfinals",[["Alpha","Ronin"],["Nova","Vertex"],["Kaze","Wraith"],["Onyx","Pulse"]]],["Semifinals",[["Alpha","Vertex"],["Kaze","Onyx"]]],["Final",[["Alpha","Kaze"]]]].map(([round,matches])=>`
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:20px;">
-        <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">${round}</div>
-        ${matches.map(([a,b])=>`
-        <div style="border:1px solid var(--fc-border, #22222e);border-radius:10px;overflow:hidden;">
-          <div style="padding:9px 12px;font-size:13px;color:var(--fc-text, #e5e7eb);background:var(--fc-surface, #101018);border-bottom:1px solid var(--fc-border, #22222e);">${a}</div>
-          <div style="padding:9px 12px;font-size:13px;color:var(--fc-muted, #6b7280);background:var(--fc-surface, #101018);">${b}</div>
-        </div>`).join("")}
-      </div>`).join("")}
+        html: `<section class="block block-esports-bracket-1 block-esports-bracket">
+  <div class="block block-esports-bracket-2 block-esports-bracket">
+    <h2 class="block block-esports-bracket-3 block-esports-bracket">Bracket</h2>
+    <div class="block block-esports-bracket-4 block-esports-bracket">
+      
+      <div class="block block-esports-bracket-5 block-esports-bracket">
+        <div class="block block-esports-bracket-6 block-esports-bracket">Quarterfinals</div>
+        
+        <div class="block block-esports-bracket-7 block-esports-bracket">
+          <div class="block block-esports-bracket-8 block-esports-bracket">Alpha</div>
+          <div class="block block-esports-bracket-9 block-esports-bracket">Ronin</div>
+        </div>
+        <div class="block block-esports-bracket-10 block-esports-bracket">
+          <div class="block block-esports-bracket-11 block-esports-bracket">Nova</div>
+          <div class="block block-esports-bracket-12 block-esports-bracket">Vertex</div>
+        </div>
+        <div class="block block-esports-bracket-13 block-esports-bracket">
+          <div class="block block-esports-bracket-14 block-esports-bracket">Kaze</div>
+          <div class="block block-esports-bracket-15 block-esports-bracket">Wraith</div>
+        </div>
+        <div class="block block-esports-bracket-16 block-esports-bracket">
+          <div class="block block-esports-bracket-17 block-esports-bracket">Onyx</div>
+          <div class="block block-esports-bracket-18 block-esports-bracket">Pulse</div>
+        </div>
+      </div>
+      <div class="block block-esports-bracket-19 block-esports-bracket">
+        <div class="block block-esports-bracket-20 block-esports-bracket">Semifinals</div>
+        
+        <div class="block block-esports-bracket-21 block-esports-bracket">
+          <div class="block block-esports-bracket-22 block-esports-bracket">Alpha</div>
+          <div class="block block-esports-bracket-23 block-esports-bracket">Vertex</div>
+        </div>
+        <div class="block block-esports-bracket-24 block-esports-bracket">
+          <div class="block block-esports-bracket-25 block-esports-bracket">Kaze</div>
+          <div class="block block-esports-bracket-26 block-esports-bracket">Onyx</div>
+        </div>
+      </div>
+      <div class="block block-esports-bracket-27 block-esports-bracket">
+        <div class="block block-esports-bracket-28 block-esports-bracket">Final</div>
+        
+        <div class="block block-esports-bracket-29 block-esports-bracket">
+          <div class="block block-esports-bracket-30 block-esports-bracket">Alpha</div>
+          <div class="block block-esports-bracket-31 block-esports-bracket">Kaze</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>`,
@@ -663,16 +766,46 @@ export const EXTRA_CATEGORIES = [
       {
         id: "esports-schedule",
         label: "Esports · Stream Schedule",
-        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #fff);">Stream schedule</h2>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;">
-      ${[["Mon","7PM","Ranked grind"],["Tue","Off",""],["Wed","7PM","Scrims"],["Thu","7PM","Community night"],["Fri","8PM","Tournament"],["Sat","2PM","VOD review"],["Sun","Off",""]].map(([d,t,s])=>`
-      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:14px 10px;text-align:center;">
-        <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${d}</div>
-        <div style="font-weight:700;color:${t==="Off"?"var(--fc-muted, #4b5563)":"var(--fc-accent, #22d3ee)"};font-size:14px;margin-bottom:4px;">${t}</div>
-        <div style="font-size:11px;color:var(--fc-muted, #6b7280);">${s}</div>
-      </div>`).join("")}
+        html: `<section class="block block-esports-schedule-1 block-esports-schedule">
+  <div class="block block-esports-schedule-2 block-esports-schedule">
+    <h2 class="block block-esports-schedule-3 block-esports-schedule">Stream schedule</h2>
+    <div class="block block-esports-schedule-4 block-esports-schedule">
+      
+      <div class="block block-esports-schedule-5 block-esports-schedule">
+        <div class="block block-esports-schedule-6 block-esports-schedule">Mon</div>
+        <div class="block block-esports-schedule-7 block-esports-schedule">7PM</div>
+        <div class="block block-esports-schedule-8 block-esports-schedule">Ranked grind</div>
+      </div>
+      <div class="block block-esports-schedule-9 block-esports-schedule">
+        <div class="block block-esports-schedule-10 block-esports-schedule">Tue</div>
+        <div class="block block-esports-schedule-11 block-esports-schedule">Off</div>
+        <div class="block block-esports-schedule-12 block-esports-schedule"></div>
+      </div>
+      <div class="block block-esports-schedule-13 block-esports-schedule">
+        <div class="block block-esports-schedule-14 block-esports-schedule">Wed</div>
+        <div class="block block-esports-schedule-15 block-esports-schedule">7PM</div>
+        <div class="block block-esports-schedule-16 block-esports-schedule">Scrims</div>
+      </div>
+      <div class="block block-esports-schedule-17 block-esports-schedule">
+        <div class="block block-esports-schedule-18 block-esports-schedule">Thu</div>
+        <div class="block block-esports-schedule-19 block-esports-schedule">7PM</div>
+        <div class="block block-esports-schedule-20 block-esports-schedule">Community night</div>
+      </div>
+      <div class="block block-esports-schedule-21 block-esports-schedule">
+        <div class="block block-esports-schedule-22 block-esports-schedule">Fri</div>
+        <div class="block block-esports-schedule-23 block-esports-schedule">8PM</div>
+        <div class="block block-esports-schedule-24 block-esports-schedule">Tournament</div>
+      </div>
+      <div class="block block-esports-schedule-25 block-esports-schedule">
+        <div class="block block-esports-schedule-26 block-esports-schedule">Sat</div>
+        <div class="block block-esports-schedule-27 block-esports-schedule">2PM</div>
+        <div class="block block-esports-schedule-28 block-esports-schedule">VOD review</div>
+      </div>
+      <div class="block block-esports-schedule-29 block-esports-schedule">
+        <div class="block block-esports-schedule-30 block-esports-schedule">Sun</div>
+        <div class="block block-esports-schedule-31 block-esports-schedule">Off</div>
+        <div class="block block-esports-schedule-32 block-esports-schedule"></div>
+      </div>
     </div>
   </div>
 </section>`,
@@ -680,16 +813,31 @@ export const EXTRA_CATEGORIES = [
       {
         id: "esports-stats",
         label: "Esports · Player Stat Cards",
-        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #fff);">Player stats</h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
-      ${[["Viper","1.34","78%"],["Ashen","1.21","71%"],["Kudo","0.98","65%"],["Frost","1.08","69%"]].map(([n,kd,hs])=>`
-      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:14px;padding:20px;">
-        <div style="font-weight:800;color:var(--fc-text, #fff);font-size:15px;margin-bottom:14px;">${n}</div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--fc-muted, #6b7280);margin-bottom:6px;"><span>K/D</span><span style="color:var(--fc-accent, #22d3ee);font-weight:700;">${kd}</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--fc-muted, #6b7280);"><span>Headshot %</span><span style="color:var(--fc-accent, #22d3ee);font-weight:700;">${hs}</span></div>
-      </div>`).join("")}
+        html: `<section class="block block-esports-stats-1 block-esports-stats">
+  <div class="block block-esports-stats-2 block-esports-stats">
+    <h2 class="block block-esports-stats-3 block-esports-stats">Player stats</h2>
+    <div class="block block-esports-stats-4 block-esports-stats">
+      
+      <div class="block block-esports-stats-5 block-esports-stats">
+        <div class="block block-esports-stats-6 block-esports-stats">Viper</div>
+        <div class="block block-esports-stats-7 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-8 block-esports-stats">1.34</span></div>
+        <div class="block block-esports-stats-9 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-10 block-esports-stats">78%</span></div>
+      </div>
+      <div class="block block-esports-stats-11 block-esports-stats">
+        <div class="block block-esports-stats-12 block-esports-stats">Ashen</div>
+        <div class="block block-esports-stats-13 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-14 block-esports-stats">1.21</span></div>
+        <div class="block block-esports-stats-15 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-16 block-esports-stats">71%</span></div>
+      </div>
+      <div class="block block-esports-stats-17 block-esports-stats">
+        <div class="block block-esports-stats-18 block-esports-stats">Kudo</div>
+        <div class="block block-esports-stats-19 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-20 block-esports-stats">0.98</span></div>
+        <div class="block block-esports-stats-21 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-22 block-esports-stats">65%</span></div>
+      </div>
+      <div class="block block-esports-stats-23 block-esports-stats">
+        <div class="block block-esports-stats-24 block-esports-stats">Frost</div>
+        <div class="block block-esports-stats-25 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-26 block-esports-stats">1.08</span></div>
+        <div class="block block-esports-stats-27 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-28 block-esports-stats">69%</span></div>
+      </div>
     </div>
   </div>
 </section>`,
@@ -697,20 +845,44 @@ export const EXTRA_CATEGORIES = [
       {
         id: "esports-leaderboard",
         label: "Esports · Leaderboard",
-        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:32px;letter-spacing:-.02em;margin:0 0 28px;color:var(--fc-text, #fff);">Leaderboard</h2>
-    <div style="border:1px solid var(--fc-border, #22222e);border-radius:14px;overflow:hidden;">
-      <div style="display:grid;grid-template-columns:56px 1fr 100px 100px;padding:12px 16px;background:var(--fc-surface, #101018);font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;">
+        html: `<section class="block block-esports-leaderboard-1 block-esports-leaderboard">
+  <div class="block block-esports-leaderboard-2 block-esports-leaderboard">
+    <h2 class="block block-esports-leaderboard-3 block-esports-leaderboard">Leaderboard</h2>
+    <div class="block block-esports-leaderboard-4 block-esports-leaderboard">
+      <div class="block block-esports-leaderboard-5 block-esports-leaderboard">
         <div>#</div><div>Team</div><div>Wins</div><div>Points</div>
       </div>
-      ${[["1","Alpha Esports","14","842"],["2","Vertex GG","12","790"],["3","Kaze Nation","11","755"],["4","Onyx Squad","9","680"],["5","Pulse Collective","8","611"]].map(([r,team,w,pts],i)=>`
-      <div style="display:grid;grid-template-columns:56px 1fr 100px 100px;padding:12px 16px;align-items:center;background:${i%2===0?"var(--fc-bg, #05050a)":"var(--fc-surface, #101018)"};border-top:1px solid var(--fc-border, #22222e);">
-        <div style="font-weight:800;color:${i===0?"var(--fc-accent, #22d3ee)":"var(--fc-muted, #6b7280)"};">${r}</div>
-        <div style="color:var(--fc-text, #e5e7eb);font-weight:600;font-size:14px;">${team}</div>
-        <div style="color:var(--fc-muted, #6b7280);font-size:13px;">${w}</div>
-        <div style="color:var(--fc-accent, #22d3ee);font-weight:700;font-size:13px;">${pts}</div>
-      </div>`).join("")}
+      
+      <div class="block block-esports-leaderboard-6 block-esports-leaderboard">
+        <div class="block block-esports-leaderboard-7 block-esports-leaderboard">1</div>
+        <div class="block block-esports-leaderboard-8 block-esports-leaderboard">Alpha Esports</div>
+        <div class="block block-esports-leaderboard-9 block-esports-leaderboard">14</div>
+        <div class="block block-esports-leaderboard-10 block-esports-leaderboard">842</div>
+      </div>
+      <div class="block block-esports-leaderboard-11 block-esports-leaderboard">
+        <div class="block block-esports-leaderboard-12 block-esports-leaderboard">2</div>
+        <div class="block block-esports-leaderboard-13 block-esports-leaderboard">Vertex GG</div>
+        <div class="block block-esports-leaderboard-14 block-esports-leaderboard">12</div>
+        <div class="block block-esports-leaderboard-15 block-esports-leaderboard">790</div>
+      </div>
+      <div class="block block-esports-leaderboard-16 block-esports-leaderboard">
+        <div class="block block-esports-leaderboard-17 block-esports-leaderboard">3</div>
+        <div class="block block-esports-leaderboard-18 block-esports-leaderboard">Kaze Nation</div>
+        <div class="block block-esports-leaderboard-19 block-esports-leaderboard">11</div>
+        <div class="block block-esports-leaderboard-20 block-esports-leaderboard">755</div>
+      </div>
+      <div class="block block-esports-leaderboard-21 block-esports-leaderboard">
+        <div class="block block-esports-leaderboard-22 block-esports-leaderboard">4</div>
+        <div class="block block-esports-leaderboard-23 block-esports-leaderboard">Onyx Squad</div>
+        <div class="block block-esports-leaderboard-24 block-esports-leaderboard">9</div>
+        <div class="block block-esports-leaderboard-25 block-esports-leaderboard">680</div>
+      </div>
+      <div class="block block-esports-leaderboard-26 block-esports-leaderboard">
+        <div class="block block-esports-leaderboard-27 block-esports-leaderboard">5</div>
+        <div class="block block-esports-leaderboard-28 block-esports-leaderboard">Pulse Collective</div>
+        <div class="block block-esports-leaderboard-29 block-esports-leaderboard">8</div>
+        <div class="block block-esports-leaderboard-30 block-esports-leaderboard">611</div>
+      </div>
     </div>
   </div>
 </section>`,
@@ -718,26 +890,34 @@ export const EXTRA_CATEGORIES = [
       {
         id: "esports-org-hub",
         label: "Esports · Organization Hub",
-        html: `<section style="font-family:${F};padding:64px 32px;background:var(--fc-bg, #05050a);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:36px;flex-wrap:wrap;">
+        html: `<section class="block block-esports-org-hub-1 block-esports-org-hub">
+  <div class="block block-esports-org-hub-2 block-esports-org-hub">
+    <div class="block block-esports-org-hub-3 block-esports-org-hub">
       <div>
-        <h2 style="font-size:36px;letter-spacing:-.02em;margin:0 0 6px;color:var(--fc-text, #fff);">Alpha Esports</h2>
-        <p style="margin:0;color:var(--fc-muted, #6b7280);font-size:14px;max-width:520px;">Competing across Valorant, CS2 and League — est. 2021. Follow the journey, catch the streams, join the community.</p>
+        <h2 class="block block-esports-org-hub-4 block-esports-org-hub">Alpha Esports</h2>
+        <p class="block block-esports-org-hub-5 block-esports-org-hub">Competing across Valorant, CS2 and League — est. 2021. Follow the journey, catch the streams, join the community.</p>
       </div>
-      <a href="#" style="background:var(--fc-accent, #22d3ee);color:#05050a;font-weight:800;font-size:13px;padding:12px 22px;border-radius:999px;text-decoration:none;white-space:nowrap;">Join the community</a>
+      <a href="#" class="block block-esports-org-hub-6 block-esports-org-hub">Join the community</a>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:36px;">
-      ${[["Est.","2021"],["Titles","3 games"],["Followers","210K+"]].map(([l,v])=>`
-      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:18px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--fc-accent, #22d3ee);">${v}</div>
-        <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;">${l}</div>
-      </div>`).join("")}
+    <div class="block block-esports-org-hub-7 block-esports-org-hub">
+      
+      <div class="block block-esports-org-hub-8 block-esports-org-hub">
+        <div class="block block-esports-org-hub-9 block-esports-org-hub">2021</div>
+        <div class="block block-esports-org-hub-10 block-esports-org-hub">Est.</div>
+      </div>
+      <div class="block block-esports-org-hub-11 block-esports-org-hub">
+        <div class="block block-esports-org-hub-12 block-esports-org-hub">3 games</div>
+        <div class="block block-esports-org-hub-13 block-esports-org-hub">Titles</div>
+      </div>
+      <div class="block block-esports-org-hub-14 block-esports-org-hub">
+        <div class="block block-esports-org-hub-15 block-esports-org-hub">210K+</div>
+        <div class="block block-esports-org-hub-16 block-esports-org-hub">Followers</div>
+      </div>
     </div>
-    <div style="text-align:center;">
-      <div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Backed by</div>
-      <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap;opacity:.7;">
-        ${["SPONSOR ONE","SPONSOR TWO","SPONSOR THREE","SPONSOR FOUR"].map((s)=>`<div style="font-weight:800;letter-spacing:.04em;color:var(--fc-muted, #6b7280);font-size:14px;">${s}</div>`).join("")}
+    <div class="block block-esports-org-hub-17 block-esports-org-hub">
+      <div class="block block-esports-org-hub-18 block-esports-org-hub">Backed by</div>
+      <div class="block block-esports-org-hub-19 block-esports-org-hub">
+        <div class="block block-esports-org-hub-20 block-esports-org-hub">SPONSOR ONE</div><div class="block block-esports-org-hub-21 block-esports-org-hub">SPONSOR TWO</div><div class="block block-esports-org-hub-22 block-esports-org-hub">SPONSOR THREE</div><div class="block block-esports-org-hub-23 block-esports-org-hub">SPONSOR FOUR</div>
       </div>
     </div>
   </div>
@@ -752,18 +932,30 @@ export const EXTRA_CATEGORIES = [
       {
         id: "creator-membership",
         label: "Creator · Subscription Tiers",
-        html: `<section style="font-family:${F};padding:72px 32px;background:var(--fc-bg, #ffffff);">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 8px;color:var(--fc-text, #0f172a);text-align:center;">Support the channel</h2>
-    <p style="margin:0 0 32px;color:var(--fc-muted, #64748b);font-size:15px;text-align:center;">Pick a membership tier and unlock perks.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
-      ${[["Fan","5",["Member badge","Emotes","Shoutouts"]],["Supporter","15",["Everything in Fan","Discord access","Monthly Q&A"]],["VIP","40",["Everything in Supporter","1:1 game session","Name in credits"]]].map(([n,p,feats],i)=>`
-      <div style="padding:28px;border-radius:16px;border:1px solid var(--fc-border, #e2e8f0);${i===1?"border-color:var(--fc-primary, #7c3aed);box-shadow:0 20px 50px rgba(0,0,0,.08);":""}background:var(--fc-surface, #fff);">
-        <div style="font-weight:700;font-size:16px;color:var(--fc-text, #0f172a);margin-bottom:6px;">${n}</div>
-        <div style="font-size:32px;font-weight:800;color:var(--fc-text, #0f172a);margin-bottom:16px;">$${p}<span style="font-size:13px;font-weight:500;color:var(--fc-muted, #64748b);">/mo</span></div>
-        <ul style="list-style:none;padding:0;margin:0 0 22px;font-size:13px;color:var(--fc-muted, #64748b);line-height:2;">${feats.map(f=>`<li>✓ ${f}</li>`).join("")}</ul>
-        <a href="#" style="display:block;text-align:center;padding:11px;border-radius:10px;background:${i===1?"var(--fc-primary, #7c3aed)":"transparent"};color:${i===1?"#fff":"var(--fc-text, #0f172a)"};border:1px solid var(--fc-border, #e2e8f0);text-decoration:none;font-weight:600;font-size:14px;">Join ${n}</a>
-      </div>`).join("")}
+        html: `<section class="block block-creator-membership-1 block-creator-membership">
+  <div class="block block-creator-membership-2 block-creator-membership">
+    <h2 class="block block-creator-membership-3 block-creator-membership">Support the channel</h2>
+    <p class="block block-creator-membership-4 block-creator-membership">Pick a membership tier and unlock perks.</p>
+    <div class="block block-creator-membership-5 block-creator-membership">
+      
+      <div class="block block-creator-membership-6 block-creator-membership">
+        <div class="block block-creator-membership-7 block-creator-membership">Fan</div>
+        <div class="block block-creator-membership-8 block-creator-membership">$5<span class="block block-creator-membership-9 block-creator-membership">/mo</span></div>
+        <ul class="block block-creator-membership-10 block-creator-membership"><li>✓ Member badge</li><li>✓ Emotes</li><li>✓ Shoutouts</li></ul>
+        <a href="#" class="block block-creator-membership-11 block-creator-membership">Join Fan</a>
+      </div>
+      <div class="block block-creator-membership-12 block-creator-membership">
+        <div class="block block-creator-membership-13 block-creator-membership">Supporter</div>
+        <div class="block block-creator-membership-14 block-creator-membership">$15<span class="block block-creator-membership-15 block-creator-membership">/mo</span></div>
+        <ul class="block block-creator-membership-16 block-creator-membership"><li>✓ Everything in Fan</li><li>✓ Discord access</li><li>✓ Monthly Q&A</li></ul>
+        <a href="#" class="block block-creator-membership-17 block-creator-membership">Join Supporter</a>
+      </div>
+      <div class="block block-creator-membership-18 block-creator-membership">
+        <div class="block block-creator-membership-19 block-creator-membership">VIP</div>
+        <div class="block block-creator-membership-20 block-creator-membership">$40<span class="block block-creator-membership-21 block-creator-membership">/mo</span></div>
+        <ul class="block block-creator-membership-22 block-creator-membership"><li>✓ Everything in Supporter</li><li>✓ 1:1 game session</li><li>✓ Name in credits</li></ul>
+        <a href="#" class="block block-creator-membership-23 block-creator-membership">Join VIP</a>
+      </div>
     </div>
   </div>
 </section>`,
@@ -783,12 +975,12 @@ export const EXTRA_CATEGORIES = [
       {
         id: "retro-hitcounter",
         label: "Retro · Hit Counter",
-        html: `<div data-wd-hitcounter-root style="font-family:${F};display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px;background:var(--fc-bg, #000010);">
-  <div style="font-size:11px;letter-spacing:.06em;color:var(--fc-muted, #9ca3af);text-transform:uppercase;">You are visitor number</div>
-  <div style="display:flex;gap:2px;background:#111;padding:6px 8px;border:2px inset #666;border-radius:2px;" data-wd-hitcounter-digits>
-    ${Array.from({length: 6}).map(() => `<span style="display:inline-block;width:18px;text-align:center;font-family:'Courier New',monospace;font-weight:700;font-size:20px;color:#39ff14;text-shadow:0 0 6px #39ff14;background:#0a0a0a;">0</span>`).join("")}
+        html: `<div data-wd-hitcounter-root class="block block-retro-hitcounter-1 block-retro-hitcounter">
+  <div class="block block-retro-hitcounter-2 block-retro-hitcounter">You are visitor number</div>
+  <div class="block block-retro-hitcounter-3 block-retro-hitcounter" data-wd-hitcounter-digits>
+    <span class="block block-retro-hitcounter-4 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-5 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-6 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-7 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-8 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-9 block-retro-hitcounter">0</span>
   </div>
-  <div style="font-size:10px;color:var(--fc-muted, #6b7280);">counts visits to this page, stored in your browser — a modern stand-in for the server-side hit files 90s CGI counters used</div>
+  <div class="block block-retro-hitcounter-10 block-retro-hitcounter">counts visits to this page, stored in your browser — a modern stand-in for the server-side hit files 90s CGI counters used</div>
   <script>(function(){
     try {
       var root = document.currentScript.closest('[data-wd-hitcounter-root]');
@@ -818,23 +1010,27 @@ export const EXTRA_CATEGORIES = [
       {
         id: "retro-guestbook",
         label: "Retro · Sign My Guestbook",
-        html: `<section style="font-family:${F};padding:56px 24px;background:var(--fc-bg, #1a0033);">
-  <div style="max-width:560px;margin:0 auto;background:var(--fc-surface, #2d0052);border:3px double #ff00ff;border-radius:4px;padding:28px;">
-    <h2 style="margin:0 0 4px;font-size:24px;color:#ffff00;text-shadow:2px 2px 0 #ff00ff;font-family:'Comic Sans MS',cursive;">✦ Sign My Guestbook! ✦</h2>
-    <p style="margin:0 0 20px;font-size:12px;color:#00ffff;">Thanx for stopping by my page! Leave a message below ~*~</p>
+        html: `<section class="block block-retro-guestbook-1 block-retro-guestbook">
+  <div class="block block-retro-guestbook-2 block-retro-guestbook">
+    <h2 class="block block-retro-guestbook-3 block-retro-guestbook">✦ Sign My Guestbook! ✦</h2>
+    <p class="block block-retro-guestbook-4 block-retro-guestbook">Thanx for stopping by my page! Leave a message below ~*~</p>
     <form>
-      <label style="display:block;font-size:11px;color:#fff;margin-bottom:4px;">Your Name</label>
-      <input style="width:100%;box-sizing:border-box;padding:8px 10px;margin-bottom:12px;border:2px inset #999;background:#fff;font-family:${F};" />
-      <label style="display:block;font-size:11px;color:#fff;margin-bottom:4px;">Message</label>
-      <textarea rows="3" style="width:100%;box-sizing:border-box;padding:8px 10px;margin-bottom:14px;border:2px inset #999;background:#fff;font-family:${F};resize:vertical;"></textarea>
-      <button type="submit" style="padding:9px 20px;background:linear-gradient(180deg,#ff66ff,#cc00cc);border:2px outset #ff99ff;border-radius:4px;color:#fff;font-weight:700;cursor:pointer;">Sign It! →</button>
+      <label class="block block-retro-guestbook-5 block-retro-guestbook">Your Name</label>
+      <input class="block block-retro-guestbook-6 block-retro-guestbook" />
+      <label class="block block-retro-guestbook-7 block-retro-guestbook">Message</label>
+      <textarea rows="3" class="block block-retro-guestbook-8 block-retro-guestbook"></textarea>
+      <button type="submit" class="block block-retro-guestbook-9 block-retro-guestbook">Sign It! →</button>
     </form>
-    <div style="margin-top:24px;border-top:1px dashed #ff00ff;padding-top:16px;">
-      ${[["xXsparkle_soulXx","omg i love ur page!! the bg music is SO good 💜"],["webmaster_99","nice site, added you to my links page. webring pending approval."]].map(([name, msg]) => `
-      <div style="margin-bottom:10px;font-size:12px;">
-        <span style="color:#ffff00;font-weight:700;">${name}</span> <span style="color:#999;">wrote:</span>
-        <div style="color:#eee;margin-top:2px;">${msg}</div>
-      </div>`).join("")}
+    <div class="block block-retro-guestbook-10 block-retro-guestbook">
+      
+      <div class="block block-retro-guestbook-11 block-retro-guestbook">
+        <span class="block block-retro-guestbook-12 block-retro-guestbook">xXsparkle_soulXx</span> <span class="block block-retro-guestbook-13 block-retro-guestbook">wrote:</span>
+        <div class="block block-retro-guestbook-14 block-retro-guestbook">omg i love ur page!! the bg music is SO good 💜</div>
+      </div>
+      <div class="block block-retro-guestbook-15 block-retro-guestbook">
+        <span class="block block-retro-guestbook-16 block-retro-guestbook">webmaster_99</span> <span class="block block-retro-guestbook-17 block-retro-guestbook">wrote:</span>
+        <div class="block block-retro-guestbook-18 block-retro-guestbook">nice site, added you to my links page. webring pending approval.</div>
+      </div>
     </div>
   </div>
 </section>`,
@@ -842,39 +1038,76 @@ export const EXTRA_CATEGORIES = [
       {
         id: "retro-webring",
         label: "Retro · Webring Navigator",
-        html: `<div style="font-family:${F};display:flex;align-items:center;justify-content:center;gap:0;padding:16px;background:var(--fc-bg, #000033);">
-  <div style="display:flex;align-items:center;border:1px solid #6699ff;border-radius:8px;overflow:hidden;background:var(--fc-surface, #001a4d);">
-    <a href="#" style="padding:9px 16px;color:#99ccff;text-decoration:none;font-size:12px;font-weight:700;border-right:1px solid #335599;">← Prev Site</a>
-    <div style="padding:9px 16px;text-align:center;">
-      <div style="font-size:10px;color:#6699ff;text-transform:uppercase;letter-spacing:.06em;">Member of the</div>
-      <div style="font-size:12px;color:#fff;font-weight:700;">Indie Web Ring</div>
+        html: `<div class="block block-retro-webring-1 block-retro-webring">
+  <div class="block block-retro-webring-2 block-retro-webring">
+    <a href="#" class="block block-retro-webring-3 block-retro-webring">← Prev Site</a>
+    <div class="block block-retro-webring-4 block-retro-webring">
+      <div class="block block-retro-webring-5 block-retro-webring">Member of the</div>
+      <div class="block block-retro-webring-6 block-retro-webring">Indie Web Ring</div>
     </div>
-    <a href="#" style="padding:9px 16px;color:#99ccff;text-decoration:none;font-size:12px;font-weight:700;border-left:1px solid #335599;border-right:1px solid #335599;">🔀 Random</a>
-    <a href="#" style="padding:9px 16px;color:#99ccff;text-decoration:none;font-size:12px;font-weight:700;">Next Site →</a>
+    <a href="#" class="block block-retro-webring-7 block-retro-webring">🔀 Random</a>
+    <a href="#" class="block block-retro-webring-8 block-retro-webring">Next Site →</a>
   </div>
 </div>`,
       },
       {
         id: "retro-buttons88",
         label: "Retro · 88×31 Button Row",
-        html: `<div style="font-family:${F};display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:20px;background:var(--fc-bg, #ffffff);">
-  ${[["#ff6600","#ffffff","BEST VIEWED\\nWITH EYES"],["#003399","#ffffff","VALID\\nHTML5"],["#009933","#ffffff","made with\\nCSS Grid"],["#cc0066","#ffffff","100%\\nHUMAN MADE"],["#333333","#ffcc00","POWERED BY\\nCOFFEE"]].map(([bg,fg,label]) => `
-  <div style="width:88px;height:31px;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;font-weight:700;line-height:1.2;border:1px solid #000;font-family:'Courier New',monospace;white-space:pre-line;">${label.replace(/\\n/g,"\n")}</div>`).join("")}
+        html: `<div class="block block-retro-buttons88-1 block-retro-buttons88">
+  
+  <div class="block block-retro-buttons88-2 block-retro-buttons88">BEST VIEWED
+WITH EYES</div>
+  <div class="block block-retro-buttons88-3 block-retro-buttons88">VALID
+HTML5</div>
+  <div class="block block-retro-buttons88-4 block-retro-buttons88">made with
+CSS Grid</div>
+  <div class="block block-retro-buttons88-5 block-retro-buttons88">100%
+HUMAN MADE</div>
+  <div class="block block-retro-buttons88-6 block-retro-buttons88">POWERED BY
+COFFEE</div>
 </div>`,
       },
       {
         id: "retro-top8",
         label: "Retro · Top 8 Friends",
-        html: `<section style="font-family:${F};padding:48px 24px;background:var(--fc-bg, #0d001a);">
-  <div style="max-width:640px;margin:0 auto;">
-    <h2 style="font-size:20px;color:#fff;margin:0 0 4px;">Top Friends</h2>
-    <p style="font-size:11px;color:#a855f7;margin:0 0 18px;">view all →</p>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-      ${AVA.concat(AVA.slice(0,2)).slice(0,8).map((img,i) => `
-      <a href="#" style="text-decoration:none;text-align:center;">
-        <img src="${img}" alt="Friend ${i+1}" style="width:100%;aspect-ratio:1;object-fit:cover;border:2px solid #a855f7;border-radius:6px;" />
-        <div style="font-size:10px;color:#e9d5ff;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">friend_${i+1}</div>
-      </a>`).join("")}
+        html: `<section class="block block-retro-top8-1 block-retro-top8">
+  <div class="block block-retro-top8-2 block-retro-top8">
+    <h2 class="block block-retro-top8-3 block-retro-top8">Top Friends</h2>
+    <p class="block block-retro-top8-4 block-retro-top8">view all →</p>
+    <div class="block block-retro-top8-5 block-retro-top8">
+      
+      <a href="#" class="block block-retro-top8-6 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="Friend 1" class="block block-retro-top8-7 block-retro-top8" />
+        <div class="block block-retro-top8-8 block-retro-top8">friend_1</div>
+      </a>
+      <a href="#" class="block block-retro-top8-9 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Friend 2" class="block block-retro-top8-10 block-retro-top8" />
+        <div class="block block-retro-top8-11 block-retro-top8">friend_2</div>
+      </a>
+      <a href="#" class="block block-retro-top8-12 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" alt="Friend 3" class="block block-retro-top8-13 block-retro-top8" />
+        <div class="block block-retro-top8-14 block-retro-top8">friend_3</div>
+      </a>
+      <a href="#" class="block block-retro-top8-15 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" alt="Friend 4" class="block block-retro-top8-16 block-retro-top8" />
+        <div class="block block-retro-top8-17 block-retro-top8">friend_4</div>
+      </a>
+      <a href="#" class="block block-retro-top8-18 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" alt="Friend 5" class="block block-retro-top8-19 block-retro-top8" />
+        <div class="block block-retro-top8-20 block-retro-top8">friend_5</div>
+      </a>
+      <a href="#" class="block block-retro-top8-21 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=75" alt="Friend 6" class="block block-retro-top8-22 block-retro-top8" />
+        <div class="block block-retro-top8-23 block-retro-top8">friend_6</div>
+      </a>
+      <a href="#" class="block block-retro-top8-24 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="Friend 7" class="block block-retro-top8-25 block-retro-top8" />
+        <div class="block block-retro-top8-26 block-retro-top8">friend_7</div>
+      </a>
+      <a href="#" class="block block-retro-top8-27 block-retro-top8">
+        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Friend 8" class="block block-retro-top8-28 block-retro-top8" />
+        <div class="block block-retro-top8-29 block-retro-top8">friend_8</div>
+      </a>
     </div>
   </div>
 </section>`,
@@ -882,53 +1115,56 @@ export const EXTRA_CATEGORIES = [
       {
         id: "retro-eprops",
         label: "Retro · eProps & Blogroll",
-        html: `<div style="font-family:${F};display:grid;grid-template-columns:1fr 220px;gap:20px;padding:32px 24px;background:var(--fc-bg, #fff8f0);max-width:760px;margin:0 auto;">
-  <div style="border:1px solid var(--fc-border, #e5c9a8);border-radius:8px;padding:20px;background:var(--fc-surface, #fff);">
-    <div style="font-size:11px;color:var(--fc-muted, #92653f);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Latest entry</div>
-    <h3 style="margin:0 0 8px;font-size:18px;color:var(--fc-text, #4a2c17);">today was actually pretty good</h3>
-    <p style="margin:0 0 14px;font-size:13px;color:var(--fc-muted, #6b4a2f);line-height:1.6;">nothing much happened but the weather was nice and I got bubble tea so 8/10 day tbh...</p>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:#ff9933;color:#fff;border:0;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;">⭐ eProps (24)</button>
-      <span style="font-size:11px;color:var(--fc-muted, #92653f);">12 comments</span>
+        html: `<div class="block block-retro-eprops-1 block-retro-eprops">
+  <div class="block block-retro-eprops-2 block-retro-eprops">
+    <div class="block block-retro-eprops-3 block-retro-eprops">Latest entry</div>
+    <h3 class="block block-retro-eprops-4 block-retro-eprops">today was actually pretty good</h3>
+    <p class="block block-retro-eprops-5 block-retro-eprops">nothing much happened but the weather was nice and I got bubble tea so 8/10 day tbh...</p>
+    <div class="block block-retro-eprops-6 block-retro-eprops">
+      <button class="block block-retro-eprops-7 block-retro-eprops">⭐ eProps (24)</button>
+      <span class="block block-retro-eprops-8 block-retro-eprops">12 comments</span>
     </div>
   </div>
   <div>
-    <div style="font-size:11px;color:var(--fc-muted, #92653f);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">My Blogrings</div>
-    ${["Poetry & Prose Ring","2000s Nostalgia Crew","Bubble Tea Lovers","Late Night Thoughts"].map(r => `
-    <div style="font-size:12px;color:#cc6600;padding:5px 0;border-bottom:1px dotted var(--fc-border, #e5c9a8);">◆ ${r}</div>`).join("")}
+    <div class="block block-retro-eprops-9 block-retro-eprops">My Blogrings</div>
+    
+    <div class="block block-retro-eprops-10 block-retro-eprops">◆ Poetry & Prose Ring</div>
+    <div class="block block-retro-eprops-11 block-retro-eprops">◆ 2000s Nostalgia Crew</div>
+    <div class="block block-retro-eprops-12 block-retro-eprops">◆ Bubble Tea Lovers</div>
+    <div class="block block-retro-eprops-13 block-retro-eprops">◆ Late Night Thoughts</div>
   </div>
 </div>`,
       },
       {
         id: "retro-construction",
         label: "Retro · Under Construction",
-        html: `<div style="font-family:${F};padding:14px;background:repeating-linear-gradient(45deg,#ffcc00,#ffcc00 20px,#000 20px,#000 40px);">
-  <div style="background:#000;color:#ffcc00;text-align:center;padding:12px 20px;font-weight:800;font-size:16px;letter-spacing:.05em;font-family:'Comic Sans MS',cursive;border:2px dashed #ffcc00;">
+        html: `<div class="block block-retro-construction-1 block-retro-construction">
+  <div class="block block-retro-construction-2 block-retro-construction">
     🚧 PAGE UNDER CONSTRUCTION 🚧<br />
-    <span style="font-size:11px;font-weight:400;color:#fff;">check back soon — always more to add!</span>
+    <span class="block block-retro-construction-3 block-retro-construction">check back soon — always more to add!</span>
   </div>
 </div>`,
       },
       {
         id: "retro-divider",
         label: "Retro · Rainbow Glitter Divider",
-        html: `<div style="padding:20px 24px;background:var(--fc-bg, #ffffff);text-align:center;">
-  <div style="height:6px;border-radius:3px;background:linear-gradient(90deg,#ff0000,#ff9900,#ffff00,#33ff00,#00ffff,#3300ff,#ff00ff,#ff0000);background-size:200% 100%;animation:wd-rainbow-shift 3s linear infinite;"></div>
-  <div style="margin-top:6px;font-family:'Comic Sans MS',cursive;font-size:13px;font-weight:700;background:linear-gradient(90deg,#ff0000,#ff9900,#ffff00,#33ff00,#00ffff,#3300ff,#ff00ff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:wd-rainbow-shift 3s linear infinite;">✧･ﾟ: *✧･ﾟ:* thanks for visiting *:･ﾟ✧*:･ﾟ✧</div>
+        html: `<div class="block block-retro-divider-1 block-retro-divider">
+  <div class="block block-retro-divider-2 block-retro-divider"></div>
+  <div class="block block-retro-divider-3 block-retro-divider">✧･ﾟ: *✧･ﾟ:* thanks for visiting *:･ﾟ✧*:･ﾟ✧</div>
   <style>@keyframes wd-rainbow-shift{0%{background-position:0% 50%}100%{background-position:200% 50%}}</style>
 </div>`,
       },
       {
         id: "retro-musicplayer",
         label: "Retro · Now Playing Bar",
-        html: `<div style="font-family:${F};display:flex;justify-content:center;padding:20px;background:var(--fc-bg, #1a1a2e);">
-  <div style="background:linear-gradient(180deg,#2a2a4a,#1a1a2e);border:2px solid #6666aa;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 0 20px rgba(102,102,170,.4);">
-    <div style="width:38px;height:38px;border-radius:6px;background:linear-gradient(135deg,#ff6699,#6699ff);flex-shrink:0;"></div>
+        html: `<div class="block block-retro-musicplayer-1 block-retro-musicplayer">
+  <div class="block block-retro-musicplayer-2 block-retro-musicplayer">
+    <div class="block block-retro-musicplayer-3 block-retro-musicplayer"></div>
     <div>
-      <div style="font-size:10px;color:#9999cc;text-transform:uppercase;letter-spacing:.06em;">♪ now playing</div>
-      <div style="font-size:13px;color:#fff;font-weight:700;">profile-anthem.mp3</div>
+      <div class="block block-retro-musicplayer-4 block-retro-musicplayer">♪ now playing</div>
+      <div class="block block-retro-musicplayer-5 block-retro-musicplayer">profile-anthem.mp3</div>
     </div>
-    <audio controls style="height:32px;"></audio>
+    <audio controls class="block block-retro-musicplayer-6 block-retro-musicplayer"></audio>
   </div>
 </div>`,
       },
@@ -940,10 +1176,10 @@ export const EXTRA_CATEGORIES = [
         // never had to handle.
         id: "retro-browserbadges",
         label: "Retro · Browser Badges",
-        html: `<div style="font-family:${F};display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:18px;background:var(--fc-bg, #c0c0c0);">
-  <div style="background:#000080;color:#fff;font-family:'Courier New',monospace;font-size:11px;font-weight:700;text-align:center;padding:6px 12px;border:2px outset #6666cc;">Best viewed in<br/>Netscape Navigator 4.0</div>
-  <div style="background:#000080;color:#fff;font-family:'Courier New',monospace;font-size:11px;font-weight:700;text-align:center;padding:6px 12px;border:2px outset #6666cc;">Optimized for<br/>Internet Explorer 5+</div>
-  <div style="background:#000080;color:#fff;font-family:'Courier New',monospace;font-size:11px;font-weight:700;text-align:center;padding:6px 12px;border:2px outset #6666cc;">800×600<br/>resolution</div>
+        html: `<div class="block block-retro-browserbadges-1 block-retro-browserbadges">
+  <div class="block block-retro-browserbadges-2 block-retro-browserbadges">Best viewed in<br/>Netscape Navigator 4.0</div>
+  <div class="block block-retro-browserbadges-3 block-retro-browserbadges">Optimized for<br/>Internet Explorer 5+</div>
+  <div class="block block-retro-browserbadges-4 block-retro-browserbadges">800×600<br/>resolution</div>
 </div>`,
       },
       {
@@ -955,11 +1191,11 @@ export const EXTRA_CATEGORIES = [
         // needing a matching image asset per color.
         id: "retro-web2badge",
         label: "Retro · Web 2.0 Glossy Badge",
-        html: `<div style="font-family:${F};display:flex;justify-content:center;padding:32px;background:var(--fc-bg, #eef2f7);">
-  <div style="position:relative;display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:14px;background:linear-gradient(180deg,#8ec5fc 0%,#2e6fd9 100%);box-shadow:0 4px 0 #1c4a99,0 8px 16px rgba(0,0,0,.25);overflow:hidden;">
-    <div style="position:absolute;top:2px;left:6px;right:6px;height:45%;border-radius:12px 12px 50% 50% / 12px 12px 100% 100%;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0));pointer-events:none;"></div>
-    <span style="position:relative;font-size:20px;font-weight:800;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);letter-spacing:-0.02em;">myStartup</span>
-    <span style="position:relative;font-size:10px;font-weight:700;color:#e0edff;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;">beta</span>
+        html: `<div class="block block-retro-web2badge-1 block-retro-web2badge">
+  <div class="block block-retro-web2badge-2 block-retro-web2badge">
+    <div class="block block-retro-web2badge-3 block-retro-web2badge"></div>
+    <span class="block block-retro-web2badge-4 block-retro-web2badge">myStartup</span>
+    <span class="block block-retro-web2badge-5 block-retro-web2badge">beta</span>
   </div>
 </div>`,
       },
@@ -969,13 +1205,28 @@ export const EXTRA_CATEGORIES = [
         // receipts and "last active" timestamps existed.
         id: "retro-buddyicons",
         label: "Retro · Buddy List",
-        html: `<div style="font-family:${F};padding:18px;background:var(--fc-bg, #f0f4ff);">
-  <div style="font-size:11px;font-weight:700;color:#4a5a8a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Buddy List — ${AVA.length} online</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    ${AVA.map((src) => `<div style="position:relative;">
-      <img src="${src}" alt="" style="width:50px;height:50px;border-radius:4px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.25);object-fit:cover;" />
-      <span style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#4ade80;border:2px solid #fff;"></span>
-    </div>`).join("")}
+        html: `<div class="block block-retro-buddyicons-1 block-retro-buddyicons">
+  <div class="block block-retro-buddyicons-2 block-retro-buddyicons">Buddy List — 6 online</div>
+  <div class="block block-retro-buddyicons-3 block-retro-buddyicons">
+    <div class="block block-retro-buddyicons-4 block-retro-buddyicons">
+      <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="" class="block block-retro-buddyicons-5 block-retro-buddyicons" />
+      <span class="block block-retro-buddyicons-6 block-retro-buddyicons"></span>
+    </div><div class="block block-retro-buddyicons-7 block-retro-buddyicons">
+      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="" class="block block-retro-buddyicons-8 block-retro-buddyicons" />
+      <span class="block block-retro-buddyicons-9 block-retro-buddyicons"></span>
+    </div><div class="block block-retro-buddyicons-10 block-retro-buddyicons">
+      <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" alt="" class="block block-retro-buddyicons-11 block-retro-buddyicons" />
+      <span class="block block-retro-buddyicons-12 block-retro-buddyicons"></span>
+    </div><div class="block block-retro-buddyicons-13 block-retro-buddyicons">
+      <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" alt="" class="block block-retro-buddyicons-14 block-retro-buddyicons" />
+      <span class="block block-retro-buddyicons-15 block-retro-buddyicons"></span>
+    </div><div class="block block-retro-buddyicons-16 block-retro-buddyicons">
+      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" alt="" class="block block-retro-buddyicons-17 block-retro-buddyicons" />
+      <span class="block block-retro-buddyicons-18 block-retro-buddyicons"></span>
+    </div><div class="block block-retro-buddyicons-19 block-retro-buddyicons">
+      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=75" alt="" class="block block-retro-buddyicons-20 block-retro-buddyicons" />
+      <span class="block block-retro-buddyicons-21 block-retro-buddyicons"></span>
+    </div>
   </div>
 </div>`,
       },
@@ -986,15 +1237,15 @@ export const EXTRA_CATEGORIES = [
         // rapid-fire, and displayed inline rather than on its own page.
         id: "retro-shoutbox",
         label: "Retro · Shout Box",
-        html: `<div style="font-family:${F};max-width:420px;margin:0 auto;padding:18px;background:var(--fc-surface, #ffffff);border:2px solid #cbd5e1;border-radius:6px;">
-  <div style="font-size:13px;font-weight:800;color:var(--fc-text, #1e293b);border-bottom:2px dashed #cbd5e1;padding-bottom:8px;margin-bottom:10px;">💬 Shout Box</div>
-  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
-    <div style="font-size:12px;background:#f1f5f9;padding:6px 8px;border-radius:4px;color:#1e293b;"><b style="color:#7c3aed;">xXcoolkidXx:</b> omg i love ur layout!!</div>
-    <div style="font-size:12px;background:#f1f5f9;padding:6px 8px;border-radius:4px;color:#1e293b;"><b style="color:#0ea5e9;">sk8ergrl:</b> add me back ✨</div>
+        html: `<div class="block block-retro-shoutbox-1 block-retro-shoutbox">
+  <div class="block block-retro-shoutbox-2 block-retro-shoutbox">💬 Shout Box</div>
+  <div class="block block-retro-shoutbox-3 block-retro-shoutbox">
+    <div class="block block-retro-shoutbox-4 block-retro-shoutbox"><b class="block block-retro-shoutbox-5 block-retro-shoutbox">xXcoolkidXx:</b> omg i love ur layout!!</div>
+    <div class="block block-retro-shoutbox-6 block-retro-shoutbox"><b class="block block-retro-shoutbox-7 block-retro-shoutbox">sk8ergrl:</b> add me back ✨</div>
   </div>
-  <div style="display:flex;gap:6px;">
-    <input placeholder="leave a shout..." style="flex:1;font-size:12px;padding:8px;border:1px solid #cbd5e1;border-radius:4px;" />
-    <button style="font-size:12px;font-weight:700;padding:8px 14px;border:0;border-radius:4px;background:#7c3aed;color:#fff;cursor:pointer;">Post</button>
+  <div class="block block-retro-shoutbox-8 block-retro-shoutbox">
+    <input placeholder="leave a shout..." class="block block-retro-shoutbox-9 block-retro-shoutbox" />
+    <button class="block block-retro-shoutbox-10 block-retro-shoutbox">Post</button>
   </div>
 </div>`,
       },
@@ -1007,8 +1258,8 @@ export const EXTRA_CATEGORIES = [
         // pattern) and removes each sparkle after its fade completes.
         id: "retro-sparkletrail",
         label: "Retro · Cursor Sparkle Trail",
-        html: `<div data-wd-sparkletrail-root style="font-family:${F};position:relative;padding:48px 24px;text-align:center;background:var(--fc-bg, #0a0a1a);border-radius:8px;overflow:hidden;cursor:crosshair;">
-  <div style="font-size:13px;color:#c9b8ff;">✨ Move your mouse here for a sparkle trail ✨</div>
+        html: `<div data-wd-sparkletrail-root class="block block-retro-sparkletrail-1 block-retro-sparkletrail">
+  <div class="block block-retro-sparkletrail-2 block-retro-sparkletrail">✨ Move your mouse here for a sparkle trail ✨</div>
   <script>(function(){
     var root = document.currentScript.closest('[data-wd-sparkletrail-root]');
     if (!root) return;
@@ -1032,94 +1283,159 @@ export const EXTRA_CATEGORIES = [
         // styled to look like an old OS media-player chrome.
         id: "retro-midiplayer",
         label: "Retro · MIDI Player",
-        html: `<div style="font-family:${F};display:inline-flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(180deg,#e8e8e8,#c0c0c0);border:2px outset #ffffff;border-radius:4px;">
-  <div style="width:28px;height:28px;flex-shrink:0;border-radius:50%;background:radial-gradient(circle at 35% 35%,#555,#000);display:flex;align-items:center;justify-content:center;">
-    <div style="width:6px;height:6px;border-radius:50%;background:#888;"></div>
+        html: `<div class="block block-retro-midiplayer-1 block-retro-midiplayer">
+  <div class="block block-retro-midiplayer-2 block-retro-midiplayer">
+    <div class="block block-retro-midiplayer-3 block-retro-midiplayer"></div>
   </div>
   <div>
-    <div style="font-size:10px;font-family:'Courier New',monospace;color:#333;">♫ background_theme.mid</div>
-    <audio controls style="height:24px;width:180px;"></audio>
+    <div class="block block-retro-midiplayer-4 block-retro-midiplayer">♫ background_theme.mid</div>
+    <audio controls class="block block-retro-midiplayer-5 block-retro-midiplayer"></audio>
   </div>
 </div>`,
       },
       {
         id: "retro-awaymessage",
         label: "Retro · AIM Away Message",
-        html: `<div style="font-family:'Trebuchet MS',sans-serif;max-width:340px;background:#fff;border:2px solid #316ac5;border-radius:6px;box-shadow:2px 2px 6px rgba(0,0,0,.25);">
-  <div style="background:linear-gradient(180deg,#5a8fdc,#2f5fb8);color:#fff;font-size:12px;font-weight:bold;padding:4px 8px;border-radius:4px 4px 0 0;display:flex;justify-content:space-between;align-items:center;">
+        html: `<div class="block block-retro-awaymessage-1 block-retro-awaymessage">
+  <div class="block block-retro-awaymessage-2 block-retro-awaymessage">
     <span>xXsk8rgrl02Xx — Away Message</span>
-    <span style="font-family:monospace;">✕</span>
+    <span class="block block-retro-awaymessage-3 block-retro-awaymessage">✕</span>
   </div>
-  <div style="padding:12px;font-size:12px;color:#222;line-height:1.6;">
-    <div style="margin-bottom:8px;"><strong>I'm away from my computer right now.</strong></div>
-    <div style="background:#f0f4ff;border:1px solid #c8d8f0;border-radius:4px;padding:8px;font-style:italic;">"in class, txt my cell &lt;3 back in an hour probably"</div>
-    <div style="margin-top:8px;color:#666;">Auto-response sent at 2:14 PM</div>
+  <div class="block block-retro-awaymessage-4 block-retro-awaymessage">
+    <div class="block block-retro-awaymessage-5 block-retro-awaymessage"><strong>I'm away from my computer right now.</strong></div>
+    <div class="block block-retro-awaymessage-6 block-retro-awaymessage">"in class, txt my cell &lt;3 back in an hour probably"</div>
+    <div class="block block-retro-awaymessage-7 block-retro-awaymessage">Auto-response sent at 2:14 PM</div>
   </div>
 </div>`,
       },
       {
         id: "retro-poll",
         label: "Retro · Poll Widget",
-        html: `<div style="font-family:${F};max-width:280px;background:#fdf6e3;border:2px solid #d4a017;border-radius:6px;padding:14px;">
-  <div style="font-weight:bold;font-size:13px;color:#7a5200;margin-bottom:10px;border-bottom:2px dotted #d4a017;padding-bottom:8px;">⭐ Poll of the Week ⭐</div>
-  <div style="font-size:12px;color:#333;margin-bottom:10px;">What should the next site layout be?</div>
-  ${["Sparkly & pink", "Dark & moody", "Rainbow chaos", "Keep this one"].map((opt, i) => `
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#333;margin-bottom:6px;cursor:pointer;">
-    <input type="radio" name="wd-poll" ${i === 0 ? "checked" : ""} />
-    <span>${opt}</span>
-  </label>`).join("")}
-  <button style="margin-top:8px;width:100%;padding:6px;background:#d4a017;color:#fff;border:1px solid #a67c00;border-radius:3px;font-size:11px;font-weight:bold;cursor:pointer;">Vote!</button>
-  <div style="margin-top:6px;font-size:10px;color:#997700;text-align:center;">1,204 votes so far</div>
+        html: `<div class="block block-retro-poll-1 block-retro-poll">
+  <div class="block block-retro-poll-2 block-retro-poll">⭐ Poll of the Week ⭐</div>
+  <div class="block block-retro-poll-3 block-retro-poll">What should the next site layout be?</div>
+  
+  <label class="block block-retro-poll-4 block-retro-poll">
+    <input type="radio" name="wd-poll" checked />
+    <span>Sparkly & pink</span>
+  </label>
+  <label class="block block-retro-poll-5 block-retro-poll">
+    <input type="radio" name="wd-poll"  />
+    <span>Dark & moody</span>
+  </label>
+  <label class="block block-retro-poll-6 block-retro-poll">
+    <input type="radio" name="wd-poll"  />
+    <span>Rainbow chaos</span>
+  </label>
+  <label class="block block-retro-poll-7 block-retro-poll">
+    <input type="radio" name="wd-poll"  />
+    <span>Keep this one</span>
+  </label>
+  <button class="block block-retro-poll-8 block-retro-poll">Vote!</button>
+  <div class="block block-retro-poll-9 block-retro-poll">1,204 votes so far</div>
 </div>`,
       },
       {
         id: "retro-petadopt",
         label: "Retro · Pet Adoption Badge",
-        html: `<div style="font-family:${F};display:inline-flex;align-items:center;gap:10px;max-width:260px;background:linear-gradient(180deg,#eaffea,#d0f5d0);border:2px solid #4caf50;border-radius:10px;padding:10px 14px;">
-  <div style="width:48px;height:48px;flex-shrink:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe082,#ff8a65);border:2px solid #fff;box-shadow:0 0 0 1px #4caf50;"></div>
+        html: `<div class="block block-retro-petadopt-1 block-retro-petadopt">
+  <div class="block block-retro-petadopt-2 block-retro-petadopt"></div>
   <div>
-    <div style="font-size:12px;font-weight:bold;color:#2e7d32;">You adopted Sprinkle!</div>
-    <div style="font-size:10px;color:#4e7d52;">Level 3 Cloud Puff · Fed 2 hrs ago</div>
-    <a href="#" style="font-size:10px;color:#2e7d32;text-decoration:underline;">Visit my pet →</a>
+    <div class="block block-retro-petadopt-3 block-retro-petadopt">You adopted Sprinkle!</div>
+    <div class="block block-retro-petadopt-4 block-retro-petadopt">Level 3 Cloud Puff · Fed 2 hrs ago</div>
+    <a href="#" class="block block-retro-petadopt-5 block-retro-petadopt">Visit my pet →</a>
   </div>
 </div>`,
       },
       {
         id: "retro-forumheader",
         label: "Retro · Forum Header",
-        html: `<header style="font-family:Verdana,sans-serif;">
-  <div style="background:linear-gradient(180deg,#3b6ea5,#1d3d63);padding:14px 24px;">
-    <div style="color:#fff;font-size:20px;font-weight:bold;">FieldworkForums.net</div>
-    <div style="color:#aecbe8;font-size:11px;margin-top:2px;">the only forum you will ever need, established 2003</div>
+        html: `<header class="block block-retro-forumheader-1 block-retro-forumheader">
+  <div class="block block-retro-forumheader-2 block-retro-forumheader">
+    <div class="block block-retro-forumheader-3 block-retro-forumheader">FieldworkForums.net</div>
+    <div class="block block-retro-forumheader-4 block-retro-forumheader">the only forum you will ever need, established 2003</div>
   </div>
-  <div style="background:#dde6f0;border-bottom:1px solid #b8c8dc;padding:6px 24px;font-size:11px;color:#3b6ea5;">Forum Index &raquo; General Discussion &raquo; <strong>Thread Title Goes Here</strong></div>
+  <div class="block block-retro-forumheader-5 block-retro-forumheader">Forum Index &raquo; General Discussion &raquo; <strong>Thread Title Goes Here</strong></div>
 </header>`,
       },
       {
         id: "retro-forumpost",
         label: "Retro · Forum Post",
-        html: `<div style="display:grid;grid-template-columns:150px 1fr;background:#ffffff;border:1px solid #b8c8dc;border-radius:3px;font-family:Verdana,sans-serif;">
-  <div style="padding:12px;border-right:1px solid #b8c8dc;text-align:center;background:#f4f7fb;">
-    <div style="width:64px;height:64px;background:linear-gradient(135deg,#3b6ea5,#1d3d63);border:1px solid #b8c8dc;border-radius:3px;margin:0 auto 8px;"></div>
-    <div style="font-size:12px;font-weight:bold;color:#1d3d63;">forumveteran99</div>
-    <div style="font-size:10px;color:#7a8aa0;margin-top:2px;">Senior Member</div>
-    <div style="font-size:9px;color:#9aabc0;margin-top:8px;">Joined: Mar 2004<br>Posts: 3,204</div>
+        html: `<div class="block block-retro-forumpost-1 block-retro-forumpost">
+  <div class="block block-retro-forumpost-2 block-retro-forumpost">
+    <div class="block block-retro-forumpost-3 block-retro-forumpost"></div>
+    <div class="block block-retro-forumpost-4 block-retro-forumpost">forumveteran99</div>
+    <div class="block block-retro-forumpost-5 block-retro-forumpost">Senior Member</div>
+    <div class="block block-retro-forumpost-6 block-retro-forumpost">Joined: Mar 2004<br>Posts: 3,204</div>
   </div>
-  <div style="padding:12px 16px;">
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:#7a8aa0;border-bottom:1px dotted #cdd8e6;padding-bottom:6px;margin-bottom:8px;"><span>Posted: Today, 9:14 AM</span><span>Post #1 <a href="#" style="color:#3b6ea5;">Quote</a></span></div>
-    <div style="font-size:13px;line-height:1.65;color:#28303d;">Type the post content here. Duplicate this block to build out a full thread.</div>
-    <div style="font-size:10px;color:#9aabc0;font-style:italic;margin-top:12px;border-top:1px dotted #cdd8e6;padding-top:6px;">Signature line goes here</div>
+  <div class="block block-retro-forumpost-7 block-retro-forumpost">
+    <div class="block block-retro-forumpost-8 block-retro-forumpost"><span>Posted: Today, 9:14 AM</span><span>Post #1 <a href="#" class="block block-retro-forumpost-9 block-retro-forumpost">Quote</a></span></div>
+    <div class="block block-retro-forumpost-10 block-retro-forumpost">Type the post content here. Duplicate this block to build out a full thread.</div>
+    <div class="block block-retro-forumpost-11 block-retro-forumpost">Signature line goes here</div>
   </div>
 </div>`,
       },
       {
         id: "retro-forumreply",
         label: "Retro · Forum Reply Box",
-        html: buildCommentsSectionHtml({
-          seedComments: [],
-          wrapStyle: "font-family:Verdana,sans-serif;padding:16px 0;background:#e8ecf1;",
-          headingStyle: "font-size:13px;font-weight:bold;color:#1d3d63;",
-        }),
+        html: `<section data-forge-comments class="block block-retro-forumreply-1 block-retro-forumreply">
+  <div class="block block-retro-forumreply-2 block-retro-forumreply">
+    <h3 class="block block-retro-forumreply-3 block-retro-forumreply">Comments (<span data-forge-comment-count>0</span>)</h3>
+    <div data-forge-comment-list></div>
+    <form data-forge-comment-form class="block block-retro-forumreply-4 block-retro-forumreply">
+      <input name="name" placeholder="Your name" required class="block block-retro-forumreply-5 block-retro-forumreply">
+      <textarea name="text" placeholder="Say something..." required rows="3" class="block block-retro-forumreply-6 block-retro-forumreply"></textarea>
+      <button type="submit" class="block block-retro-forumreply-7 block-retro-forumreply">Post Comment</button>
+    </form>
+    <script type="application/json" data-forge-comments-seed>[]</script>
+    <script data-forge-js="comments.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function renderComment(c){
+  return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
+    + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
+                : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
+    + '<div style="flex:1;min-width:0;">'
+    + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
+    + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
+    + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
+    + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
+    + '</div></div>';
+}
+function initWidget(root){
+  root.setAttribute("data-forge-comments-init","1");
+  var seedEl=root.querySelector("[data-forge-comments-seed]");
+  var comments=[];
+  try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
+  var list=root.querySelector("[data-forge-comment-list]");
+  var countEl=root.querySelector("[data-forge-comment-count]");
+  function renderAll(){
+    if(list) list.innerHTML=comments.map(renderComment).join("");
+    if(countEl) countEl.textContent=String(comments.length);
+  }
+  renderAll();
+  var form=root.querySelector("[data-forge-comment-form]");
+  if(form){
+    form.addEventListener("submit",function(e){
+      e.preventDefault();
+      var nameInput=form.querySelector('[name="name"]');
+      var textInput=form.querySelector('[name="text"]');
+      var name=(nameInput&&nameInput.value||"").trim();
+      var text=(textInput&&textInput.value||"").trim();
+      if(!name||!text) return;
+      comments.push({id:Date.now(),author:name,date:"Just now",text:text});
+      renderAll();
+      form.reset();
+    });
+  }
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+  </div>
+</section>`,
       },
     ],
   },
@@ -1130,25 +1446,25 @@ export const EXTRA_CATEGORIES = [
       {
         id: "parallax-hero-fullbleed",
         label: "Parallax Hero · Full Bleed",
-        html: `<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:32px;background-image:linear-gradient(rgba(10,15,20,.55),rgba(10,15,20,.55)),url(${PARALLAX_MOUNTAIN});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
-  <div style="max-width:720px;">
-    <div style="display:inline-block;padding:6px 14px;border:1px solid rgba(255,255,255,.35);border-radius:999px;font-size:12px;color:#fff;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;">Est. 2026</div>
-    <h1 style="font-size:64px;line-height:1.05;letter-spacing:-0.03em;margin:0 0 20px;color:#fff;">Where ambition meets altitude.</h1>
-    <p style="font-size:18px;color:rgba(255,255,255,.85);margin:0 0 32px;">A full-bleed statement hero — the background stays fixed while your content scrolls over it.</p>
-    <button style="background:#fff;color:#0a0f14;border:0;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Explore</button>
+        html: `<section class="block block-parallax-hero-fullbleed-1 block-parallax-hero-fullbleed">
+  <div class="block block-parallax-hero-fullbleed-2 block-parallax-hero-fullbleed">
+    <div class="block block-parallax-hero-fullbleed-3 block-parallax-hero-fullbleed">Est. 2026</div>
+    <h1 class="block block-parallax-hero-fullbleed-4 block-parallax-hero-fullbleed">Where ambition meets altitude.</h1>
+    <p class="block block-parallax-hero-fullbleed-5 block-parallax-hero-fullbleed">A full-bleed statement hero — the background stays fixed while your content scrolls over it.</p>
+    <button class="block block-parallax-hero-fullbleed-6 block-parallax-hero-fullbleed">Explore</button>
   </div>
 </section>`,
       },
       {
         id: "parallax-hero-split",
         label: "Parallax Hero · Split Content",
-        html: `<section style="min-height:80vh;display:flex;align-items:center;padding:32px 64px;background-image:linear-gradient(90deg,rgba(8,12,10,.75) 0%,rgba(8,12,10,.25) 55%,rgba(8,12,10,0) 80%),url(${PARALLAX_FOREST});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
-  <div style="max-width:480px;">
-    <h1 style="font-size:48px;line-height:1.1;letter-spacing:-0.02em;margin:0 0 16px;color:#fff;">Grown, not manufactured.</h1>
-    <p style="font-size:16px;color:rgba(255,255,255,.85);margin:0 0 24px;">Content sits in a legible band on the left; the parallax background carries the mood on the right.</p>
-    <div style="display:flex;gap:12px;">
-      <button style="background:#fff;color:#0a0f14;border:0;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Get started</button>
-      <button style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);padding:12px 22px;border-radius:8px;font-size:14px;cursor:pointer;">Learn more</button>
+        html: `<section class="block block-parallax-hero-split-1 block-parallax-hero-split">
+  <div class="block block-parallax-hero-split-2 block-parallax-hero-split">
+    <h1 class="block block-parallax-hero-split-3 block-parallax-hero-split">Grown, not manufactured.</h1>
+    <p class="block block-parallax-hero-split-4 block-parallax-hero-split">Content sits in a legible band on the left; the parallax background carries the mood on the right.</p>
+    <div class="block block-parallax-hero-split-5 block-parallax-hero-split">
+      <button class="block block-parallax-hero-split-6 block-parallax-hero-split">Get started</button>
+      <button class="block block-parallax-hero-split-7 block-parallax-hero-split">Learn more</button>
     </div>
   </div>
 </section>`,
@@ -1156,15 +1472,15 @@ export const EXTRA_CATEGORIES = [
       {
         id: "parallax-section-quote",
         label: "Parallax Section · Big Quote",
-        html: `<section style="padding:140px 32px;text-align:center;background-image:linear-gradient(rgba(6,10,20,.6),rgba(6,10,20,.6)),url(${PARALLAX_OCEAN});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
-  <div style="max-width:820px;margin:0 auto;">
-    <div style="font-size:64px;line-height:1;color:rgba(255,255,255,.35);font-family:Georgia,serif;margin-bottom:8px;">"</div>
-    <p style="font-size:34px;line-height:1.35;letter-spacing:-0.01em;color:#fff;margin:0 0 28px;font-weight:500;">The best interfaces disappear — you stop noticing the tool and start noticing the work.</p>
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
-      <img src="${AVA[0]}" alt="" style="width:44px;height:44px;border-radius:999px;object-fit:cover;border:2px solid rgba(255,255,255,.4);" />
-      <div style="text-align:left;">
-        <div style="font-size:14px;font-weight:600;color:#fff;">Nadia Osei</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.7);">Creative Director, Tidewater</div>
+        html: `<section class="block block-parallax-section-quote-1 block-parallax-section-quote">
+  <div class="block block-parallax-section-quote-2 block-parallax-section-quote">
+    <div class="block block-parallax-section-quote-3 block-parallax-section-quote">"</div>
+    <p class="block block-parallax-section-quote-4 block-parallax-section-quote">The best interfaces disappear — you stop noticing the tool and start noticing the work.</p>
+    <div class="block block-parallax-section-quote-5 block-parallax-section-quote">
+      <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="" class="block block-parallax-section-quote-6 block-parallax-section-quote" />
+      <div class="block block-parallax-section-quote-7 block-parallax-section-quote">
+        <div class="block block-parallax-section-quote-8 block-parallax-section-quote">Nadia Osei</div>
+        <div class="block block-parallax-section-quote-9 block-parallax-section-quote">Creative Director, Tidewater</div>
       </div>
     </div>
   </div>
@@ -1173,23 +1489,23 @@ export const EXTRA_CATEGORIES = [
       {
         id: "parallax-section-stats",
         label: "Parallax Section · Stats Band",
-        html: `<section style="padding:88px 32px;background-image:linear-gradient(rgba(15,10,5,.6),rgba(15,10,5,.6)),url(${PARALLAX_DESERT});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
-  <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center;">
+        html: `<section class="block block-parallax-section-stats-1 block-parallax-section-stats">
+  <div class="block block-parallax-section-stats-2 block-parallax-section-stats">
     <div>
-      <div style="font-size:44px;font-weight:700;color:#fff;">14k+</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Sites shipped</div>
+      <div class="block block-parallax-section-stats-3 block-parallax-section-stats">14k+</div>
+      <div class="block block-parallax-section-stats-4 block-parallax-section-stats">Sites shipped</div>
     </div>
     <div>
-      <div style="font-size:44px;font-weight:700;color:#fff;">99.9%</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Uptime</div>
+      <div class="block block-parallax-section-stats-5 block-parallax-section-stats">99.9%</div>
+      <div class="block block-parallax-section-stats-6 block-parallax-section-stats">Uptime</div>
     </div>
     <div>
-      <div style="font-size:44px;font-weight:700;color:#fff;">38</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Countries</div>
+      <div class="block block-parallax-section-stats-7 block-parallax-section-stats">38</div>
+      <div class="block block-parallax-section-stats-8 block-parallax-section-stats">Countries</div>
     </div>
     <div>
-      <div style="font-size:44px;font-weight:700;color:#fff;">4.9★</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:6px;">Average rating</div>
+      <div class="block block-parallax-section-stats-9 block-parallax-section-stats">4.9★</div>
+      <div class="block block-parallax-section-stats-10 block-parallax-section-stats">Average rating</div>
     </div>
   </div>
 </section>`,
@@ -1197,10 +1513,10 @@ export const EXTRA_CATEGORIES = [
       {
         id: "parallax-section-cta",
         label: "Parallax Section · CTA Banner",
-        html: `<section style="padding:96px 32px;text-align:center;background-image:linear-gradient(rgba(10,20,25,.65),rgba(10,20,25,.65)),url(${PARALLAX_CITY});background-attachment:fixed;background-size:cover;background-position:center;font-family:${F};">
-  <h2 style="font-size:38px;letter-spacing:-0.02em;margin:0 0 12px;color:#fff;">Ready when the skyline is.</h2>
-  <p style="font-size:16px;color:rgba(255,255,255,.85);margin:0 0 28px;">Start free — upgrade only once you're ready to publish.</p>
-  <button style="background:#fff;color:#0a1419;border:0;padding:14px 30px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Start building free</button>
+        html: `<section class="block block-parallax-section-cta-1 block-parallax-section-cta">
+  <h2 class="block block-parallax-section-cta-2 block-parallax-section-cta">Ready when the skyline is.</h2>
+  <p class="block block-parallax-section-cta-3 block-parallax-section-cta">Start free — upgrade only once you're ready to publish.</p>
+  <button class="block block-parallax-section-cta-4 block-parallax-section-cta">Start building free</button>
 </section>`,
       },
     ],
@@ -1212,49 +1528,129 @@ export const EXTRA_CATEGORIES = [
       {
         id: "social-wall-columns",
         label: "Social Media Wall (Multi-Column)",
-        html: `<section data-forge-widget="social-wall" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:1080px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Live from social</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">What people are saying</h2>
-    <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;">
-      ${[
-        ["twitter","𝕏","Twitter / X",[
-          ["Web Dojo","@webdojo_hq","2h","Just shipped dark mode across every export. Thanks for the 200+ bug reports that got us here 🙏","💬 12   🔁 34   ♥ 156"],
-          ["Sam Reyes","@designer_sam","5h","Client sent over \"make it pop\" for the fourth time today. I have achieved zen.","💬 8   🔁 3   ♥ 91"],
-          ["Kai Nakamura","@buildwithkai","1d","Hot take: the best websites still load in under a second. Fight me.","💬 41   🔁 12   ♥ 203"],
-        ]],
-        ["instagram","📷","Instagram",[
-          ["studio.northlane","Studio Northlane","3h","Behind the scenes from today's shoot 🎬","♥ 412   💬 18"],
-          ["mira.codes","Mira Chen","6h","New desk setup, finally organized after 6 months 📐","♥ 289   💬 24"],
-          ["thefolio.club","The Folio Club","1d","Portfolio review night was a hit — thank you to everyone who came out.","♥ 567   💬 41"],
-        ]],
-        ["facebook","f","Facebook",[
-          ["Riverside Coffee Co.","Riverside Coffee Co.","4h","We're extending our weekend hours starting this Saturday! Come say hi ☕","♥ 89   💬 12   ↗ 6"],
-          ["Northgate Studio","Northgate Studio","8h","Our new client showcase is live on the site — link in comments.","♥ 134   💬 22   ↗ 9"],
-          ["The Local Market","The Local Market","2d","Thank you for another incredible farmers market season 🌽","♥ 210   💬 31   ↗ 14"],
-        ]],
-      ].map(([platform,glyph,label,cards])=>`
-      <div data-forge-widget="social-wall-column" data-platform="${platform}" style="flex:0 0 300px;display:flex;flex-direction:column;border:1px solid var(--fc-border, #e2e8f0);border-radius:14px;overflow:hidden;background:var(--fc-surface, #f8fafc);height:520px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--fc-text, #0f172a);color:var(--fc-bg, #ffffff);">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="width:24px;height:24px;border-radius:999px;background:var(--fc-bg, #ffffff);color:var(--fc-text, #0f172a);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${glyph}</span>
-            <span style="font-size:14px;font-weight:600;">${label}</span>
+        html: `<section data-forge-widget="social-wall" data-forge-project-id="" class="block block-social-wall-columns-1 block-social-wall-columns">
+  <div class="block block-social-wall-columns-2 block-social-wall-columns">
+    <div class="block block-social-wall-columns-3 block-social-wall-columns">Live from social</div>
+    <h2 class="block block-social-wall-columns-4 block-social-wall-columns">What people are saying</h2>
+    <div class="block block-social-wall-columns-5 block-social-wall-columns">
+      
+      <div data-forge-widget="social-wall-column" data-platform="twitter" class="block block-social-wall-columns-6 block-social-wall-columns">
+        <div class="block block-social-wall-columns-7 block-social-wall-columns">
+          <div class="block block-social-wall-columns-8 block-social-wall-columns">
+            <span class="block block-social-wall-columns-9 block-social-wall-columns">𝕏</span>
+            <span class="block block-social-wall-columns-10 block-social-wall-columns">Twitter / X</span>
           </div>
-          <span data-forge-connect="${platform}" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--fc-bg, #ffffff);opacity:.85;border-radius:999px;padding:3px 8px;cursor:pointer;">Not connected</span>
+          <span data-forge-connect="twitter" class="block block-social-wall-columns-11 block-social-wall-columns">Not connected</span>
         </div>
-        <div data-forge-cards style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;">
-          ${cards.map(([name,handle,time,text,stats])=>`
-          <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:10px;padding:10px 12px;background:var(--fc-bg, #ffffff);">
-            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;">
-              <span style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">${name}</span>
-              <span style="font-size:11px;color:var(--fc-muted, #94a3b8);white-space:nowrap;">${time}</span>
+        <div data-forge-cards class="block block-social-wall-columns-12 block-social-wall-columns">
+          
+          <div class="block block-social-wall-columns-13 block-social-wall-columns">
+            <div class="block block-social-wall-columns-14 block-social-wall-columns">
+              <span class="block block-social-wall-columns-15 block-social-wall-columns">Web Dojo</span>
+              <span class="block block-social-wall-columns-16 block-social-wall-columns">2h</span>
             </div>
-            <div style="font-size:11px;color:var(--fc-muted, #64748b);margin-bottom:6px;">${handle}</div>
-            <p style="margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--fc-text, #0f172a);">${text}</p>
-            <div style="font-size:11px;color:var(--fc-muted, #94a3b8);">${stats}</div>
-          </div>`).join("")}
+            <div class="block block-social-wall-columns-17 block-social-wall-columns">@webdojo_hq</div>
+            <p class="block block-social-wall-columns-18 block-social-wall-columns">Just shipped dark mode across every export. Thanks for the 200+ bug reports that got us here 🙏</p>
+            <div class="block block-social-wall-columns-19 block-social-wall-columns">💬 12   🔁 34   ♥ 156</div>
+          </div>
+          <div class="block block-social-wall-columns-20 block-social-wall-columns">
+            <div class="block block-social-wall-columns-21 block-social-wall-columns">
+              <span class="block block-social-wall-columns-22 block-social-wall-columns">Sam Reyes</span>
+              <span class="block block-social-wall-columns-23 block-social-wall-columns">5h</span>
+            </div>
+            <div class="block block-social-wall-columns-24 block-social-wall-columns">@designer_sam</div>
+            <p class="block block-social-wall-columns-25 block-social-wall-columns">Client sent over "make it pop" for the fourth time today. I have achieved zen.</p>
+            <div class="block block-social-wall-columns-26 block-social-wall-columns">💬 8   🔁 3   ♥ 91</div>
+          </div>
+          <div class="block block-social-wall-columns-27 block-social-wall-columns">
+            <div class="block block-social-wall-columns-28 block-social-wall-columns">
+              <span class="block block-social-wall-columns-29 block-social-wall-columns">Kai Nakamura</span>
+              <span class="block block-social-wall-columns-30 block-social-wall-columns">1d</span>
+            </div>
+            <div class="block block-social-wall-columns-31 block-social-wall-columns">@buildwithkai</div>
+            <p class="block block-social-wall-columns-32 block-social-wall-columns">Hot take: the best websites still load in under a second. Fight me.</p>
+            <div class="block block-social-wall-columns-33 block-social-wall-columns">💬 41   🔁 12   ♥ 203</div>
+          </div>
         </div>
-      </div>`).join("")}
+      </div>
+      <div data-forge-widget="social-wall-column" data-platform="instagram" class="block block-social-wall-columns-34 block-social-wall-columns">
+        <div class="block block-social-wall-columns-35 block-social-wall-columns">
+          <div class="block block-social-wall-columns-36 block-social-wall-columns">
+            <span class="block block-social-wall-columns-37 block-social-wall-columns">📷</span>
+            <span class="block block-social-wall-columns-38 block-social-wall-columns">Instagram</span>
+          </div>
+          <span data-forge-connect="instagram" class="block block-social-wall-columns-39 block-social-wall-columns">Not connected</span>
+        </div>
+        <div data-forge-cards class="block block-social-wall-columns-40 block-social-wall-columns">
+          
+          <div class="block block-social-wall-columns-41 block-social-wall-columns">
+            <div class="block block-social-wall-columns-42 block-social-wall-columns">
+              <span class="block block-social-wall-columns-43 block-social-wall-columns">studio.northlane</span>
+              <span class="block block-social-wall-columns-44 block-social-wall-columns">3h</span>
+            </div>
+            <div class="block block-social-wall-columns-45 block-social-wall-columns">Studio Northlane</div>
+            <p class="block block-social-wall-columns-46 block-social-wall-columns">Behind the scenes from today's shoot 🎬</p>
+            <div class="block block-social-wall-columns-47 block-social-wall-columns">♥ 412   💬 18</div>
+          </div>
+          <div class="block block-social-wall-columns-48 block-social-wall-columns">
+            <div class="block block-social-wall-columns-49 block-social-wall-columns">
+              <span class="block block-social-wall-columns-50 block-social-wall-columns">mira.codes</span>
+              <span class="block block-social-wall-columns-51 block-social-wall-columns">6h</span>
+            </div>
+            <div class="block block-social-wall-columns-52 block-social-wall-columns">Mira Chen</div>
+            <p class="block block-social-wall-columns-53 block-social-wall-columns">New desk setup, finally organized after 6 months 📐</p>
+            <div class="block block-social-wall-columns-54 block-social-wall-columns">♥ 289   💬 24</div>
+          </div>
+          <div class="block block-social-wall-columns-55 block-social-wall-columns">
+            <div class="block block-social-wall-columns-56 block-social-wall-columns">
+              <span class="block block-social-wall-columns-57 block-social-wall-columns">thefolio.club</span>
+              <span class="block block-social-wall-columns-58 block-social-wall-columns">1d</span>
+            </div>
+            <div class="block block-social-wall-columns-59 block-social-wall-columns">The Folio Club</div>
+            <p class="block block-social-wall-columns-60 block-social-wall-columns">Portfolio review night was a hit — thank you to everyone who came out.</p>
+            <div class="block block-social-wall-columns-61 block-social-wall-columns">♥ 567   💬 41</div>
+          </div>
+        </div>
+      </div>
+      <div data-forge-widget="social-wall-column" data-platform="facebook" class="block block-social-wall-columns-62 block-social-wall-columns">
+        <div class="block block-social-wall-columns-63 block-social-wall-columns">
+          <div class="block block-social-wall-columns-64 block-social-wall-columns">
+            <span class="block block-social-wall-columns-65 block-social-wall-columns">f</span>
+            <span class="block block-social-wall-columns-66 block-social-wall-columns">Facebook</span>
+          </div>
+          <span data-forge-connect="facebook" class="block block-social-wall-columns-67 block-social-wall-columns">Not connected</span>
+        </div>
+        <div data-forge-cards class="block block-social-wall-columns-68 block-social-wall-columns">
+          
+          <div class="block block-social-wall-columns-69 block-social-wall-columns">
+            <div class="block block-social-wall-columns-70 block-social-wall-columns">
+              <span class="block block-social-wall-columns-71 block-social-wall-columns">Riverside Coffee Co.</span>
+              <span class="block block-social-wall-columns-72 block-social-wall-columns">4h</span>
+            </div>
+            <div class="block block-social-wall-columns-73 block-social-wall-columns">Riverside Coffee Co.</div>
+            <p class="block block-social-wall-columns-74 block-social-wall-columns">We're extending our weekend hours starting this Saturday! Come say hi ☕</p>
+            <div class="block block-social-wall-columns-75 block-social-wall-columns">♥ 89   💬 12   ↗ 6</div>
+          </div>
+          <div class="block block-social-wall-columns-76 block-social-wall-columns">
+            <div class="block block-social-wall-columns-77 block-social-wall-columns">
+              <span class="block block-social-wall-columns-78 block-social-wall-columns">Northgate Studio</span>
+              <span class="block block-social-wall-columns-79 block-social-wall-columns">8h</span>
+            </div>
+            <div class="block block-social-wall-columns-80 block-social-wall-columns">Northgate Studio</div>
+            <p class="block block-social-wall-columns-81 block-social-wall-columns">Our new client showcase is live on the site — link in comments.</p>
+            <div class="block block-social-wall-columns-82 block-social-wall-columns">♥ 134   💬 22   ↗ 9</div>
+          </div>
+          <div class="block block-social-wall-columns-83 block-social-wall-columns">
+            <div class="block block-social-wall-columns-84 block-social-wall-columns">
+              <span class="block block-social-wall-columns-85 block-social-wall-columns">The Local Market</span>
+              <span class="block block-social-wall-columns-86 block-social-wall-columns">2d</span>
+            </div>
+            <div class="block block-social-wall-columns-87 block-social-wall-columns">The Local Market</div>
+            <p class="block block-social-wall-columns-88 block-social-wall-columns">Thank you for another incredible farmers market season 🌽</p>
+            <div class="block block-social-wall-columns-89 block-social-wall-columns">♥ 210   💬 31   ↗ 14</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <script data-forge-js="social-wall.js">(function(){
@@ -1309,13 +1705,64 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "comments-section",
         label: "Comment Thread",
-        html: buildCommentsSectionHtml({
-          seedComments: [
-            { id: 1, author: "Priya K.", avatar: AVA[0], date: "2 days ago", text: "This is exactly what I needed to read today — thank you for writing it out so clearly." },
-            { id: 2, author: "Marcus D.", avatar: AVA[1], date: "1 day ago", text: "Solid points. I'd add that the second one is easy to overlook until it bites you." },
-            { id: 3, author: "Renee A.", avatar: AVA[2], date: "5 hours ago", text: "Bookmarking this. Coming back to it next time I forget why I did it this way." },
-          ],
-        }),
+        html: `<section data-forge-comments class="block block-comments-section-1 block-comments-section">
+  <div class="block block-comments-section-2 block-comments-section">
+    <h3 class="block block-comments-section-3 block-comments-section">Comments (<span data-forge-comment-count>0</span>)</h3>
+    <div data-forge-comment-list></div>
+    <form data-forge-comment-form class="block block-comments-section-4 block-comments-section">
+      <input name="name" placeholder="Your name" required class="block block-comments-section-5 block-comments-section">
+      <textarea name="text" placeholder="Say something..." required rows="3" class="block block-comments-section-6 block-comments-section"></textarea>
+      <button type="submit" class="block block-comments-section-7 block-comments-section">Post Comment</button>
+    </form>
+    <script type="application/json" data-forge-comments-seed>[{"id":1,"author":"Priya K.","avatar":"https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75","date":"2 days ago","text":"This is exactly what I needed to read today — thank you for writing it out so clearly."},{"id":2,"author":"Marcus D.","avatar":"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75","date":"1 day ago","text":"Solid points. I'd add that the second one is easy to overlook until it bites you."},{"id":3,"author":"Renee A.","avatar":"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75","date":"5 hours ago","text":"Bookmarking this. Coming back to it next time I forget why I did it this way."}]</script>
+    <script data-forge-js="comments.js">(function(){
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function renderComment(c){
+  return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
+    + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
+                : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
+    + '<div style="flex:1;min-width:0;">'
+    + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
+    + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
+    + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
+    + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
+    + '</div></div>';
+}
+function initWidget(root){
+  root.setAttribute("data-forge-comments-init","1");
+  var seedEl=root.querySelector("[data-forge-comments-seed]");
+  var comments=[];
+  try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
+  var list=root.querySelector("[data-forge-comment-list]");
+  var countEl=root.querySelector("[data-forge-comment-count]");
+  function renderAll(){
+    if(list) list.innerHTML=comments.map(renderComment).join("");
+    if(countEl) countEl.textContent=String(comments.length);
+  }
+  renderAll();
+  var form=root.querySelector("[data-forge-comment-form]");
+  if(form){
+    form.addEventListener("submit",function(e){
+      e.preventDefault();
+      var nameInput=form.querySelector('[name="name"]');
+      var textInput=form.querySelector('[name="text"]');
+      var name=(nameInput&&nameInput.value||"").trim();
+      var text=(textInput&&textInput.value||"").trim();
+      if(!name||!text) return;
+      comments.push({id:Date.now(),author:name,date:"Just now",text:text});
+      renderAll();
+      form.reset();
+    });
+  }
+}
+function init(){
+  var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
+  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+})();</script>
+  </div>
+</section>`,
       },
     ],
   },
@@ -1326,25 +1773,25 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "updates-block",
         label: "Latest Updates",
-        html: `<section data-forge-widget="updates" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:960px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">What's new</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Latest Updates</h2>
-    <div data-forge-updates-list style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">2 days ago</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Welcome to our new site</div>
-        <div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">We're excited to launch. Check back for regular updates.</div>
+        html: `<section data-forge-widget="updates" data-forge-project-id="" class="block block-zenero-updates-block-1 block-zenero-updates-block">
+  <div class="block block-zenero-updates-block-2 block-zenero-updates-block">
+    <div class="block block-zenero-updates-block-3 block-zenero-updates-block">What's new</div>
+    <h2 class="block block-zenero-updates-block-4 block-zenero-updates-block">Latest Updates</h2>
+    <div data-forge-updates-list class="block block-zenero-updates-block-5 block-zenero-updates-block">
+      <div class="block block-zenero-updates-block-6 block-zenero-updates-block">
+        <div class="block block-zenero-updates-block-7 block-zenero-updates-block">2 days ago</div>
+        <div class="block block-zenero-updates-block-8 block-zenero-updates-block">Welcome to our new site</div>
+        <div class="block block-zenero-updates-block-9 block-zenero-updates-block">We're excited to launch. Check back for regular updates.</div>
       </div>
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">1 week ago</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">New features coming soon</div>
-        <div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">We're working on something special. Stay tuned.</div>
+      <div class="block block-zenero-updates-block-10 block-zenero-updates-block">
+        <div class="block block-zenero-updates-block-11 block-zenero-updates-block">1 week ago</div>
+        <div class="block block-zenero-updates-block-12 block-zenero-updates-block">New features coming soon</div>
+        <div class="block block-zenero-updates-block-13 block-zenero-updates-block">We're working on something special. Stay tuned.</div>
       </div>
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">2 weeks ago</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Community milestone</div>
-        <div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">Thank you to everyone who's been part of this journey.</div>
+      <div class="block block-zenero-updates-block-14 block-zenero-updates-block">
+        <div class="block block-zenero-updates-block-15 block-zenero-updates-block">2 weeks ago</div>
+        <div class="block block-zenero-updates-block-16 block-zenero-updates-block">Community milestone</div>
+        <div class="block block-zenero-updates-block-17 block-zenero-updates-block">Thank you to everyone who's been part of this journey.</div>
       </div>
     </div>
   </div>
@@ -1379,12 +1826,12 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "gallery-block",
         label: "Gallery Grid",
-        html: `<section data-forge-widget="gallery" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:1080px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Our work</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Gallery</h2>
-    <div data-forge-gallery-grid style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-      ${PORT.slice(0, 6).map((src) => `<img src="${src}" alt="Gallery item" style="width:100%;height:200px;object-fit:cover;border-radius:10px;" />`).join("")}
+        html: `<section data-forge-widget="gallery" data-forge-project-id="" class="block block-zenero-gallery-block-1 block-zenero-gallery-block">
+  <div class="block block-zenero-gallery-block-2 block-zenero-gallery-block">
+    <div class="block block-zenero-gallery-block-3 block-zenero-gallery-block">Our work</div>
+    <h2 class="block block-zenero-gallery-block-4 block-zenero-gallery-block">Gallery</h2>
+    <div data-forge-gallery-grid class="block block-zenero-gallery-block-5 block-zenero-gallery-block">
+      <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-6 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-7 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-8 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-9 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-10 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-11 block-zenero-gallery-block" />
     </div>
   </div>
   <script data-forge-js="gallery.js">(function(){
@@ -1414,16 +1861,16 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "latest-from-blog",
         label: "Latest from Blog",
-        html: `<section data-forge-widget="latest-blog" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:720px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">From the blog</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Latest from Blog</h2>
-    <div data-forge-blog-titles style="display:flex;flex-direction:column;gap:8px;">
-      <button style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;">Getting Started with Web Dojo</button>
-      <button style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;">Design Tips for Better Landing Pages</button>
-      <button style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;">Why Static Sites Still Win</button>
+        html: `<section data-forge-widget="latest-blog" data-forge-project-id="" class="block block-zenero-latest-from-blog-1 block-zenero-latest-from-blog">
+  <div class="block block-zenero-latest-from-blog-2 block-zenero-latest-from-blog">
+    <div class="block block-zenero-latest-from-blog-3 block-zenero-latest-from-blog">From the blog</div>
+    <h2 class="block block-zenero-latest-from-blog-4 block-zenero-latest-from-blog">Latest from Blog</h2>
+    <div data-forge-blog-titles class="block block-zenero-latest-from-blog-5 block-zenero-latest-from-blog">
+      <button class="block block-zenero-latest-from-blog-6 block-zenero-latest-from-blog">Getting Started with Web Dojo</button>
+      <button class="block block-zenero-latest-from-blog-7 block-zenero-latest-from-blog">Design Tips for Better Landing Pages</button>
+      <button class="block block-zenero-latest-from-blog-8 block-zenero-latest-from-blog">Why Static Sites Still Win</button>
     </div>
-    <div data-forge-blog-excerpt style="display:none;margin-top:16px;padding:16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);"></div>
+    <div data-forge-blog-excerpt class="block block-zenero-latest-from-blog-9 block-zenero-latest-from-blog"></div>
   </div>
   <script data-forge-js="latest-blog.js">(function(){
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
@@ -1480,28 +1927,28 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "portfolio-timeline",
         label: "Portfolio Timeline",
-        html: `<section data-forge-widget="portfolio" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:720px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Selected work</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Portfolio</h2>
-    <div data-forge-portfolio-timeline style="position:relative;padding-left:24px;border-left:2px solid var(--fc-border, #e2e8f0);">
-      <div style="position:relative;margin-bottom:24px;">
-        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
-        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2024</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Project Alpha</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">A flagship web experience.</div>
+        html: `<section data-forge-widget="portfolio" data-forge-project-id="" class="block block-zenero-portfolio-timeline-1 block-zenero-portfolio-timeline">
+  <div class="block block-zenero-portfolio-timeline-2 block-zenero-portfolio-timeline">
+    <div class="block block-zenero-portfolio-timeline-3 block-zenero-portfolio-timeline">Selected work</div>
+    <h2 class="block block-zenero-portfolio-timeline-4 block-zenero-portfolio-timeline">Portfolio</h2>
+    <div data-forge-portfolio-timeline class="block block-zenero-portfolio-timeline-5 block-zenero-portfolio-timeline">
+      <div class="block block-zenero-portfolio-timeline-6 block-zenero-portfolio-timeline">
+        <div class="block block-zenero-portfolio-timeline-7 block-zenero-portfolio-timeline"></div>
+        <div class="block block-zenero-portfolio-timeline-8 block-zenero-portfolio-timeline">2024</div>
+        <div class="block block-zenero-portfolio-timeline-9 block-zenero-portfolio-timeline">Project Alpha</div>
+        <div class="block block-zenero-portfolio-timeline-10 block-zenero-portfolio-timeline">A flagship web experience.</div>
       </div>
-      <div style="position:relative;margin-bottom:24px;">
-        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
-        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2023</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Project Beta</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">A mobile-first redesign.</div>
+      <div class="block block-zenero-portfolio-timeline-11 block-zenero-portfolio-timeline">
+        <div class="block block-zenero-portfolio-timeline-12 block-zenero-portfolio-timeline"></div>
+        <div class="block block-zenero-portfolio-timeline-13 block-zenero-portfolio-timeline">2023</div>
+        <div class="block block-zenero-portfolio-timeline-14 block-zenero-portfolio-timeline">Project Beta</div>
+        <div class="block block-zenero-portfolio-timeline-15 block-zenero-portfolio-timeline">A mobile-first redesign.</div>
       </div>
-      <div style="position:relative;">
-        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
-        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2022</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Project Gamma</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">An e-commerce buildout.</div>
+      <div class="block block-zenero-portfolio-timeline-16 block-zenero-portfolio-timeline">
+        <div class="block block-zenero-portfolio-timeline-17 block-zenero-portfolio-timeline"></div>
+        <div class="block block-zenero-portfolio-timeline-18 block-zenero-portfolio-timeline">2022</div>
+        <div class="block block-zenero-portfolio-timeline-19 block-zenero-portfolio-timeline">Project Gamma</div>
+        <div class="block block-zenero-portfolio-timeline-20 block-zenero-portfolio-timeline">An e-commerce buildout.</div>
       </div>
     </div>
   </div>
@@ -1538,18 +1985,18 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "testimonials-from-comments",
         label: "Testimonials from Comments",
-        html: `<section data-forge-widget="testimonials" data-forge-project-id="" data-forge-platform="facebook" data-forge-post-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:720px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">What people say</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Testimonials</h2>
-    <div data-forge-testimonials-list style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:13px;line-height:1.5;color:var(--fc-text, #334155);">"This product changed how we work. Highly recommended."</div>
-        <div style="font-size:12px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:8px;">— Sarah M.</div>
+        html: `<section data-forge-widget="testimonials" data-forge-project-id="" data-forge-platform="facebook" data-forge-post-id="" class="block block-zenero-testimonials-from-comments-1 block-zenero-testimonials-from-comments">
+  <div class="block block-zenero-testimonials-from-comments-2 block-zenero-testimonials-from-comments">
+    <div class="block block-zenero-testimonials-from-comments-3 block-zenero-testimonials-from-comments">What people say</div>
+    <h2 class="block block-zenero-testimonials-from-comments-4 block-zenero-testimonials-from-comments">Testimonials</h2>
+    <div data-forge-testimonials-list class="block block-zenero-testimonials-from-comments-5 block-zenero-testimonials-from-comments">
+      <div class="block block-zenero-testimonials-from-comments-6 block-zenero-testimonials-from-comments">
+        <div class="block block-zenero-testimonials-from-comments-7 block-zenero-testimonials-from-comments">"This product changed how we work. Highly recommended."</div>
+        <div class="block block-zenero-testimonials-from-comments-8 block-zenero-testimonials-from-comments">— Sarah M.</div>
       </div>
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:13px;line-height:1.5;color:var(--fc-text, #334155);">"Incredible support and a beautiful product."</div>
-        <div style="font-size:12px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:8px;">— James K.</div>
+      <div class="block block-zenero-testimonials-from-comments-9 block-zenero-testimonials-from-comments">
+        <div class="block block-zenero-testimonials-from-comments-10 block-zenero-testimonials-from-comments">"Incredible support and a beautiful product."</div>
+        <div class="block block-zenero-testimonials-from-comments-11 block-zenero-testimonials-from-comments">— James K.</div>
       </div>
     </div>
   </div>
@@ -1585,22 +2032,22 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "timeline-block",
         label: "Timeline",
-        html: `<section data-forge-widget="timeline" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:720px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Our story</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Timeline</h2>
-    <div data-forge-timeline-list style="position:relative;padding-left:24px;border-left:2px solid var(--fc-border, #e2e8f0);">
-      <div style="position:relative;margin-bottom:24px;">
-        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
-        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2024</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Founded</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">Started the company.</div>
+        html: `<section data-forge-widget="timeline" data-forge-project-id="" class="block block-zenero-timeline-block-1 block-zenero-timeline-block">
+  <div class="block block-zenero-timeline-block-2 block-zenero-timeline-block">
+    <div class="block block-zenero-timeline-block-3 block-zenero-timeline-block">Our story</div>
+    <h2 class="block block-zenero-timeline-block-4 block-zenero-timeline-block">Timeline</h2>
+    <div data-forge-timeline-list class="block block-zenero-timeline-block-5 block-zenero-timeline-block">
+      <div class="block block-zenero-timeline-block-6 block-zenero-timeline-block">
+        <div class="block block-zenero-timeline-block-7 block-zenero-timeline-block"></div>
+        <div class="block block-zenero-timeline-block-8 block-zenero-timeline-block">2024</div>
+        <div class="block block-zenero-timeline-block-9 block-zenero-timeline-block">Founded</div>
+        <div class="block block-zenero-timeline-block-10 block-zenero-timeline-block">Started the company.</div>
       </div>
-      <div style="position:relative;">
-        <div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>
-        <div style="font-size:12px;color:var(--fc-muted, #94a3b8);">2025</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">Launched</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">Shipped the first release.</div>
+      <div class="block block-zenero-timeline-block-11 block-zenero-timeline-block">
+        <div class="block block-zenero-timeline-block-12 block-zenero-timeline-block"></div>
+        <div class="block block-zenero-timeline-block-13 block-zenero-timeline-block">2025</div>
+        <div class="block block-zenero-timeline-block-14 block-zenero-timeline-block">Launched</div>
+        <div class="block block-zenero-timeline-block-15 block-zenero-timeline-block">Shipped the first release.</div>
       </div>
     </div>
   </div>
@@ -1636,25 +2083,25 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "bento-block",
         label: "Features Bento",
-        html: `<section data-forge-widget="bento" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:${F};">
-  <div style="max-width:960px;margin:0 auto;">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px;">Why us</div>
-    <h2 style="font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a);">Features</h2>
-    <div data-forge-bento-grid style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:24px;margin-bottom:10px;">🚀</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Fast</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);">Loads in under a second.</div>
+        html: `<section data-forge-widget="bento" data-forge-project-id="" class="block block-zenero-bento-block-1 block-zenero-bento-block">
+  <div class="block block-zenero-bento-block-2 block-zenero-bento-block">
+    <div class="block block-zenero-bento-block-3 block-zenero-bento-block">Why us</div>
+    <h2 class="block block-zenero-bento-block-4 block-zenero-bento-block">Features</h2>
+    <div data-forge-bento-grid class="block block-zenero-bento-block-5 block-zenero-bento-block">
+      <div class="block block-zenero-bento-block-6 block-zenero-bento-block">
+        <div class="block block-zenero-bento-block-7 block-zenero-bento-block">🚀</div>
+        <div class="block block-zenero-bento-block-8 block-zenero-bento-block">Fast</div>
+        <div class="block block-zenero-bento-block-9 block-zenero-bento-block">Loads in under a second.</div>
       </div>
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:24px;margin-bottom:10px;">🔒</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Secure</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);">Built with best practices.</div>
+      <div class="block block-zenero-bento-block-10 block-zenero-bento-block">
+        <div class="block block-zenero-bento-block-11 block-zenero-bento-block">🔒</div>
+        <div class="block block-zenero-bento-block-12 block-zenero-bento-block">Secure</div>
+        <div class="block block-zenero-bento-block-13 block-zenero-bento-block">Built with best practices.</div>
       </div>
-      <div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);">
-        <div style="font-size:24px;margin-bottom:10px;">🎨</div>
-        <div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">Beautiful</div>
-        <div style="font-size:13px;color:var(--fc-muted, #64748b);">Designed to stand out.</div>
+      <div class="block block-zenero-bento-block-14 block-zenero-bento-block">
+        <div class="block block-zenero-bento-block-15 block-zenero-bento-block">🎨</div>
+        <div class="block block-zenero-bento-block-16 block-zenero-bento-block">Beautiful</div>
+        <div class="block block-zenero-bento-block-17 block-zenero-bento-block">Designed to stand out.</div>
       </div>
     </div>
   </div>
@@ -1691,13 +2138,13 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "esports-roster-live",
         label: "Esports · Roster (live)",
-        html: `<section data-forge-widget="roster" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #05050a);font-family:${F};">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:28px;letter-spacing:-.02em;margin:0 0 24px;color:var(--fc-text, #fff);">Roster</h2>
-    <div data-forge-roster-grid style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
-      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:20px 14px;text-align:center;">
-        <div style="font-size:11px;font-weight:800;color:var(--fc-accent, #22d3ee);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Add players in the Zenero dashboard</div>
-        <div style="font-weight:700;color:var(--fc-muted, #6b7280);font-size:13px;">No roster yet</div>
+        html: `<section data-forge-widget="roster" data-forge-project-id="" class="block block-zenero-esports-roster-live-1 block-zenero-esports-roster-live">
+  <div class="block block-zenero-esports-roster-live-2 block-zenero-esports-roster-live">
+    <h2 class="block block-zenero-esports-roster-live-3 block-zenero-esports-roster-live">Roster</h2>
+    <div data-forge-roster-grid class="block block-zenero-esports-roster-live-4 block-zenero-esports-roster-live">
+      <div class="block block-zenero-esports-roster-live-5 block-zenero-esports-roster-live">
+        <div class="block block-zenero-esports-roster-live-6 block-zenero-esports-roster-live">Add players in the Zenero dashboard</div>
+        <div class="block block-zenero-esports-roster-live-7 block-zenero-esports-roster-live">No roster yet</div>
       </div>
     </div>
   </div>
@@ -1733,11 +2180,11 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "esports-fixtures-live",
         label: "Esports · Fixtures (live)",
-        html: `<section data-forge-widget="fixtures" data-forge-project-id="" style="padding:56px 32px;background:var(--fc-bg, #05050a);font-family:${F};">
-  <div style="max-width:1120px;margin:0 auto;">
-    <h2 style="font-size:28px;letter-spacing:-.02em;margin:0 0 24px;color:var(--fc-text, #fff);">Fixtures</h2>
-    <div data-forge-fixtures-list style="display:flex;flex-direction:column;gap:10px;">
-      <div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:10px;padding:16px 22px;color:var(--fc-muted, #6b7280);font-size:13px;">Add fixtures in the Zenero dashboard.</div>
+        html: `<section data-forge-widget="fixtures" data-forge-project-id="" class="block block-zenero-esports-fixtures-live-1 block-zenero-esports-fixtures-live">
+  <div class="block block-zenero-esports-fixtures-live-2 block-zenero-esports-fixtures-live">
+    <h2 class="block block-zenero-esports-fixtures-live-3 block-zenero-esports-fixtures-live">Fixtures</h2>
+    <div data-forge-fixtures-list class="block block-zenero-esports-fixtures-live-4 block-zenero-esports-fixtures-live">
+      <div class="block block-zenero-esports-fixtures-live-5 block-zenero-esports-fixtures-live">Add fixtures in the Zenero dashboard.</div>
     </div>
   </div>
   <script data-forge-js="fixtures.js">(function(){
@@ -1776,9 +2223,9 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "esports-org-stats-live",
         label: "Esports · Org Stats (live)",
-        html: `<section data-forge-widget="org-stats" data-forge-project-id="" style="padding:44px 32px;background:var(--fc-surface, #101018);border-top:1px solid var(--fc-border, #22222e);border-bottom:1px solid var(--fc-border, #22222e);font-family:${F};">
-  <div data-forge-org-stats-row style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;max-width:1000px;margin:0 auto;">
-    <div style="text-align:center;flex:1;min-width:120px;color:var(--fc-muted, #6b7280);font-size:12px;">Add stats in the Zenero dashboard.</div>
+        html: `<section data-forge-widget="org-stats" data-forge-project-id="" class="block block-zenero-esports-org-stats-live-1 block-zenero-esports-org-stats-live">
+  <div data-forge-org-stats-row class="block block-zenero-esports-org-stats-live-2 block-zenero-esports-org-stats-live">
+    <div class="block block-zenero-esports-org-stats-live-3 block-zenero-esports-org-stats-live">Add stats in the Zenero dashboard.</div>
   </div>
   <script data-forge-js="org-stats.js">(function(){
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
