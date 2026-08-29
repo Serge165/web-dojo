@@ -52,6 +52,7 @@ import { scanHtml, inlineLocalStylesheets } from "@/lib/importHtml";
 import { hasZeneroWidget } from "@/lib/zeneroWidgets";
 import { escText } from "@/lib/escapeHtml";
 import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
+import { patchFirstStyle, removeStyleProp } from "@/lib/patchRootStyle";
 import { upsertResponsiveOverridesCss } from "@/lib/responsiveOverrides";
 import { upsertAnalyticsHead } from "@/lib/analyticsSnippets";
 import { buildAppliedAnimation, buildOnScrollBootstrapScript, ONSCROLL_BOOTSTRAP_MARKER } from "@/lib/animations";
@@ -61,20 +62,9 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const uid = () => "el_" + Math.random().toString(36).slice(2, 10);
 
-// Merge a patch of CSS declarations into the first inline style="…" attribute.
-const patchFirstStyle = (html, patch) => {
-  if (/style="([^"]*)"/.test(html)) {
-    return html.replace(/style="([^"]*)"/, (_, styles) => {
-      const parts = styles.split(";").map((s) => s.trim()).filter(Boolean);
-      const map = {};
-      parts.forEach((p) => { const i = p.indexOf(":"); if (i > 0) map[p.slice(0, i).trim()] = p.slice(i + 1).trim(); });
-      Object.assign(map, patch);
-      return `style="${Object.entries(map).map(([k, v]) => `${k}: ${v}`).join("; ")}"`;
-    });
-  }
-  const styleStr = Object.entries(patch).map(([k, v]) => `${k}: ${v}`).join("; ");
-  return html.replace(/<([a-zA-Z][^ >]*)(\s|>)/, (_, tag, s) => `<${tag} style="${styleStr}"${s}`);
-};
+// Root-tag-targeted style patch/remove — see lib/patchRootStyle.js for the
+// full rationale (Phase 7). Pulled into its own import-free module so it's
+// unit-testable without loading this page's monaco-editor/axios/etc. graph.
 
 // Add a class to the first/root tag (used when pasting hover effects).
 const addClassToFirstTag = (html, cls) => {
@@ -109,19 +99,6 @@ const removeAttrFromFirstTag = (html, attr) => {
   if (!m) return html;
   const [full, tag, attrs] = m;
   return html.replace(full, `<${tag}${attrs.replace(new RegExp(`\\s*${attr}="[^"]*"`), "")}>`);
-};
-
-// Removes one declaration from the first inline style="…" attribute, if
-// present — used when applying an on-scroll animation onto an element
-// that previously had a regular one, so a stale inline `animation:`
-// (highest specificity) doesn't permanently block the .wd-inview class
-// rule from ever taking effect.
-const removeStyleProp = (html, prop) => {
-  if (!/style="([^"]*)"/.test(html)) return html;
-  return html.replace(/style="([^"]*)"/, (_, styles) => {
-    const kept = styles.split(";").map((s) => s.trim()).filter(Boolean).filter((p) => p.split(":")[0].trim() !== prop);
-    return `style="${kept.join("; ")}"`;
-  });
 };
 
 export default function Builder() {
