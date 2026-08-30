@@ -115,13 +115,37 @@ one panel:
   edited inconsistently — sometimes by `GenericBlockEditor`, sometimes not
   at all if another kind's editor claimed the block).
 - **Media/background region** — present if the block has an `<img>`, a
-  `<video>`, an inline `background-image`/`background: url(...)`, **or** is
-  a hero/parallax-shaped block with none of the above (the Phase 4b
-  regression case). For that last case, the editor offers "set a
-  background" and writes a **new inline** `style="background-image:
-  url(...)"` onto the block's outer element when the user picks one — inline
-  style wins over the class rule in the cascade, so this doesn't require
-  touching generated CSS.
+  `<video>`, an inline `background-image`/`background: url(...)`, a
+  `--block-bg-image` custom-property hook (below), **or** is a
+  hero/parallax-shaped block with none of the above (the Phase 4b
+  regression case).
+
+  **Override mechanism — CSS custom property, not raw inline replacement.**
+  Checked against the actual generated CSS: `parallax-hero-fullbleed`'s
+  background is compound —
+  `background-image: linear-gradient(rgba(10,15,20,.55),rgba(10,15,20,.55)),
+  url(...)`, a dark scrim layered over the photo specifically so white text
+  stays legible. A raw inline `style="background-image:url(...)"` override
+  would replace the whole value and silently delete the scrim. Instead, the
+  template migration (§1) adds a `--block-bg-image` custom property to any
+  generated background rule that has one, e.g.:
+
+  ```css
+  background-image: linear-gradient(rgba(10,15,20,.55),rgba(10,15,20,.55)),
+    var(--block-bg-image, url(<original-photo>));
+  ```
+
+  and the media editor writes only the variable inline —
+  `style="--block-bg-image:url(<new-photo>)"` — leaving every other layer
+  (scrim, gradients, `background-size`/`-position`/`-attachment`) untouched.
+  This matches the existing token-override convention already used elsewhere
+  in this codebase (`var(--fc-primary, #2563eb)` in the timeline editor's
+  generated markup) and in the user's own Avalon GEMS system
+  (`--gem-ruby-gradient` etc.) — inline styling stays data-only, never
+  design, which also keeps exported HTML clean. Blocks with a *simple*
+  (non-compound) background, or none at all, get the same
+  `--block-bg-image` hook added during migration so the editor never needs a
+  raw-replacement code path at all.
 - **Structured content region** — gallery image list, timeline entries,
   bento tiles, navbar items — same parsers/editors that exist today
   (`parseGalleryImages`/`parseTimelineEntries`/`parseBentoItems`/
@@ -151,9 +175,16 @@ container conventions; region detection above is independent of it).
 
 After template migration, re-run `phase4b-classify-blocks.mjs` to regenerate
 `blockStyles.generated.js` / `block_styles_generated.py`, same pipeline
-already exercised for the Phase 4b fix. No generator logic changes expected
-(new class strings only, not new selector shapes) — verify with the existing
-`test_block_styles_generated.py` / equivalent JS regression tests.
+already exercised for the Phase 4b fix. One generator logic change is
+required (revised from "no changes expected" after checking the actual
+output): any `background-image` declaration the generator extracts must be
+rewritten to wrap its `url(...)` term in `var(--block-bg-image,
+url(...))`, preserving any other layers (gradients, multiple backgrounds)
+around it unchanged — see §3's media-region override mechanism. Everything
+else is new class strings only, not new selector shapes — verify with the
+existing `test_block_styles_generated.py` / equivalent JS regression tests,
+plus a new case asserting the `var(--block-bg-image, ...)` wrapping on a
+compound-background fixture.
 
 ## Testing
 
