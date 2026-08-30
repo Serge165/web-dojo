@@ -171,20 +171,38 @@ just yields the default `"section"` shape, which never throws and never
 blocks any region editor from working (shape informs the heading-editor's
 container conventions; region detection above is independent of it).
 
-### 5. Backend CSS regeneration
+### 5. Backend CSS: `--block-bg-image` wrapping (revised)
 
-After template migration, re-run `phase4b-classify-blocks.mjs` to regenerate
-`blockStyles.generated.js` / `block_styles_generated.py`, same pipeline
-already exercised for the Phase 4b fix. One generator logic change is
-required (revised from "no changes expected" after checking the actual
-output): any `background-image` declaration the generator extracts must be
-rewritten to wrap its `url(...)` term in `var(--block-bg-image,
-url(...))`, preserving any other layers (gradients, multiple backgrounds)
-around it unchanged — see §3's media-region override mechanism. Everything
-else is new class strings only, not new selector shapes — verify with the
-existing `test_block_styles_generated.py` / equivalent JS regression tests,
-plus a new case asserting the `var(--block-bg-image, ...)` wrapping on a
-compound-background fixture.
+**Correction from the original draft:** `phase4b-classify-blocks.mjs`
+cannot be re-run. Its own generated output's header comment says so
+explicitly — it extracts CSS from *live inline `style="..."` attributes* in
+`blocks.js`/`blocksExtra.js`; those attributes are already gone (fully
+converted to classes by the Phase 4b migration that already shipped). A
+second run finds nothing to extract and **wipes the generated CSS to
+empty**. It is a one-shot migration tool, not a repeatable build step —
+confirmed directly from `backend/block_styles_generated.py`'s own header.
+
+Instead: a new, narrow, **idempotent** post-processing script
+(`scripts/wrap-block-bg-vars.mjs`) transforms the CSS text already sitting
+in `blockStyles.generated.js` and `block_styles_generated.py` directly —
+no re-derivation from source templates. For every `background-image:`
+declaration in that text, wrap each `url(...)` term not already inside a
+`var(--block-bg-image, ...)` call with one, leaving every other layer
+(gradients, `background-attachment`/`-size`/`-position`, multiple
+backgrounds) untouched. Idempotent means running it twice produces the same
+output as running it once (skip terms already wrapped) — unlike the
+original one-shot generator, this script is safe to re-run if new
+background-image blocks are added later.
+
+Both files hold the same CSS text (`blockStyles.generated.js` as JS
+template-literal/string exports, `block_styles_generated.py` as
+JSON-escaped Python string literals — JSON escaping only affects quotes
+and newlines, not the CSS syntax itself), so the same regex transform
+applies to both directly. Verify with the existing
+`test_block_styles_generated.py` / equivalent JS regression tests, plus a
+new case asserting the `var(--block-bg-image, ...)` wrapping on the
+`parallax-hero-fullbleed` fixture specifically (compound background: scrim
+gradient + photo).
 
 ## Testing
 
