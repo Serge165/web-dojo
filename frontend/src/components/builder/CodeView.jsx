@@ -32,7 +32,44 @@ const withRootId = (html, id) => {
   return doc.body.innerHTML;
 };
 
-const joinElementsHtml = (elements) => elements.map((e) => withRootId(e.html, e.id)).join("\n");
+// Both panes are generated from ONE stripInlineStyles pass over the
+// id-stamped elements, so the HTML tab always shows the same
+// block-<cat>-<slug>-<occ> classes the CSS tab (and the real export,
+// buildStandaloneHtml/buildMultiPageExport) assign for the same elements
+// — previously the HTML tab bypassed stripInlineStyles entirely and just
+// joined raw el.html, so it kept showing inline style="..." while the CSS
+// tab already showed classes for the same blocks. classMap (returned
+// alongside html/css) is what commitHtmlEdit below uses to reverse an
+// edited pane back to real inline styles before it's written to elements.
+const paneSource = (elements) => stripInlineStyles(elements.map((e) => ({ ...e, html: withRootId(e.html, e.id) })));
+
+// elements[].html is always the real storage format (inline style="...",
+// see stripInlineStyles.js's header comment) — the classed text the HTML
+// pane displays is a display/export-only view, never itself persisted.
+// So typing in the HTML pane (a content/structure edit) must not silently
+// convert an element's stored html to the classed form, or its style
+// values — and anything the CSS pane showed for them — would vanish the
+// instant nothing in the app re-extracts them (most visibly for elements
+// with no data-wd-cat/data-wd-block pair, i.e. legacy/imported markup,
+// where the classed text has NO base styling anywhere to fall back on).
+// For each synthetic class still present in the edited node that this
+// element's OWN classMap entry actually produced (not just a same-named
+// coincidence belonging to some other element), swap it back for the
+// original style="..." declaration at that occurrence, pulled from the
+// pre-edit html. A class the user genuinely typed (not in classMap for
+// this id) is left untouched.
+const reinlineEditedHtml = (elementId, oldHtml, newHtml, classMap) => {
+  const oldDecls = (oldHtml.match(/style="([^"]*)"/g) || []).map((s) => s.slice(7, -1));
+  return newHtml.replace(/class="([^"]*)"/g, (full, classAttr) => {
+    const cls = classAttr.split(/\s+/).find((c) => {
+      const hit = classMap.get(c);
+      return hit && hit.elementId === elementId;
+    });
+    if (!cls) return full;
+    const decl = oldDecls[classMap.get(cls).occurrence];
+    return decl === undefined ? full : `style="${decl}"`;
+  });
+};
 
 // Monaco-powered CodePen-style editor: four live-synced tabs (HTML, CSS,
 // JS, Head) on the left. Editing the HTML or CSS tab writes straight back
@@ -50,8 +87,8 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
   const [tab, setTab] = useState("css"); // html | css | js | head — CSS first: it's the generated globals.css-equivalent, the thing most worth seeing by default
   const [headLang, setHeadLang] = useState("html");
 
-  const [htmlText, setHtmlText] = useState(() => joinElementsHtml(elements));
-  const [cssText, setCssText] = useState(() => stripInlineStyles(elements).css);
+  const [htmlText, setHtmlText] = useState(() => paneSource(elements).html);
+  const [cssText, setCssText] = useState(() => paneSource(elements).css);
 
   // Tracks the last `elements` value THIS component itself produced, so
   // the sync effect below can tell "an external change happened elsewhere
@@ -72,8 +109,9 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
     // later fire and stomp this new external state with stale data.
     clearTimeout(htmlDebounceRef.current); htmlDebounceRef.current = null;
     clearTimeout(cssDebounceRef.current); cssDebounceRef.current = null;
-    setHtmlText(joinElementsHtml(elements));
-    setCssText(stripInlineStyles(elements).css);
+    const { html, css } = paneSource(elements);
+    setHtmlText(html);
+    setCssText(css);
   }, [elements]);
 
   useEffect(() => () => {
@@ -86,17 +124,32 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
     onElementsChange(next);
   };
 
+  // Reconciles an HTML-pane edit into elements, reversing any synthetic
+  // classes still present back to real inline styles first (reinlineEditedHtml)
+  // so a pure content/structure edit can't erase styling the HTML pane never
+  // actually lets you edit directly (that's the CSS pane's / Style tab's job).
+  // Reconciles against lastAppliedElementsRef.current (the latest committed
+  // base), not the `elements` prop closed over when the caller's callback was
+  // created — if the CSS pane committed a change while a debounce was
+  // pending, `elements` here would be stale and reconciling against it would
+  // silently discard that CSS commit.
+  const commitHtmlEdit = (value) => {
+    const base = lastAppliedElementsRef.current;
+    const { classMap } = stripInlineStyles(base);
+    const byId = new Map(base.map((e) => [e.id, e.html]));
+    const nodes = parseTopLevelNodes(value).map((node) => {
+      const oldHtml = node.id && byId.get(node.id);
+      return oldHtml ? { ...node, outerHTML: reinlineEditedHtml(node.id, oldHtml, node.outerHTML, classMap) } : node;
+    });
+    return reconcileElementsFromHtml(base, nodes, uidForNewBlocks);
+  };
+
   const onHtmlChange = (value) => {
     setHtmlText(value);
     clearTimeout(htmlDebounceRef.current);
     htmlDebounceRef.current = setTimeout(() => {
       htmlDebounceRef.current = null;
-      // Reconcile against lastAppliedElementsRef.current (the latest
-      // committed base), not the `elements` prop closed over when this
-      // callback was created — if the CSS pane committed a change while
-      // this timer was pending, `elements` here is stale and reconciling
-      // against it would silently discard that CSS commit.
-      commitElements(reconcileElementsFromHtml(lastAppliedElementsRef.current, parseTopLevelNodes(value), uidForNewBlocks));
+      commitElements(commitHtmlEdit(value));
     }, SYNC_DEBOUNCE_MS);
   };
 
@@ -115,7 +168,7 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
     if (htmlDebounceRef.current) {
       clearTimeout(htmlDebounceRef.current);
       htmlDebounceRef.current = null;
-      commitElements(reconcileElementsFromHtml(lastAppliedElementsRef.current, parseTopLevelNodes(htmlText), uidForNewBlocks));
+      commitElements(commitHtmlEdit(htmlText));
     }
     if (cssDebounceRef.current) {
       clearTimeout(cssDebounceRef.current);
