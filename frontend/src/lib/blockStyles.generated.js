@@ -11,6 +11,31 @@
 // NOT wired into the canvas or the exporter yet — that's a later phase.
 // This module is just the extracted CSS payload.
 //
+// Phase 5: universal base rule for the bare `.block` marker every block
+// root carries (see docs/PHASE_4a_HANDOFF.md "Picking up Phase 4b" #3).
+// Static, hand-authored here (not derived from block scanning) so it
+// survives a rerun of this script. Kept to the one declaration with real
+// evidence behind it — see docs/PHASE_4a_HANDOFF.md's Phase 5 report for
+// the investigation:
+//   - position: relative — Canvas.jsx wraps every canvas element in its
+//     own `position: relative` div, but the export path (exportHtml.js)
+//     drops block HTML straight into the page with no such wrapper. 12/117
+//     blocks have position:absolute descendants with no position set on
+//     their own root, relying on *something* upstream being positioned —
+//     in the canvas that's the Canvas.jsx wrapper; in an export it's
+//     nothing. Giving every `.block` its own containing block for
+//     position:absolute children fixes that gap and is a no-op wherever a
+//     block already sets its own position (the video/parallax blocks do).
+// box-sizing: border-box was considered (the task doc's own suggestion)
+// and rejected: several block roots pair max-width with padding assuming
+// today's browser-default content-box box model (e.g.
+// block-containers-basic-1: max-width:1120px + padding:32px) — forcing
+// border-box would shrink their content width by the padding amount, a
+// real visual regression, not a no-op.
+// :where() keeps this rule's specificity at 0 so it can never outrank a
+// per-block class regardless of source order (visual-regression-verified:
+// same outcome either way, but this is order-independent by construction).
+//
 // MANUAL EXCEPTION (Phase 4b collision blocks): nav-mega, hdr-dropdown,
 // pricing-toggle, faq-accordion, newsletter-signup, portfolio-filter,
 // contact-recaptcha each have an element with a pre-existing hand-authored
@@ -24,6 +49,8 @@
 // stripInlineStyles.js. If phase4b-classify-blocks.mjs is ever extended to
 // handle the merge case, these 7 blocks' CSS should move back under its
 // normal generated output and this note can go.
+
+export const BLOCK_BASE_CSS = `:where(.block) { position: relative; }`;
 
 export const BLOCK_STYLES_BY_CATEGORY = {
   "components": `/* cmp-gallery-grid */
@@ -1681,6 +1708,7 @@ export const BLOCK_STYLES_MEDIA_CSS = `@media (max-width: 1024px) { .block-compo
 @media (max-width: 767px) { .block-zenero-esports-roster-live-4 { grid-template-columns: 1fr !important; } }`;
 
 export const BLOCK_STYLES_CSS = [
+  BLOCK_BASE_CSS,
   ...Object.values(BLOCK_STYLES_BY_CATEGORY),
   BLOCK_STYLES_MEDIA_CSS,
 ].filter(Boolean).join("\n\n");
