@@ -143,6 +143,20 @@ export const detectBlockKind = (html) => {
   return null;
 };
 
+// --- structural shape detection (independent of kind) ----------------
+
+// Purely structural — reads canonical markers added by
+// migrate-block-regions.mjs. Absence of markers is not an error: it just
+// means the block predates the migration or has no structured content, and
+// "section" is a safe default (region detection in detectRegions() below
+// works independently of shape).
+export const detectBlockShape = (html) => {
+  if (!html) return "section";
+  if (/^\s*<nav\b/i.test(html)) return "nav";
+  if (/class="[^"]*\bcontainer block\b[^"]*"/i.test(html)) return "container";
+  return "section";
+};
+
 // ============================================================
 // IMAGE (single photo — hero/header backgrounds, <img> heroes)
 // ============================================================

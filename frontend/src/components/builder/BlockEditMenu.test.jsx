@@ -24,6 +24,7 @@ import {
   setVideoBlockPoster,
   parseEditableNodes,
   setEditableNode,
+  detectBlockShape,
 } from "./BlockEditMenu";
 import { themes, applyTheme, getSavedThemeName } from "@/themes";
 
@@ -433,5 +434,25 @@ describe("generic editable-node helpers", () => {
 
   test("parseEditableNodes returns [] for empty input", () => {
     expect(parseEditableNodes("")).toEqual([]);
+  });
+});
+
+describe("detectBlockShape", () => {
+  it("detects nav shape", () => {
+    expect(detectBlockShape('<nav class="block nav-simple-1"><a href="#">Home</a></nav>')).toBe("nav");
+  });
+
+  it("detects container shape from the content marker", () => {
+    const html = '<section class="block"><div class="block"><h2>Gallery</h2><div class="container block gallery-grid 1"><img src="a.jpg"/></div></div></section>';
+    expect(detectBlockShape(html)).toBe("container");
+  });
+
+  it("defaults to section shape when no markers are present", () => {
+    expect(detectBlockShape('<section class="block hero-1"><h1>Hi</h1></section>')).toBe("section");
+  });
+
+  it("returns section shape for empty/null input rather than throwing", () => {
+    expect(detectBlockShape("")).toBe("section");
+    expect(detectBlockShape(null)).toBe("section");
   });
 });
