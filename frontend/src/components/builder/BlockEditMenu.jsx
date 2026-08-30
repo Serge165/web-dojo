@@ -227,6 +227,29 @@ export const setImageBlockSrc = (html, src) => {
   return html.replace(/url\((['"]?)[^'")]*\1\)/i, () => `url(${escAttrLocal(src)})`);
 };
 
+// Writes a per-instance background-image override as a --block-bg-image
+// inline custom property on the block's OUTER element — inline always wins
+// over the class rule's var(--block-bg-image, <default>) fallback (see
+// wrap-block-bg-vars.mjs / Task 1-2), so this never needs to touch
+// generated CSS, and never clobbers other layers (gradients etc.) the
+// class rule already composes around the variable.
+export const setBlockBgImage = (html, src) => {
+  const outerOpen = (html.match(/^\s*<[a-z][a-z0-9]*\b[^>]*>/i) || [])[0];
+  if (!outerOpen) return html;
+  const varDecl = `--block-bg-image:url(${escAttrLocal(src)})`;
+  let newOpen;
+  if (/\bstyle="/i.test(outerOpen)) {
+    newOpen = outerOpen.replace(/style="([^"]*)"/i, (_m, existing) => {
+      const withoutOldVar = existing.replace(/--block-bg-image:[^;"]*;?\s*/i, "").trim();
+      const joined = withoutOldVar ? `${withoutOldVar};${varDecl}` : varDecl;
+      return `style="${joined}"`;
+    });
+  } else {
+    newOpen = outerOpen.replace(/>$/, ` style="${varDecl}">`);
+  }
+  return html.slice(0, html.indexOf(outerOpen)) + newOpen + html.slice(html.indexOf(outerOpen) + outerOpen.length);
+};
+
 // ============================================================
 // VIDEO (video-hero / video-bg blocks — a <video><source>… tag)
 // ============================================================
@@ -964,6 +987,59 @@ const ImageBlockEditor = ({ html, onChange, projectId = null, blockId = null }) 
           data-testid="image-url-input"
         />
         <Btn onClick={() => { if (urlDraft.trim()) { commit(urlDraft.trim()); setUrlDraft(""); } }} title="Use URL" testId="image-url-apply">Set</Btn>
+      </div>
+    </div>
+  );
+};
+
+const BackgroundBlockEditor = ({ html, onChange, projectId = null, blockId = null }) => {
+  const fileRef = useRef(null);
+  const [urlDraft, setUrlDraft] = useState("");
+  const current = (html.match(/--block-bg-image:url\(([^)]*)\)/i) || [])[1] || "";
+
+  const commit = (src) => onChange(setBlockBgImage(html, src));
+
+  const onUpload = async (e) => {
+    const file = (e.target.files || [])[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!projectId) {
+      commit(await readAsDataURL(file));
+      return;
+    }
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const API = process.env.REACT_APP_BACKEND_URL || "";
+      const res = await fetch(`${API}/api/projects/${projectId}/assets/upload?asset_type=image&asset_id=${encodeURIComponent(blockId || "1")}`, { method: "POST", body: fd });
+      if (!res.ok) throw new Error(`upload failed (${res.status})`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.detail || "upload failed");
+      commit(data.url);
+    } catch {
+      commit(await readAsDataURL(file));
+    }
+  };
+
+  return (
+    <div className="space-y-2" data-testid="block-edit-background">
+      <div className="flex items-center gap-2">
+        {current ? <img src={current} alt="" className="w-12 h-12 object-cover rounded flex-none border border-[#332D22]" /> : <div className="w-12 h-12 rounded flex-none border border-[#332D22] bg-[#242019]" />}
+        <div className="flex-1 flex gap-1">
+          <Btn onClick={() => fileRef.current?.click()} title="Upload background image" testId="bg-upload-btn"><Upload size={11} /> Upload</Btn>
+          <input ref={fileRef} type="file" accept="image/*" hidden onChange={onUpload} data-testid="bg-upload-input" />
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <input
+          value={urlDraft}
+          onChange={(e) => setUrlDraft(e.target.value)}
+          placeholder="Paste a background image URL"
+          aria-label="Background image URL"
+          className={inputCls}
+          data-testid="bg-url-input"
+        />
+        <Btn onClick={() => { if (urlDraft.trim()) { commit(urlDraft.trim()); setUrlDraft(""); } }} title="Use URL" testId="bg-url-apply">Set</Btn>
       </div>
     </div>
   );

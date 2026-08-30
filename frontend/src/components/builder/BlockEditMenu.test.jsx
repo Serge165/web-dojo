@@ -26,6 +26,7 @@ import {
   setEditableNode,
   detectBlockShape,
   detectRegions,
+  setBlockBgImage,
 } from "./BlockEditMenu";
 import { themes, applyTheme, getSavedThemeName } from "@/themes";
 
@@ -493,5 +494,27 @@ describe("detectRegions", () => {
     const html = '<section class="block"><div class="block"><h2 class="block">Gallery</h2><div class="block" style="display:grid"><img src="a.jpg"/><img src="b.jpg"/><img src="c.jpg"/></div></div></section>';
     const regions = detectRegions(html);
     expect(regions.content).toBe("gallery");
+  });
+});
+
+describe("setBlockBgImage", () => {
+  it("adds a new --block-bg-image inline style to a block with no existing background", () => {
+    const html = '<section class="block block-parallax-hero-fullbleed-1"><h1 class="block">Hi</h1></section>';
+    const out = setBlockBgImage(html, "https://x.test/new.jpg");
+    expect(out).toMatch(/<section class="block block-parallax-hero-fullbleed-1" style="--block-bg-image:url\(https:\/\/x\.test\/new\.jpg\)">/);
+  });
+
+  it("updates an existing --block-bg-image inline style in place", () => {
+    const html = '<section class="block" style="--block-bg-image:url(old.jpg)"><h1 class="block">Hi</h1></section>';
+    const out = setBlockBgImage(html, "new.jpg");
+    expect(out).toContain('style="--block-bg-image:url(new.jpg)"');
+    expect(out).not.toContain("old.jpg");
+  });
+
+  it("preserves other existing inline styles on the same element", () => {
+    const html = '<section class="block" style="min-height:100vh"><h1 class="block">Hi</h1></section>';
+    const out = setBlockBgImage(html, "new.jpg");
+    expect(out).toContain("min-height:100vh");
+    expect(out).toContain("--block-bg-image:url(new.jpg)");
   });
 });
