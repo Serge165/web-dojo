@@ -128,9 +128,9 @@ export const LeftSidebar = ({
 
   return (
     <aside className="w-64 flex-none border-r border-[#332D22] bg-[#1C1A15] flex flex-col overflow-hidden" data-testid="left-sidebar">
-      {/* Phase 5 (Issue #6) polish: bigger, clearly separated tabs with an
-          active accent underline instead of the cramped 10px flat bar. */}
-      <div className="grid grid-cols-8 border-b border-[#332D22] divide-x divide-[#332D22] text-[11px] tracking-tight">
+      {/* 8 tabs in a 256px sidebar don't fit on one row at any readable font
+          size (32px/tab) — wrap to 2 rows of 4 so each tab gets 64px. */}
+      <div className="grid grid-cols-4 border-b border-[#332D22] divide-x divide-y divide-[#332D22] text-[11px] tracking-tight">
         {[
           { id: "edit", label: "Edit" },
           { id: "library", label: "Library" },
