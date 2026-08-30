@@ -92,12 +92,46 @@ from the immutable block id. See docs/PHASE_4_BLOCK_AUDIT.md.
 
 ## Picking up Phase 4b (Path A)
 
-1. Rewrite block templates in `blocks.js`/`blocksExtra.js`/`pageLayouts.js` to emit
-   `class="block block-<catId>-<slug>"` instead of inline styles. The class bodies are
-   already determined by this phase's audit doc — port each block's current inline
-   declarations into the generated globals.css section.
-2. Rework `BlockEditMenu.jsx` to edit tokens/CSS vars (writes via `upsertRootVar`, which
-   already exists) instead of mutating inline styles.
+> **Status: done**, as of the Phase 4b commits on `pre-tauri-fixes` following this
+> handoff. Notes below reflect what was actually found/built, correcting two things
+> this doc got wrong going in — kept so a future reader doesn't have to
+> re-derive them the way three separate implementation passes each did.
+
+1. Rewrite block templates in `blocks.js`/`blocksExtra.js` to emit
+   `class="block block-<catId>-<slug>-<occ>"` (+ shared unprefixed marker) instead of
+   inline styles, reusing `stripInlineStyles.js`'s existing extraction verbatim via a
+   codegen script (`frontend/scripts/phase4b-classify-blocks.mjs`) rather than hand
+   transcription. Done for all 117 blocks (**not 91** — see count correction below).
+   `pageLayouts.js` turned out to be explicitly OUT of scope per
+   `docs/PHASE_4_BLOCK_AUDIT.md` §6 (its 44 page layouts are one-off compositions, not
+   reusable blocks) — this doc's task list was wrong to list it here; it was not touched.
+   Extracted CSS lives in `frontend/src/lib/blockStyles.generated.js`, wired into the
+   live canvas (`Canvas.jsx`) and the exporter (`exportHtml.js`).
+2. **This doc's "Rework `BlockEditMenu.jsx`" framing was wrong.** `BlockEditMenu.jsx`
+   handles structural content editing (nav items, timeline entries, gallery images) and
+   was never involved in style/token editing. The actual per-element background/color
+   token mechanism — already correctly built on `upsertRootVar`, as this doc predicted
+   — lives in `frontend/src/pages/Builder.jsx` (`applyBackground`/`applyColor`/
+   `patchStyle`) and the Style-tab panels it feeds (`StyleInspector.jsx`,
+   `BackgroundMediaPanel.jsx`, `BlendPanel.jsx`, `ShapePanel.jsx`, via `RightSidebar.jsx`).
+   Task 1's conversion broke its targeting (a whole-string "first `style=`" scan that
+   used to land on a block's root by accident of ordering, now sometimes matching a
+   descendant or a literal `style="` inside a widget `<script>` payload). Fixed by
+   anchoring the patch on the root tag specifically, extracted into
+   `frontend/src/lib/patchRootStyle.js`.
 3. Extend `.block` universal base class rules (the marker classes are already emitted).
-4. Add visual regression coverage (Playwright screenshots pre/post refactor) before
-   deleting the inline-style generation logic.
+4. Visual regression coverage added: `frontend/src/__tests__/visual-regression/`
+   (Playwright, `npm run test:visual`), one baseline per block, all 117.
+   `stripInlineStyles.js`'s fallback (tag+counter, `.section-N`) logic was **not**
+   deleted — it's still load-bearing for `pageLayouts.js` and any user-authored/
+   imported markup, and for CSS added to a block live after insertion (Task 2's fix
+   still routes through it). "Legacy" turned out to mean "still in active use", not
+   dead code.
+
+**Block/category count correction:** this doc and `docs/PHASE_4_BLOCK_AUDIT.md` both
+say **26 categories / 91 blocks**. The real count is **28 categories / 117 blocks** —
+the audit undercounted `retro` (21 blocks, not enumerated) and missed the `oxygene`
+category entirely (5 blocks, which already shipped hand-authored `block-oxygene-*`
+classes with no inline styles — nothing to convert). Don't trust the audit's §2/§7
+tables' totals; `frontend/src/lib/blockClassName.js`'s `BLOCK_PREFIX_BY_CAT` and the
+real `CATEGORIES` export are the source of truth going forward.

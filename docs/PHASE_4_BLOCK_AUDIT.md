@@ -1,3 +1,10 @@
+> **Count correction (post-Phase-4b):** this doc's "26 categories / 91 blocks" totals
+> below are stale. The real count is **28 categories / 117 blocks** — this audit
+> undercounted `retro` (21 blocks) and missed the `oxygene` category entirely (5 blocks,
+> already hand-classed, no inline styles). The naming SCHEME in §3 is still correct and
+> was adopted as-is; only the inventory totals/tables are incomplete. See
+> `docs/PHASE_4a_HANDOFF.md`'s "Picking up Phase 4b" section for what actually shipped.
+
 # Phase 4 — Block Menu Audit & CSS-Class Map
 
 > **For:** Reviewer / Phase 4a implementer (DeepSeek V3-Flash handoff #3).
