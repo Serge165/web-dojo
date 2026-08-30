@@ -157,6 +157,57 @@ export const detectBlockShape = (html) => {
   return "section";
 };
 
+// --- composable region detection ---------------------------------------
+//
+// Replaces detectBlockKind's exclusive one-kind-wins dispatch. A block can
+// have any combination of these regions; BlockEditMenu (Task 8) renders one
+// editor slice per region present, instead of picking exactly one. This is
+// what fixes the two confirmed regressions: parallax-hero-fullbleed (no img
+// at all, but IS a hero — media region must still offer to set a
+// background) and video-hero (has both video AND heading/CTA text, both
+// must be editable at once).
+
+const HERO_SHAPE_RE = /<section\b[^>]*>[\s\S]*<h1\b/i; // same heuristic detectBlockKind used for "hero"
+
+export const detectHeadingRegion = (html) => {
+  if (!html) return false;
+  if (/^\s*<nav\b/i.test(html) || /\bfooter\b/i.test((html.match(/^\s*<[a-z]+[^>]*class="([^"]*)"/i) || [])[1] || "")) return false;
+  return /\bblock-heading\b/.test(html) || /<h1\b/i.test(html) || /<h2\b/i.test(html);
+};
+
+export const detectMediaRegion = (html) => {
+  if (!html) return null;
+  if (/<video\b/i.test(html)) return "video";
+  const imgCount = (html.match(/<img\b/gi) || []).length;
+  // A gallery's images belong to the content region, not a single media
+  // region — only treat a lone image (imgCount <= 2, below the gallery
+  // threshold) as a media region.
+  if (imgCount >= 1 && imgCount <= 2) return "image";
+  if (/background(?:-image)?:\s*[^;"]*(?:url\(|var\(--block-bg-image)/i.test(html)) return "bg";
+  if (imgCount === 0 && HERO_SHAPE_RE.test(html)) return "bg-empty"; // parallax-hero-fullbleed case
+  return null;
+};
+
+export const detectContentRegion = (html) => {
+  if (!html) return null;
+  if (/^\s*<nav\b/i.test(html)) return "navbar";
+  if (/data-forge-portfolio-timeline/i.test(html)) return "timeline";
+  if (/<ol\b[\s\S]*<li[\s>]/i.test(html) && (/\bcontainer block\b/.test(html) || /(border-left:\s*2px|position:absolute;left:-\d+px)/i.test(html))) return "timeline";
+  if (/data-forge-widget=["']gallery["']/i.test(html)) return "gallery";
+  const imgCount = (html.match(/<img\b/gi) || []).length;
+  if (imgCount >= 3) return "gallery";
+  if (/\bcontainer block\b/.test(html) && /<h3[\s>]/i.test(html) && (html.match(/<h3\b/gi) || []).length >= 3) return "bento";
+  if (/display:\s*grid/i.test(html) && /<h3[\s>]/i.test(html)) return "bento";
+  return null;
+};
+
+export const detectRegions = (html) => ({
+  heading: detectHeadingRegion(html),
+  media: detectMediaRegion(html),
+  content: detectContentRegion(html),
+  generic: true, // the generic text-node editor is always offered as a catch-all for whatever the above didn't claim; Task 8 filters out nodes already owned by another region's editor
+});
+
 // ============================================================
 // IMAGE (single photo — hero/header backgrounds, <img> heroes)
 // ============================================================

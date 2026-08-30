@@ -25,6 +25,7 @@ import {
   parseEditableNodes,
   setEditableNode,
   detectBlockShape,
+  detectRegions,
 } from "./BlockEditMenu";
 import { themes, applyTheme, getSavedThemeName } from "@/themes";
 
@@ -454,5 +455,43 @@ describe("detectBlockShape", () => {
   it("returns section shape for empty/null input rather than throwing", () => {
     expect(detectBlockShape("")).toBe("section");
     expect(detectBlockShape(null)).toBe("section");
+  });
+});
+
+describe("detectRegions", () => {
+  it("parallax-hero-fullbleed: no img/video, but is a hero-shaped block — media region is bg-empty (editable, just unset)", () => {
+    const html = '<section class="block block-parallax-hero-fullbleed-1 block-parallax-hero-fullbleed"><div class="block"><h1 class="block block-heading">Where ambition meets altitude.</h1><p class="block">Sub</p><button class="block">Explore</button></div></section>';
+    const regions = detectRegions(html);
+    expect(regions.heading).toBe(true);
+    expect(regions.media).toBe("bg-empty");
+    expect(regions.generic).toBe(true);
+  });
+
+  it("video-hero: has both a video region AND a heading/generic region (the confirmed regression)", () => {
+    const html = '<section class="block block-video-hero-1"><video class="block" poster="p.jpg"><source src="v.mp4" type="video/mp4"/></video><div class="block"><h1 class="block block-heading">Motion tells your story</h1><p class="block">Sub</p><a class="block" href="#">Watch</a></div></section>';
+    const regions = detectRegions(html);
+    expect(regions.media).toBe("video");
+    expect(regions.heading).toBe(true);
+    expect(regions.generic).toBe(true);
+  });
+
+  it("gallery block: content region is gallery, no heading claims the image grid", () => {
+    const html = '<section class="block"><div class="block"><h2 class="block block-heading">Gallery</h2><div class="container block cmp-gallery-grid"><img src="a.jpg"/><img src="b.jpg"/><img src="c.jpg"/></div></div></section>';
+    const regions = detectRegions(html);
+    expect(regions.content).toBe("gallery");
+    expect(regions.heading).toBe(true);
+  });
+
+  it("navbar: no heading region (navs are excluded per spec)", () => {
+    const html = '<nav class="block nav-simple-1"><a href="#">Home</a></nav>';
+    const regions = detectRegions(html);
+    expect(regions.heading).toBe(false);
+    expect(regions.content).toBe("navbar");
+  });
+
+  it("legacy block with no migration markers still detects gallery via content heuristics", () => {
+    const html = '<section class="block"><div class="block"><h2 class="block">Gallery</h2><div class="block" style="display:grid"><img src="a.jpg"/><img src="b.jpg"/><img src="c.jpg"/></div></div></section>';
+    const regions = detectRegions(html);
+    expect(regions.content).toBe("gallery");
   });
 });
