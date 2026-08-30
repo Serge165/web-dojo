@@ -122,14 +122,27 @@ body {
 - The unprefixed marker class (e.g. `.block-heroes-centered`) has NO CSS rule — it's
   an override hook for Avalon GEMS themes
 
-**Category section labels** match the block library categories:
-`Blocks: Toolbox`, `Blocks: Navbars`, `Blocks: Headers`, `Blocks: Heroes`,
-`Blocks: Sections`, `Blocks: Containers`, `Blocks: Text`, `Blocks: Layout`,
-`Blocks: Footers`, `Blocks: Video`, `Blocks: Pricing`, `Blocks: Team`,
-`Blocks: FAQ`, `Blocks: Newsletter`, `Blocks: Portfolio`, `Blocks: Services`,
-`Blocks: Contact`, `Blocks: Testimonials`, `Blocks: Esports`, `Blocks: Creator`,
-`Blocks: Retro`, `Blocks: Parallax`, `Blocks: Social`, `Blocks: Comments`,
-`Blocks: Components`, `Blocks: Timelines`, `Blocks: Zenero`
+**Category section labels are the real `CATEGORIES[i].label` values** (from
+`frontend/src/lib/blocks.js`/`blocksExtra.js`, mirrored in `backend/server.py`'s
+`_BLOCK_CATEGORY_LABELS`) — NOT a fixed hand-typed list. The list below (28 categories,
+current as of the Phase 4b backend-parity fix) is a snapshot for reference; if a category's
+`label` field ever changes, the exported section name changes with it automatically, no code
+change needed anywhere else:
+
+`Blocks: Components`, `Blocks: Timelines`, `Blocks: Navbars`, `Blocks: Headers`,
+`Blocks: Footers`, `Blocks: Video BG`, `Blocks: Heroes`, `Blocks: Sections`,
+`Blocks: Containers`, `Blocks: Text`, `Blocks: Toolbox`, `Blocks: Pricing`,
+`Blocks: Team`, `Blocks: FAQ`, `Blocks: Newsletter`, `Blocks: Portfolio`,
+`Blocks: Layout`, `Blocks: Services`, `Blocks: Contact`, `Blocks: Testimonials`,
+`Blocks: Esports`, `Blocks: Creator`, `Blocks: Moldy Oldies` (category id `retro`),
+`Blocks: Parallax`, `Blocks: Social`, `Blocks: Comments`, `Blocks: Zenero Content`
+(category id `zenero`), `Blocks: Oxygene`
+
+Three of these read differently from their category `id` — `video`→"Video BG",
+`retro`→"Moldy Oldies", `zenero`→"Zenero Content" — that's intentional, matching what
+the Library sidebar shows the user, not a typo. An earlier version of this doc listed
+`Blocks: Video`/`Blocks: Retro`/`Blocks: Zenero` (the id, title-cased) and omitted
+`Oxygene` entirely — both wrong; corrected 2026-08-30.
 
 ---
 
