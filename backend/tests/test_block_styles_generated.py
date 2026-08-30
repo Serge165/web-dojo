@@ -68,6 +68,14 @@ class TestBundlePathShipsStaticBlockCssPerCategory:
         assert first_rule in files["globals.css"]
 
 
+class TestBackgroundImageVarWrapping:
+    def test_parallax_hero_fullbleed_background_uses_block_bg_image_var(self):
+        css = BLOCK_STYLES_BY_CATEGORY["parallax"]
+        assert "var(--block-bg-image, url(" in css
+        # the scrim gradient layer must still be present alongside the var
+        assert "linear-gradient(rgba(10,15,20,.55),rgba(10,15,20,.55))" in css
+
+
 def demo():
     """Runnable self-check (also exercised by pytest above)."""
     html = server._project_to_html(_doc())
