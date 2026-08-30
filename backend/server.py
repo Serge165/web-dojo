@@ -32,6 +32,14 @@ import base64
 import smtplib
 from email.message import EmailMessage
 import html
+# Phase 4b parity: static per-block CSS for the 117 author-time-classed
+# library blocks (Python mirror of frontend/src/lib/blockStyles.generated.js
+# — see block_styles_generated.py's header for how it's kept in sync).
+from block_styles_generated import (
+    BLOCK_STYLES_BY_CATEGORY,
+    BLOCK_STYLES_MEDIA_CSS,
+    BLOCK_STYLES_CSS,
+)
 
 
 ROOT_DIR = Path(__file__).parent
@@ -1143,7 +1151,14 @@ def _project_to_html(doc: dict, page: Optional[dict] = None) -> str:
     forge = _extract_forge_css(head_extra)
     head_extra = forge["remaining_head"]
     theme_css = "\n".join(
-        blk for blk in [*forge["theme_vars"], *forge["base"], component_css,
+        blk for blk in [*forge["theme_vars"], *forge["base"],
+                        # Static per-block CSS for the 117 author-time-classed
+                        # blocks, placed before `component_css` so anything
+                        # _strip_inline_styles still extracts live (the few
+                        # unconverted blocks, or one re-styled after insertion)
+                        # cascades on top rather than getting shadowed by the
+                        # base rule — same ordering exportHtml.js uses.
+                        BLOCK_STYLES_CSS, component_css,
                         *forge["imported_css"], *forge["animations"],
                         *forge["media_queries"],
                         *[r for r in strip_media.split("\n") if r]] if blk
@@ -1503,6 +1518,73 @@ _BLOCK_PREFIX_BY_CAT = {
     "zenero": "",
 }
 
+# Category id -> display label, in the real block-library CATEGORIES order
+# (frontend/src/lib/blocks.js's CATEGORIES + blocksExtra.js's
+# EXTRA_CATEGORIES, merged) — used only for the globals.css "Blocks:
+# <Label>" section headers/ordering (_build_organized_stylesheet /
+# _build_multi_page_bundle), not for class naming. docs/PHASE_4a_HANDOFF.md
+# "Picking up Phase 4b" notes the real count is 28 categories (this audit
+# undercounted retro and missed oxygene) — CATEGORIES is the source of
+# truth, not docs/GLOBALS_CSS_SPEC.md §3's older label list.
+_BLOCK_CATEGORY_LABELS = {
+    "components": "Components",
+    "timelines": "Timelines",
+    "navbars": "Navbars",
+    "heroes": "Heroes",
+    "sections": "Sections",
+    "containers": "Containers",
+    "text": "Text",
+    "toolbox": "Toolbox",
+    "headers": "Headers",
+    "footers": "Footers",
+    "video": "Video BG",
+    "pricing": "Pricing",
+    "team": "Team",
+    "faq": "FAQ",
+    "newsletter": "Newsletter",
+    "portfolio": "Portfolio",
+    "layout": "Layout",
+    "services": "Services",
+    "contact": "Contact",
+    "testimonials": "Testimonials",
+    "esports": "Esports",
+    "creator": "Creator",
+    "retro": "Moldy Oldies",
+    "parallax": "Parallax",
+    "social": "Social",
+    "comments": "Comments",
+    "zenero": "Zenero Content",
+    "oxygene": "Oxygene",
+}
+
+# Extracts the category id out of a semantic-path CSS selector produced by
+# _strip_inline_styles (".<prefix>block-<catId>-<slug>-<occ> { ... }") for
+# _build_multi_page_bundle's per-category "Blocks:" bucketing — a post-hoc
+# pass over the already-produced CSS text, not a change to the extraction/
+# naming algorithm itself (which is untouched).
+_CSS_RULE_CAT_RE = re.compile(r'\bblock-([a-z0-9]+)-')
+
+
+def _bucket_css_by_category(component_css: str) -> dict:
+    """Buckets already-extracted component CSS rules (one per line, as
+    _strip_inline_styles emits them) by the block category their selector
+    encodes. Rules with no block-<catId>- segment in their selector (the
+    tag+counter fallback path — user-authored/imported markup) land under
+    "__generic__". Mirrors what frontend/src/lib/stripInlineStyles.js's
+    componentCssByCat computes inline during extraction; done here as a
+    separate pass instead so _strip_inline_styles's own logic stays
+    untouched."""
+    buckets: dict = {}
+    for line in component_css.split("\n"):
+        if not line.strip():
+            continue
+        selector = line.split("{", 1)[0]
+        m = _CSS_RULE_CAT_RE.search(selector)
+        cat_id = m.group(1) if m else "__generic__"
+        buckets.setdefault(cat_id, []).append(line)
+    return {k: "\n".join(v) for k, v in buckets.items()}
+
+
 _BLOCK_CAT_RE = re.compile(r'data-wd-cat="([^"]*)"')
 _BLOCK_ID_RE = re.compile(r'data-wd-block="([^"]*)"')
 
@@ -1753,17 +1835,23 @@ def _dedupe(items: list) -> list:
     return seen
 
 
-def _build_organized_stylesheet(theme_vars, base, component_css, animations, media_queries) -> str:
+def _build_organized_stylesheet(theme_vars, base, component_buckets, generic_component_css, animations, media_queries) -> str:
     """Assembles one clearly labeled globals.css. Section order: Theme
-    Variables, Base, Components, Animations, Media Queries — matches the
-    order a page actually applies them in. Mirrors frontend/src/lib/
-    exportHtml.js's buildOrganizedStylesheet — keep both in sync."""
+    Variables, Base, Blocks: <Category> (one per bucket in
+    component_buckets), Components (generic_component_css — imported/
+    unbucketed CSS), Animations, Media Queries — matches
+    docs/GLOBALS_CSS_SPEC.md §3 and frontend/src/lib/exportHtml.js's
+    buildOrganizedStylesheet/buildComponentSections. `component_buckets` is
+    a list of (label, css) pairs, already in category order. Keep both in
+    sync."""
+    component_sections = [(f"Blocks: {label}", css) for label, css in (component_buckets or [])]
+    component_sections.append(("Components", generic_component_css or ""))
     sections = [
         ("Theme Variables", _merge_root_blocks(theme_vars)),
         ("Base", "\n".join(_dedupe(base))),
-        ("Components", component_css or ""),
+        *component_sections,
         ("Animations", "\n\n".join(_dedupe(animations))),
-        ("Media Queries", "\n".join([RESPONSIVE_CSS_BODY, *_dedupe(media_queries)])),
+        ("Media Queries", "\n".join([RESPONSIVE_CSS_BODY, BLOCK_STYLES_MEDIA_CSS, *_dedupe(media_queries)])),
         # A11y: users with a reduced-motion OS preference get a static site.
         ("Reduced Motion",
          "@media (prefers-reduced-motion: reduce) {\n"
@@ -1795,7 +1883,8 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
 
     files = {}
     used = set()
-    component_css_parts = []
+    all_component_by_cat: dict = {}  # catId -> [css chunk, ...], across pages
+    generic_css_parts = []           # imported styles + unbucketed fallback rules
     all_theme_vars, all_base, all_animations, all_media_queries = [], [], [], []
     all_js_files: dict = {}
 
@@ -1847,8 +1936,17 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
             "</body>\n</html>"
         )
         files[filename] = html
-        component_css_parts.append(component_css)
-        component_css_parts.extend(forge["imported_css"])
+        # Bucket this page's per-category component CSS for the labeled
+        # "Blocks:" globals.css sections; imported styles + the tag+counter
+        # fallback rules flatten into the generic tail "Components" bucket.
+        for cat_id, css in _bucket_css_by_category(component_css).items():
+            if not css:
+                continue
+            if cat_id == "__generic__":
+                generic_css_parts.append(css)
+            else:
+                all_component_by_cat.setdefault(cat_id, []).append(css)
+        generic_css_parts.extend(forge["imported_css"])
         all_theme_vars.extend(forge["theme_vars"])
         all_base.extend(forge["base"])
         all_animations.extend(forge["animations"])
@@ -1857,9 +1955,22 @@ def _build_multi_page_bundle(doc: dict, css_filename: str = "globals.css") -> di
     # One shared rule paints every page's canvas from its [data-wd-page]
     # variable (Phase 5, Issue #7 — replaces the per-page <style> tags).
     all_base.append("body { margin: 0; background: var(--wd-canvas-bg, #ffffff); }")
+    # Assemble labeled "Blocks: <Category>" sections in CATEGORIES order.
+    # Each bucket's static generated CSS (blockStyles.generated.js's Python
+    # mirror) comes first, with any export-time-extracted rules for that
+    # category appended after it, so a live edit cascades on top of the
+    # author-time default instead of being shadowed by it.
+    component_buckets = []
+    for cat_id, label in _BLOCK_CATEGORY_LABELS.items():
+        generated = BLOCK_STYLES_BY_CATEGORY.get(cat_id, "")
+        extracted = "\n".join(c for c in all_component_by_cat.get(cat_id, []) if c)
+        css = "\n".join(p for p in [generated, extracted] if p)
+        if css:
+            component_buckets.append((label, css))
+    generic_css = "\n".join(p for p in generic_css_parts if p)
     files[css_filename] = _build_organized_stylesheet(
         all_theme_vars, all_base,
-        "\n".join(p for p in component_css_parts if p),
+        component_buckets, generic_css,
         all_animations, all_media_queries,
     )
     for name, code in all_js_files.items():
