@@ -241,7 +241,7 @@ export const setBlockBgImage = (html, src) => {
   if (/\bstyle="/i.test(outerOpen)) {
     newOpen = outerOpen.replace(/style="([^"]*)"/i, (_m, existing) => {
       const withoutOldVar = existing.replace(/--block-bg-image:[^;"]*;?\s*/i, "").trim();
-      const joined = withoutOldVar ? `${withoutOldVar};${varDecl}` : varDecl;
+      const joined = (withoutOldVar ? `${withoutOldVar};${varDecl}` : varDecl).replace(/;{2,}/g, ";");
       return `style="${joined}"`;
     });
   } else {

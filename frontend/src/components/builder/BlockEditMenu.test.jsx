@@ -517,4 +517,12 @@ describe("setBlockBgImage", () => {
     expect(out).toContain("min-height:100vh");
     expect(out).toContain("--block-bg-image:url(new.jpg)");
   });
+
+  it("does not accumulate semicolons across repeated edits of the same block", () => {
+    const html = '<section class="block" style="min-height:100vh"><h1 class="block">Hi</h1></section>';
+    const once = setBlockBgImage(html, "new.jpg");
+    const twice = setBlockBgImage(once, "newer.jpg");
+    expect(twice).toContain('style="min-height:100vh;--block-bg-image:url(newer.jpg)"');
+    expect(twice).not.toMatch(/;;/);
+  });
 });
