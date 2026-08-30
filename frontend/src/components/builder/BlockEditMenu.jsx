@@ -1302,26 +1302,45 @@ const GenericBlockEditor = ({ html, onChange, projectId = null, blockId = null }
 };
 
 // ============================================================
-// Root — renders the right editor for the selected block kind.
+// Root — renders one editor slice per region present on the block,
+// instead of picking exactly one kind. See detectRegions() above.
 // ============================================================
 
-const KIND_LABELS = { gallery: "Gallery", navbar: "Navbar", timeline: "Timeline", bento: "Bento Box", image: "Image", video: "Video", hero: "Hero", cta: "Call to Action", card: "Cards" };
-const GENERIC_KINDS = new Set(["hero", "cta", "card", null]);
+const CONTENT_LABELS = { gallery: "Gallery", navbar: "Navbar", timeline: "Timeline", bento: "Bento Box" };
 
 export const BlockEditMenu = ({ selectedHtml, onChange, pages = [], projectId = null, blockId = null }) => {
-  const kind = useMemo(() => detectBlockKind(selectedHtml), [selectedHtml]);
+  const regions = useMemo(() => detectRegions(selectedHtml), [selectedHtml]);
   if (!selectedHtml) return null;
-  const menuKey = kind || "generic";
+
+  const contentEditor = {
+    gallery: <GalleryEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />,
+    navbar: <NavbarEditor html={selectedHtml} onChange={onChange} pages={pages} />,
+    timeline: <TimelineEditor html={selectedHtml} onChange={onChange} />,
+    bento: <BentoEditor html={selectedHtml} onChange={onChange} />,
+  }[regions.content];
+
+  const mediaEditor = {
+    image: <ImageBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />,
+    video: <VideoBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />,
+    bg: <BackgroundBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />,
+    "bg-empty": <BackgroundBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />,
+  }[regions.media];
+
+  // The generic text-node editor is suppressed only for navbar (fully
+  // owned by NavbarEditor's own brand/items UI) — every other content kind
+  // still needs it for text this block's dedicated editor doesn't cover
+  // (e.g. a gallery block's own <h2> caption, a bento block's intro
+  // paragraph).
+  const showGeneric = regions.content !== "navbar";
+
+  const label = CONTENT_LABELS[regions.content] || (regions.media === "video" ? "Video" : regions.media ? "Background" : "Block");
+
   return (
-    <div className="space-y-2" data-testid={`block-edit-menu-${menuKey}`}>
-      <div className="text-[11px] font-semibold text-[#D9BC55]">{(kind && KIND_LABELS[kind]) || "Block"} — edit menu</div>
-      {kind === "gallery" && <GalleryEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
-      {kind === "navbar" && <NavbarEditor html={selectedHtml} onChange={onChange} pages={pages} />}
-      {kind === "timeline" && <TimelineEditor html={selectedHtml} onChange={onChange} />}
-      {kind === "bento" && <BentoEditor html={selectedHtml} onChange={onChange} />}
-      {kind === "image" && <ImageBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
-      {kind === "video" && <VideoBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
-      {GENERIC_KINDS.has(kind) && <GenericBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
+    <div className="space-y-3" data-testid={`block-edit-menu-${regions.content || regions.media || "generic"}`}>
+      <div className="text-[11px] font-semibold text-[#D9BC55]">{label} — edit menu</div>
+      {contentEditor}
+      {mediaEditor}
+      {showGeneric && <GenericBlockEditor html={selectedHtml} onChange={onChange} projectId={projectId} blockId={blockId} />}
     </div>
   );
 };

@@ -1,4 +1,6 @@
+import { render, screen } from "@testing-library/react";
 import {
+  BlockEditMenu,
   detectBlockKind,
   splitSiblings,
   parseGalleryImages,
@@ -524,5 +526,31 @@ describe("setBlockBgImage", () => {
     const twice = setBlockBgImage(once, "newer.jpg");
     expect(twice).toContain('style="min-height:100vh;--block-bg-image:url(newer.jpg)"');
     expect(twice).not.toMatch(/;;/);
+  });
+});
+
+describe("BlockEditMenu composable rendering", () => {
+  it("parallax-hero-fullbleed: shows a background editor even with zero <img> tags (regression)", () => {
+    const html = '<section class="block block-parallax-hero-fullbleed-1"><h1 class="block block-heading">Where ambition meets altitude.</h1><p class="block">Sub</p></section>';
+    render(<BlockEditMenu selectedHtml={html} onChange={() => {}} />);
+    expect(screen.getByTestId("block-edit-background")).toBeInTheDocument();
+  });
+
+  it("video-hero: shows BOTH the video editor and the generic text editor at once (regression)", () => {
+    const html = '<section class="block block-video-hero-1"><video class="block" poster="p.jpg"><source src="v.mp4" type="video/mp4"/></video><h1 class="block block-heading">Motion tells your story</h1><a class="block" href="#">Watch</a></section>';
+    render(<BlockEditMenu selectedHtml={html} onChange={() => {}} />);
+    expect(screen.getByTestId("block-edit-video")).toBeInTheDocument();
+    expect(screen.getByTestId("block-edit-generic")).toBeInTheDocument();
+  });
+
+  it("gallery block: shows the gallery editor, not the generic editor, for the image grid", () => {
+    const html = '<section class="block"><h2 class="block block-heading">Gallery</h2><div class="container block cmp-gallery-grid"><img src="a.jpg"/><img src="b.jpg"/><img src="c.jpg"/></div></section>';
+    render(<BlockEditMenu selectedHtml={html} onChange={() => {}} />);
+    expect(screen.getByTestId("block-edit-gallery")).toBeInTheDocument();
+  });
+
+  it("renders nothing when selectedHtml is empty", () => {
+    const { container } = render(<BlockEditMenu selectedHtml="" onChange={() => {}} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });
