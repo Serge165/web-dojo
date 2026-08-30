@@ -497,6 +497,18 @@ describe("detectRegions", () => {
     const regions = detectRegions(html);
     expect(regions.content).toBe("gallery");
   });
+
+  it("header wrapping a nav (not anchored at html start) still detects navbar", () => {
+    const html = '<header class="block hdr-announcement-1"><div class="block">Free shipping today</div><nav class="block"><a href="#">Home</a><a href="#">Shop</a></nav></header>';
+    const regions = detectRegions(html);
+    expect(regions.content).toBe("navbar");
+  });
+
+  it("card grid with 3+ images each in its own card wrapper, no migration marker, is NOT classified as gallery", () => {
+    const html = '<section class="block"><h2 class="block block-heading">Our Team</h2><div class="block"><div class="block"><img src="a.jpg"/><p class="block">Alice</p></div><div class="block"><img src="b.jpg"/><p class="block">Bob</p></div><div class="block"><img src="c.jpg"/><p class="block">Carol</p></div></div></section>';
+    const regions = detectRegions(html);
+    expect(regions.content).not.toBe("gallery");
+  });
 });
 
 describe("setBlockBgImage", () => {

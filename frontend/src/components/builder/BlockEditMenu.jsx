@@ -190,12 +190,18 @@ export const detectMediaRegion = (html) => {
 
 export const detectContentRegion = (html) => {
   if (!html) return null;
-  if (/^\s*<nav\b/i.test(html)) return "navbar";
+  if (/<nav\b/i.test(html)) return "navbar";
   if (/data-forge-portfolio-timeline/i.test(html)) return "timeline";
   if (/<ol\b[\s\S]*<li[\s>]/i.test(html) && (/\bcontainer block\b/.test(html) || /(border-left:\s*2px|position:absolute;left:-\d+px)/i.test(html))) return "timeline";
   if (/data-forge-widget=["']gallery["']/i.test(html)) return "gallery";
   const imgCount = (html.match(/<img\b/gi) || []).length;
-  if (imgCount >= 3) return "gallery";
+  // Requires the migration's own "container block" marker (correctly-
+  // migrated real galleries) or the legacy display:grid/column-count
+  // heuristic (pre-migration user content, never got a marker) — NOT a
+  // bare imgCount check, which also matches card-wrapper grids
+  // (team-cards, portfolio-filter, etc.) where each <img> sits in its own
+  // card div and GalleryEditor's remove/add paths would corrupt the layout.
+  if (imgCount >= 3 && (/\bcontainer block\b/.test(html) || /(display:\s*grid|column-count)/i.test(html))) return "gallery";
   if (/\bcontainer block\b/.test(html) && /<h3[\s>]/i.test(html) && (html.match(/<h3\b/gi) || []).length >= 3) return "bento";
   if (/display:\s*grid/i.test(html) && /<h3[\s>]/i.test(html)) return "bento";
   return null;
