@@ -538,11 +538,23 @@ const itemsZoneMatch = (html) => {
   if (!navOpen) return null;
   const navStart = navOpen.index + navOpen[0].length;
   const divs = splitSiblings(html.slice(navStart), "div");
-  const zone = divs.find((d) => /<a\b/i.test(d));
-  if (!zone) return null;
-  const absStart = navStart + html.slice(navStart).indexOf(zone);
-  const inner = zone.slice(zone.indexOf(">") + 1, zone.lastIndexOf("</div>"));
-  return { absStart, zone, inner };
+  const divZone = divs.find((d) => /<a\b/i.test(d));
+  if (divZone) {
+    const absStart = navStart + html.slice(navStart).indexOf(divZone);
+    const inner = divZone.slice(divZone.indexOf(">") + 1, divZone.lastIndexOf("</div>"));
+    const openTag = divZone.slice(0, divZone.indexOf(">") + 1);
+    return { absStart, zone: divZone, inner, openTag, closeTag: "</div>" };
+  }
+  // Fallback: <a> tags directly inside <nav>, no wrapping <div> — real templates
+  // (hdr-announcement, hdr-minimal-serif, hdr-dark-cta, hdr-search-actions,
+  // cmp-header-lrg) only reach this function now that detectContentRegion's
+  // nav-anchor fix routes them to NavbarEditor at all; previously they fell
+  // through to GenericBlockEditor and this gap was never exercised.
+  const navCloseIdx = html.indexOf("</nav>", navStart);
+  if (navCloseIdx === -1) return null;
+  const inner = html.slice(navStart, navCloseIdx);
+  if (!/<a\b/i.test(inner) || /<div\b/i.test(inner)) return null; // nested-div case is handled above
+  return { absStart: navStart, zone: inner, inner, openTag: "", closeTag: "" };
 };
 
 
@@ -583,7 +595,7 @@ export const setNavbarItems = (html, items) => {
   const hasDd = items.some((n) => n.children && n.children.length);
   const body = items.map((n) => buildNavNode(n)).join("\n");
   const rebuilt = `${hasDd ? `${NAV_CSS_TAG}\n` : ""}${body}`;
-  const newZone = `${zone.zone.slice(0, zone.zone.indexOf(">") + 1)}\n${rebuilt}\n${zone.zone.slice(zone.zone.lastIndexOf("</div>"))}`;
+  const newZone = `${zone.openTag}\n${rebuilt}\n${zone.closeTag}`;
   return html.slice(0, zone.absStart) + newZone + html.slice(zone.absStart + zone.zone.length);
 };
 
@@ -663,7 +675,12 @@ export const setNavbarVariant = (html, variant) => {
   out = patchNavStyle(out, "nav", styleDecls(VARIANT_NAV_STYLE[variant] || VARIANT_NAV_STYLE["horizontal-top"]));
   // 3. items container layout (vertical stacks links; minimalist hides them)
   const zone = itemsZoneMatch(out);
-  if (zone) {
+  // A wrapping items <div> is required to hold a container-level style (flex-
+  // direction, display:none for minimalist) — the flat "<a> tags directly in
+  // <nav>" case (zone.openTag === "") has no element to attach it to, so
+  // variant-driven container styling is skipped there rather than corrupting
+  // the zone with a mis-sliced rebuild.
+  if (zone && zone.openTag) {
     const mode = variant.startsWith("vertical") ? "vertical" : VARIANT_ITEMS_MODE[variant] || "horizontal";
     const itemsStyle = mode === "vertical"
       ? "flex-direction:column;gap:5px;"
@@ -671,7 +688,7 @@ export const setNavbarVariant = (html, variant) => {
     if (itemsStyle) {
       const patched = patchNavStyle(zone.inner, "div", styleDecls(itemsStyle));
       out = out.slice(0, zone.absStart)
-        + zone.zone.slice(0, zone.zone.indexOf(">") + 1) + patched + zone.zone.slice(zone.zone.lastIndexOf("</div>"))
+        + zone.openTag + patched + zone.closeTag
         + out.slice(zone.absStart + zone.zone.length);
     }
   }

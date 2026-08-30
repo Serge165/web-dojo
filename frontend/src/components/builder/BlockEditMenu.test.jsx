@@ -276,6 +276,31 @@ describe("navbar tree + dropdowns (Phase 2A/2B)", () => {
     expect(pageHref({ slug: "index.html" })).toBe("index.html");
     expect(pageHref({})).toBe("index.html");
   });
+
+  // Real templates (hdr-announcement, hdr-minimal-serif, hdr-dark-cta,
+  // hdr-search-actions, cmp-header-lrg) put <a> tags directly inside <nav>
+  // with no wrapping <div> — itemsZoneMatch's div-only zone detection missed
+  // these entirely, so NavbarEditor showed "NAV ITEMS (0)" and add/edit was a
+  // silent no-op once detectContentRegion started routing these blocks to it.
+  const flatNavHtml = `<header class="block hdr-1"><div class="block hdr-2">Brand</div><nav class="block hdr-3"><a href="#" class="block hdr-4">Home</a><a href="#" class="block hdr-5">Shop</a><a href="#" class="block hdr-6">Blog</a></nav></header>`;
+
+  test("parses items from <a> tags with no wrapping <div>", () => {
+    expect(parseNavbarTree(flatNavHtml).items).toEqual([
+      { label: "Home", href: "#", children: [] },
+      { label: "Shop", href: "#", children: [] },
+      { label: "Blog", href: "#", children: [] },
+    ]);
+  });
+
+  test("adds/edits items with no wrapping <div> (previously a silent no-op)", () => {
+    const items = [
+      { label: "Home", href: "#", children: [] },
+      { label: "Pricing", href: "/pricing", children: [] },
+    ];
+    const out = setNavbarItems(flatNavHtml, items);
+    const parsed = parseNavbarTree(out).items;
+    expect(parsed).toEqual(items);
+  });
 });
 
 describe("editor themes (Phase 3)", () => {
