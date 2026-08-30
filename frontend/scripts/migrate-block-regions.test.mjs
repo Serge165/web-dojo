@@ -1,7 +1,7 @@
 // frontend/scripts/migrate-block-regions.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { markHeading, markContentRegion } from "./migrate-block-regions.mjs";
+import { markHeading, markContentRegion, applyMigrationToSource } from "./migrate-block-regions.mjs";
 
 test("markHeading adds block-heading to the first h1", () => {
   const input = '<section class="block hero-1 block-hero"><h1 class="block hero-2 block-hero">Hi</h1><p class="block hero-3 block-hero">Sub</p></section>';
@@ -57,4 +57,29 @@ test("markContentRegion reports and skips a block it can't confidently classify"
   const { changed, reason } = markContentRegion(input, "hero-1");
   assert.equal(changed, false);
   assert.match(reason, /no gallery\/timeline\/bento content found/);
+});
+
+test("applyMigrationToSource processes a block shared by reference (mergeCategories aliasing) only once, against the file it actually lives in", () => {
+  const block = { id: "hero-1", label: "Hero", html: '<section class="block hero-1"><h1 class="block hero-2">Hi</h1></section>' };
+  const extraCats = [{ blocks: [block] }];
+  const mergedCats = [{ blocks: [block] }]; // same object reference, as blocks.js's mergeCategories aliases it
+  const processed = new WeakSet();
+
+  const extraResult = applyMigrationToSource(block.html, extraCats, processed);
+  assert.equal(extraResult.headingCount, 1);
+  assert.match(extraResult.source, /block-heading/);
+
+  const coreSource = "unrelated blocks.js content that does not contain this block's html";
+  const coreResult = applyMigrationToSource(coreSource, mergedCats, processed);
+  assert.equal(coreResult.headingCount, 0); // already processed via extraCats, skipped here
+  assert.equal(coreResult.source, coreSource); // left untouched, not silently no-op-written
+});
+
+test("applyMigrationToSource does not double literal $ characters in transformed block content", () => {
+  const block = { id: "pricing-1", label: "Pricing", html: '<section class="block pricing-1"><h1 class="block pricing-2">$19/mo</h1></section>' };
+  const cats = [{ blocks: [block] }];
+  const { source, headingCount } = applyMigrationToSource(block.html, cats, new WeakSet());
+  assert.equal(headingCount, 1);
+  assert.match(source, /\$19\/mo/);
+  assert.doesNotMatch(source, /\$\$19/);
 });

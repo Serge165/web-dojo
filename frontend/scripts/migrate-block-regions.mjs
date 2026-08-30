@@ -87,6 +87,46 @@ export function markContentRegion(html, blockId) {
   return { html, changed: false, reason: `${blockId}: no gallery/timeline/bento content found` };
 }
 
+// Applies the migration to every block in `cats` against `source`, skipping
+// any block object already in `processed` (mergeCategories in blocks.js
+// aliases EXTRA_CATEGORIES's block objects into CATEGORIES by reference —
+// without this guard a shared block gets "processed" against the wrong
+// file's source and silently never written to the file it actually lives
+// in). Exported for unit testing; used by main() below.
+export function applyMigrationToSource(source, cats, processed) {
+  const skipped = [];
+  let headingCount = 0;
+  let contentCount = 0;
+
+  for (const cat of cats) {
+    for (const block of cat.blocks) {
+      if (processed.has(block)) continue;
+      processed.add(block);
+
+      const afterHeading = markHeading(block.html);
+      if (afterHeading.changed) headingCount += 1;
+      const afterContent = markContentRegion(afterHeading.html, block.id);
+      if (afterContent.changed) contentCount += 1;
+      else if (afterContent.reason && /no gallery\/timeline\/bento/.test(afterContent.reason)) {
+        // Not every block has structured content (heroes, CTAs, cards) —
+        // only report ones whose id LOOKS like it should (gallery/
+        // timeline/bento/social in the id or label) but didn't match.
+        if (/gallery|timeline|bento|social/i.test(block.id + block.label)) skipped.push(afterContent.reason);
+      }
+      const finalHtml = afterContent.html;
+      if (finalHtml !== block.html) {
+        // NOTE: replacer must be a function so `finalHtml` is inserted
+        // verbatim — a string replacer would treat "$&"/"$1"/"$$" etc. in
+        // finalHtml as $-patterns and corrupt any literal "$" it contains.
+        source = source.replace(block.html, () => finalHtml);
+        block.html = finalHtml; // keep in-memory copy consistent if reused below
+      }
+    }
+  }
+
+  return { source, headingCount, contentCount, skipped };
+}
+
 // --- CLI: patch blocks.js / blocksExtra.js in place ---------------------
 
 async function main() {
@@ -104,32 +144,21 @@ async function main() {
   const skipped = [];
   let headingCount = 0;
   let contentCount = 0;
+  const processed = new WeakSet();
 
+  // EXTRA_CATEGORIES first: CATEGORIES = mergeCategories(CORE, EXTRA)
+  // aliases EXTRA's block objects by reference, so they must be matched
+  // against blocksExtra.js's own text before CATEGORIES's pass skips them.
   for (const [file, cats] of [
-    [path.join(LIB_DIR, "blocks.js"), CATEGORIES],
     [path.join(LIB_DIR, "blocksExtra.js"), EXTRA_CATEGORIES],
+    [path.join(LIB_DIR, "blocks.js"), CATEGORIES],
   ]) {
-    let source = readFileSync(file, "utf8");
-    for (const cat of cats) {
-      for (const block of cat.blocks) {
-        const afterHeading = markHeading(block.html);
-        if (afterHeading.changed) headingCount += 1;
-        const afterContent = markContentRegion(afterHeading.html, block.id);
-        if (afterContent.changed) contentCount += 1;
-        else if (afterContent.reason && /no gallery\/timeline\/bento/.test(afterContent.reason)) {
-          // Not every block has structured content (heroes, CTAs, cards) —
-          // only report ones whose id LOOKS like it should (gallery/
-          // timeline/bento/social in the id or label) but didn't match.
-          if (/gallery|timeline|bento|social/i.test(block.id + block.label)) skipped.push(afterContent.reason);
-        }
-        const finalHtml = afterContent.html;
-        if (finalHtml !== block.html) {
-          source = source.replace(block.html, () => finalHtml.replace(/\$/g, "$$$$"));
-          block.html = finalHtml; // keep in-memory copy consistent if reused below
-        }
-      }
-    }
-    writeFileSync(file, source);
+    const source = readFileSync(file, "utf8");
+    const result = applyMigrationToSource(source, cats, processed);
+    writeFileSync(file, result.source);
+    headingCount += result.headingCount;
+    contentCount += result.contentCount;
+    skipped.push(...result.skipped);
   }
 
   console.log(`Marked ${headingCount} headings, ${contentCount} content regions.`);
