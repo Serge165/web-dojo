@@ -348,7 +348,7 @@ export const EXTRA_CATEGORIES = [
   <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-hero-2 block-video-hero"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
   <div class="block block-video-hero-3 block-video-hero"></div>
   <div class="block block-video-hero-4 block-video-hero">
-    <h1 class="block block-video-hero-5 block-video-hero">Motion tells your story</h1>
+    <h1 class="block block-video-hero-5 block-video-hero block-heading">Motion tells your story</h1>
     <p class="block block-video-hero-6 block-video-hero">A cinematic hero with a looping background video. Muted, auto-playing, mobile-friendly.</p>
     <a href="#" class="block block-video-hero-7 block-video-hero">Watch the film</a>
   </div>
@@ -362,7 +362,7 @@ export const EXTRA_CATEGORIES = [
     <div class="block block-video-section-3 block-video-section"><video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-section-4 block-video-section"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video></div>
     <div>
       <div class="block block-video-section-5 block-video-section">See it in action</div>
-      <h2 class="block block-video-section-6 block-video-section">Built to move</h2>
+      <h2 class="block block-video-section-6 block-video-section block-heading">Built to move</h2>
       <p class="block block-video-section-7 block-video-section">Pair looping product footage with crisp copy. The video autoplays muted and loops seamlessly on every device.</p>
       <a href="#" class="block block-video-section-8 block-video-section">Learn more</a>
     </div>
@@ -376,7 +376,7 @@ export const EXTRA_CATEGORIES = [
   <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-banner-2 block-video-banner"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
   <div class="block block-video-banner-3 block-video-banner"></div>
   <div class="block block-video-banner-4 block-video-banner">
-    <h2 class="block block-video-banner-5 block-video-banner">Adventure awaits</h2>
+    <h2 class="block block-video-banner-5 block-video-banner block-heading">Adventure awaits</h2>
     <p class="block block-video-banner-6 block-video-banner">A compact full-bleed video banner for section breaks.</p>
   </div>
 </section>`,
@@ -392,7 +392,7 @@ export const EXTRA_CATEGORIES = [
         label: "Pricing · Monthly/Yearly Toggle",
         html: `<section class="block block-pricing-toggle-1 block-pricing-toggle">
   <div class="wd-pricing block-pricing-toggle-2 block-pricing-toggle">
-    <h2 class="block block-pricing-toggle-3 block-pricing-toggle">Simple pricing</h2>
+    <h2 class="block block-pricing-toggle-3 block-pricing-toggle block-heading">Simple pricing</h2>
     <p class="block block-pricing-toggle-4 block-pricing-toggle">Switch between monthly and yearly billing.</p>
     <input type="checkbox" id="wd-pt" class="wd-pt-toggle block-pricing-toggle-5 block-pricing-toggle" />
     <label for="wd-pt" class="block block-pricing-toggle-6 block-pricing-toggle">
@@ -449,7 +449,7 @@ export const EXTRA_CATEGORIES = [
         label: "Team · Member Cards",
         html: `<section class="block block-team-cards-1 block-team-cards">
   <div class="block block-team-cards-2 block-team-cards">
-    <h2 class="block block-team-cards-3 block-team-cards">Meet the team</h2>
+    <h2 class="block block-team-cards-3 block-team-cards block-heading">Meet the team</h2>
     <div class="block block-team-cards-4 block-team-cards">
       
       <div class="block block-team-cards-5 block-team-cards">
@@ -503,7 +503,7 @@ export const EXTRA_CATEGORIES = [
         label: "FAQ · Accordion",
         html: `<section class="block block-faq-accordion-1 block-faq-accordion">
   <div class="wd-faq block-faq-accordion-2 block-faq-accordion">
-    <h2 class="block block-faq-accordion-3 block-faq-accordion">Frequently asked</h2>
+    <h2 class="block block-faq-accordion-3 block-faq-accordion block-heading">Frequently asked</h2>
     
     <details class="block block-faq-accordion-4 block-faq-accordion">
       <summary class="block block-faq-accordion-5 block-faq-accordion">
@@ -548,7 +548,7 @@ export const EXTRA_CATEGORIES = [
         label: "Newsletter · Signup + Validation",
         html: `<section class="block block-newsletter-signup-1 block-newsletter-signup">
   <form novalidate class="wd-nl block-newsletter-signup-2 block-newsletter-signup">
-    <h2 class="block block-newsletter-signup-3 block-newsletter-signup">Join the newsletter</h2>
+    <h2 class="block block-newsletter-signup-3 block-newsletter-signup block-heading">Join the newsletter</h2>
     <p class="block block-newsletter-signup-4 block-newsletter-signup">Product updates and design notes, twice a month.</p>
     <div class="block block-newsletter-signup-5 block-newsletter-signup">
       <input type="email" required placeholder="you@example.com" class="block block-newsletter-signup-6 block-newsletter-signup" />
@@ -573,7 +573,7 @@ export const EXTRA_CATEGORIES = [
         label: "Portfolio · Filterable Gallery",
         html: `<section class="block block-portfolio-filter-1 block-portfolio-filter">
   <div class="wd-portfolio block-portfolio-filter-2 block-portfolio-filter">
-    <h2 class="block block-portfolio-filter-3 block-portfolio-filter">Selected work</h2>
+    <h2 class="block block-portfolio-filter-3 block-portfolio-filter block-heading">Selected work</h2>
     <div class="block block-portfolio-filter-4 block-portfolio-filter">
       <input type="radio" name="wd-pf" id="wd-pf-all" checked class="block block-portfolio-filter-5 block-portfolio-filter" /><label for="wd-pf-all" class="block block-portfolio-filter-6 block-portfolio-filter">all</label><input type="radio" name="wd-pf" id="wd-pf-branding"  class="block block-portfolio-filter-7 block-portfolio-filter" /><label for="wd-pf-branding" class="block block-portfolio-filter-8 block-portfolio-filter">branding</label><input type="radio" name="wd-pf" id="wd-pf-product"  class="block block-portfolio-filter-9 block-portfolio-filter" /><label for="wd-pf-product" class="block block-portfolio-filter-10 block-portfolio-filter">product</label><input type="radio" name="wd-pf" id="wd-pf-web"  class="block block-portfolio-filter-11 block-portfolio-filter" /><label for="wd-pf-web" class="block block-portfolio-filter-12 block-portfolio-filter">web</label>
     </div>
@@ -623,7 +623,7 @@ export const EXTRA_CATEGORIES = [
         label: "Services · Icon Grid",
         html: `<section class="block block-services-icons-1 block-services-icons">
   <div class="block block-services-icons-2 block-services-icons">
-    <h2 class="block block-services-icons-3 block-services-icons">What we do</h2>
+    <h2 class="block block-services-icons-3 block-services-icons block-heading">What we do</h2>
     <div class="block block-services-icons-4 block-services-icons">
       
       <div class="block block-services-icons-5 block-services-icons">
@@ -663,7 +663,7 @@ export const EXTRA_CATEGORIES = [
         html: `<section class="block block-contact-recaptcha-1 block-contact-recaptcha">
   <!-- reCAPTCHA: add <script src="https://www.google.com/recaptcha/api.js" async defer></script> to the page head and replace YOUR_SITE_KEY below -->
   <form class="block block-contact-recaptcha-2 block-contact-recaptcha">
-    <h2 class="block block-contact-recaptcha-3 block-contact-recaptcha">Get in touch</h2>
+    <h2 class="block block-contact-recaptcha-3 block-contact-recaptcha block-heading">Get in touch</h2>
     <label class="block block-contact-recaptcha-4 block-contact-recaptcha">Name</label>
     <input required class="block block-contact-recaptcha-5 block-contact-recaptcha" />
     <label class="block block-contact-recaptcha-6 block-contact-recaptcha">Email</label>
@@ -686,7 +686,7 @@ export const EXTRA_CATEGORIES = [
         label: "Testimonial · Carousel",
         html: `<section class="block block-testimonials-carousel-1 block-testimonials-carousel">
   <div class="block block-testimonials-carousel-2 block-testimonials-carousel">
-    <h2 class="block block-testimonials-carousel-3 block-testimonials-carousel">Loved by teams</h2>
+    <h2 class="block block-testimonials-carousel-3 block-testimonials-carousel block-heading">Loved by teams</h2>
   </div>
   <div class="block block-testimonials-carousel-4 block-testimonials-carousel">
     
@@ -725,7 +725,7 @@ export const EXTRA_CATEGORIES = [
         label: "Esports · Team Roster",
         html: `<section class="block block-esports-roster-1 block-esports-roster">
   <div class="block block-esports-roster-2 block-esports-roster">
-    <h2 class="block block-esports-roster-3 block-esports-roster">Roster</h2>
+    <h2 class="block block-esports-roster-3 block-esports-roster block-heading">Roster</h2>
     <p class="block block-esports-roster-4 block-esports-roster">Season 2026</p>
     <div class="block block-esports-roster-5 block-esports-roster">
       
@@ -758,7 +758,7 @@ export const EXTRA_CATEGORIES = [
         label: "Esports · Tournament Bracket",
         html: `<section class="block block-esports-bracket-1 block-esports-bracket">
   <div class="block block-esports-bracket-2 block-esports-bracket">
-    <h2 class="block block-esports-bracket-3 block-esports-bracket">Bracket</h2>
+    <h2 class="block block-esports-bracket-3 block-esports-bracket block-heading">Bracket</h2>
     <div class="block block-esports-bracket-4 block-esports-bracket">
       
       <div class="block block-esports-bracket-5 block-esports-bracket">
@@ -810,7 +810,7 @@ export const EXTRA_CATEGORIES = [
         label: "Esports · Stream Schedule",
         html: `<section class="block block-esports-schedule-1 block-esports-schedule">
   <div class="block block-esports-schedule-2 block-esports-schedule">
-    <h2 class="block block-esports-schedule-3 block-esports-schedule">Stream schedule</h2>
+    <h2 class="block block-esports-schedule-3 block-esports-schedule block-heading">Stream schedule</h2>
     <div class="block block-esports-schedule-4 block-esports-schedule">
       
       <div class="block block-esports-schedule-5 block-esports-schedule">
@@ -857,7 +857,7 @@ export const EXTRA_CATEGORIES = [
         label: "Esports · Player Stat Cards",
         html: `<section class="block block-esports-stats-1 block-esports-stats">
   <div class="block block-esports-stats-2 block-esports-stats">
-    <h2 class="block block-esports-stats-3 block-esports-stats">Player stats</h2>
+    <h2 class="block block-esports-stats-3 block-esports-stats block-heading">Player stats</h2>
     <div class="block block-esports-stats-4 block-esports-stats">
       
       <div class="block block-esports-stats-5 block-esports-stats">
@@ -889,7 +889,7 @@ export const EXTRA_CATEGORIES = [
         label: "Esports · Leaderboard",
         html: `<section class="block block-esports-leaderboard-1 block-esports-leaderboard">
   <div class="block block-esports-leaderboard-2 block-esports-leaderboard">
-    <h2 class="block block-esports-leaderboard-3 block-esports-leaderboard">Leaderboard</h2>
+    <h2 class="block block-esports-leaderboard-3 block-esports-leaderboard block-heading">Leaderboard</h2>
     <div class="block block-esports-leaderboard-4 block-esports-leaderboard">
       <div class="block block-esports-leaderboard-5 block-esports-leaderboard">
         <div>#</div><div>Team</div><div>Wins</div><div>Points</div>
@@ -936,7 +936,7 @@ export const EXTRA_CATEGORIES = [
   <div class="block block-esports-org-hub-2 block-esports-org-hub">
     <div class="block block-esports-org-hub-3 block-esports-org-hub">
       <div>
-        <h2 class="block block-esports-org-hub-4 block-esports-org-hub">Alpha Esports</h2>
+        <h2 class="block block-esports-org-hub-4 block-esports-org-hub block-heading">Alpha Esports</h2>
         <p class="block block-esports-org-hub-5 block-esports-org-hub">Competing across Valorant, CS2 and League — est. 2021. Follow the journey, catch the streams, join the community.</p>
       </div>
       <a href="#" class="block block-esports-org-hub-6 block-esports-org-hub">Join the community</a>
@@ -976,7 +976,7 @@ export const EXTRA_CATEGORIES = [
         label: "Creator · Subscription Tiers",
         html: `<section class="block block-creator-membership-1 block-creator-membership">
   <div class="block block-creator-membership-2 block-creator-membership">
-    <h2 class="block block-creator-membership-3 block-creator-membership">Support the channel</h2>
+    <h2 class="block block-creator-membership-3 block-creator-membership block-heading">Support the channel</h2>
     <p class="block block-creator-membership-4 block-creator-membership">Pick a membership tier and unlock perks.</p>
     <div class="block block-creator-membership-5 block-creator-membership">
       
@@ -1054,7 +1054,7 @@ export const EXTRA_CATEGORIES = [
         label: "Retro · Sign My Guestbook",
         html: `<section class="block block-retro-guestbook-1 block-retro-guestbook">
   <div class="block block-retro-guestbook-2 block-retro-guestbook">
-    <h2 class="block block-retro-guestbook-3 block-retro-guestbook">✦ Sign My Guestbook! ✦</h2>
+    <h2 class="block block-retro-guestbook-3 block-retro-guestbook block-heading">✦ Sign My Guestbook! ✦</h2>
     <p class="block block-retro-guestbook-4 block-retro-guestbook">Thanx for stopping by my page! Leave a message below ~*~</p>
     <form>
       <label class="block block-retro-guestbook-5 block-retro-guestbook">Your Name</label>
@@ -1114,7 +1114,7 @@ COFFEE</div>
         label: "Retro · Top 8 Friends",
         html: `<section class="block block-retro-top8-1 block-retro-top8">
   <div class="block block-retro-top8-2 block-retro-top8">
-    <h2 class="block block-retro-top8-3 block-retro-top8">Top Friends</h2>
+    <h2 class="block block-retro-top8-3 block-retro-top8 block-heading">Top Friends</h2>
     <p class="block block-retro-top8-4 block-retro-top8">view all →</p>
     <div class="block block-retro-top8-5 block-retro-top8">
       
@@ -1491,7 +1491,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section class="block block-parallax-hero-fullbleed-1 block-parallax-hero-fullbleed">
   <div class="block block-parallax-hero-fullbleed-2 block-parallax-hero-fullbleed">
     <div class="block block-parallax-hero-fullbleed-3 block-parallax-hero-fullbleed">Est. 2026</div>
-    <h1 class="block block-parallax-hero-fullbleed-4 block-parallax-hero-fullbleed">Where ambition meets altitude.</h1>
+    <h1 class="block block-parallax-hero-fullbleed-4 block-parallax-hero-fullbleed block-heading">Where ambition meets altitude.</h1>
     <p class="block block-parallax-hero-fullbleed-5 block-parallax-hero-fullbleed">A full-bleed statement hero — the background stays fixed while your content scrolls over it.</p>
     <button class="block block-parallax-hero-fullbleed-6 block-parallax-hero-fullbleed">Explore</button>
   </div>
@@ -1502,7 +1502,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         label: "Parallax Hero · Split Content",
         html: `<section class="block block-parallax-hero-split-1 block-parallax-hero-split">
   <div class="block block-parallax-hero-split-2 block-parallax-hero-split">
-    <h1 class="block block-parallax-hero-split-3 block-parallax-hero-split">Grown, not manufactured.</h1>
+    <h1 class="block block-parallax-hero-split-3 block-parallax-hero-split block-heading">Grown, not manufactured.</h1>
     <p class="block block-parallax-hero-split-4 block-parallax-hero-split">Content sits in a legible band on the left; the parallax background carries the mood on the right.</p>
     <div class="block block-parallax-hero-split-5 block-parallax-hero-split">
       <button class="block block-parallax-hero-split-6 block-parallax-hero-split">Get started</button>
@@ -1556,7 +1556,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         id: "parallax-section-cta",
         label: "Parallax Section · CTA Banner",
         html: `<section class="block block-parallax-section-cta-1 block-parallax-section-cta">
-  <h2 class="block block-parallax-section-cta-2 block-parallax-section-cta">Ready when the skyline is.</h2>
+  <h2 class="block block-parallax-section-cta-2 block-parallax-section-cta block-heading">Ready when the skyline is.</h2>
   <p class="block block-parallax-section-cta-3 block-parallax-section-cta">Start free — upgrade only once you're ready to publish.</p>
   <button class="block block-parallax-section-cta-4 block-parallax-section-cta">Start building free</button>
 </section>`,
@@ -1573,7 +1573,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="social-wall" data-forge-project-id="" class="block block-social-wall-columns-1 block-social-wall-columns">
   <div class="block block-social-wall-columns-2 block-social-wall-columns">
     <div class="block block-social-wall-columns-3 block-social-wall-columns">Live from social</div>
-    <h2 class="block block-social-wall-columns-4 block-social-wall-columns">What people are saying</h2>
+    <h2 class="block block-social-wall-columns-4 block-social-wall-columns block-heading">What people are saying</h2>
     <div class="block block-social-wall-columns-5 block-social-wall-columns">
       
       <div data-forge-widget="social-wall-column" data-platform="twitter" class="block block-social-wall-columns-6 block-social-wall-columns">
@@ -1818,7 +1818,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="updates" data-forge-project-id="" class="block block-zenero-updates-block-1 block-zenero-updates-block">
   <div class="block block-zenero-updates-block-2 block-zenero-updates-block">
     <div class="block block-zenero-updates-block-3 block-zenero-updates-block">What's new</div>
-    <h2 class="block block-zenero-updates-block-4 block-zenero-updates-block">Latest Updates</h2>
+    <h2 class="block block-zenero-updates-block-4 block-zenero-updates-block block-heading">Latest Updates</h2>
     <div data-forge-updates-list class="block block-zenero-updates-block-5 block-zenero-updates-block">
       <div class="block block-zenero-updates-block-6 block-zenero-updates-block">
         <div class="block block-zenero-updates-block-7 block-zenero-updates-block">2 days ago</div>
@@ -1871,8 +1871,8 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="gallery" data-forge-project-id="" class="block block-zenero-gallery-block-1 block-zenero-gallery-block">
   <div class="block block-zenero-gallery-block-2 block-zenero-gallery-block">
     <div class="block block-zenero-gallery-block-3 block-zenero-gallery-block">Our work</div>
-    <h2 class="block block-zenero-gallery-block-4 block-zenero-gallery-block">Gallery</h2>
-    <div data-forge-gallery-grid class="block block-zenero-gallery-block-5 block-zenero-gallery-block">
+    <h2 class="block block-zenero-gallery-block-4 block-zenero-gallery-block block-heading">Gallery</h2>
+    <div data-forge-gallery-grid class="block block-zenero-gallery-block-5 block-zenero-gallery-block container block gallery-block">
       <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-6 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-7 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-8 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-9 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-10 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-11 block-zenero-gallery-block" />
     </div>
   </div>
@@ -1906,7 +1906,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="latest-blog" data-forge-project-id="" class="block block-zenero-latest-from-blog-1 block-zenero-latest-from-blog">
   <div class="block block-zenero-latest-from-blog-2 block-zenero-latest-from-blog">
     <div class="block block-zenero-latest-from-blog-3 block-zenero-latest-from-blog">From the blog</div>
-    <h2 class="block block-zenero-latest-from-blog-4 block-zenero-latest-from-blog">Latest from Blog</h2>
+    <h2 class="block block-zenero-latest-from-blog-4 block-zenero-latest-from-blog block-heading">Latest from Blog</h2>
     <div data-forge-blog-titles class="block block-zenero-latest-from-blog-5 block-zenero-latest-from-blog">
       <button class="block block-zenero-latest-from-blog-6 block-zenero-latest-from-blog">Getting Started with Web Dojo</button>
       <button class="block block-zenero-latest-from-blog-7 block-zenero-latest-from-blog">Design Tips for Better Landing Pages</button>
@@ -1972,7 +1972,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="portfolio" data-forge-project-id="" class="block block-zenero-portfolio-timeline-1 block-zenero-portfolio-timeline">
   <div class="block block-zenero-portfolio-timeline-2 block-zenero-portfolio-timeline">
     <div class="block block-zenero-portfolio-timeline-3 block-zenero-portfolio-timeline">Selected work</div>
-    <h2 class="block block-zenero-portfolio-timeline-4 block-zenero-portfolio-timeline">Portfolio</h2>
+    <h2 class="block block-zenero-portfolio-timeline-4 block-zenero-portfolio-timeline block-heading">Portfolio</h2>
     <div data-forge-portfolio-timeline class="block block-zenero-portfolio-timeline-5 block-zenero-portfolio-timeline">
       <div class="block block-zenero-portfolio-timeline-6 block-zenero-portfolio-timeline">
         <div class="block block-zenero-portfolio-timeline-7 block-zenero-portfolio-timeline"></div>
@@ -2030,7 +2030,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="testimonials" data-forge-project-id="" data-forge-platform="facebook" data-forge-post-id="" class="block block-zenero-testimonials-from-comments-1 block-zenero-testimonials-from-comments">
   <div class="block block-zenero-testimonials-from-comments-2 block-zenero-testimonials-from-comments">
     <div class="block block-zenero-testimonials-from-comments-3 block-zenero-testimonials-from-comments">What people say</div>
-    <h2 class="block block-zenero-testimonials-from-comments-4 block-zenero-testimonials-from-comments">Testimonials</h2>
+    <h2 class="block block-zenero-testimonials-from-comments-4 block-zenero-testimonials-from-comments block-heading">Testimonials</h2>
     <div data-forge-testimonials-list class="block block-zenero-testimonials-from-comments-5 block-zenero-testimonials-from-comments">
       <div class="block block-zenero-testimonials-from-comments-6 block-zenero-testimonials-from-comments">
         <div class="block block-zenero-testimonials-from-comments-7 block-zenero-testimonials-from-comments">"This product changed how we work. Highly recommended."</div>
@@ -2077,7 +2077,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="timeline" data-forge-project-id="" class="block block-zenero-timeline-block-1 block-zenero-timeline-block">
   <div class="block block-zenero-timeline-block-2 block-zenero-timeline-block">
     <div class="block block-zenero-timeline-block-3 block-zenero-timeline-block">Our story</div>
-    <h2 class="block block-zenero-timeline-block-4 block-zenero-timeline-block">Timeline</h2>
+    <h2 class="block block-zenero-timeline-block-4 block-zenero-timeline-block block-heading">Timeline</h2>
     <div data-forge-timeline-list class="block block-zenero-timeline-block-5 block-zenero-timeline-block">
       <div class="block block-zenero-timeline-block-6 block-zenero-timeline-block">
         <div class="block block-zenero-timeline-block-7 block-zenero-timeline-block"></div>
@@ -2128,7 +2128,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         html: `<section data-forge-widget="bento" data-forge-project-id="" class="block block-zenero-bento-block-1 block-zenero-bento-block">
   <div class="block block-zenero-bento-block-2 block-zenero-bento-block">
     <div class="block block-zenero-bento-block-3 block-zenero-bento-block">Why us</div>
-    <h2 class="block block-zenero-bento-block-4 block-zenero-bento-block">Features</h2>
+    <h2 class="block block-zenero-bento-block-4 block-zenero-bento-block block-heading">Features</h2>
     <div data-forge-bento-grid class="block block-zenero-bento-block-5 block-zenero-bento-block">
       <div class="block block-zenero-bento-block-6 block-zenero-bento-block">
         <div class="block block-zenero-bento-block-7 block-zenero-bento-block">🚀</div>
@@ -2182,7 +2182,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         label: "Esports · Roster (live)",
         html: `<section data-forge-widget="roster" data-forge-project-id="" class="block block-zenero-esports-roster-live-1 block-zenero-esports-roster-live">
   <div class="block block-zenero-esports-roster-live-2 block-zenero-esports-roster-live">
-    <h2 class="block block-zenero-esports-roster-live-3 block-zenero-esports-roster-live">Roster</h2>
+    <h2 class="block block-zenero-esports-roster-live-3 block-zenero-esports-roster-live block-heading">Roster</h2>
     <div data-forge-roster-grid class="block block-zenero-esports-roster-live-4 block-zenero-esports-roster-live">
       <div class="block block-zenero-esports-roster-live-5 block-zenero-esports-roster-live">
         <div class="block block-zenero-esports-roster-live-6 block-zenero-esports-roster-live">Add players in the Zenero dashboard</div>
@@ -2224,7 +2224,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         label: "Esports · Fixtures (live)",
         html: `<section data-forge-widget="fixtures" data-forge-project-id="" class="block block-zenero-esports-fixtures-live-1 block-zenero-esports-fixtures-live">
   <div class="block block-zenero-esports-fixtures-live-2 block-zenero-esports-fixtures-live">
-    <h2 class="block block-zenero-esports-fixtures-live-3 block-zenero-esports-fixtures-live">Fixtures</h2>
+    <h2 class="block block-zenero-esports-fixtures-live-3 block-zenero-esports-fixtures-live block-heading">Fixtures</h2>
     <div data-forge-fixtures-list class="block block-zenero-esports-fixtures-live-4 block-zenero-esports-fixtures-live">
       <div class="block block-zenero-esports-fixtures-live-5 block-zenero-esports-fixtures-live">Add fixtures in the Zenero dashboard.</div>
     </div>
@@ -2306,7 +2306,7 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
         label: "Oxygene · Hero",
         html: `<section class="block oxygene block-oxygene-hero">
   <div class="block-oxygene-hero-inner">
-    <h1 class="block-oxygene-hero-title">Oxygen.</h1>
+    <h1 class="block-oxygene-hero-title block-heading">Oxygen.</h1>
     <h2 class="block-oxygene-hero-subtitle">Where design meets innovation</h2>
     <p class="block-oxygene-hero-description">Build luminous digital experiences with a design system crafted for clarity, scale, and soul.</p>
     <button class="block-oxygene-btn block-oxygene-btn-primary">Get Started</button>

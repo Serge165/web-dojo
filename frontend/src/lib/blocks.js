@@ -22,8 +22,8 @@ const CORE_CATEGORIES = [
         label: "Gallery · 3-col Grid",
         html: `<section class="block block-components-gallery-grid-1 block-components-gallery-grid">
   <div class="block block-components-gallery-grid-2 block-components-gallery-grid">
-    <h2 class="block block-components-gallery-grid-3 block-components-gallery-grid">Gallery</h2>
-    <div class="block block-components-gallery-grid-4 block-components-gallery-grid">
+    <h2 class="block block-components-gallery-grid-3 block-components-gallery-grid block-heading">Gallery</h2>
+    <div class="block block-components-gallery-grid-4 block-components-gallery-grid container block cmp-gallery-grid">
       <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=70" class="block block-components-gallery-grid-5 block-components-gallery-grid" alt="" />
       <img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?w=800&q=70" class="block block-components-gallery-grid-6 block-components-gallery-grid" alt="" />
       <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=70" class="block block-components-gallery-grid-7 block-components-gallery-grid" alt="" />
@@ -39,8 +39,8 @@ const CORE_CATEGORIES = [
         label: "Gallery · Masonry",
         html: `<section class="block block-components-gallery-masonry-1 block-components-gallery-masonry">
   <div class="block block-components-gallery-masonry-2 block-components-gallery-masonry">
-    <h2 class="block block-components-gallery-masonry-3 block-components-gallery-masonry">Curated</h2>
-    <div class="block block-components-gallery-masonry-4 block-components-gallery-masonry">
+    <h2 class="block block-components-gallery-masonry-3 block-components-gallery-masonry block-heading">Curated</h2>
+    <div class="block block-components-gallery-masonry-4 block-components-gallery-masonry container block cmp-gallery-masonry">
       <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=70" class="block block-components-gallery-masonry-5 block-components-gallery-masonry" alt="" />
       <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=70" class="block block-components-gallery-masonry-6 block-components-gallery-masonry" alt="" />
       <img src="https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=800&q=70" class="block block-components-gallery-masonry-7 block-components-gallery-masonry" alt="" />
@@ -56,9 +56,9 @@ const CORE_CATEGORIES = [
         label: "Gallery · Scroll Carousel",
         html: `<section class="block block-components-gallery-carousel-1 block-components-gallery-carousel">
   <div class="block block-components-gallery-carousel-2 block-components-gallery-carousel">
-    <h2 class="block block-components-gallery-carousel-3 block-components-gallery-carousel">Featured</h2>
+    <h2 class="block block-components-gallery-carousel-3 block-components-gallery-carousel block-heading">Featured</h2>
   </div>
-  <div class="block block-components-gallery-carousel-4 block-components-gallery-carousel">
+  <div class="block block-components-gallery-carousel-4 block-components-gallery-carousel container block cmp-gallery-carousel">
     <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=70" class="block block-components-gallery-carousel-5 block-components-gallery-carousel" alt="" /><img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?w=800&q=70" class="block block-components-gallery-carousel-6 block-components-gallery-carousel" alt="" /><img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=70" class="block block-components-gallery-carousel-7 block-components-gallery-carousel" alt="" /><img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=70" class="block block-components-gallery-carousel-8 block-components-gallery-carousel" alt="" /><img src="https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=800&q=70" class="block block-components-gallery-carousel-9 block-components-gallery-carousel" alt="" /><img src="https://images.unsplash.com/photo-1441829266145-6d4bfbf99bd8?w=800&q=70" class="block block-components-gallery-carousel-10 block-components-gallery-carousel" alt="" />
   </div>
 </section>`,
@@ -76,7 +76,7 @@ const CORE_CATEGORIES = [
         id: "cmp-gallery-polaroid",
         label: "Gallery · Polaroid Stack",
         html: `<section class="block block-components-gallery-polaroid-1 block-components-gallery-polaroid">
-  <div class="block block-components-gallery-polaroid-2 block-components-gallery-polaroid">
+  <div class="block block-components-gallery-polaroid-2 block-components-gallery-polaroid container block cmp-gallery-polaroid">
     <figure class="block block-components-gallery-polaroid-3 block-components-gallery-polaroid"><img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=70" class="block block-components-gallery-polaroid-4 block-components-gallery-polaroid" alt="" /><figcaption class="block block-components-gallery-polaroid-5 block-components-gallery-polaroid">memory</figcaption></figure><figure class="block block-components-gallery-polaroid-6 block-components-gallery-polaroid"><img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?w=800&q=70" class="block block-components-gallery-polaroid-7 block-components-gallery-polaroid" alt="" /><figcaption class="block block-components-gallery-polaroid-8 block-components-gallery-polaroid">memory</figcaption></figure><figure class="block block-components-gallery-polaroid-9 block-components-gallery-polaroid"><img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=70" class="block block-components-gallery-polaroid-10 block-components-gallery-polaroid" alt="" /><figcaption class="block block-components-gallery-polaroid-11 block-components-gallery-polaroid">memory</figcaption></figure><figure class="block block-components-gallery-polaroid-12 block-components-gallery-polaroid"><img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=800&q=70" class="block block-components-gallery-polaroid-13 block-components-gallery-polaroid" alt="" /><figcaption class="block block-components-gallery-polaroid-14 block-components-gallery-polaroid">memory</figcaption></figure><figure class="block block-components-gallery-polaroid-15 block-components-gallery-polaroid"><img src="https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=800&q=70" class="block block-components-gallery-polaroid-16 block-components-gallery-polaroid" alt="" /><figcaption class="block block-components-gallery-polaroid-17 block-components-gallery-polaroid">memory</figcaption></figure><figure class="block block-components-gallery-polaroid-18 block-components-gallery-polaroid"><img src="https://images.unsplash.com/photo-1441829266145-6d4bfbf99bd8?w=800&q=70" class="block block-components-gallery-polaroid-19 block-components-gallery-polaroid" alt="" /><figcaption class="block block-components-gallery-polaroid-20 block-components-gallery-polaroid">memory</figcaption></figure>
   </div>
 </section>`,
@@ -85,7 +85,7 @@ const CORE_CATEGORIES = [
         id: "cmp-gallery-lightbox",
         label: "Gallery · Featured + Thumbs",
         html: `<section class="block block-components-gallery-lightbox-1 block-components-gallery-lightbox">
-  <div class="block block-components-gallery-lightbox-2 block-components-gallery-lightbox">
+  <div class="block block-components-gallery-lightbox-2 block-components-gallery-lightbox container block cmp-gallery-lightbox">
     <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&q=70" class="block block-components-gallery-lightbox-3 block-components-gallery-lightbox" alt="" />
     <img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?w=800&q=70" class="block block-components-gallery-lightbox-4 block-components-gallery-lightbox" alt="" />
     <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=70" class="block block-components-gallery-lightbox-5 block-components-gallery-lightbox" alt="" />
@@ -131,7 +131,7 @@ const CORE_CATEGORIES = [
         id: "cmp-anim-hero",
         label: "Animated Hero",
         html: `<section class="block block-components-anim-hero-1 block-components-anim-hero">
-  <h1 class="block block-components-anim-hero-2 block-components-anim-hero">Design in motion.</h1>
+  <h1 class="block block-components-anim-hero-2 block-components-anim-hero block-heading">Design in motion.</h1>
   <p class="block block-components-anim-hero-3 block-components-anim-hero">A studio-grade website builder with real-time animations, themes and export.</p>
   <button class="block block-components-anim-hero-4 block-components-anim-hero">Start creating</button>
   <style>@keyframes forge-slide-up{0%{opacity:0;transform:translateY(28px)}100%{opacity:1;transform:translateY(0)}}@keyframes forge-pop{0%{opacity:0;transform:scale(.6)}60%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}</style>
@@ -167,7 +167,7 @@ const CORE_CATEGORIES = [
         label: "Pricing (3-col)",
         html: `<section class="block block-components-pricing-3-1 block-components-pricing-3">
   <div class="block block-components-pricing-3-2 block-components-pricing-3">
-    <h2 class="block block-components-pricing-3-3 block-components-pricing-3">Simple pricing</h2>
+    <h2 class="block block-components-pricing-3-3 block-components-pricing-3 block-heading">Simple pricing</h2>
     <div class="block block-components-pricing-3-4 block-components-pricing-3">
       <div class="block block-components-pricing-3-5 block-components-pricing-3">
         <div class="block block-components-pricing-3-6 block-components-pricing-3">Free</div>
@@ -218,8 +218,8 @@ const CORE_CATEGORIES = [
         label: "Vertical Timeline",
         html: `<section class="block block-timelines-vert-1 block-timelines-vert">
   <div class="block block-timelines-vert-2 block-timelines-vert">
-    <h2 class="block block-timelines-vert-3 block-timelines-vert">Our journey</h2>
-    <ol class="block block-timelines-vert-4 block-timelines-vert">
+    <h2 class="block block-timelines-vert-3 block-timelines-vert block-heading">Our journey</h2>
+    <ol class="block block-timelines-vert-4 block-timelines-vert container block cmp-timeline-vert">
       <li class="block block-timelines-vert-5 block-timelines-vert">
         <span class="block block-timelines-vert-6 block-timelines-vert"></span>
         <div class="block block-timelines-vert-7 block-timelines-vert">2021</div>
@@ -255,7 +255,7 @@ const CORE_CATEGORIES = [
         label: "Alternating Timeline",
         html: `<section class="block block-timelines-alt-1 block-timelines-alt">
   <div class="block block-timelines-alt-2 block-timelines-alt">
-    <h2 class="block block-timelines-alt-3 block-timelines-alt">Milestones</h2>
+    <h2 class="block block-timelines-alt-3 block-timelines-alt block-heading">Milestones</h2>
     <div class="block block-timelines-alt-4 block-timelines-alt"></div>
     
       <div class="block block-timelines-alt-5 block-timelines-alt">
@@ -306,7 +306,7 @@ const CORE_CATEGORIES = [
         label: "Horizontal Timeline",
         html: `<section class="block block-timelines-hori-1 block-timelines-hori">
   <div class="block block-timelines-hori-2 block-timelines-hori">
-    <h2 class="block block-timelines-hori-3 block-timelines-hori">Roadmap 2026</h2>
+    <h2 class="block block-timelines-hori-3 block-timelines-hori block-heading">Roadmap 2026</h2>
     <div class="block block-timelines-hori-4 block-timelines-hori">
       <div class="block block-timelines-hori-5 block-timelines-hori"></div>
       <div class="block block-timelines-hori-6 block-timelines-hori">
@@ -341,7 +341,7 @@ const CORE_CATEGORIES = [
         label: "Card Timeline",
         html: `<section class="block block-timelines-cards-1 block-timelines-cards">
   <div class="block block-timelines-cards-2 block-timelines-cards">
-    <h2 class="block block-timelines-cards-3 block-timelines-cards">Release history</h2>
+    <h2 class="block block-timelines-cards-3 block-timelines-cards block-heading">Release history</h2>
     <div class="block block-timelines-cards-4 block-timelines-cards">
       <article class="block block-timelines-cards-5 block-timelines-cards">
         <div>
@@ -389,8 +389,8 @@ const CORE_CATEGORIES = [
         label: "Numbered Steps",
         html: `<section class="block block-timelines-steps-1 block-timelines-steps">
   <div class="block block-timelines-steps-2 block-timelines-steps">
-    <h2 class="block block-timelines-steps-3 block-timelines-steps">How it works</h2>
-    <ol class="block block-timelines-steps-4 block-timelines-steps">
+    <h2 class="block block-timelines-steps-3 block-timelines-steps block-heading">How it works</h2>
+    <ol class="block block-timelines-steps-4 block-timelines-steps container block cmp-timeline-steps">
       <li class="block block-timelines-steps-5 block-timelines-steps">
         <span class="block block-timelines-steps-6 block-timelines-steps">1</span>
         <div class="block block-timelines-steps-7 block-timelines-steps">Sign up</div>
@@ -457,7 +457,7 @@ const CORE_CATEGORIES = [
         html: `<section class="block block-heroes-centered-1 block-heroes-centered">
   <div class="block block-heroes-centered-2 block-heroes-centered">
     <div class="block block-heroes-centered-3 block-heroes-centered">New · v1.0 released</div>
-    <h1 class="block block-heroes-centered-4 block-heroes-centered">Build faster. Ship sharper.</h1>
+    <h1 class="block block-heroes-centered-4 block-heroes-centered block-heading">Build faster. Ship sharper.</h1>
     <p class="block block-heroes-centered-5 block-heroes-centered">A studio-grade website builder that gets out of your way. Drag, drop, and export production HTML.</p>
     <div class="block block-heroes-centered-6 block-heroes-centered">
       <button class="block block-heroes-centered-7 block-heroes-centered">Get started</button>
@@ -471,7 +471,7 @@ const CORE_CATEGORIES = [
         label: "Split Hero",
         html: `<section class="block block-heroes-split-1 block-heroes-split">
   <div>
-    <h1 class="block block-heroes-split-2 block-heroes-split">A canvas for the web.</h1>
+    <h1 class="block block-heroes-split-2 block-heroes-split block-heading">A canvas for the web.</h1>
     <p class="block block-heroes-split-3 block-heroes-split">Design in the browser. Import any HTML. Export standalone files. No lock-in.</p>
     <button class="block block-heroes-split-4 block-heroes-split">Start building</button>
   </div>
@@ -489,7 +489,7 @@ const CORE_CATEGORIES = [
         label: "Feature Grid",
         html: `<section class="block block-sections-feature-1 block-sections-feature">
   <div class="block block-sections-feature-2 block-sections-feature">
-    <h2 class="block block-sections-feature-3 block-sections-feature">Everything you need.</h2>
+    <h2 class="block block-sections-feature-3 block-sections-feature block-heading">Everything you need.</h2>
     <div class="block block-sections-feature-4 block-sections-feature">
       <div class="block block-sections-feature-5 block-sections-feature">
         <div class="block block-sections-feature-6 block-sections-feature"></div>
@@ -514,7 +514,7 @@ const CORE_CATEGORIES = [
         id: "section-cta",
         label: "CTA Banner",
         html: `<section class="block block-sections-cta-1 block-sections-cta">
-  <h2 class="block block-sections-cta-2 block-sections-cta">Ready to ship?</h2>
+  <h2 class="block block-sections-cta-2 block-sections-cta block-heading">Ready to ship?</h2>
   <p class="block block-sections-cta-3 block-sections-cta">Export production HTML in a single click.</p>
   <button class="block block-sections-cta-4 block-sections-cta">Start now</button>
 </section>`,
@@ -555,8 +555,8 @@ const CORE_CATEGORIES = [
     id: "text",
     label: "Text",
     blocks: [
-      { id: "text-h1", label: "Heading 1", html: `<h1 class="block block-text-h1-1 block-text-h1">Heading 1</h1>` },
-      { id: "text-h2", label: "Heading 2", html: `<h2 class="block block-text-h2-1 block-text-h2">Heading 2</h2>` },
+      { id: "text-h1", label: "Heading 1", html: `<h1 class="block block-text-h1-1 block-text-h1 block-heading">Heading 1</h1>` },
+      { id: "text-h2", label: "Heading 2", html: `<h2 class="block block-text-h2-1 block-text-h2 block-heading">Heading 2</h2>` },
       { id: "text-p", label: "Paragraph", html: `<p class="block block-text-p-1 block-text-p">A paragraph of body copy. Click to edit contents inline in Design mode.</p>` },
       { id: "text-input", label: "Text Input", html: `<div class="block block-text-input-1 block-text-input"><input type="text" placeholder="Type here…" class="block block-text-input-2 block-text-input" /></div>` },
       { id: "text-area", label: "Textarea", html: `<div class="block block-text-area-1 block-text-area"><textarea placeholder="Multi-line…" rows="4" class="block block-text-area-2 block-text-area"></textarea></div>` },
