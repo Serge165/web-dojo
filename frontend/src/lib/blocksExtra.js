@@ -122,69 +122,69 @@ export const EXTRA_CATEGORIES = [
       {
         id: "nav-centered-logo",
         label: "Centered Logo Nav",
-        html: `<nav class="block block-navbars-centered-logo-1 block-navbars-centered-logo">
-  <div class="block block-navbars-centered-logo-2 block-navbars-centered-logo">
-    <a href="#" class="block block-navbars-centered-logo-3 block-navbars-centered-logo">Shop</a><a href="#" class="block block-navbars-centered-logo-4 block-navbars-centered-logo">New</a><a href="#" class="block block-navbars-centered-logo-5 block-navbars-centered-logo">About</a>
-  </div>
-  <div class="block block-navbars-centered-logo-6 block-navbars-centered-logo">MAISON</div>
-  <div class="block block-navbars-centered-logo-7 block-navbars-centered-logo">
-    <a href="#" class="block block-navbars-centered-logo-8 block-navbars-centered-logo">Journal</a><a href="#" class="block block-navbars-centered-logo-9 block-navbars-centered-logo">Cart (0)</a>
-  </div>
-</nav>`,
+        html: `<nav class="block block-navbars-centered-logo">
+          <div class="utility-2">
+          <a href="#" class="utility-3">Shop</a><a href="#" class="utility-4">New</a><a href="#" class="utility-5">About</a>
+          </div>
+          <div class="utility-6">MAISON</div>
+          <div class="utility-7">
+          <a href="#" class="utility-8">Journal</a><a href="#" class="utility-9">Cart (0)</a>
+          </div>
+        </nav>`,
       },
       {
         id: "nav-mega",
         label: "Mega-menu Nav",
-        html: `<nav class="wd-mega block-navbars-mega-1 block-navbars-mega">
-  <div class="block block-navbars-mega-2 block-navbars-mega">Northwind</div>
-  <div class="block block-navbars-mega-3 block-navbars-mega">
-    <div class="wd-mega-item block-navbars-mega-4 block-navbars-mega"><a href="#" class="block block-navbars-mega-5 block-navbars-mega">Products ▾</a>
-      <div class="wd-mega-panel block-navbars-mega-6 block-navbars-mega">
-        <a href="#" class="block block-navbars-mega-7 block-navbars-mega"><div class="block block-navbars-mega-8 block-navbars-mega">Analytics</div><div class="block block-navbars-mega-9 block-navbars-mega">Understand your traffic</div></a><a href="#" class="block block-navbars-mega-10 block-navbars-mega"><div class="block block-navbars-mega-11 block-navbars-mega">Automations</div><div class="block block-navbars-mega-12 block-navbars-mega">Set it and forget it</div></a><a href="#" class="block block-navbars-mega-13 block-navbars-mega"><div class="block block-navbars-mega-14 block-navbars-mega">Inbox</div><div class="block block-navbars-mega-15 block-navbars-mega">One place for messages</div></a><a href="#" class="block block-navbars-mega-16 block-navbars-mega"><div class="block block-navbars-mega-17 block-navbars-mega">Reports</div><div class="block block-navbars-mega-18 block-navbars-mega">Beautiful dashboards</div></a>
-      </div>
-    </div>
-    <a href="#" class="block block-navbars-mega-19 block-navbars-mega">Pricing</a><a href="#" class="block block-navbars-mega-20 block-navbars-mega">Docs</a>
-  </div>
-  <button class="block block-navbars-mega-21 block-navbars-mega">Get started</button>
-  <style>.wd-mega .wd-mega-item:hover .wd-mega-panel{display:grid;}</style>
-</nav>`,
+        html: `<nav class="block block-navbars-mega">
+          <div class="utility-2">Northwind</div>
+          <div class="utility-3">
+          <div class="wd-mega-item utility-4"><a href="#" class="utility-5">Products ▾</a>
+          <div class="wd-mega-panel utility-6">
+          <a href="#" class="utility-7"><div class="utility-8">Analytics</div><div class="utility-9">Understand your traffic</div></a><a href="#" class="utility-10"><div class="utility-11">Automations</div><div class="utility-12">Set it and forget it</div></a><a href="#" class="utility-13"><div class="utility-14">Inbox</div><div class="utility-15">One place for messages</div></a><a href="#" class="utility-16"><div class="utility-17">Reports</div><div class="utility-18">Beautiful dashboards</div></a>
+          </div>
+          </div>
+          <a href="#" class="utility-19">Pricing</a><a href="#" class="utility-20">Docs</a>
+          </div>
+          <button class="utility-21">Get started</button>
+          <style>.wd-mega .wd-mega-item:hover .wd-mega-panel{display:grid;}</style>
+        </nav>`,
       },
       {
         id: "nav-ecommerce",
         label: "E-commerce Nav + Search",
-        html: `<nav class="block block-navbars-ecommerce-1 block-navbars-ecommerce">
-  <div class="block block-navbars-ecommerce-2 block-navbars-ecommerce">STORE</div>
-  <div class="block block-navbars-ecommerce-3 block-navbars-ecommerce">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-    <input placeholder="Search products…" class="block block-navbars-ecommerce-4 block-navbars-ecommerce" />
-  </div>
-  <div class="block block-navbars-ecommerce-5 block-navbars-ecommerce">
-    <a href="#" class="block block-navbars-ecommerce-6 block-navbars-ecommerce">Account</a>
-    <a href="#" class="block block-navbars-ecommerce-7 block-navbars-ecommerce">Cart <span class="block block-navbars-ecommerce-8 block-navbars-ecommerce">3</span></a>
-  </div>
-</nav>`,
+        html: `<nav class="block block-navbars-ecommerce">
+          <div class="utility-2">STORE</div>
+          <div class="utility-3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input placeholder="Search products…" class="utility-4" />
+          </div>
+          <div class="utility-5">
+          <a href="#" class="utility-6">Account</a>
+          <a href="#" class="utility-7">Cart <span class="utility-8">3</span></a>
+          </div>
+        </nav>`,
       },
       {
         id: "nav-transparent",
         label: "Transparent Overlay Nav",
-        html: `<nav class="block block-navbars-transparent-1 block-navbars-transparent">
-  <div class="block block-navbars-transparent-2 block-navbars-transparent">AURORA</div>
-  <div class="block block-navbars-transparent-3 block-navbars-transparent">
-    <a href="#" class="block block-navbars-transparent-4 block-navbars-transparent">Home</a><a href="#" class="block block-navbars-transparent-5 block-navbars-transparent">Rooms</a><a href="#" class="block block-navbars-transparent-6 block-navbars-transparent">Dining</a>
-  </div>
-  <button class="block block-navbars-transparent-7 block-navbars-transparent">Book now</button>
-</nav>`,
+        html: `<nav class="block block-navbars-transparent">
+          <div class="utility-2">AURORA</div>
+          <div class="utility-3">
+          <a href="#" class="utility-4">Home</a><a href="#" class="utility-5">Rooms</a><a href="#" class="utility-6">Dining</a>
+          </div>
+          <button class="utility-7">Book now</button>
+        </nav>`,
       },
       {
         id: "nav-app-tabs",
         label: "App Pill-tabs Nav",
-        html: `<nav class="block block-navbars-app-tabs-1 block-navbars-app-tabs">
-  <div class="block block-navbars-app-tabs-2 block-navbars-app-tabs">◐ Flowly</div>
-  <div class="block block-navbars-app-tabs-3 block-navbars-app-tabs">
-    <a href="#" class="block block-navbars-app-tabs-4 block-navbars-app-tabs">Overview</a><a href="#" class="block block-navbars-app-tabs-5 block-navbars-app-tabs">Projects</a><a href="#" class="block block-navbars-app-tabs-6 block-navbars-app-tabs">Team</a><a href="#" class="block block-navbars-app-tabs-7 block-navbars-app-tabs">Settings</a>
-  </div>
-  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80" class="block block-navbars-app-tabs-8 block-navbars-app-tabs" alt="" />
-</nav>`,
+        html: `<nav class="block block-navbars-app-tabs">
+          <div class="utility-2">◐ Flowly</div>
+          <div class="utility-3">
+          <a href="#" class="utility-4">Overview</a><a href="#" class="utility-5">Projects</a><a href="#" class="utility-6">Team</a><a href="#" class="utility-7">Settings</a>
+          </div>
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80" class="utility-8" alt="" />
+        </nav>`,
       },
     ],
   },
@@ -195,61 +195,61 @@ export const EXTRA_CATEGORIES = [
       {
         id: "hdr-announcement",
         label: "Announcement + Header",
-        html: `<div class="block block-headers-announcement-1 block-headers-announcement">
-  <div class="block block-headers-announcement-2 block-headers-announcement">✦ Free shipping on orders over $50 — <a href="#" class="block block-headers-announcement-3 block-headers-announcement">Shop now</a></div>
-  <header class="block block-headers-announcement-4 block-headers-announcement">
-    <div class="block block-headers-announcement-5 block-headers-announcement">Brand</div>
-    <nav class="block block-headers-announcement-6 block-headers-announcement"><a href="#" class="block block-headers-announcement-7 block-headers-announcement">Home</a><a href="#" class="block block-headers-announcement-8 block-headers-announcement">Shop</a><a href="#" class="block block-headers-announcement-9 block-headers-announcement">Blog</a></nav>
-    <button class="block block-headers-announcement-10 block-headers-announcement">Contact</button>
+        html: `<section class="block block-headers-announcement">
+  <div class="utility-2">✦ Free shipping on orders over $50 — <a href="#" class="utility-3">Shop now</a></div>
+  <header class="utility-4">
+    <div class="utility-5">Brand</div>
+    <nav class="utility-6"><a href="#" class="utility-7">Home</a><a href="#" class="utility-8">Shop</a><a href="#" class="utility-9">Blog</a></nav>
+    <button class="utility-10">Contact</button>
   </header>
-</div>`,
+</section>`,
       },
       {
         id: "hdr-dropdown",
         label: "Header + Dropdown",
-        html: `<header class="wd-hd block-headers-dropdown-1 block-headers-dropdown">
-  <div class="block block-headers-dropdown-2 block-headers-dropdown">Vertex</div>
-  <nav class="block block-headers-dropdown-3 block-headers-dropdown">
-    <div class="wd-hd-item block-headers-dropdown-4 block-headers-dropdown"><a href="#" class="block block-headers-dropdown-5 block-headers-dropdown">Solutions ▾</a>
-      <div class="wd-hd-menu block-headers-dropdown-6 block-headers-dropdown">
-        <a href="#" class="block block-headers-dropdown-7 block-headers-dropdown">For startups</a><a href="#" class="block block-headers-dropdown-8 block-headers-dropdown">For agencies</a><a href="#" class="block block-headers-dropdown-9 block-headers-dropdown">For enterprise</a>
-      </div>
-    </div>
-    <a href="#" class="block block-headers-dropdown-10 block-headers-dropdown">Pricing</a><a href="#" class="block block-headers-dropdown-11 block-headers-dropdown">Company</a>
-  </nav>
-  <button class="block block-headers-dropdown-12 block-headers-dropdown">Sign up</button>
-  <style>.wd-hd .wd-hd-item:hover .wd-hd-menu{display:block;}</style>
-</header>`,
+        html: `<section class="block block-headers-dropdown">
+          <div class="utility-2">Vertex</div>
+          <nav class="utility-3">
+          <div class="wd-hd-item utility-4"><a href="#" class="utility-5">Solutions ▾</a>
+          <div class="wd-hd-menu utility-6">
+          <a href="#" class="utility-7">For startups</a><a href="#" class="utility-8">For agencies</a><a href="#" class="utility-9">For enterprise</a>
+          </div>
+          </div>
+          <a href="#" class="utility-10">Pricing</a><a href="#" class="utility-11">Company</a>
+          </nav>
+          <button class="utility-12">Sign up</button>
+          <style>.wd-hd .wd-hd-item:hover .wd-hd-menu{display:block;}</style>
+        </section>`,
       },
       {
         id: "hdr-minimal-serif",
         label: "Minimal Serif Header",
-        html: `<header class="block block-headers-minimal-serif-1 block-headers-minimal-serif">
-  <div class="block block-headers-minimal-serif-2 block-headers-minimal-serif">The Quarterly</div>
-  <nav class="block block-headers-minimal-serif-3 block-headers-minimal-serif">
-    <a href="#" class="block block-headers-minimal-serif-4 block-headers-minimal-serif">Essays</a><a href="#" class="block block-headers-minimal-serif-5 block-headers-minimal-serif">Interviews</a><a href="#" class="block block-headers-minimal-serif-6 block-headers-minimal-serif">Archive</a><a href="#" class="block block-headers-minimal-serif-7 block-headers-minimal-serif">Subscribe</a>
-  </nav>
-</header>`,
+        html: `<section class="block block-headers-minimal-serif">
+          <div class="utility-2">The Quarterly</div>
+          <nav class="utility-3">
+          <a href="#" class="utility-4">Essays</a><a href="#" class="utility-5">Interviews</a><a href="#" class="utility-6">Archive</a><a href="#" class="utility-7">Subscribe</a>
+          </nav>
+        </section>`,
       },
       {
         id: "hdr-dark-cta",
         label: "Dark Header + CTA",
-        html: `<header class="block block-headers-dark-cta-1 block-headers-dark-cta">
-  <div class="block block-headers-dark-cta-2 block-headers-dark-cta"><div class="block block-headers-dark-cta-3 block-headers-dark-cta"></div><span class="block block-headers-dark-cta-4 block-headers-dark-cta">Ignite</span></div>
-  <nav class="block block-headers-dark-cta-5 block-headers-dark-cta"><a href="#" class="block block-headers-dark-cta-6 block-headers-dark-cta">Product</a><a href="#" class="block block-headers-dark-cta-7 block-headers-dark-cta">Customers</a><a href="#" class="block block-headers-dark-cta-8 block-headers-dark-cta">Pricing</a></nav>
-  <div class="block block-headers-dark-cta-9 block-headers-dark-cta"><button class="block block-headers-dark-cta-10 block-headers-dark-cta">Log in</button><button class="block block-headers-dark-cta-11 block-headers-dark-cta">Start free</button></div>
-</header>`,
+        html: `<section class="block block-headers-dark-cta">
+          <div class="utility-2"><div class="utility-3"></div><span class="utility-4">Ignite</span></div>
+          <nav class="utility-5"><a href="#" class="utility-6">Product</a><a href="#" class="utility-7">Customers</a><a href="#" class="utility-8">Pricing</a></nav>
+          <div class="utility-9"><button class="utility-10">Log in</button><button class="utility-11">Start free</button></div>
+        </section>`,
       },
       {
         id: "hdr-search-actions",
         label: "Header + Search + Icons",
-        html: `<header class="block block-headers-search-actions-1 block-headers-search-actions">
-  <div class="block block-headers-search-actions-2 block-headers-search-actions">Docs</div>
-  <nav class="block block-headers-search-actions-3 block-headers-search-actions"><a href="#" class="block block-headers-search-actions-4 block-headers-search-actions">Guides</a><a href="#" class="block block-headers-search-actions-5 block-headers-search-actions">API</a><a href="#" class="block block-headers-search-actions-6 block-headers-search-actions">Examples</a></nav>
-  <div class="block block-headers-search-actions-7 block-headers-search-actions"></div>
-  <div class="block block-headers-search-actions-8 block-headers-search-actions"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="Search docs ⌘K" class="block block-headers-search-actions-9 block-headers-search-actions" /></div>
-  <a href="#" class="block block-headers-search-actions-10 block-headers-search-actions">◔</a>
-</header>`,
+        html: `<section class="block block-headers-search-actions">
+          <div class="utility-2">Docs</div>
+          <nav class="utility-3"><a href="#" class="utility-4">Guides</a><a href="#" class="utility-5">API</a><a href="#" class="utility-6">Examples</a></nav>
+          <div class="utility-7"></div>
+          <div class="utility-8"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input placeholder="Search docs ⌘K" class="utility-9" /></div>
+          <a href="#" class="utility-10">◔</a>
+        </section>`,
       },
     ],
   },
@@ -260,80 +260,80 @@ export const EXTRA_CATEGORIES = [
       {
         id: "ft-minimal",
         label: "Minimal Footer",
-        html: `<footer class="block block-footers-minimal-1 block-footers-minimal">
-  <div class="block block-footers-minimal-2 block-footers-minimal">© 2026 Brand — All rights reserved.</div>
-  <div class="block block-footers-minimal-3 block-footers-minimal"><a href="#" class="block block-footers-minimal-4 block-footers-minimal">Privacy</a><a href="#" class="block block-footers-minimal-5 block-footers-minimal">Terms</a><a href="#" class="block block-footers-minimal-6 block-footers-minimal">Contact</a></div>
-</footer>`,
+        html: `<footer class="block block-footers-minimal">
+          <div class="utility-2">© 2026 Brand — All rights reserved.</div>
+          <div class="utility-3"><a href="#" class="utility-4">Privacy</a><a href="#" class="utility-5">Terms</a><a href="#" class="utility-6">Contact</a></div>
+        </footer>`,
       },
       {
         id: "ft-newsletter",
         label: "Newsletter Footer",
-        html: `<footer class="block block-footers-newsletter-1 block-footers-newsletter">
-  <div class="block block-footers-newsletter-2 block-footers-newsletter">
-    <div><h3 class="block block-footers-newsletter-3 block-footers-newsletter">Stay in the loop</h3><p class="block block-footers-newsletter-4 block-footers-newsletter">One thoughtful email a week. No spam.</p></div>
-    <form class="block block-footers-newsletter-5 block-footers-newsletter"><input placeholder="you@example.com" class="block block-footers-newsletter-6 block-footers-newsletter" /><button class="block block-footers-newsletter-7 block-footers-newsletter">Subscribe</button></form>
-  </div>
-  <div class="block block-footers-newsletter-8 block-footers-newsletter">© 2026 Brand.</div>
-</footer>`,
+        html: `<footer class="block block-footers-newsletter">
+          <div class="utility-2">
+          <div><h3 class="utility-3">Stay in the loop</h3><p class="utility-4">One thoughtful email a week. No spam.</p></div>
+          <form class="utility-5"><input placeholder="you@example.com" class="utility-6" /><button class="utility-7">Subscribe</button></form>
+          </div>
+          <div class="utility-8">© 2026 Brand.</div>
+        </footer>`,
       },
       {
         id: "ft-social-dark",
         label: "Social Footer",
-        html: `<footer class="block block-footers-social-dark-1 block-footers-social-dark">
-  <div class="block block-footers-social-dark-2 block-footers-social-dark">AURORA</div>
-  <div class="block block-footers-social-dark-3 block-footers-social-dark">
-    <a href="#" class="block block-footers-social-dark-4 block-footers-social-dark">Instagram</a><a href="#" class="block block-footers-social-dark-5 block-footers-social-dark">X</a><a href="#" class="block block-footers-social-dark-6 block-footers-social-dark">YouTube</a><a href="#" class="block block-footers-social-dark-7 block-footers-social-dark">TikTok</a>
-  </div>
-  <div class="block block-footers-social-dark-8 block-footers-social-dark">© 2026 Aurora Studio. Made with care.</div>
-</footer>`,
+        html: `<footer class="block block-footers-social-dark">
+          <div class="utility-2">AURORA</div>
+          <div class="utility-3">
+          <a href="#" class="utility-4">Instagram</a><a href="#" class="utility-5">X</a><a href="#" class="utility-6">YouTube</a><a href="#" class="utility-7">TikTok</a>
+          </div>
+          <div class="utility-8">© 2026 Aurora Studio. Made with care.</div>
+        </footer>`,
       },
       {
         id: "ft-columns-light",
         label: "4-column Light Footer",
-        html: `<footer class="block block-footers-columns-light-1 block-footers-columns-light">
-  <div class="block block-footers-columns-light-2 block-footers-columns-light">
-    <div><div class="block block-footers-columns-light-3 block-footers-columns-light">Brand</div><p class="block block-footers-columns-light-4 block-footers-columns-light">Design and ship beautiful sites, fast.</p></div>
-    <div><div class="block block-footers-columns-light-5 block-footers-columns-light">Product</div><a href="#" class="block block-footers-columns-light-6 block-footers-columns-light">Features</a><a href="#" class="block block-footers-columns-light-7 block-footers-columns-light">Pricing</a><a href="#" class="block block-footers-columns-light-8 block-footers-columns-light">Roadmap</a></div><div><div class="block block-footers-columns-light-9 block-footers-columns-light">Resources</div><a href="#" class="block block-footers-columns-light-10 block-footers-columns-light">Blog</a><a href="#" class="block block-footers-columns-light-11 block-footers-columns-light">Guides</a><a href="#" class="block block-footers-columns-light-12 block-footers-columns-light">Support</a></div><div><div class="block block-footers-columns-light-13 block-footers-columns-light">Company</div><a href="#" class="block block-footers-columns-light-14 block-footers-columns-light">About</a><a href="#" class="block block-footers-columns-light-15 block-footers-columns-light">Careers</a><a href="#" class="block block-footers-columns-light-16 block-footers-columns-light">Legal</a></div>
-  </div>
-</footer>`,
+        html: `<footer class="block block-footers-columns-light">
+          <div class="utility-2">
+          <div><div class="utility-3">Brand</div><p class="utility-4">Design and ship beautiful sites, fast.</p></div>
+          <div><div class="utility-5">Product</div><a href="#" class="utility-6">Features</a><a href="#" class="utility-7">Pricing</a><a href="#" class="utility-8">Roadmap</a></div><div><div class="utility-9">Resources</div><a href="#" class="utility-10">Blog</a><a href="#" class="utility-11">Guides</a><a href="#" class="utility-12">Support</a></div><div><div class="utility-13">Company</div><a href="#" class="utility-14">About</a><a href="#" class="utility-15">Careers</a><a href="#" class="utility-16">Legal</a></div>
+          </div>
+        </footer>`,
       },
       {
         id: "ft-contact",
         label: "Contact Footer",
-        html: `<footer class="block block-footers-contact-1 block-footers-contact">
-  <div class="block block-footers-contact-2 block-footers-contact">
-    <div><div class="block block-footers-contact-3 block-footers-contact">Get in touch</div><p class="block block-footers-contact-4 block-footers-contact">hello@example.com<br/>+1 (555) 019-2834<br/>24 Harbour St, Suite 400</p></div>
-    <div><div class="block block-footers-contact-5 block-footers-contact">Hours</div><p class="block block-footers-contact-6 block-footers-contact">Mon–Fri · 9–6<br/>Sat · 10–4<br/>Sun · Closed</p></div>
-    <div><div class="block block-footers-contact-7 block-footers-contact">Follow</div><p class="block block-footers-contact-8 block-footers-contact">Instagram<br/>LinkedIn<br/>YouTube</p></div>
-  </div>
-  <div class="block block-footers-contact-9 block-footers-contact">© 2026 Brand.</div>
-</footer>`,
+        html: `<footer class="block block-footers-contact">
+          <div class="utility-2">
+          <div><div class="utility-3">Get in touch</div><p class="utility-4">hello@example.com<br/>+1 (555) 019-2834<br/>24 Harbour St, Suite 400</p></div>
+          <div><div class="utility-5">Hours</div><p class="utility-6">Mon–Fri · 9–6<br/>Sat · 10–4<br/>Sun · Closed</p></div>
+          <div><div class="utility-7">Follow</div><p class="utility-8">Instagram<br/>LinkedIn<br/>YouTube</p></div>
+          </div>
+          <div class="utility-9">© 2026 Brand.</div>
+        </footer>`,
       },
       {
         id: "ft-app-download",
         label: "App Download Footer",
-        html: `<footer class="block block-footers-app-download-1 block-footers-app-download">
-  <h3 class="block block-footers-app-download-2 block-footers-app-download">Take it everywhere</h3>
-  <p class="block block-footers-app-download-3 block-footers-app-download">Download the app for iOS and Android.</p>
-  <div class="block block-footers-app-download-4 block-footers-app-download">
-    <a href="#" class="block block-footers-app-download-5 block-footers-app-download">↧ App Store</a>
-    <a href="#" class="block block-footers-app-download-6 block-footers-app-download">↧ Google Play</a>
-  </div>
-</footer>`,
+        html: `<footer class="block block-footers-app-download">
+          <h3 class="utility-2">Take it everywhere</h3>
+          <p class="utility-3">Download the app for iOS and Android.</p>
+          <div class="utility-4">
+          <a href="#" class="utility-5">↧ App Store</a>
+          <a href="#" class="utility-6">↧ Google Play</a>
+          </div>
+        </footer>`,
       },
       {
         id: "ft-mega-multicol",
         label: "Mega 5-column Footer",
-        html: `<footer class="block block-footers-mega-multicol-1 block-footers-mega-multicol">
-  <div class="block block-footers-mega-multicol-2 block-footers-mega-multicol">
-    <div><div class="block block-footers-mega-multicol-3 block-footers-mega-multicol">Brand</div><p class="block block-footers-mega-multicol-4 block-footers-mega-multicol">Tools for teams who ship fast and design well.</p></div>
-    <div><div class="block block-footers-mega-multicol-5 block-footers-mega-multicol">Product</div><a href="#" class="block block-footers-mega-multicol-6 block-footers-mega-multicol">Features</a><a href="#" class="block block-footers-mega-multicol-7 block-footers-mega-multicol">Integrations</a><a href="#" class="block block-footers-mega-multicol-8 block-footers-mega-multicol">Changelog</a></div><div><div class="block block-footers-mega-multicol-9 block-footers-mega-multicol">Solutions</div><a href="#" class="block block-footers-mega-multicol-10 block-footers-mega-multicol">Agencies</a><a href="#" class="block block-footers-mega-multicol-11 block-footers-mega-multicol">Startups</a><a href="#" class="block block-footers-mega-multicol-12 block-footers-mega-multicol">Enterprise</a></div><div><div class="block block-footers-mega-multicol-13 block-footers-mega-multicol">Resources</div><a href="#" class="block block-footers-mega-multicol-14 block-footers-mega-multicol">Blog</a><a href="#" class="block block-footers-mega-multicol-15 block-footers-mega-multicol">Guides</a><a href="#" class="block block-footers-mega-multicol-16 block-footers-mega-multicol">API Docs</a></div><div><div class="block block-footers-mega-multicol-17 block-footers-mega-multicol">Company</div><a href="#" class="block block-footers-mega-multicol-18 block-footers-mega-multicol">About</a><a href="#" class="block block-footers-mega-multicol-19 block-footers-mega-multicol">Careers</a><a href="#" class="block block-footers-mega-multicol-20 block-footers-mega-multicol">Press</a></div>
-  </div>
-  <div class="block block-footers-mega-multicol-21 block-footers-mega-multicol">
-    <span>© 2026 Brand. All rights reserved.</span>
-    <div class="block block-footers-mega-multicol-22 block-footers-mega-multicol"><a href="#" class="block block-footers-mega-multicol-23 block-footers-mega-multicol">Privacy</a><a href="#" class="block block-footers-mega-multicol-24 block-footers-mega-multicol">Terms</a><a href="#" class="block block-footers-mega-multicol-25 block-footers-mega-multicol">Cookies</a></div>
-  </div>
-</footer>`,
+        html: `<footer class="block block-footers-mega-multicol">
+          <div class="utility-2">
+          <div><div class="utility-3">Brand</div><p class="utility-4">Tools for teams who ship fast and design well.</p></div>
+          <div><div class="utility-5">Product</div><a href="#" class="utility-6">Features</a><a href="#" class="utility-7">Integrations</a><a href="#" class="utility-8">Changelog</a></div><div><div class="utility-9">Solutions</div><a href="#" class="utility-10">Agencies</a><a href="#" class="utility-11">Startups</a><a href="#" class="utility-12">Enterprise</a></div><div><div class="utility-13">Resources</div><a href="#" class="utility-14">Blog</a><a href="#" class="utility-15">Guides</a><a href="#" class="utility-16">API Docs</a></div><div><div class="utility-17">Company</div><a href="#" class="utility-18">About</a><a href="#" class="utility-19">Careers</a><a href="#" class="utility-20">Press</a></div>
+          </div>
+          <div class="utility-21">
+          <span>© 2026 Brand. All rights reserved.</span>
+          <div class="utility-22"><a href="#" class="utility-23">Privacy</a><a href="#" class="utility-24">Terms</a><a href="#" class="utility-25">Cookies</a></div>
+          </div>
+        </footer>`,
       },
     ],
   },
@@ -344,42 +344,42 @@ export const EXTRA_CATEGORIES = [
       {
         id: "video-hero",
         label: "Hero · Video Background",
-        html: `<section class="block block-video-hero-1 block-video-hero">
-  <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-hero-2 block-video-hero"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
-  <div class="block block-video-hero-3 block-video-hero"></div>
-  <div class="block block-video-hero-4 block-video-hero">
-    <h1 class="block block-video-hero-5 block-video-hero block-heading">Motion tells your story</h1>
-    <p class="block block-video-hero-6 block-video-hero">A cinematic hero with a looping background video. Muted, auto-playing, mobile-friendly.</p>
-    <a href="#" class="block block-video-hero-7 block-video-hero">Watch the film</a>
-  </div>
-</section>`,
+        html: `<section class="block block-video-hero">
+          <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="utility-2"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
+          <div class="utility-3"></div>
+          <div class="utility-4">
+          <h1 class="utility-5 block-heading">Motion tells your story</h1>
+          <p class="utility-6">A cinematic hero with a looping background video. Muted, auto-playing, mobile-friendly.</p>
+          <a href="#" class="utility-7">Watch the film</a>
+          </div>
+        </section>`,
       },
       {
         id: "video-section",
         label: "Section · Video + Text",
-        html: `<section class="block block-video-section-1 block-video-section">
-  <div class="block block-video-section-2 block-video-section">
-    <div class="block block-video-section-3 block-video-section"><video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-section-4 block-video-section"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video></div>
-    <div>
-      <div class="block block-video-section-5 block-video-section">See it in action</div>
-      <h2 class="block block-video-section-6 block-video-section block-heading">Built to move</h2>
-      <p class="block block-video-section-7 block-video-section">Pair looping product footage with crisp copy. The video autoplays muted and loops seamlessly on every device.</p>
-      <a href="#" class="block block-video-section-8 block-video-section">Learn more</a>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-video-section">
+          <div class="utility-2">
+          <div class="utility-3"><video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="utility-4"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video></div>
+          <div>
+          <div class="utility-5">See it in action</div>
+          <h2 class="utility-6 block-heading">Built to move</h2>
+          <p class="utility-7">Pair looping product footage with crisp copy. The video autoplays muted and loops seamlessly on every device.</p>
+          <a href="#" class="utility-8">Learn more</a>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "video-banner",
         label: "Video Banner Strip",
-        html: `<section class="block block-video-banner-1 block-video-banner">
-  <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="block block-video-banner-2 block-video-banner"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
-  <div class="block block-video-banner-3 block-video-banner"></div>
-  <div class="block block-video-banner-4 block-video-banner">
-    <h2 class="block block-video-banner-5 block-video-banner block-heading">Adventure awaits</h2>
-    <p class="block block-video-banner-6 block-video-banner">A compact full-bleed video banner for section breaks.</p>
-  </div>
-</section>`,
+        html: `<section class="block block-video-banner">
+          <video autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70" class="utility-2"><source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" /></video>
+          <div class="utility-3"></div>
+          <div class="utility-4">
+          <h2 class="utility-5 block-heading">Adventure awaits</h2>
+          <p class="utility-6">A compact full-bleed video banner for section breaks.</p>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -390,53 +390,52 @@ export const EXTRA_CATEGORIES = [
       {
         id: "pricing-toggle",
         label: "Pricing · Monthly/Yearly Toggle",
-        html: `<section class="block block-pricing-toggle-1 block-pricing-toggle">
-  <div class="wd-pricing block-pricing-toggle-2 block-pricing-toggle">
-    <h2 class="block block-pricing-toggle-3 block-pricing-toggle block-heading">Simple pricing</h2>
-    <p class="block block-pricing-toggle-4 block-pricing-toggle">Switch between monthly and yearly billing.</p>
-    <input type="checkbox" id="wd-pt" class="wd-pt-toggle block-pricing-toggle-5 block-pricing-toggle" />
-    <label for="wd-pt" class="block block-pricing-toggle-6 block-pricing-toggle">
-      <span>Monthly</span>
-      <span class="block block-pricing-toggle-7 block-pricing-toggle">
-        <span class="wd-pt-dot block-pricing-toggle-8 block-pricing-toggle"></span>
-      </span>
-      <span>Yearly <span class="block block-pricing-toggle-9 block-pricing-toggle">(save 20%)</span></span>
-    </label>
-    <div class="block block-pricing-toggle-10 block-pricing-toggle">
-      
-      <div class="block block-pricing-toggle-11 block-pricing-toggle">
-        <div class="block block-pricing-toggle-12 block-pricing-toggle">Starter</div>
-        <div class="block block-pricing-toggle-13 block-pricing-toggle"><span class="wd-price-m">$9</span><span class="wd-price-y">$86</span><span class="block block-pricing-toggle-14 block-pricing-toggle">/mo</span></div>
-        <ul class="block block-pricing-toggle-15 block-pricing-toggle">
+        html: `<section class="block block-pricing-toggle">
+          <div class="wd-pricing utility-2">
+          <h2 class="utility-3 block-heading">Simple pricing</h2>
+          <p class="utility-4">Switch between monthly and yearly billing.</p>
+          <input type="checkbox" id="wd-pt" class="wd-pt-toggle utility-5" />
+          <label for="wd-pt" class="utility-6">
+          <span>Monthly</span>
+          <span class="utility-7">
+          <span class="wd-pt-dot utility-8"></span>
+          </span>
+          <span>Yearly <span class="utility-9">(save 20%)</span></span>
+          </label>
+          <div class="utility-10">
+          <div class="utility-11">
+          <div class="utility-12">Starter</div>
+          <div class="utility-13"><span class="wd-price-m">$9</span><span class="wd-price-y">$86</span><span class="utility-14">/mo</span></div>
+          <ul class="utility-15">
           <li>✓ Full feature access</li><li>✓ Priority support</li><li>✓ Unlimited projects</li>
-        </ul>
-        <a href="#" class="block block-pricing-toggle-16 block-pricing-toggle">Choose Starter</a>
-      </div>
-      <div class="block block-pricing-toggle-17 block-pricing-toggle">
-        <div class="block block-pricing-toggle-18 block-pricing-toggle">Growth</div>
-        <div class="block block-pricing-toggle-19 block-pricing-toggle"><span class="wd-price-m">$29</span><span class="wd-price-y">$278</span><span class="block block-pricing-toggle-20 block-pricing-toggle">/mo</span></div>
-        <ul class="block block-pricing-toggle-21 block-pricing-toggle">
+          </ul>
+          <a href="#" class="utility-16">Choose Starter</a>
+          </div>
+          <div class="utility-17">
+          <div class="utility-18">Growth</div>
+          <div class="utility-19"><span class="wd-price-m">$29</span><span class="wd-price-y">$278</span><span class="utility-20">/mo</span></div>
+          <ul class="utility-21">
           <li>✓ Full feature access</li><li>✓ Priority support</li><li>✓ Unlimited projects</li>
-        </ul>
-        <a href="#" class="block block-pricing-toggle-22 block-pricing-toggle">Choose Growth</a>
-      </div>
-      <div class="block block-pricing-toggle-23 block-pricing-toggle">
-        <div class="block block-pricing-toggle-24 block-pricing-toggle">Scale</div>
-        <div class="block block-pricing-toggle-25 block-pricing-toggle"><span class="wd-price-m">$79</span><span class="wd-price-y">$758</span><span class="block block-pricing-toggle-26 block-pricing-toggle">/mo</span></div>
-        <ul class="block block-pricing-toggle-27 block-pricing-toggle">
+          </ul>
+          <a href="#" class="utility-22">Choose Growth</a>
+          </div>
+          <div class="utility-23">
+          <div class="utility-24">Scale</div>
+          <div class="utility-25"><span class="wd-price-m">$79</span><span class="wd-price-y">$758</span><span class="utility-26">/mo</span></div>
+          <ul class="utility-27">
           <li>✓ Full feature access</li><li>✓ Priority support</li><li>✓ Unlimited projects</li>
-        </ul>
-        <a href="#" class="block block-pricing-toggle-28 block-pricing-toggle">Choose Scale</a>
-      </div>
-    </div>
-    <style>
-      .wd-pricing .wd-price-y{display:none;}
-      .wd-pricing .wd-pt-toggle:checked ~ label .wd-pt-dot{transform:translateX(20px);}
-      .wd-pricing .wd-pt-toggle:checked ~ div .wd-price-m{display:none;}
-      .wd-pricing .wd-pt-toggle:checked ~ div .wd-price-y{display:inline;}
-    </style>
-  </div>
-</section>`,
+          </ul>
+          <a href="#" class="utility-28">Choose Scale</a>
+          </div>
+          </div>
+          <style>
+          .wd-pricing .wd-price-y{display:none;}
+          .wd-pricing .wd-pt-toggle:checked ~ label .wd-pt-dot{transform:translateX(20px);}
+          .wd-pricing .wd-pt-toggle:checked ~ div .wd-price-m{display:none;}
+          .wd-pricing .wd-pt-toggle:checked ~ div .wd-price-y{display:inline;}
+          </style>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -447,50 +446,49 @@ export const EXTRA_CATEGORIES = [
       {
         id: "team-cards",
         label: "Team · Member Cards",
-        html: `<section class="block block-team-cards-1 block-team-cards">
-  <div class="block block-team-cards-2 block-team-cards">
-    <h2 class="block block-team-cards-3 block-team-cards block-heading">Meet the team</h2>
-    <div class="block block-team-cards-4 block-team-cards">
-      
-      <div class="block block-team-cards-5 block-team-cards">
-        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="block block-team-cards-6 block-team-cards" alt="Ava Chen" />
-        <div class="block block-team-cards-7 block-team-cards">Ava Chen</div>
-        <div class="block block-team-cards-8 block-team-cards">Product Lead</div>
-        <div class="block block-team-cards-9 block-team-cards">
-          <a href="#" class="block block-team-cards-10 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
-          <a href="#" class="block block-team-cards-11 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
-        </div>
-      </div>
-      <div class="block block-team-cards-12 block-team-cards">
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="block block-team-cards-13 block-team-cards" alt="Marcus Reed" />
-        <div class="block block-team-cards-14 block-team-cards">Marcus Reed</div>
-        <div class="block block-team-cards-15 block-team-cards">Engineering</div>
-        <div class="block block-team-cards-16 block-team-cards">
-          <a href="#" class="block block-team-cards-17 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
-          <a href="#" class="block block-team-cards-18 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
-        </div>
-      </div>
-      <div class="block block-team-cards-19 block-team-cards">
-        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="block block-team-cards-20 block-team-cards" alt="Priya Nair" />
-        <div class="block block-team-cards-21 block-team-cards">Priya Nair</div>
-        <div class="block block-team-cards-22 block-team-cards">Design</div>
-        <div class="block block-team-cards-23 block-team-cards">
-          <a href="#" class="block block-team-cards-24 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
-          <a href="#" class="block block-team-cards-25 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
-        </div>
-      </div>
-      <div class="block block-team-cards-26 block-team-cards">
-        <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" class="block block-team-cards-27 block-team-cards" alt="Tom Vidal" />
-        <div class="block block-team-cards-28 block-team-cards">Tom Vidal</div>
-        <div class="block block-team-cards-29 block-team-cards">Growth</div>
-        <div class="block block-team-cards-30 block-team-cards">
-          <a href="#" class="block block-team-cards-31 block-team-cards" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
-          <a href="#" class="block block-team-cards-32 block-team-cards" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-team-cards">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Meet the team</h2>
+          <div class="utility-4">
+          <div class="utility-5">
+          <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="utility-6" alt="Ava Chen" />
+          <div class="utility-7">Ava Chen</div>
+          <div class="utility-8">Product Lead</div>
+          <div class="utility-9">
+          <a href="#" class="utility-10" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="utility-11" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+          </div>
+          </div>
+          <div class="utility-12">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="utility-13" alt="Marcus Reed" />
+          <div class="utility-14">Marcus Reed</div>
+          <div class="utility-15">Engineering</div>
+          <div class="utility-16">
+          <a href="#" class="utility-17" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="utility-18" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+          </div>
+          </div>
+          <div class="utility-19">
+          <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="utility-20" alt="Priya Nair" />
+          <div class="utility-21">Priya Nair</div>
+          <div class="utility-22">Design</div>
+          <div class="utility-23">
+          <a href="#" class="utility-24" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="utility-25" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+          </div>
+          </div>
+          <div class="utility-26">
+          <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" class="utility-27" alt="Tom Vidal" />
+          <div class="utility-28">Tom Vidal</div>
+          <div class="utility-29">Growth</div>
+          <div class="utility-30">
+          <a href="#" class="utility-31" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="utility-32" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+          </div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -501,41 +499,40 @@ export const EXTRA_CATEGORIES = [
       {
         id: "faq-accordion",
         label: "FAQ · Accordion",
-        html: `<section class="block block-faq-accordion-1 block-faq-accordion">
-  <div class="wd-faq block-faq-accordion-2 block-faq-accordion">
-    <h2 class="block block-faq-accordion-3 block-faq-accordion block-heading">Frequently asked</h2>
-    
-    <details class="block block-faq-accordion-4 block-faq-accordion">
-      <summary class="block block-faq-accordion-5 block-faq-accordion">
-        Can I cancel anytime?
-        <span class="wd-chev block-faq-accordion-6 block-faq-accordion">⌄</span>
-      </summary>
-      <p class="block block-faq-accordion-7 block-faq-accordion">Yes, cancel from your account settings with no fees or lock-in period.</p>
-    </details>
-    <details class="block block-faq-accordion-8 block-faq-accordion">
-      <summary class="block block-faq-accordion-9 block-faq-accordion">
-        Do you offer a free trial?
-        <span class="wd-chev block-faq-accordion-10 block-faq-accordion">⌄</span>
-      </summary>
-      <p class="block block-faq-accordion-11 block-faq-accordion">Every plan starts with a 14-day free trial, no card required.</p>
-    </details>
-    <details class="block block-faq-accordion-12 block-faq-accordion">
-      <summary class="block block-faq-accordion-13 block-faq-accordion">
-        Is my data secure?
-        <span class="wd-chev block-faq-accordion-14 block-faq-accordion">⌄</span>
-      </summary>
-      <p class="block block-faq-accordion-15 block-faq-accordion">All data is encrypted in transit and at rest, with daily backups.</p>
-    </details>
-    <details class="block block-faq-accordion-16 block-faq-accordion">
-      <summary class="block block-faq-accordion-17 block-faq-accordion">
-        Can I change plans later?
-        <span class="wd-chev block-faq-accordion-18 block-faq-accordion">⌄</span>
-      </summary>
-      <p class="block block-faq-accordion-19 block-faq-accordion">Upgrade or downgrade anytime — billing prorates automatically.</p>
-    </details>
-    <style>.wd-faq details[open] .wd-chev{transform:rotate(180deg);} .wd-faq summary::-webkit-details-marker{display:none;}</style>
-  </div>
-</section>`,
+        html: `<section class="block block-faq-accordion">
+          <div class="wd-faq utility-2">
+          <h2 class="utility-3 block-heading">Frequently asked</h2>
+          <details class="utility-4">
+          <summary class="utility-5">
+          Can I cancel anytime?
+          <span class="wd-chev utility-6">⌄</span>
+          </summary>
+          <p class="utility-7">Yes, cancel from your account settings with no fees or lock-in period.</p>
+          </details>
+          <details class="utility-8">
+          <summary class="utility-9">
+          Do you offer a free trial?
+          <span class="wd-chev utility-10">⌄</span>
+          </summary>
+          <p class="utility-11">Every plan starts with a 14-day free trial, no card required.</p>
+          </details>
+          <details class="utility-12">
+          <summary class="utility-13">
+          Is my data secure?
+          <span class="wd-chev utility-14">⌄</span>
+          </summary>
+          <p class="utility-15">All data is encrypted in transit and at rest, with daily backups.</p>
+          </details>
+          <details class="utility-16">
+          <summary class="utility-17">
+          Can I change plans later?
+          <span class="wd-chev utility-18">⌄</span>
+          </summary>
+          <p class="utility-19">Upgrade or downgrade anytime — billing prorates automatically.</p>
+          </details>
+          <style>.wd-faq details[open] .wd-chev{transform:rotate(180deg);} .wd-faq summary::-webkit-details-marker{display:none;}</style>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -546,21 +543,21 @@ export const EXTRA_CATEGORIES = [
       {
         id: "newsletter-signup",
         label: "Newsletter · Signup + Validation",
-        html: `<section class="block block-newsletter-signup-1 block-newsletter-signup">
-  <form novalidate class="wd-nl block-newsletter-signup-2 block-newsletter-signup">
-    <h2 class="block block-newsletter-signup-3 block-newsletter-signup block-heading">Join the newsletter</h2>
-    <p class="block block-newsletter-signup-4 block-newsletter-signup">Product updates and design notes, twice a month.</p>
-    <div class="block block-newsletter-signup-5 block-newsletter-signup">
-      <input type="email" required placeholder="you@example.com" class="block block-newsletter-signup-6 block-newsletter-signup" />
-      <button type="submit" class="block block-newsletter-signup-7 block-newsletter-signup">Subscribe</button>
-    </div>
-    <p class="wd-nl-err block-newsletter-signup-8 block-newsletter-signup">Please enter a valid email address.</p>
-    <style>
-      .wd-nl:has(input:invalid:not(:placeholder-shown)) .wd-nl-err{display:block;}
-      .wd-nl:has(input:invalid:not(:placeholder-shown)) input{border-color:#dc2626;}
-    </style>
-  </form>
-</section>`,
+        html: `<section class="block block-newsletter-signup">
+          <form novalidate class="wd-nl utility-2">
+          <h2 class="utility-3 block-heading">Join the newsletter</h2>
+          <p class="utility-4">Product updates and design notes, twice a month.</p>
+          <div class="utility-5">
+          <input type="email" required placeholder="you@example.com" class="utility-6" />
+          <button type="submit" class="utility-7">Subscribe</button>
+          </div>
+          <p class="wd-nl-err utility-8">Please enter a valid email address.</p>
+          <style>
+          .wd-nl:has(input:invalid:not(:placeholder-shown)) .wd-nl-err{display:block;}
+          .wd-nl:has(input:invalid:not(:placeholder-shown)) input{border-color:#dc2626;}
+          </style>
+          </form>
+        </section>`,
       },
     ],
   },
@@ -571,26 +568,26 @@ export const EXTRA_CATEGORIES = [
       {
         id: "portfolio-filter",
         label: "Portfolio · Filterable Gallery",
-        html: `<section class="block block-portfolio-filter-1 block-portfolio-filter">
-  <div class="wd-portfolio block-portfolio-filter-2 block-portfolio-filter">
-    <h2 class="block block-portfolio-filter-3 block-portfolio-filter block-heading">Selected work</h2>
-    <div class="block block-portfolio-filter-4 block-portfolio-filter">
-      <input type="radio" name="wd-pf" id="wd-pf-all" checked class="block block-portfolio-filter-5 block-portfolio-filter" /><label for="wd-pf-all" class="block block-portfolio-filter-6 block-portfolio-filter">all</label><input type="radio" name="wd-pf" id="wd-pf-branding"  class="block block-portfolio-filter-7 block-portfolio-filter" /><label for="wd-pf-branding" class="block block-portfolio-filter-8 block-portfolio-filter">branding</label><input type="radio" name="wd-pf" id="wd-pf-product"  class="block block-portfolio-filter-9 block-portfolio-filter" /><label for="wd-pf-product" class="block block-portfolio-filter-10 block-portfolio-filter">product</label><input type="radio" name="wd-pf" id="wd-pf-web"  class="block block-portfolio-filter-11 block-portfolio-filter" /><label for="wd-pf-web" class="block block-portfolio-filter-12 block-portfolio-filter">web</label>
-    </div>
-    <div class="block block-portfolio-filter-13 block-portfolio-filter">
-      <div data-cat="branding" class="wd-pf-item block-portfolio-filter-14 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" class="block block-portfolio-filter-15 block-portfolio-filter" alt="" /></div><div data-cat="product" class="wd-pf-item block-portfolio-filter-16 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" class="block block-portfolio-filter-17 block-portfolio-filter" alt="" /></div><div data-cat="web" class="wd-pf-item block-portfolio-filter-18 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" class="block block-portfolio-filter-19 block-portfolio-filter" alt="" /></div><div data-cat="branding" class="wd-pf-item block-portfolio-filter-20 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" class="block block-portfolio-filter-21 block-portfolio-filter" alt="" /></div><div data-cat="product" class="wd-pf-item block-portfolio-filter-22 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" class="block block-portfolio-filter-23 block-portfolio-filter" alt="" /></div><div data-cat="web" class="wd-pf-item block-portfolio-filter-24 block-portfolio-filter"><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" class="block block-portfolio-filter-25 block-portfolio-filter" alt="" /></div>
-    </div>
-    <style>
-      .wd-portfolio:has(#wd-pf-all:checked) label[for="wd-pf-all"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
-      .wd-portfolio:has(#wd-pf-branding:checked) label[for="wd-pf-branding"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
-      .wd-portfolio:has(#wd-pf-product:checked) label[for="wd-pf-product"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
-      .wd-portfolio:has(#wd-pf-web:checked) label[for="wd-pf-web"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
-      .wd-portfolio:has(#wd-pf-branding:checked) .wd-pf-item:not([data-cat="branding"]){display:none;}
-      .wd-portfolio:has(#wd-pf-product:checked) .wd-pf-item:not([data-cat="product"]){display:none;}
-      .wd-portfolio:has(#wd-pf-web:checked) .wd-pf-item:not([data-cat="web"]){display:none;}
-    </style>
-  </div>
-</section>`,
+        html: `<section class="block block-portfolio-filter">
+          <div class="wd-portfolio utility-2">
+          <h2 class="utility-3 block-heading">Selected work</h2>
+          <div class="utility-4">
+          <input type="radio" name="wd-pf" id="wd-pf-all" checked class="utility-5" /><label for="wd-pf-all" class="utility-6">all</label><input type="radio" name="wd-pf" id="wd-pf-branding"  class="utility-7" /><label for="wd-pf-branding" class="utility-8">branding</label><input type="radio" name="wd-pf" id="wd-pf-product"  class="utility-9" /><label for="wd-pf-product" class="utility-10">product</label><input type="radio" name="wd-pf" id="wd-pf-web"  class="utility-11" /><label for="wd-pf-web" class="utility-12">web</label>
+          </div>
+          <div class="utility-13">
+          <div data-cat="branding" class="wd-pf-item utility-14"><img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" class="utility-15" alt="" /></div><div data-cat="product" class="wd-pf-item utility-16"><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" class="utility-17" alt="" /></div><div data-cat="web" class="wd-pf-item utility-18"><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" class="utility-19" alt="" /></div><div data-cat="branding" class="wd-pf-item utility-20"><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" class="utility-21" alt="" /></div><div data-cat="product" class="wd-pf-item utility-22"><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" class="utility-23" alt="" /></div><div data-cat="web" class="wd-pf-item utility-24"><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" class="utility-25" alt="" /></div>
+          </div>
+          <style>
+          .wd-portfolio:has(#wd-pf-all:checked) label[for="wd-pf-all"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+          .wd-portfolio:has(#wd-pf-branding:checked) label[for="wd-pf-branding"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+          .wd-portfolio:has(#wd-pf-product:checked) label[for="wd-pf-product"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+          .wd-portfolio:has(#wd-pf-web:checked) label[for="wd-pf-web"]{background:var(--fc-primary, #0f172a);color:#fff;border-color:var(--fc-primary, #0f172a);}
+          .wd-portfolio:has(#wd-pf-branding:checked) .wd-pf-item:not([data-cat="branding"]){display:none;}
+          .wd-portfolio:has(#wd-pf-product:checked) .wd-pf-item:not([data-cat="product"]){display:none;}
+          .wd-portfolio:has(#wd-pf-web:checked) .wd-pf-item:not([data-cat="web"]){display:none;}
+          </style>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -601,16 +598,16 @@ export const EXTRA_CATEGORIES = [
       {
         id: "layout-bento",
         label: "Bento Grid",
-        html: `<section class="block block-layout-bento-1 block-layout-bento">
-  <div class="block block-layout-bento-2 block-layout-bento">
-    <div class="block block-layout-bento-3 block-layout-bento"><div class="block block-layout-bento-4 block-layout-bento">Design system</div><div class="block block-layout-bento-5 block-layout-bento">Tokens, components, and docs in one place.</div></div>
-    <div class="block block-layout-bento-6 block-layout-bento"><div class="block block-layout-bento-7 block-layout-bento">Ship faster</div></div>
-    <div class="block block-layout-bento-8 block-layout-bento">Analytics</div>
-    <div class="block block-layout-bento-9 block-layout-bento">Integrations</div>
-    <div class="block block-layout-bento-10 block-layout-bento"><img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" class="block block-layout-bento-11 block-layout-bento" alt="" /></div>
-    <div class="block block-layout-bento-12 block-layout-bento">99.99% uptime</div>
-  </div>
-</section>`,
+        html: `<section class="block block-layout-bento">
+          <div class="utility-2">
+          <div class="utility-3"><div class="utility-4">Design system</div><div class="utility-5">Tokens, components, and docs in one place.</div></div>
+          <div class="utility-6"><div class="utility-7">Ship faster</div></div>
+          <div class="utility-8">Analytics</div>
+          <div class="utility-9">Integrations</div>
+          <div class="utility-10"><img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" class="utility-11" alt="" /></div>
+          <div class="utility-12">99.99% uptime</div>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -621,35 +618,34 @@ export const EXTRA_CATEGORIES = [
       {
         id: "services-icons",
         label: "Services · Icon Grid",
-        html: `<section class="block block-services-icons-1 block-services-icons">
-  <div class="block block-services-icons-2 block-services-icons">
-    <h2 class="block block-services-icons-3 block-services-icons block-heading">What we do</h2>
-    <div class="block block-services-icons-4 block-services-icons">
-      
-      <div class="block block-services-icons-5 block-services-icons">
-        <div class="block block-services-icons-6 block-services-icons">
+        html: `<section class="block block-services-icons">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">What we do</h2>
+          <div class="utility-4">
+          <div class="utility-5">
+          <div class="utility-6">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
-        </div>
-        <div class="block block-services-icons-7 block-services-icons">Strategy</div>
-        <p class="block block-services-icons-8 block-services-icons">Positioning, research and roadmaps that align teams.</p>
-      </div>
-      <div class="block block-services-icons-9 block-services-icons">
-        <div class="block block-services-icons-10 block-services-icons">
+          </div>
+          <div class="utility-7">Strategy</div>
+          <p class="utility-8">Positioning, research and roadmaps that align teams.</p>
+          </div>
+          <div class="utility-9">
+          <div class="utility-10">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v6l4 2"/></svg>
-        </div>
-        <div class="block block-services-icons-11 block-services-icons">Design</div>
-        <p class="block block-services-icons-12 block-services-icons">Interfaces and systems that feel effortless to use.</p>
-      </div>
-      <div class="block block-services-icons-13 block-services-icons">
-        <div class="block block-services-icons-14 block-services-icons">
+          </div>
+          <div class="utility-11">Design</div>
+          <p class="utility-12">Interfaces and systems that feel effortless to use.</p>
+          </div>
+          <div class="utility-13">
+          <div class="utility-14">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3L2 12l6 9M16 3l6 9-6 9"/></svg>
-        </div>
-        <div class="block block-services-icons-15 block-services-icons">Engineering</div>
-        <p class="block block-services-icons-16 block-services-icons">Reliable, scalable builds shipped on schedule.</p>
-      </div>
-    </div>
-  </div>
-</section>`,
+          </div>
+          <div class="utility-15">Engineering</div>
+          <p class="utility-16">Reliable, scalable builds shipped on schedule.</p>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -660,20 +656,20 @@ export const EXTRA_CATEGORIES = [
       {
         id: "contact-recaptcha",
         label: "Contact Form · reCAPTCHA",
-        html: `<section class="block block-contact-recaptcha-1 block-contact-recaptcha">
-  <!-- reCAPTCHA: add <script src="https://www.google.com/recaptcha/api.js" async defer></script> to the page head and replace YOUR_SITE_KEY below -->
-  <form class="block block-contact-recaptcha-2 block-contact-recaptcha">
-    <h2 class="block block-contact-recaptcha-3 block-contact-recaptcha block-heading">Get in touch</h2>
-    <label class="block block-contact-recaptcha-4 block-contact-recaptcha">Name</label>
-    <input required class="block block-contact-recaptcha-5 block-contact-recaptcha" />
-    <label class="block block-contact-recaptcha-6 block-contact-recaptcha">Email</label>
-    <input type="email" required class="block block-contact-recaptcha-7 block-contact-recaptcha" />
-    <label class="block block-contact-recaptcha-8 block-contact-recaptcha">Message</label>
-    <textarea required rows="4" class="block block-contact-recaptcha-9 block-contact-recaptcha"></textarea>
-    <div data-sitekey="YOUR_SITE_KEY" class="g-recaptcha block-contact-recaptcha-10 block-contact-recaptcha"></div>
-    <button type="submit" class="block block-contact-recaptcha-11 block-contact-recaptcha">Send message</button>
-  </form>
-</section>`,
+        html: `<section class="block block-contact-recaptcha">
+          <!-- reCAPTCHA: add <script src="https://www.google.com/recaptcha/api.js" async defer></script> to the page head and replace YOUR_SITE_KEY below -->
+          <form class="utility-2">
+          <h2 class="utility-3 block-heading">Get in touch</h2>
+          <label class="utility-4">Name</label>
+          <input required class="utility-5" />
+          <label class="utility-6">Email</label>
+          <input type="email" required class="utility-7" />
+          <label class="utility-8">Message</label>
+          <textarea required rows="4" class="utility-9"></textarea>
+          <div data-sitekey="YOUR_SITE_KEY" class="g-recaptcha utility-10"></div>
+          <button type="submit" class="utility-11">Send message</button>
+          </form>
+        </section>`,
       },
     ],
   },
@@ -684,35 +680,34 @@ export const EXTRA_CATEGORIES = [
       {
         id: "testimonial-carousel",
         label: "Testimonial · Carousel",
-        html: `<section class="block block-testimonials-carousel-1 block-testimonials-carousel">
-  <div class="block block-testimonials-carousel-2 block-testimonials-carousel">
-    <h2 class="block block-testimonials-carousel-3 block-testimonials-carousel block-heading">Loved by teams</h2>
-  </div>
-  <div class="block block-testimonials-carousel-4 block-testimonials-carousel">
-    
-    <div class="block block-testimonials-carousel-5 block-testimonials-carousel">
-      <p class="block block-testimonials-carousel-6 block-testimonials-carousel">"This tool cut our build time in half."</p>
-      <div class="block block-testimonials-carousel-7 block-testimonials-carousel">
-        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="block block-testimonials-carousel-8 block-testimonials-carousel" alt="" />
-        <div><div class="block block-testimonials-carousel-9 block-testimonials-carousel">Jordan Lee</div><div class="block block-testimonials-carousel-10 block-testimonials-carousel">VP Design, Nova</div></div>
-      </div>
-    </div>
-    <div class="block block-testimonials-carousel-11 block-testimonials-carousel">
-      <p class="block block-testimonials-carousel-12 block-testimonials-carousel">"Support is fast and the product just works."</p>
-      <div class="block block-testimonials-carousel-13 block-testimonials-carousel">
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="block block-testimonials-carousel-14 block-testimonials-carousel" alt="" />
-        <div><div class="block block-testimonials-carousel-15 block-testimonials-carousel">Sam Okafor</div><div class="block block-testimonials-carousel-16 block-testimonials-carousel">Founder, Loop</div></div>
-      </div>
-    </div>
-    <div class="block block-testimonials-carousel-17 block-testimonials-carousel">
-      <p class="block block-testimonials-carousel-18 block-testimonials-carousel">"Our whole team switched in a week."</p>
-      <div class="block block-testimonials-carousel-19 block-testimonials-carousel">
-        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="block block-testimonials-carousel-20 block-testimonials-carousel" alt="" />
-        <div><div class="block block-testimonials-carousel-21 block-testimonials-carousel">Rae Kim</div><div class="block block-testimonials-carousel-22 block-testimonials-carousel">Head of Product, Fera</div></div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-testimonials-carousel">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Loved by teams</h2>
+          </div>
+          <div class="utility-4">
+          <div class="utility-5">
+          <p class="utility-6">"This tool cut our build time in half."</p>
+          <div class="utility-7">
+          <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="utility-8" alt="" />
+          <div><div class="utility-9">Jordan Lee</div><div class="utility-10">VP Design, Nova</div></div>
+          </div>
+          </div>
+          <div class="utility-11">
+          <p class="utility-12">"Support is fast and the product just works."</p>
+          <div class="utility-13">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="utility-14" alt="" />
+          <div><div class="utility-15">Sam Okafor</div><div class="utility-16">Founder, Loop</div></div>
+          </div>
+          </div>
+          <div class="utility-17">
+          <p class="utility-18">"Our whole team switched in a week."</p>
+          <div class="utility-19">
+          <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="utility-20" alt="" />
+          <div><div class="utility-21">Rae Kim</div><div class="utility-22">Head of Product, Fera</div></div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -723,247 +718,238 @@ export const EXTRA_CATEGORIES = [
       {
         id: "esports-roster",
         label: "Esports · Team Roster",
-        html: `<section class="block block-esports-roster-1 block-esports-roster">
-  <div class="block block-esports-roster-2 block-esports-roster">
-    <h2 class="block block-esports-roster-3 block-esports-roster block-heading">Roster</h2>
-    <p class="block block-esports-roster-4 block-esports-roster">Season 2026</p>
-    <div class="block block-esports-roster-5 block-esports-roster">
-      
-      <div class="block block-esports-roster-6 block-esports-roster">
-        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="block block-esports-roster-7 block-esports-roster" alt="Viper" />
-        <div class="block block-esports-roster-8 block-esports-roster"><div class="block block-esports-roster-9 block-esports-roster">Viper</div><div class="block block-esports-roster-10 block-esports-roster">IGL</div></div>
-      </div>
-      <div class="block block-esports-roster-11 block-esports-roster">
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="block block-esports-roster-12 block-esports-roster" alt="Ashen" />
-        <div class="block block-esports-roster-13 block-esports-roster"><div class="block block-esports-roster-14 block-esports-roster">Ashen</div><div class="block block-esports-roster-15 block-esports-roster">Duelist</div></div>
-      </div>
-      <div class="block block-esports-roster-16 block-esports-roster">
-        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="block block-esports-roster-17 block-esports-roster" alt="Kudo" />
-        <div class="block block-esports-roster-18 block-esports-roster"><div class="block block-esports-roster-19 block-esports-roster">Kudo</div><div class="block block-esports-roster-20 block-esports-roster">Support</div></div>
-      </div>
-      <div class="block block-esports-roster-21 block-esports-roster">
-        <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" class="block block-esports-roster-22 block-esports-roster" alt="Frost" />
-        <div class="block block-esports-roster-23 block-esports-roster"><div class="block block-esports-roster-24 block-esports-roster">Frost</div><div class="block block-esports-roster-25 block-esports-roster">Sentinel</div></div>
-      </div>
-      <div class="block block-esports-roster-26 block-esports-roster">
-        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" class="block block-esports-roster-27 block-esports-roster" alt="Ronin" />
-        <div class="block block-esports-roster-28 block-esports-roster"><div class="block block-esports-roster-29 block-esports-roster">Ronin</div><div class="block block-esports-roster-30 block-esports-roster">Flex</div></div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-esports-roster">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Roster</h2>
+          <p class="utility-4">Season 2026</p>
+          <div class="utility-5">
+          <div class="utility-6">
+          <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" class="utility-7" alt="Viper" />
+          <div class="utility-8"><div class="utility-9">Viper</div><div class="utility-10">IGL</div></div>
+          </div>
+          <div class="utility-11">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" class="utility-12" alt="Ashen" />
+          <div class="utility-13"><div class="utility-14">Ashen</div><div class="utility-15">Duelist</div></div>
+          </div>
+          <div class="utility-16">
+          <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" class="utility-17" alt="Kudo" />
+          <div class="utility-18"><div class="utility-19">Kudo</div><div class="utility-20">Support</div></div>
+          </div>
+          <div class="utility-21">
+          <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" class="utility-22" alt="Frost" />
+          <div class="utility-23"><div class="utility-24">Frost</div><div class="utility-25">Sentinel</div></div>
+          </div>
+          <div class="utility-26">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" class="utility-27" alt="Ronin" />
+          <div class="utility-28"><div class="utility-29">Ronin</div><div class="utility-30">Flex</div></div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "esports-bracket",
         label: "Esports · Tournament Bracket",
-        html: `<section class="block block-esports-bracket-1 block-esports-bracket">
-  <div class="block block-esports-bracket-2 block-esports-bracket">
-    <h2 class="block block-esports-bracket-3 block-esports-bracket block-heading">Bracket</h2>
-    <div class="block block-esports-bracket-4 block-esports-bracket">
-      
-      <div class="block block-esports-bracket-5 block-esports-bracket">
-        <div class="block block-esports-bracket-6 block-esports-bracket">Quarterfinals</div>
-        
-        <div class="block block-esports-bracket-7 block-esports-bracket">
-          <div class="block block-esports-bracket-8 block-esports-bracket">Alpha</div>
-          <div class="block block-esports-bracket-9 block-esports-bracket">Ronin</div>
-        </div>
-        <div class="block block-esports-bracket-10 block-esports-bracket">
-          <div class="block block-esports-bracket-11 block-esports-bracket">Nova</div>
-          <div class="block block-esports-bracket-12 block-esports-bracket">Vertex</div>
-        </div>
-        <div class="block block-esports-bracket-13 block-esports-bracket">
-          <div class="block block-esports-bracket-14 block-esports-bracket">Kaze</div>
-          <div class="block block-esports-bracket-15 block-esports-bracket">Wraith</div>
-        </div>
-        <div class="block block-esports-bracket-16 block-esports-bracket">
-          <div class="block block-esports-bracket-17 block-esports-bracket">Onyx</div>
-          <div class="block block-esports-bracket-18 block-esports-bracket">Pulse</div>
-        </div>
-      </div>
-      <div class="block block-esports-bracket-19 block-esports-bracket">
-        <div class="block block-esports-bracket-20 block-esports-bracket">Semifinals</div>
-        
-        <div class="block block-esports-bracket-21 block-esports-bracket">
-          <div class="block block-esports-bracket-22 block-esports-bracket">Alpha</div>
-          <div class="block block-esports-bracket-23 block-esports-bracket">Vertex</div>
-        </div>
-        <div class="block block-esports-bracket-24 block-esports-bracket">
-          <div class="block block-esports-bracket-25 block-esports-bracket">Kaze</div>
-          <div class="block block-esports-bracket-26 block-esports-bracket">Onyx</div>
-        </div>
-      </div>
-      <div class="block block-esports-bracket-27 block-esports-bracket">
-        <div class="block block-esports-bracket-28 block-esports-bracket">Final</div>
-        
-        <div class="block block-esports-bracket-29 block-esports-bracket">
-          <div class="block block-esports-bracket-30 block-esports-bracket">Alpha</div>
-          <div class="block block-esports-bracket-31 block-esports-bracket">Kaze</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-esports-bracket">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Bracket</h2>
+          <div class="utility-4">
+          <div class="utility-5">
+          <div class="utility-6">Quarterfinals</div>
+          <div class="utility-7">
+          <div class="utility-8">Alpha</div>
+          <div class="utility-9">Ronin</div>
+          </div>
+          <div class="utility-10">
+          <div class="utility-11">Nova</div>
+          <div class="utility-12">Vertex</div>
+          </div>
+          <div class="utility-13">
+          <div class="utility-14">Kaze</div>
+          <div class="utility-15">Wraith</div>
+          </div>
+          <div class="utility-16">
+          <div class="utility-17">Onyx</div>
+          <div class="utility-18">Pulse</div>
+          </div>
+          </div>
+          <div class="utility-19">
+          <div class="utility-20">Semifinals</div>
+          <div class="utility-21">
+          <div class="utility-22">Alpha</div>
+          <div class="utility-23">Vertex</div>
+          </div>
+          <div class="utility-24">
+          <div class="utility-25">Kaze</div>
+          <div class="utility-26">Onyx</div>
+          </div>
+          </div>
+          <div class="utility-27">
+          <div class="utility-28">Final</div>
+          <div class="utility-29">
+          <div class="utility-30">Alpha</div>
+          <div class="utility-31">Kaze</div>
+          </div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "esports-schedule",
         label: "Esports · Stream Schedule",
-        html: `<section class="block block-esports-schedule-1 block-esports-schedule">
-  <div class="block block-esports-schedule-2 block-esports-schedule">
-    <h2 class="block block-esports-schedule-3 block-esports-schedule block-heading">Stream schedule</h2>
-    <div class="block block-esports-schedule-4 block-esports-schedule">
-      
-      <div class="block block-esports-schedule-5 block-esports-schedule">
-        <div class="block block-esports-schedule-6 block-esports-schedule">Mon</div>
-        <div class="block block-esports-schedule-7 block-esports-schedule">7PM</div>
-        <div class="block block-esports-schedule-8 block-esports-schedule">Ranked grind</div>
-      </div>
-      <div class="block block-esports-schedule-9 block-esports-schedule">
-        <div class="block block-esports-schedule-10 block-esports-schedule">Tue</div>
-        <div class="block block-esports-schedule-11 block-esports-schedule">Off</div>
-        <div class="block block-esports-schedule-12 block-esports-schedule"></div>
-      </div>
-      <div class="block block-esports-schedule-13 block-esports-schedule">
-        <div class="block block-esports-schedule-14 block-esports-schedule">Wed</div>
-        <div class="block block-esports-schedule-15 block-esports-schedule">7PM</div>
-        <div class="block block-esports-schedule-16 block-esports-schedule">Scrims</div>
-      </div>
-      <div class="block block-esports-schedule-17 block-esports-schedule">
-        <div class="block block-esports-schedule-18 block-esports-schedule">Thu</div>
-        <div class="block block-esports-schedule-19 block-esports-schedule">7PM</div>
-        <div class="block block-esports-schedule-20 block-esports-schedule">Community night</div>
-      </div>
-      <div class="block block-esports-schedule-21 block-esports-schedule">
-        <div class="block block-esports-schedule-22 block-esports-schedule">Fri</div>
-        <div class="block block-esports-schedule-23 block-esports-schedule">8PM</div>
-        <div class="block block-esports-schedule-24 block-esports-schedule">Tournament</div>
-      </div>
-      <div class="block block-esports-schedule-25 block-esports-schedule">
-        <div class="block block-esports-schedule-26 block-esports-schedule">Sat</div>
-        <div class="block block-esports-schedule-27 block-esports-schedule">2PM</div>
-        <div class="block block-esports-schedule-28 block-esports-schedule">VOD review</div>
-      </div>
-      <div class="block block-esports-schedule-29 block-esports-schedule">
-        <div class="block block-esports-schedule-30 block-esports-schedule">Sun</div>
-        <div class="block block-esports-schedule-31 block-esports-schedule">Off</div>
-        <div class="block block-esports-schedule-32 block-esports-schedule"></div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-esports-schedule">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Stream schedule</h2>
+          <div class="utility-4">
+          <div class="utility-5">
+          <div class="utility-6">Mon</div>
+          <div class="utility-7">7PM</div>
+          <div class="utility-8">Ranked grind</div>
+          </div>
+          <div class="utility-9">
+          <div class="utility-10">Tue</div>
+          <div class="utility-11">Off</div>
+          <div class="utility-12"></div>
+          </div>
+          <div class="utility-13">
+          <div class="utility-14">Wed</div>
+          <div class="utility-15">7PM</div>
+          <div class="utility-16">Scrims</div>
+          </div>
+          <div class="utility-17">
+          <div class="utility-18">Thu</div>
+          <div class="utility-19">7PM</div>
+          <div class="utility-20">Community night</div>
+          </div>
+          <div class="utility-21">
+          <div class="utility-22">Fri</div>
+          <div class="utility-23">8PM</div>
+          <div class="utility-24">Tournament</div>
+          </div>
+          <div class="utility-25">
+          <div class="utility-26">Sat</div>
+          <div class="utility-27">2PM</div>
+          <div class="utility-28">VOD review</div>
+          </div>
+          <div class="utility-29">
+          <div class="utility-30">Sun</div>
+          <div class="utility-31">Off</div>
+          <div class="utility-32"></div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "esports-stats",
         label: "Esports · Player Stat Cards",
-        html: `<section class="block block-esports-stats-1 block-esports-stats">
-  <div class="block block-esports-stats-2 block-esports-stats">
-    <h2 class="block block-esports-stats-3 block-esports-stats block-heading">Player stats</h2>
-    <div class="block block-esports-stats-4 block-esports-stats">
-      
-      <div class="block block-esports-stats-5 block-esports-stats">
-        <div class="block block-esports-stats-6 block-esports-stats">Viper</div>
-        <div class="block block-esports-stats-7 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-8 block-esports-stats">1.34</span></div>
-        <div class="block block-esports-stats-9 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-10 block-esports-stats">78%</span></div>
-      </div>
-      <div class="block block-esports-stats-11 block-esports-stats">
-        <div class="block block-esports-stats-12 block-esports-stats">Ashen</div>
-        <div class="block block-esports-stats-13 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-14 block-esports-stats">1.21</span></div>
-        <div class="block block-esports-stats-15 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-16 block-esports-stats">71%</span></div>
-      </div>
-      <div class="block block-esports-stats-17 block-esports-stats">
-        <div class="block block-esports-stats-18 block-esports-stats">Kudo</div>
-        <div class="block block-esports-stats-19 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-20 block-esports-stats">0.98</span></div>
-        <div class="block block-esports-stats-21 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-22 block-esports-stats">65%</span></div>
-      </div>
-      <div class="block block-esports-stats-23 block-esports-stats">
-        <div class="block block-esports-stats-24 block-esports-stats">Frost</div>
-        <div class="block block-esports-stats-25 block-esports-stats"><span>K/D</span><span class="block block-esports-stats-26 block-esports-stats">1.08</span></div>
-        <div class="block block-esports-stats-27 block-esports-stats"><span>Headshot %</span><span class="block block-esports-stats-28 block-esports-stats">69%</span></div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-esports-stats">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Player stats</h2>
+          <div class="utility-4">
+          <div class="utility-5">
+          <div class="utility-6">Viper</div>
+          <div class="utility-7"><span>K/D</span><span class="utility-8">1.34</span></div>
+          <div class="utility-9"><span>Headshot %</span><span class="utility-10">78%</span></div>
+          </div>
+          <div class="utility-11">
+          <div class="utility-12">Ashen</div>
+          <div class="utility-13"><span>K/D</span><span class="utility-14">1.21</span></div>
+          <div class="utility-15"><span>Headshot %</span><span class="utility-16">71%</span></div>
+          </div>
+          <div class="utility-17">
+          <div class="utility-18">Kudo</div>
+          <div class="utility-19"><span>K/D</span><span class="utility-20">0.98</span></div>
+          <div class="utility-21"><span>Headshot %</span><span class="utility-22">65%</span></div>
+          </div>
+          <div class="utility-23">
+          <div class="utility-24">Frost</div>
+          <div class="utility-25"><span>K/D</span><span class="utility-26">1.08</span></div>
+          <div class="utility-27"><span>Headshot %</span><span class="utility-28">69%</span></div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "esports-leaderboard",
         label: "Esports · Leaderboard",
-        html: `<section class="block block-esports-leaderboard-1 block-esports-leaderboard">
-  <div class="block block-esports-leaderboard-2 block-esports-leaderboard">
-    <h2 class="block block-esports-leaderboard-3 block-esports-leaderboard block-heading">Leaderboard</h2>
-    <div class="block block-esports-leaderboard-4 block-esports-leaderboard">
-      <div class="block block-esports-leaderboard-5 block-esports-leaderboard">
-        <div>#</div><div>Team</div><div>Wins</div><div>Points</div>
-      </div>
-      
-      <div class="block block-esports-leaderboard-6 block-esports-leaderboard">
-        <div class="block block-esports-leaderboard-7 block-esports-leaderboard">1</div>
-        <div class="block block-esports-leaderboard-8 block-esports-leaderboard">Alpha Esports</div>
-        <div class="block block-esports-leaderboard-9 block-esports-leaderboard">14</div>
-        <div class="block block-esports-leaderboard-10 block-esports-leaderboard">842</div>
-      </div>
-      <div class="block block-esports-leaderboard-11 block-esports-leaderboard">
-        <div class="block block-esports-leaderboard-12 block-esports-leaderboard">2</div>
-        <div class="block block-esports-leaderboard-13 block-esports-leaderboard">Vertex GG</div>
-        <div class="block block-esports-leaderboard-14 block-esports-leaderboard">12</div>
-        <div class="block block-esports-leaderboard-15 block-esports-leaderboard">790</div>
-      </div>
-      <div class="block block-esports-leaderboard-16 block-esports-leaderboard">
-        <div class="block block-esports-leaderboard-17 block-esports-leaderboard">3</div>
-        <div class="block block-esports-leaderboard-18 block-esports-leaderboard">Kaze Nation</div>
-        <div class="block block-esports-leaderboard-19 block-esports-leaderboard">11</div>
-        <div class="block block-esports-leaderboard-20 block-esports-leaderboard">755</div>
-      </div>
-      <div class="block block-esports-leaderboard-21 block-esports-leaderboard">
-        <div class="block block-esports-leaderboard-22 block-esports-leaderboard">4</div>
-        <div class="block block-esports-leaderboard-23 block-esports-leaderboard">Onyx Squad</div>
-        <div class="block block-esports-leaderboard-24 block-esports-leaderboard">9</div>
-        <div class="block block-esports-leaderboard-25 block-esports-leaderboard">680</div>
-      </div>
-      <div class="block block-esports-leaderboard-26 block-esports-leaderboard">
-        <div class="block block-esports-leaderboard-27 block-esports-leaderboard">5</div>
-        <div class="block block-esports-leaderboard-28 block-esports-leaderboard">Pulse Collective</div>
-        <div class="block block-esports-leaderboard-29 block-esports-leaderboard">8</div>
-        <div class="block block-esports-leaderboard-30 block-esports-leaderboard">611</div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-esports-leaderboard">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Leaderboard</h2>
+          <div class="utility-4">
+          <div class="utility-5">
+          <div>#</div><div>Team</div><div>Wins</div><div>Points</div>
+          </div>
+          <div class="utility-6">
+          <div class="utility-7">1</div>
+          <div class="utility-8">Alpha Esports</div>
+          <div class="utility-9">14</div>
+          <div class="utility-10">842</div>
+          </div>
+          <div class="utility-11">
+          <div class="utility-12">2</div>
+          <div class="utility-13">Vertex GG</div>
+          <div class="utility-14">12</div>
+          <div class="utility-15">790</div>
+          </div>
+          <div class="utility-16">
+          <div class="utility-17">3</div>
+          <div class="utility-18">Kaze Nation</div>
+          <div class="utility-19">11</div>
+          <div class="utility-20">755</div>
+          </div>
+          <div class="utility-21">
+          <div class="utility-22">4</div>
+          <div class="utility-23">Onyx Squad</div>
+          <div class="utility-24">9</div>
+          <div class="utility-25">680</div>
+          </div>
+          <div class="utility-26">
+          <div class="utility-27">5</div>
+          <div class="utility-28">Pulse Collective</div>
+          <div class="utility-29">8</div>
+          <div class="utility-30">611</div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "esports-org-hub",
         label: "Esports · Organization Hub",
-        html: `<section class="block block-esports-org-hub-1 block-esports-org-hub">
-  <div class="block block-esports-org-hub-2 block-esports-org-hub">
-    <div class="block block-esports-org-hub-3 block-esports-org-hub">
-      <div>
-        <h2 class="block block-esports-org-hub-4 block-esports-org-hub block-heading">Alpha Esports</h2>
-        <p class="block block-esports-org-hub-5 block-esports-org-hub">Competing across Valorant, CS2 and League — est. 2021. Follow the journey, catch the streams, join the community.</p>
-      </div>
-      <a href="#" class="block block-esports-org-hub-6 block-esports-org-hub">Join the community</a>
-    </div>
-    <div class="block block-esports-org-hub-7 block-esports-org-hub">
-      
-      <div class="block block-esports-org-hub-8 block-esports-org-hub">
-        <div class="block block-esports-org-hub-9 block-esports-org-hub">2021</div>
-        <div class="block block-esports-org-hub-10 block-esports-org-hub">Est.</div>
-      </div>
-      <div class="block block-esports-org-hub-11 block-esports-org-hub">
-        <div class="block block-esports-org-hub-12 block-esports-org-hub">3 games</div>
-        <div class="block block-esports-org-hub-13 block-esports-org-hub">Titles</div>
-      </div>
-      <div class="block block-esports-org-hub-14 block-esports-org-hub">
-        <div class="block block-esports-org-hub-15 block-esports-org-hub">210K+</div>
-        <div class="block block-esports-org-hub-16 block-esports-org-hub">Followers</div>
-      </div>
-    </div>
-    <div class="block block-esports-org-hub-17 block-esports-org-hub">
-      <div class="block block-esports-org-hub-18 block-esports-org-hub">Backed by</div>
-      <div class="block block-esports-org-hub-19 block-esports-org-hub">
-        <div class="block block-esports-org-hub-20 block-esports-org-hub">SPONSOR ONE</div><div class="block block-esports-org-hub-21 block-esports-org-hub">SPONSOR TWO</div><div class="block block-esports-org-hub-22 block-esports-org-hub">SPONSOR THREE</div><div class="block block-esports-org-hub-23 block-esports-org-hub">SPONSOR FOUR</div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-esports-org-hub">
+          <div class="utility-2">
+          <div class="utility-3">
+          <div>
+          <h2 class="utility-4 block-heading">Alpha Esports</h2>
+          <p class="utility-5">Competing across Valorant, CS2 and League — est. 2021. Follow the journey, catch the streams, join the community.</p>
+          </div>
+          <a href="#" class="utility-6">Join the community</a>
+          </div>
+          <div class="utility-7">
+          <div class="utility-8">
+          <div class="utility-9">2021</div>
+          <div class="utility-10">Est.</div>
+          </div>
+          <div class="utility-11">
+          <div class="utility-12">3 games</div>
+          <div class="utility-13">Titles</div>
+          </div>
+          <div class="utility-14">
+          <div class="utility-15">210K+</div>
+          <div class="utility-16">Followers</div>
+          </div>
+          </div>
+          <div class="utility-17">
+          <div class="utility-18">Backed by</div>
+          <div class="utility-19">
+          <div class="utility-20">SPONSOR ONE</div><div class="utility-21">SPONSOR TWO</div><div class="utility-22">SPONSOR THREE</div><div class="utility-23">SPONSOR FOUR</div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -974,33 +960,32 @@ export const EXTRA_CATEGORIES = [
       {
         id: "creator-membership",
         label: "Creator · Subscription Tiers",
-        html: `<section class="block block-creator-membership-1 block-creator-membership">
-  <div class="block block-creator-membership-2 block-creator-membership">
-    <h2 class="block block-creator-membership-3 block-creator-membership block-heading">Support the channel</h2>
-    <p class="block block-creator-membership-4 block-creator-membership">Pick a membership tier and unlock perks.</p>
-    <div class="block block-creator-membership-5 block-creator-membership">
-      
-      <div class="block block-creator-membership-6 block-creator-membership">
-        <div class="block block-creator-membership-7 block-creator-membership">Fan</div>
-        <div class="block block-creator-membership-8 block-creator-membership">$5<span class="block block-creator-membership-9 block-creator-membership">/mo</span></div>
-        <ul class="block block-creator-membership-10 block-creator-membership"><li>✓ Member badge</li><li>✓ Emotes</li><li>✓ Shoutouts</li></ul>
-        <a href="#" class="block block-creator-membership-11 block-creator-membership">Join Fan</a>
-      </div>
-      <div class="block block-creator-membership-12 block-creator-membership">
-        <div class="block block-creator-membership-13 block-creator-membership">Supporter</div>
-        <div class="block block-creator-membership-14 block-creator-membership">$15<span class="block block-creator-membership-15 block-creator-membership">/mo</span></div>
-        <ul class="block block-creator-membership-16 block-creator-membership"><li>✓ Everything in Fan</li><li>✓ Discord access</li><li>✓ Monthly Q&A</li></ul>
-        <a href="#" class="block block-creator-membership-17 block-creator-membership">Join Supporter</a>
-      </div>
-      <div class="block block-creator-membership-18 block-creator-membership">
-        <div class="block block-creator-membership-19 block-creator-membership">VIP</div>
-        <div class="block block-creator-membership-20 block-creator-membership">$40<span class="block block-creator-membership-21 block-creator-membership">/mo</span></div>
-        <ul class="block block-creator-membership-22 block-creator-membership"><li>✓ Everything in Supporter</li><li>✓ 1:1 game session</li><li>✓ Name in credits</li></ul>
-        <a href="#" class="block block-creator-membership-23 block-creator-membership">Join VIP</a>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-creator-membership">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Support the channel</h2>
+          <p class="utility-4">Pick a membership tier and unlock perks.</p>
+          <div class="utility-5">
+          <div class="utility-6">
+          <div class="utility-7">Fan</div>
+          <div class="utility-8">$5<span class="utility-9">/mo</span></div>
+          <ul class="utility-10"><li>✓ Member badge</li><li>✓ Emotes</li><li>✓ Shoutouts</li></ul>
+          <a href="#" class="utility-11">Join Fan</a>
+          </div>
+          <div class="utility-12">
+          <div class="utility-13">Supporter</div>
+          <div class="utility-14">$15<span class="utility-15">/mo</span></div>
+          <ul class="utility-16"><li>✓ Everything in Fan</li><li>✓ Discord access</li><li>✓ Monthly Q&A</li></ul>
+          <a href="#" class="utility-17">Join Supporter</a>
+          </div>
+          <div class="utility-18">
+          <div class="utility-19">VIP</div>
+          <div class="utility-20">$40<span class="utility-21">/mo</span></div>
+          <ul class="utility-22"><li>✓ Everything in Supporter</li><li>✓ 1:1 game session</li><li>✓ Name in credits</li></ul>
+          <a href="#" class="utility-23">Join VIP</a>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -1017,12 +1002,12 @@ export const EXTRA_CATEGORIES = [
       {
         id: "retro-hitcounter",
         label: "Retro · Hit Counter",
-        html: `<div data-wd-hitcounter-root class="block block-retro-hitcounter-1 block-retro-hitcounter">
-  <div class="block block-retro-hitcounter-2 block-retro-hitcounter">You are visitor number</div>
-  <div class="block block-retro-hitcounter-3 block-retro-hitcounter" data-wd-hitcounter-digits>
-    <span class="block block-retro-hitcounter-4 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-5 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-6 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-7 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-8 block-retro-hitcounter">0</span><span class="block block-retro-hitcounter-9 block-retro-hitcounter">0</span>
+        html: `<section class="block block-retro-hitcounter" data-wd-hitcounter-root>
+  <div class="utility-2">You are visitor number</div>
+  <div class="utility-3" data-wd-hitcounter-digits>
+    <span class="utility-4">0</span><span class="utility-5">0</span><span class="utility-6">0</span><span class="utility-7">0</span><span class="utility-8">0</span><span class="utility-9">0</span>
   </div>
-  <div class="block block-retro-hitcounter-10 block-retro-hitcounter">counts visits to this page, stored in your browser — a modern stand-in for the server-side hit files 90s CGI counters used</div>
+  <div class="utility-10">counts visits to this page, stored in your browser — a modern stand-in for the server-side hit files 90s CGI counters used</div>
   <script>(function(){
     try {
       var root = document.currentScript.closest('[data-wd-hitcounter-root]');
@@ -1047,168 +1032,166 @@ export const EXTRA_CATEGORIES = [
       digits.forEach(function(d, i) { if (spans[i]) spans[i].textContent = d; });
     } catch (e) {}
   })();</script>
-</div>`,
+</section>`,
       },
       {
         id: "retro-guestbook",
         label: "Retro · Sign My Guestbook",
-        html: `<section class="block block-retro-guestbook-1 block-retro-guestbook">
-  <div class="block block-retro-guestbook-2 block-retro-guestbook">
-    <h2 class="block block-retro-guestbook-3 block-retro-guestbook block-heading">✦ Sign My Guestbook! ✦</h2>
-    <p class="block block-retro-guestbook-4 block-retro-guestbook">Thanx for stopping by my page! Leave a message below ~*~</p>
-    <form>
-      <label class="block block-retro-guestbook-5 block-retro-guestbook">Your Name</label>
-      <input class="block block-retro-guestbook-6 block-retro-guestbook" />
-      <label class="block block-retro-guestbook-7 block-retro-guestbook">Message</label>
-      <textarea rows="3" class="block block-retro-guestbook-8 block-retro-guestbook"></textarea>
-      <button type="submit" class="block block-retro-guestbook-9 block-retro-guestbook">Sign It! →</button>
-    </form>
-    <div class="block block-retro-guestbook-10 block-retro-guestbook">
-      
-      <div class="block block-retro-guestbook-11 block-retro-guestbook">
-        <span class="block block-retro-guestbook-12 block-retro-guestbook">xXsparkle_soulXx</span> <span class="block block-retro-guestbook-13 block-retro-guestbook">wrote:</span>
-        <div class="block block-retro-guestbook-14 block-retro-guestbook">omg i love ur page!! the bg music is SO good 💜</div>
-      </div>
-      <div class="block block-retro-guestbook-15 block-retro-guestbook">
-        <span class="block block-retro-guestbook-16 block-retro-guestbook">webmaster_99</span> <span class="block block-retro-guestbook-17 block-retro-guestbook">wrote:</span>
-        <div class="block block-retro-guestbook-18 block-retro-guestbook">nice site, added you to my links page. webring pending approval.</div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-retro-guestbook">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">✦ Sign My Guestbook! ✦</h2>
+          <p class="utility-4">Thanx for stopping by my page! Leave a message below ~*~</p>
+          <form>
+          <label class="utility-5">Your Name</label>
+          <input class="utility-6" />
+          <label class="utility-7">Message</label>
+          <textarea rows="3" class="utility-8"></textarea>
+          <button type="submit" class="utility-9">Sign It! →</button>
+          </form>
+          <div class="utility-10">
+          <div class="utility-11">
+          <span class="utility-12">xXsparkle_soulXx</span> <span class="utility-13">wrote:</span>
+          <div class="utility-14">omg i love ur page!! the bg music is SO good 💜</div>
+          </div>
+          <div class="utility-15">
+          <span class="utility-16">webmaster_99</span> <span class="utility-17">wrote:</span>
+          <div class="utility-18">nice site, added you to my links page. webring pending approval.</div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "retro-webring",
         label: "Retro · Webring Navigator",
-        html: `<div class="block block-retro-webring-1 block-retro-webring">
-  <div class="block block-retro-webring-2 block-retro-webring">
-    <a href="#" class="block block-retro-webring-3 block-retro-webring">← Prev Site</a>
-    <div class="block block-retro-webring-4 block-retro-webring">
-      <div class="block block-retro-webring-5 block-retro-webring">Member of the</div>
-      <div class="block block-retro-webring-6 block-retro-webring">Indie Web Ring</div>
+        html: `<section class="block block-retro-webring">
+  <div class="utility-2">
+    <a href="#" class="utility-3">← Prev Site</a>
+    <div class="utility-4">
+      <div class="utility-5">Member of the</div>
+      <div class="utility-6">Indie Web Ring</div>
     </div>
-    <a href="#" class="block block-retro-webring-7 block-retro-webring">🔀 Random</a>
-    <a href="#" class="block block-retro-webring-8 block-retro-webring">Next Site →</a>
-  </div>
-</div>`,
-      },
-      {
-        id: "retro-buttons88",
-        label: "Retro · 88×31 Button Row",
-        html: `<div class="block block-retro-buttons88-1 block-retro-buttons88">
-  
-  <div class="block block-retro-buttons88-2 block-retro-buttons88">BEST VIEWED
-WITH EYES</div>
-  <div class="block block-retro-buttons88-3 block-retro-buttons88">VALID
-HTML5</div>
-  <div class="block block-retro-buttons88-4 block-retro-buttons88">made with
-CSS Grid</div>
-  <div class="block block-retro-buttons88-5 block-retro-buttons88">100%
-HUMAN MADE</div>
-  <div class="block block-retro-buttons88-6 block-retro-buttons88">POWERED BY
-COFFEE</div>
-</div>`,
-      },
-      {
-        id: "retro-top8",
-        label: "Retro · Top 8 Friends",
-        html: `<section class="block block-retro-top8-1 block-retro-top8">
-  <div class="block block-retro-top8-2 block-retro-top8">
-    <h2 class="block block-retro-top8-3 block-retro-top8 block-heading">Top Friends</h2>
-    <p class="block block-retro-top8-4 block-retro-top8">view all →</p>
-    <div class="block block-retro-top8-5 block-retro-top8">
-      
-      <a href="#" class="block block-retro-top8-6 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="Friend 1" class="block block-retro-top8-7 block-retro-top8" />
-        <div class="block block-retro-top8-8 block-retro-top8">friend_1</div>
-      </a>
-      <a href="#" class="block block-retro-top8-9 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Friend 2" class="block block-retro-top8-10 block-retro-top8" />
-        <div class="block block-retro-top8-11 block-retro-top8">friend_2</div>
-      </a>
-      <a href="#" class="block block-retro-top8-12 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" alt="Friend 3" class="block block-retro-top8-13 block-retro-top8" />
-        <div class="block block-retro-top8-14 block-retro-top8">friend_3</div>
-      </a>
-      <a href="#" class="block block-retro-top8-15 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" alt="Friend 4" class="block block-retro-top8-16 block-retro-top8" />
-        <div class="block block-retro-top8-17 block-retro-top8">friend_4</div>
-      </a>
-      <a href="#" class="block block-retro-top8-18 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" alt="Friend 5" class="block block-retro-top8-19 block-retro-top8" />
-        <div class="block block-retro-top8-20 block-retro-top8">friend_5</div>
-      </a>
-      <a href="#" class="block block-retro-top8-21 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=75" alt="Friend 6" class="block block-retro-top8-22 block-retro-top8" />
-        <div class="block block-retro-top8-23 block-retro-top8">friend_6</div>
-      </a>
-      <a href="#" class="block block-retro-top8-24 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="Friend 7" class="block block-retro-top8-25 block-retro-top8" />
-        <div class="block block-retro-top8-26 block-retro-top8">friend_7</div>
-      </a>
-      <a href="#" class="block block-retro-top8-27 block-retro-top8">
-        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Friend 8" class="block block-retro-top8-28 block-retro-top8" />
-        <div class="block block-retro-top8-29 block-retro-top8">friend_8</div>
-      </a>
-    </div>
+    <a href="#" class="utility-7">🔀 Random</a>
+    <a href="#" class="utility-8">Next Site →</a>
   </div>
 </section>`,
       },
       {
+        id: "retro-buttons88",
+        label: "Retro · 88×31 Button Row",
+        html: `<section class="block block-retro-buttons88">
+  
+  <div class="utility-2">BEST VIEWED
+WITH EYES</div>
+  <div class="utility-3">VALID
+HTML5</div>
+  <div class="utility-4">made with
+CSS Grid</div>
+  <div class="utility-5">100%
+HUMAN MADE</div>
+  <div class="utility-6">POWERED BY
+COFFEE</div>
+</section>`,
+      },
+      {
+        id: "retro-top8",
+        label: "Retro · Top 8 Friends",
+        html: `<section class="block block-retro-top8">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Top Friends</h2>
+          <p class="utility-4">view all →</p>
+          <div class="utility-5">
+          <a href="#" class="utility-6">
+          <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="Friend 1" class="utility-7" />
+          <div class="utility-8">friend_1</div>
+          </a>
+          <a href="#" class="utility-9">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Friend 2" class="utility-10" />
+          <div class="utility-11">friend_2</div>
+          </a>
+          <a href="#" class="utility-12">
+          <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" alt="Friend 3" class="utility-13" />
+          <div class="utility-14">friend_3</div>
+          </a>
+          <a href="#" class="utility-15">
+          <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" alt="Friend 4" class="utility-16" />
+          <div class="utility-17">friend_4</div>
+          </a>
+          <a href="#" class="utility-18">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" alt="Friend 5" class="utility-19" />
+          <div class="utility-20">friend_5</div>
+          </a>
+          <a href="#" class="utility-21">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=75" alt="Friend 6" class="utility-22" />
+          <div class="utility-23">friend_6</div>
+          </a>
+          <a href="#" class="utility-24">
+          <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="Friend 7" class="utility-25" />
+          <div class="utility-26">friend_7</div>
+          </a>
+          <a href="#" class="utility-27">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Friend 8" class="utility-28" />
+          <div class="utility-29">friend_8</div>
+          </a>
+          </div>
+          </div>
+        </section>`,
+      },
+      {
         id: "retro-eprops",
         label: "Retro · eProps & Blogroll",
-        html: `<div class="block block-retro-eprops-1 block-retro-eprops">
-  <div class="block block-retro-eprops-2 block-retro-eprops">
-    <div class="block block-retro-eprops-3 block-retro-eprops">Latest entry</div>
-    <h3 class="block block-retro-eprops-4 block-retro-eprops">today was actually pretty good</h3>
-    <p class="block block-retro-eprops-5 block-retro-eprops">nothing much happened but the weather was nice and I got bubble tea so 8/10 day tbh...</p>
-    <div class="block block-retro-eprops-6 block-retro-eprops">
-      <button class="block block-retro-eprops-7 block-retro-eprops">⭐ eProps (24)</button>
-      <span class="block block-retro-eprops-8 block-retro-eprops">12 comments</span>
+        html: `<section class="block block-retro-eprops">
+  <div class="utility-2">
+    <div class="utility-3">Latest entry</div>
+    <h3 class="utility-4">today was actually pretty good</h3>
+    <p class="utility-5">nothing much happened but the weather was nice and I got bubble tea so 8/10 day tbh...</p>
+    <div class="utility-6">
+      <button class="utility-7">⭐ eProps (24)</button>
+      <span class="utility-8">12 comments</span>
     </div>
   </div>
   <div>
-    <div class="block block-retro-eprops-9 block-retro-eprops">My Blogrings</div>
+    <div class="utility-9">My Blogrings</div>
     
-    <div class="block block-retro-eprops-10 block-retro-eprops">◆ Poetry & Prose Ring</div>
-    <div class="block block-retro-eprops-11 block-retro-eprops">◆ 2000s Nostalgia Crew</div>
-    <div class="block block-retro-eprops-12 block-retro-eprops">◆ Bubble Tea Lovers</div>
-    <div class="block block-retro-eprops-13 block-retro-eprops">◆ Late Night Thoughts</div>
+    <div class="utility-10">◆ Poetry & Prose Ring</div>
+    <div class="utility-11">◆ 2000s Nostalgia Crew</div>
+    <div class="utility-12">◆ Bubble Tea Lovers</div>
+    <div class="utility-13">◆ Late Night Thoughts</div>
   </div>
-</div>`,
+</section>`,
       },
       {
         id: "retro-construction",
         label: "Retro · Under Construction",
-        html: `<div class="block block-retro-construction-1 block-retro-construction">
-  <div class="block block-retro-construction-2 block-retro-construction">
+        html: `<section class="block block-retro-construction">
+  <div class="utility-2">
     🚧 PAGE UNDER CONSTRUCTION 🚧<br />
-    <span class="block block-retro-construction-3 block-retro-construction">check back soon — always more to add!</span>
+    <span class="utility-3">check back soon — always more to add!</span>
   </div>
-</div>`,
+</section>`,
       },
       {
         id: "retro-divider",
         label: "Retro · Rainbow Glitter Divider",
-        html: `<div class="block block-retro-divider-1 block-retro-divider">
-  <div class="block block-retro-divider-2 block-retro-divider"></div>
-  <div class="block block-retro-divider-3 block-retro-divider">✧･ﾟ: *✧･ﾟ:* thanks for visiting *:･ﾟ✧*:･ﾟ✧</div>
+        html: `<section class="block block-retro-divider">
+  <div class="utility-2"></div>
+  <div class="utility-3">✧･ﾟ: *✧･ﾟ:* thanks for visiting *:･ﾟ✧*:･ﾟ✧</div>
   <style>@keyframes wd-rainbow-shift{0%{background-position:0% 50%}100%{background-position:200% 50%}}</style>
-</div>`,
+</section>`,
       },
       {
         id: "retro-musicplayer",
         label: "Retro · Now Playing Bar",
-        html: `<div class="block block-retro-musicplayer-1 block-retro-musicplayer">
-  <div class="block block-retro-musicplayer-2 block-retro-musicplayer">
-    <div class="block block-retro-musicplayer-3 block-retro-musicplayer"></div>
+        html: `<section class="block block-retro-musicplayer">
+  <div class="utility-2">
+    <div class="utility-3"></div>
     <div>
-      <div class="block block-retro-musicplayer-4 block-retro-musicplayer">♪ now playing</div>
-      <div class="block block-retro-musicplayer-5 block-retro-musicplayer">profile-anthem.mp3</div>
+      <div class="utility-4">♪ now playing</div>
+      <div class="utility-5">profile-anthem.mp3</div>
     </div>
-    <audio controls class="block block-retro-musicplayer-6 block-retro-musicplayer"></audio>
+    <audio controls class="utility-6"></audio>
   </div>
-</div>`,
+</section>`,
       },
       {
         // 1998–2001 Geocities/Angelfire era: pages advertised which browser
@@ -1218,11 +1201,11 @@ COFFEE</div>
         // never had to handle.
         id: "retro-browserbadges",
         label: "Retro · Browser Badges",
-        html: `<div class="block block-retro-browserbadges-1 block-retro-browserbadges">
-  <div class="block block-retro-browserbadges-2 block-retro-browserbadges">Best viewed in<br/>Netscape Navigator 4.0</div>
-  <div class="block block-retro-browserbadges-3 block-retro-browserbadges">Optimized for<br/>Internet Explorer 5+</div>
-  <div class="block block-retro-browserbadges-4 block-retro-browserbadges">800×600<br/>resolution</div>
-</div>`,
+        html: `<section class="block block-retro-browserbadges">
+  <div class="utility-2">Best viewed in<br/>Netscape Navigator 4.0</div>
+  <div class="utility-3">Optimized for<br/>Internet Explorer 5+</div>
+  <div class="utility-4">800×600<br/>resolution</div>
+</section>`,
       },
       {
         // 2005–2010's defining startup aesthetic — the glossy, reflective
@@ -1233,13 +1216,13 @@ COFFEE</div>
         // needing a matching image asset per color.
         id: "retro-web2badge",
         label: "Retro · Web 2.0 Glossy Badge",
-        html: `<div class="block block-retro-web2badge-1 block-retro-web2badge">
-  <div class="block block-retro-web2badge-2 block-retro-web2badge">
-    <div class="block block-retro-web2badge-3 block-retro-web2badge"></div>
-    <span class="block block-retro-web2badge-4 block-retro-web2badge">myStartup</span>
-    <span class="block block-retro-web2badge-5 block-retro-web2badge">beta</span>
+        html: `<section class="block block-retro-web2badge">
+  <div class="utility-2">
+    <div class="utility-3"></div>
+    <span class="utility-4">myStartup</span>
+    <span class="utility-5">beta</span>
   </div>
-</div>`,
+</section>`,
       },
       {
         // 2003–2007: AIM/LiveJournal-style "who's online" buddy list —
@@ -1247,30 +1230,30 @@ COFFEE</div>
         // receipts and "last active" timestamps existed.
         id: "retro-buddyicons",
         label: "Retro · Buddy List",
-        html: `<div class="block block-retro-buddyicons-1 block-retro-buddyicons">
-  <div class="block block-retro-buddyicons-2 block-retro-buddyicons">Buddy List — 6 online</div>
-  <div class="block block-retro-buddyicons-3 block-retro-buddyicons">
-    <div class="block block-retro-buddyicons-4 block-retro-buddyicons">
-      <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="" class="block block-retro-buddyicons-5 block-retro-buddyicons" />
-      <span class="block block-retro-buddyicons-6 block-retro-buddyicons"></span>
-    </div><div class="block block-retro-buddyicons-7 block-retro-buddyicons">
-      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="" class="block block-retro-buddyicons-8 block-retro-buddyicons" />
-      <span class="block block-retro-buddyicons-9 block-retro-buddyicons"></span>
-    </div><div class="block block-retro-buddyicons-10 block-retro-buddyicons">
-      <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" alt="" class="block block-retro-buddyicons-11 block-retro-buddyicons" />
-      <span class="block block-retro-buddyicons-12 block-retro-buddyicons"></span>
-    </div><div class="block block-retro-buddyicons-13 block-retro-buddyicons">
-      <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" alt="" class="block block-retro-buddyicons-14 block-retro-buddyicons" />
-      <span class="block block-retro-buddyicons-15 block-retro-buddyicons"></span>
-    </div><div class="block block-retro-buddyicons-16 block-retro-buddyicons">
-      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" alt="" class="block block-retro-buddyicons-17 block-retro-buddyicons" />
-      <span class="block block-retro-buddyicons-18 block-retro-buddyicons"></span>
-    </div><div class="block block-retro-buddyicons-19 block-retro-buddyicons">
-      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=75" alt="" class="block block-retro-buddyicons-20 block-retro-buddyicons" />
-      <span class="block block-retro-buddyicons-21 block-retro-buddyicons"></span>
+        html: `<section class="block block-retro-buddyicons">
+  <div class="utility-2">Buddy List — 6 online</div>
+  <div class="utility-3">
+    <div class="utility-4">
+      <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="" class="utility-5" />
+      <span class="utility-6"></span>
+    </div><div class="utility-7">
+      <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="" class="utility-8" />
+      <span class="utility-9"></span>
+    </div><div class="utility-10">
+      <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75" alt="" class="utility-11" />
+      <span class="utility-12"></span>
+    </div><div class="utility-13">
+      <img src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=75" alt="" class="utility-14" />
+      <span class="utility-15"></span>
+    </div><div class="utility-16">
+      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=75" alt="" class="utility-17" />
+      <span class="utility-18"></span>
+    </div><div class="utility-19">
+      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=75" alt="" class="utility-20" />
+      <span class="utility-21"></span>
     </div>
   </div>
-</div>`,
+</section>`,
       },
       {
         // 2003–2008: the Xanga/Neopets "shoutbox" — a lightweight public
@@ -1279,17 +1262,17 @@ COFFEE</div>
         // rapid-fire, and displayed inline rather than on its own page.
         id: "retro-shoutbox",
         label: "Retro · Shout Box",
-        html: `<div class="block block-retro-shoutbox-1 block-retro-shoutbox">
-  <div class="block block-retro-shoutbox-2 block-retro-shoutbox">💬 Shout Box</div>
-  <div class="block block-retro-shoutbox-3 block-retro-shoutbox">
-    <div class="block block-retro-shoutbox-4 block-retro-shoutbox"><b class="block block-retro-shoutbox-5 block-retro-shoutbox">xXcoolkidXx:</b> omg i love ur layout!!</div>
-    <div class="block block-retro-shoutbox-6 block-retro-shoutbox"><b class="block block-retro-shoutbox-7 block-retro-shoutbox">sk8ergrl:</b> add me back ✨</div>
+        html: `<section class="block block-retro-shoutbox">
+  <div class="utility-2">💬 Shout Box</div>
+  <div class="utility-3">
+    <div class="utility-4"><b class="utility-5">xXcoolkidXx:</b> omg i love ur layout!!</div>
+    <div class="utility-6"><b class="utility-7">sk8ergrl:</b> add me back ✨</div>
   </div>
-  <div class="block block-retro-shoutbox-8 block-retro-shoutbox">
-    <input placeholder="leave a shout..." class="block block-retro-shoutbox-9 block-retro-shoutbox" />
-    <button class="block block-retro-shoutbox-10 block-retro-shoutbox">Post</button>
+  <div class="utility-8">
+    <input placeholder="leave a shout..." class="utility-9" />
+    <button class="utility-10">Post</button>
   </div>
-</div>`,
+</section>`,
       },
       {
         // 2000–2005: the DHTML mouse-sparkle-trail script every Neopets/
@@ -1300,8 +1283,8 @@ COFFEE</div>
         // pattern) and removes each sparkle after its fade completes.
         id: "retro-sparkletrail",
         label: "Retro · Cursor Sparkle Trail",
-        html: `<div data-wd-sparkletrail-root class="block block-retro-sparkletrail-1 block-retro-sparkletrail">
-  <div class="block block-retro-sparkletrail-2 block-retro-sparkletrail">✨ Move your mouse here for a sparkle trail ✨</div>
+        html: `<section class="block block-retro-sparkletrail" data-wd-sparkletrail-root>
+  <div class="utility-2">✨ Move your mouse here for a sparkle trail ✨</div>
   <script>(function(){
     var root = document.currentScript.closest('[data-wd-sparkletrail-root]');
     if (!root) return;
@@ -1316,7 +1299,7 @@ COFFEE</div>
       setTimeout(function(){ s.remove(); }, 650);
     });
   })();</script>
-</div>`,
+</section>`,
       },
       {
         // 1999–2003: the auto-playing MIDI background-music embed —
@@ -1325,159 +1308,159 @@ COFFEE</div>
         // styled to look like an old OS media-player chrome.
         id: "retro-midiplayer",
         label: "Retro · MIDI Player",
-        html: `<div class="block block-retro-midiplayer-1 block-retro-midiplayer">
-  <div class="block block-retro-midiplayer-2 block-retro-midiplayer">
-    <div class="block block-retro-midiplayer-3 block-retro-midiplayer"></div>
+        html: `<section class="block block-retro-midiplayer">
+  <div class="utility-2">
+    <div class="utility-3"></div>
   </div>
   <div>
-    <div class="block block-retro-midiplayer-4 block-retro-midiplayer">♫ background_theme.mid</div>
-    <audio controls class="block block-retro-midiplayer-5 block-retro-midiplayer"></audio>
+    <div class="utility-4">♫ background_theme.mid</div>
+    <audio controls class="utility-5"></audio>
   </div>
-</div>`,
+</section>`,
       },
       {
         id: "retro-awaymessage",
         label: "Retro · AIM Away Message",
-        html: `<div class="block block-retro-awaymessage-1 block-retro-awaymessage">
-  <div class="block block-retro-awaymessage-2 block-retro-awaymessage">
+        html: `<section class="block block-retro-awaymessage">
+  <div class="utility-2">
     <span>xXsk8rgrl02Xx — Away Message</span>
-    <span class="block block-retro-awaymessage-3 block-retro-awaymessage">✕</span>
+    <span class="utility-3">✕</span>
   </div>
-  <div class="block block-retro-awaymessage-4 block-retro-awaymessage">
-    <div class="block block-retro-awaymessage-5 block-retro-awaymessage"><strong>I'm away from my computer right now.</strong></div>
-    <div class="block block-retro-awaymessage-6 block-retro-awaymessage">"in class, txt my cell &lt;3 back in an hour probably"</div>
-    <div class="block block-retro-awaymessage-7 block-retro-awaymessage">Auto-response sent at 2:14 PM</div>
+  <div class="utility-4">
+    <div class="utility-5"><strong>I'm away from my computer right now.</strong></div>
+    <div class="utility-6">"in class, txt my cell &lt;3 back in an hour probably"</div>
+    <div class="utility-7">Auto-response sent at 2:14 PM</div>
   </div>
-</div>`,
+</section>`,
       },
       {
         id: "retro-poll",
         label: "Retro · Poll Widget",
-        html: `<div class="block block-retro-poll-1 block-retro-poll">
-  <div class="block block-retro-poll-2 block-retro-poll">⭐ Poll of the Week ⭐</div>
-  <div class="block block-retro-poll-3 block-retro-poll">What should the next site layout be?</div>
+        html: `<section class="block block-retro-poll">
+  <div class="utility-2">⭐ Poll of the Week ⭐</div>
+  <div class="utility-3">What should the next site layout be?</div>
   
-  <label class="block block-retro-poll-4 block-retro-poll">
+  <label class="utility-4">
     <input type="radio" name="wd-poll" checked />
     <span>Sparkly & pink</span>
   </label>
-  <label class="block block-retro-poll-5 block-retro-poll">
+  <label class="utility-5">
     <input type="radio" name="wd-poll"  />
     <span>Dark & moody</span>
   </label>
-  <label class="block block-retro-poll-6 block-retro-poll">
+  <label class="utility-6">
     <input type="radio" name="wd-poll"  />
     <span>Rainbow chaos</span>
   </label>
-  <label class="block block-retro-poll-7 block-retro-poll">
+  <label class="utility-7">
     <input type="radio" name="wd-poll"  />
     <span>Keep this one</span>
   </label>
-  <button class="block block-retro-poll-8 block-retro-poll">Vote!</button>
-  <div class="block block-retro-poll-9 block-retro-poll">1,204 votes so far</div>
-</div>`,
+  <button class="utility-8">Vote!</button>
+  <div class="utility-9">1,204 votes so far</div>
+</section>`,
       },
       {
         id: "retro-petadopt",
         label: "Retro · Pet Adoption Badge",
-        html: `<div class="block block-retro-petadopt-1 block-retro-petadopt">
-  <div class="block block-retro-petadopt-2 block-retro-petadopt"></div>
+        html: `<section class="block block-retro-petadopt">
+  <div class="utility-2"></div>
   <div>
-    <div class="block block-retro-petadopt-3 block-retro-petadopt">You adopted Sprinkle!</div>
-    <div class="block block-retro-petadopt-4 block-retro-petadopt">Level 3 Cloud Puff · Fed 2 hrs ago</div>
-    <a href="#" class="block block-retro-petadopt-5 block-retro-petadopt">Visit my pet →</a>
+    <div class="utility-3">You adopted Sprinkle!</div>
+    <div class="utility-4">Level 3 Cloud Puff · Fed 2 hrs ago</div>
+    <a href="#" class="utility-5">Visit my pet →</a>
   </div>
-</div>`,
+</section>`,
       },
       {
         id: "retro-forumheader",
         label: "Retro · Forum Header",
-        html: `<header class="block block-retro-forumheader-1 block-retro-forumheader">
-  <div class="block block-retro-forumheader-2 block-retro-forumheader">
-    <div class="block block-retro-forumheader-3 block-retro-forumheader">FieldworkForums.net</div>
-    <div class="block block-retro-forumheader-4 block-retro-forumheader">the only forum you will ever need, established 2003</div>
-  </div>
-  <div class="block block-retro-forumheader-5 block-retro-forumheader">Forum Index &raquo; General Discussion &raquo; <strong>Thread Title Goes Here</strong></div>
-</header>`,
+        html: `<section class="block block-retro-forumheader">
+          <div class="utility-2">
+          <div class="utility-3">FieldworkForums.net</div>
+          <div class="utility-4">the only forum you will ever need, established 2003</div>
+          </div>
+          <div class="utility-5">Forum Index &raquo; General Discussion &raquo; <strong>Thread Title Goes Here</strong></div>
+        </section>`,
       },
       {
         id: "retro-forumpost",
         label: "Retro · Forum Post",
-        html: `<div class="block block-retro-forumpost-1 block-retro-forumpost">
-  <div class="block block-retro-forumpost-2 block-retro-forumpost">
-    <div class="block block-retro-forumpost-3 block-retro-forumpost"></div>
-    <div class="block block-retro-forumpost-4 block-retro-forumpost">forumveteran99</div>
-    <div class="block block-retro-forumpost-5 block-retro-forumpost">Senior Member</div>
-    <div class="block block-retro-forumpost-6 block-retro-forumpost">Joined: Mar 2004<br>Posts: 3,204</div>
+        html: `<section class="block block-retro-forumpost">
+  <div class="utility-2">
+    <div class="utility-3"></div>
+    <div class="utility-4">forumveteran99</div>
+    <div class="utility-5">Senior Member</div>
+    <div class="utility-6">Joined: Mar 2004<br>Posts: 3,204</div>
   </div>
-  <div class="block block-retro-forumpost-7 block-retro-forumpost">
-    <div class="block block-retro-forumpost-8 block-retro-forumpost"><span>Posted: Today, 9:14 AM</span><span>Post #1 <a href="#" class="block block-retro-forumpost-9 block-retro-forumpost">Quote</a></span></div>
-    <div class="block block-retro-forumpost-10 block-retro-forumpost">Type the post content here. Duplicate this block to build out a full thread.</div>
-    <div class="block block-retro-forumpost-11 block-retro-forumpost">Signature line goes here</div>
+  <div class="utility-7">
+    <div class="utility-8"><span>Posted: Today, 9:14 AM</span><span>Post #1 <a href="#" class="utility-9">Quote</a></span></div>
+    <div class="utility-10">Type the post content here. Duplicate this block to build out a full thread.</div>
+    <div class="utility-11">Signature line goes here</div>
   </div>
-</div>`,
+</section>`,
       },
       {
         id: "retro-forumreply",
         label: "Retro · Forum Reply Box",
-        html: `<section data-forge-comments class="block block-retro-forumreply-1 block-retro-forumreply">
-  <div class="block block-retro-forumreply-2 block-retro-forumreply">
-    <h3 class="block block-retro-forumreply-3 block-retro-forumreply">Comments (<span data-forge-comment-count>0</span>)</h3>
-    <div data-forge-comment-list></div>
-    <form data-forge-comment-form class="block block-retro-forumreply-4 block-retro-forumreply">
-      <input name="name" placeholder="Your name" required class="block block-retro-forumreply-5 block-retro-forumreply">
-      <textarea name="text" placeholder="Say something..." required rows="3" class="block block-retro-forumreply-6 block-retro-forumreply"></textarea>
-      <button type="submit" class="block block-retro-forumreply-7 block-retro-forumreply">Post Comment</button>
-    </form>
-    <script type="application/json" data-forge-comments-seed>[]</script>
-    <script data-forge-js="comments.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function renderComment(c){
-  return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
-    + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
-                : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
-    + '<div style="flex:1;min-width:0;">'
-    + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
-    + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
-    + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
-    + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
-    + '</div></div>';
-}
-function initWidget(root){
-  root.setAttribute("data-forge-comments-init","1");
-  var seedEl=root.querySelector("[data-forge-comments-seed]");
-  var comments=[];
-  try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
-  var list=root.querySelector("[data-forge-comment-list]");
-  var countEl=root.querySelector("[data-forge-comment-count]");
-  function renderAll(){
-    if(list) list.innerHTML=comments.map(renderComment).join("");
-    if(countEl) countEl.textContent=String(comments.length);
-  }
-  renderAll();
-  var form=root.querySelector("[data-forge-comment-form]");
-  if(form){
-    form.addEventListener("submit",function(e){
-      e.preventDefault();
-      var nameInput=form.querySelector('[name="name"]');
-      var textInput=form.querySelector('[name="text"]');
-      var name=(nameInput&&nameInput.value||"").trim();
-      var text=(textInput&&textInput.value||"").trim();
-      if(!name||!text) return;
-      comments.push({id:Date.now(),author:name,date:"Just now",text:text});
-      renderAll();
-      form.reset();
-    });
-  }
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-  </div>
-</section>`,
+        html: `<section class="block block-retro-forumreply" data-forge-comments>
+          <div class="utility-2">
+          <h3 class="utility-3">Comments (<span data-forge-comment-count>0</span>)</h3>
+          <div data-forge-comment-list></div>
+          <form data-forge-comment-form class="utility-4">
+          <input name="name" placeholder="Your name" required class="utility-5">
+          <textarea name="text" placeholder="Say something..." required rows="3" class="utility-6"></textarea>
+          <button type="submit" class="utility-7">Post Comment</button>
+          </form>
+          <script type="application/json" data-forge-comments-seed>[]</script>
+          <script data-forge-js="comments.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function renderComment(c){
+          return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
+          + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
+          : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
+          + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
+          + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
+          + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
+          + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
+          + '</div></div>';
+          }
+          function initWidget(root){
+          root.setAttribute("data-forge-comments-init","1");
+          var seedEl=root.querySelector("[data-forge-comments-seed]");
+          var comments=[];
+          try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
+          var list=root.querySelector("[data-forge-comment-list]");
+          var countEl=root.querySelector("[data-forge-comment-count]");
+          function renderAll(){
+          if(list) list.innerHTML=comments.map(renderComment).join("");
+          if(countEl) countEl.textContent=String(comments.length);
+          }
+          renderAll();
+          var form=root.querySelector("[data-forge-comment-form]");
+          if(form){
+          form.addEventListener("submit",function(e){
+          e.preventDefault();
+          var nameInput=form.querySelector('[name="name"]');
+          var textInput=form.querySelector('[name="text"]');
+          var name=(nameInput&&nameInput.value||"").trim();
+          var text=(textInput&&textInput.value||"").trim();
+          if(!name||!text) return;
+          comments.push({id:Date.now(),author:name,date:"Just now",text:text});
+          renderAll();
+          form.reset();
+          });
+          }
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -1488,78 +1471,78 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "parallax-hero-fullbleed",
         label: "Parallax Hero · Full Bleed",
-        html: `<section class="block block-parallax-hero-fullbleed-1 block-parallax-hero-fullbleed">
-  <div class="block block-parallax-hero-fullbleed-2 block-parallax-hero-fullbleed">
-    <div class="block block-parallax-hero-fullbleed-3 block-parallax-hero-fullbleed">Est. 2026</div>
-    <h1 class="block block-parallax-hero-fullbleed-4 block-parallax-hero-fullbleed block-heading">Where ambition meets altitude.</h1>
-    <p class="block block-parallax-hero-fullbleed-5 block-parallax-hero-fullbleed">A full-bleed statement hero — the background stays fixed while your content scrolls over it.</p>
-    <button class="block block-parallax-hero-fullbleed-6 block-parallax-hero-fullbleed">Explore</button>
-  </div>
-</section>`,
+        html: `<section class="block block-parallax-hero-fullbleed">
+          <div class="utility-2">
+          <div class="utility-3">Est. 2026</div>
+          <h1 class="utility-4 block-heading">Where ambition meets altitude.</h1>
+          <p class="utility-5">A full-bleed statement hero — the background stays fixed while your content scrolls over it.</p>
+          <button class="utility-6">Explore</button>
+          </div>
+        </section>`,
       },
       {
         id: "parallax-hero-split",
         label: "Parallax Hero · Split Content",
-        html: `<section class="block block-parallax-hero-split-1 block-parallax-hero-split">
-  <div class="block block-parallax-hero-split-2 block-parallax-hero-split">
-    <h1 class="block block-parallax-hero-split-3 block-parallax-hero-split block-heading">Grown, not manufactured.</h1>
-    <p class="block block-parallax-hero-split-4 block-parallax-hero-split">Content sits in a legible band on the left; the parallax background carries the mood on the right.</p>
-    <div class="block block-parallax-hero-split-5 block-parallax-hero-split">
-      <button class="block block-parallax-hero-split-6 block-parallax-hero-split">Get started</button>
-      <button class="block block-parallax-hero-split-7 block-parallax-hero-split">Learn more</button>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-parallax-hero-split">
+          <div class="utility-2">
+          <h1 class="utility-3 block-heading">Grown, not manufactured.</h1>
+          <p class="utility-4">Content sits in a legible band on the left; the parallax background carries the mood on the right.</p>
+          <div class="utility-5">
+          <button class="utility-6">Get started</button>
+          <button class="utility-7">Learn more</button>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "parallax-section-quote",
         label: "Parallax Section · Big Quote",
-        html: `<section class="block block-parallax-section-quote-1 block-parallax-section-quote">
-  <div class="block block-parallax-section-quote-2 block-parallax-section-quote">
-    <div class="block block-parallax-section-quote-3 block-parallax-section-quote">"</div>
-    <p class="block block-parallax-section-quote-4 block-parallax-section-quote">The best interfaces disappear — you stop noticing the tool and start noticing the work.</p>
-    <div class="block block-parallax-section-quote-5 block-parallax-section-quote">
-      <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="" class="block block-parallax-section-quote-6 block-parallax-section-quote" />
-      <div class="block block-parallax-section-quote-7 block-parallax-section-quote">
-        <div class="block block-parallax-section-quote-8 block-parallax-section-quote">Nadia Osei</div>
-        <div class="block block-parallax-section-quote-9 block-parallax-section-quote">Creative Director, Tidewater</div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-parallax-section-quote">
+          <div class="utility-2">
+          <div class="utility-3">"</div>
+          <p class="utility-4">The best interfaces disappear — you stop noticing the tool and start noticing the work.</p>
+          <div class="utility-5">
+          <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75" alt="" class="utility-6" />
+          <div class="utility-7">
+          <div class="utility-8">Nadia Osei</div>
+          <div class="utility-9">Creative Director, Tidewater</div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "parallax-section-stats",
         label: "Parallax Section · Stats Band",
-        html: `<section class="block block-parallax-section-stats-1 block-parallax-section-stats">
-  <div class="block block-parallax-section-stats-2 block-parallax-section-stats">
-    <div>
-      <div class="block block-parallax-section-stats-3 block-parallax-section-stats">14k+</div>
-      <div class="block block-parallax-section-stats-4 block-parallax-section-stats">Sites shipped</div>
-    </div>
-    <div>
-      <div class="block block-parallax-section-stats-5 block-parallax-section-stats">99.9%</div>
-      <div class="block block-parallax-section-stats-6 block-parallax-section-stats">Uptime</div>
-    </div>
-    <div>
-      <div class="block block-parallax-section-stats-7 block-parallax-section-stats">38</div>
-      <div class="block block-parallax-section-stats-8 block-parallax-section-stats">Countries</div>
-    </div>
-    <div>
-      <div class="block block-parallax-section-stats-9 block-parallax-section-stats">4.9★</div>
-      <div class="block block-parallax-section-stats-10 block-parallax-section-stats">Average rating</div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block block-parallax-section-stats">
+          <div class="utility-2">
+          <div>
+          <div class="utility-3">14k+</div>
+          <div class="utility-4">Sites shipped</div>
+          </div>
+          <div>
+          <div class="utility-5">99.9%</div>
+          <div class="utility-6">Uptime</div>
+          </div>
+          <div>
+          <div class="utility-7">38</div>
+          <div class="utility-8">Countries</div>
+          </div>
+          <div>
+          <div class="utility-9">4.9★</div>
+          <div class="utility-10">Average rating</div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "parallax-section-cta",
         label: "Parallax Section · CTA Banner",
-        html: `<section class="block block-parallax-section-cta-1 block-parallax-section-cta">
-  <h2 class="block block-parallax-section-cta-2 block-parallax-section-cta block-heading">Ready when the skyline is.</h2>
-  <p class="block block-parallax-section-cta-3 block-parallax-section-cta">Start free — upgrade only once you're ready to publish.</p>
-  <button class="block block-parallax-section-cta-4 block-parallax-section-cta">Start building free</button>
-</section>`,
+        html: `<section class="block block-parallax-section-cta">
+          <h2 class="utility-2 block-heading">Ready when the skyline is.</h2>
+          <p class="utility-3">Start free — upgrade only once you're ready to publish.</p>
+          <button class="utility-4">Start building free</button>
+        </section>`,
       },
     ],
   },
@@ -1570,173 +1553,169 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "social-wall-columns",
         label: "Social Media Wall (Multi-Column)",
-        html: `<section data-forge-widget="social-wall" data-forge-project-id="" class="block block-social-wall-columns-1 block-social-wall-columns">
-  <div class="block block-social-wall-columns-2 block-social-wall-columns">
-    <div class="block block-social-wall-columns-3 block-social-wall-columns">Live from social</div>
-    <h2 class="block block-social-wall-columns-4 block-social-wall-columns block-heading">What people are saying</h2>
-    <div class="block block-social-wall-columns-5 block-social-wall-columns">
-      
-      <div data-forge-widget="social-wall-column" data-platform="twitter" class="block block-social-wall-columns-6 block-social-wall-columns">
-        <div class="block block-social-wall-columns-7 block-social-wall-columns">
-          <div class="block block-social-wall-columns-8 block-social-wall-columns">
-            <span class="block block-social-wall-columns-9 block-social-wall-columns">𝕏</span>
-            <span class="block block-social-wall-columns-10 block-social-wall-columns">Twitter / X</span>
+        html: `<section class="block block-social-wall-columns" data-forge-widget="social-wall" data-forge-project-id="" data-wd-cat="social" data-wd-block="social-wall">
+          <div class="container-heading">
+          <div class="utility-3">Live from social</div>
+          <h2 class="utility-4 block-heading">What people are saying</h2>
           </div>
-          <span data-forge-connect="twitter" class="block block-social-wall-columns-11 block-social-wall-columns">Not connected</span>
-        </div>
-        <div data-forge-cards class="block block-social-wall-columns-12 block-social-wall-columns">
-          
-          <div class="block block-social-wall-columns-13 block-social-wall-columns">
-            <div class="block block-social-wall-columns-14 block-social-wall-columns">
-              <span class="block block-social-wall-columns-15 block-social-wall-columns">Web Dojo</span>
-              <span class="block block-social-wall-columns-16 block-social-wall-columns">2h</span>
-            </div>
-            <div class="block block-social-wall-columns-17 block-social-wall-columns">@webdojo_hq</div>
-            <p class="block block-social-wall-columns-18 block-social-wall-columns">Just shipped dark mode across every export. Thanks for the 200+ bug reports that got us here 🙏</p>
-            <div class="block block-social-wall-columns-19 block-social-wall-columns">💬 12   🔁 34   ♥ 156</div>
+          <div class="social-wall">
+          <div class="col-1">
+          <div class="utility-7">
+          <div class="utility-8">
+          <span class="utility-9">𝕏</span>
+          <span class="utility-10">Twitter / X</span>
           </div>
-          <div class="block block-social-wall-columns-20 block-social-wall-columns">
-            <div class="block block-social-wall-columns-21 block-social-wall-columns">
-              <span class="block block-social-wall-columns-22 block-social-wall-columns">Sam Reyes</span>
-              <span class="block block-social-wall-columns-23 block-social-wall-columns">5h</span>
-            </div>
-            <div class="block block-social-wall-columns-24 block-social-wall-columns">@designer_sam</div>
-            <p class="block block-social-wall-columns-25 block-social-wall-columns">Client sent over "make it pop" for the fourth time today. I have achieved zen.</p>
-            <div class="block block-social-wall-columns-26 block-social-wall-columns">💬 8   🔁 3   ♥ 91</div>
+          <span data-forge-connect="twitter" class="utility-11">Not connected</span>
           </div>
-          <div class="block block-social-wall-columns-27 block-social-wall-columns">
-            <div class="block block-social-wall-columns-28 block-social-wall-columns">
-              <span class="block block-social-wall-columns-29 block-social-wall-columns">Kai Nakamura</span>
-              <span class="block block-social-wall-columns-30 block-social-wall-columns">1d</span>
-            </div>
-            <div class="block block-social-wall-columns-31 block-social-wall-columns">@buildwithkai</div>
-            <p class="block block-social-wall-columns-32 block-social-wall-columns">Hot take: the best websites still load in under a second. Fight me.</p>
-            <div class="block block-social-wall-columns-33 block-social-wall-columns">💬 41   🔁 12   ♥ 203</div>
+          <div data-forge-cards class="utility-12">
+          <div class="utility-13">
+          <div class="utility-14">
+          <span class="utility-15">Web Dojo</span>
+          <span class="utility-16">2h</span>
           </div>
-        </div>
-      </div>
-      <div data-forge-widget="social-wall-column" data-platform="instagram" class="block block-social-wall-columns-34 block-social-wall-columns">
-        <div class="block block-social-wall-columns-35 block-social-wall-columns">
-          <div class="block block-social-wall-columns-36 block-social-wall-columns">
-            <span class="block block-social-wall-columns-37 block-social-wall-columns">📷</span>
-            <span class="block block-social-wall-columns-38 block-social-wall-columns">Instagram</span>
+          <div class="utility-17">@webdojo_hq</div>
+          <p class="utility-18">Just shipped dark mode across every export. Thanks for the 200+ bug reports that got us here 🙏</p>
+          <div class="utility-19">💬 12   🔁 34   ♥ 156</div>
           </div>
-          <span data-forge-connect="instagram" class="block block-social-wall-columns-39 block-social-wall-columns">Not connected</span>
-        </div>
-        <div data-forge-cards class="block block-social-wall-columns-40 block-social-wall-columns">
-          
-          <div class="block block-social-wall-columns-41 block-social-wall-columns">
-            <div class="block block-social-wall-columns-42 block-social-wall-columns">
-              <span class="block block-social-wall-columns-43 block-social-wall-columns">studio.northlane</span>
-              <span class="block block-social-wall-columns-44 block-social-wall-columns">3h</span>
-            </div>
-            <div class="block block-social-wall-columns-45 block-social-wall-columns">Studio Northlane</div>
-            <p class="block block-social-wall-columns-46 block-social-wall-columns">Behind the scenes from today's shoot 🎬</p>
-            <div class="block block-social-wall-columns-47 block-social-wall-columns">♥ 412   💬 18</div>
+          <div class="utility-20">
+          <div class="utility-21">
+          <span class="utility-22">Sam Reyes</span>
+          <span class="utility-23">5h</span>
           </div>
-          <div class="block block-social-wall-columns-48 block-social-wall-columns">
-            <div class="block block-social-wall-columns-49 block-social-wall-columns">
-              <span class="block block-social-wall-columns-50 block-social-wall-columns">mira.codes</span>
-              <span class="block block-social-wall-columns-51 block-social-wall-columns">6h</span>
-            </div>
-            <div class="block block-social-wall-columns-52 block-social-wall-columns">Mira Chen</div>
-            <p class="block block-social-wall-columns-53 block-social-wall-columns">New desk setup, finally organized after 6 months 📐</p>
-            <div class="block block-social-wall-columns-54 block-social-wall-columns">♥ 289   💬 24</div>
+          <div class="utility-24">@designer_sam</div>
+          <p class="utility-25">Client sent over "make it pop" for the fourth time today. I have achieved zen.</p>
+          <div class="utility-26">💬 8   🔁 3   ♥ 91</div>
           </div>
-          <div class="block block-social-wall-columns-55 block-social-wall-columns">
-            <div class="block block-social-wall-columns-56 block-social-wall-columns">
-              <span class="block block-social-wall-columns-57 block-social-wall-columns">thefolio.club</span>
-              <span class="block block-social-wall-columns-58 block-social-wall-columns">1d</span>
-            </div>
-            <div class="block block-social-wall-columns-59 block-social-wall-columns">The Folio Club</div>
-            <p class="block block-social-wall-columns-60 block-social-wall-columns">Portfolio review night was a hit — thank you to everyone who came out.</p>
-            <div class="block block-social-wall-columns-61 block-social-wall-columns">♥ 567   💬 41</div>
+          <div class="utility-27">
+          <div class="utility-28">
+          <span class="utility-29">Kai Nakamura</span>
+          <span class="utility-30">1d</span>
           </div>
-        </div>
-      </div>
-      <div data-forge-widget="social-wall-column" data-platform="facebook" class="block block-social-wall-columns-62 block-social-wall-columns">
-        <div class="block block-social-wall-columns-63 block-social-wall-columns">
-          <div class="block block-social-wall-columns-64 block-social-wall-columns">
-            <span class="block block-social-wall-columns-65 block-social-wall-columns">f</span>
-            <span class="block block-social-wall-columns-66 block-social-wall-columns">Facebook</span>
+          <div class="utility-31">@buildwithkai</div>
+          <p class="utility-32">Hot take: the best websites still load in under a second. Fight me.</p>
+          <div class="utility-33">💬 41   🔁 12   ♥ 203</div>
           </div>
-          <span data-forge-connect="facebook" class="block block-social-wall-columns-67 block-social-wall-columns">Not connected</span>
-        </div>
-        <div data-forge-cards class="block block-social-wall-columns-68 block-social-wall-columns">
-          
-          <div class="block block-social-wall-columns-69 block-social-wall-columns">
-            <div class="block block-social-wall-columns-70 block-social-wall-columns">
-              <span class="block block-social-wall-columns-71 block-social-wall-columns">Riverside Coffee Co.</span>
-              <span class="block block-social-wall-columns-72 block-social-wall-columns">4h</span>
-            </div>
-            <div class="block block-social-wall-columns-73 block-social-wall-columns">Riverside Coffee Co.</div>
-            <p class="block block-social-wall-columns-74 block-social-wall-columns">We're extending our weekend hours starting this Saturday! Come say hi ☕</p>
-            <div class="block block-social-wall-columns-75 block-social-wall-columns">♥ 89   💬 12   ↗ 6</div>
           </div>
-          <div class="block block-social-wall-columns-76 block-social-wall-columns">
-            <div class="block block-social-wall-columns-77 block-social-wall-columns">
-              <span class="block block-social-wall-columns-78 block-social-wall-columns">Northgate Studio</span>
-              <span class="block block-social-wall-columns-79 block-social-wall-columns">8h</span>
-            </div>
-            <div class="block block-social-wall-columns-80 block-social-wall-columns">Northgate Studio</div>
-            <p class="block block-social-wall-columns-81 block-social-wall-columns">Our new client showcase is live on the site — link in comments.</p>
-            <div class="block block-social-wall-columns-82 block-social-wall-columns">♥ 134   💬 22   ↗ 9</div>
           </div>
-          <div class="block block-social-wall-columns-83 block-social-wall-columns">
-            <div class="block block-social-wall-columns-84 block-social-wall-columns">
-              <span class="block block-social-wall-columns-85 block-social-wall-columns">The Local Market</span>
-              <span class="block block-social-wall-columns-86 block-social-wall-columns">2d</span>
-            </div>
-            <div class="block block-social-wall-columns-87 block-social-wall-columns">The Local Market</div>
-            <p class="block block-social-wall-columns-88 block-social-wall-columns">Thank you for another incredible farmers market season 🌽</p>
-            <div class="block block-social-wall-columns-89 block-social-wall-columns">♥ 210   💬 31   ↗ 14</div>
+          <div class="col-2">
+          <div class="utility-35">
+          <div class="utility-36">
+          <span class="utility-37">📷</span>
+          <span class="utility-38">Instagram</span>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script data-forge-js="social-wall.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function renderCard(post){
-  return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:10px;padding:10px 12px;background:var(--fc-bg, #ffffff);">'
-    + '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;">'
-    + '<span style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">'+esc(post.author)+'</span>'
-    + '<span style="font-size:11px;color:var(--fc-muted, #94a3b8);white-space:nowrap;">'+esc(post.timestamp)+'</span>'
-    + '</div>'
-    + '<div style="font-size:11px;color:var(--fc-muted, #64748b);margin-bottom:6px;">'+esc(post.handle)+'</div>'
-    + '<p style="margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--fc-text, #0f172a);">'+esc(post.content)+'</p>'
-    + '<div style="font-size:11px;color:var(--fc-muted, #94a3b8);">💬 '+esc(post.comments)+'   🔁 '+esc(post.shares)+'   ♥ '+esc(post.likes)+'</div>'
-    + '</div>';
-}
-function initWidget(root){
-  root.setAttribute("data-forge-social-wall-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  fetch("/api/"+pid+"/social-feed").then(function(r){return r.json();}).then(function(data){
-    var posts=data.posts||[];
-    var connected=data.connected||[];
-    var columns=root.querySelectorAll("[data-forge-widget='social-wall-column']");
-    columns.forEach(function(col){
-      var platform=col.getAttribute("data-platform");
-      var badge=col.querySelector("[data-forge-connect='"+platform+"']");
-      if(badge && connected.indexOf(platform)!==-1){
-        badge.textContent="Connected";
-        badge.style.opacity="1";
-      }
-      var platformPosts=posts.filter(function(p){return p.platform===platform;});
-      if(!platformPosts.length) return; // no live posts yet: leave the sample cards in place
-      var cardsEl=col.querySelector("[data-forge-cards]");
-      if(cardsEl) cardsEl.innerHTML=platformPosts.map(renderCard).join("");
-    });
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='social-wall']:not([data-forge-social-wall-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+          <span data-forge-connect="instagram" class="utility-39">Not connected</span>
+          </div>
+          <div data-forge-cards class="utility-40">
+          <div class="utility-41">
+          <div class="utility-42">
+          <span class="utility-43">studio.northlane</span>
+          <span class="utility-44">3h</span>
+          </div>
+          <div class="utility-45">Studio Northlane</div>
+          <p class="utility-46">Behind the scenes from today's shoot 🎬</p>
+          <div class="utility-47">♥ 412   💬 18</div>
+          </div>
+          <div class="utility-48">
+          <div class="utility-49">
+          <span class="utility-50">mira.codes</span>
+          <span class="utility-51">6h</span>
+          </div>
+          <div class="utility-52">Mira Chen</div>
+          <p class="utility-53">New desk setup, finally organized after 6 months 📐</p>
+          <div class="utility-54">♥ 289   💬 24</div>
+          </div>
+          <div class="utility-55">
+          <div class="utility-56">
+          <span class="utility-57">thefolio.club</span>
+          <span class="utility-58">1d</span>
+          </div>
+          <div class="utility-59">The Folio Club</div>
+          <p class="utility-60">Portfolio review night was a hit — thank you to everyone who came out.</p>
+          <div class="utility-61">♥ 567   💬 41</div>
+          </div>
+          </div>
+          </div>
+          <div class="col-3">
+          <div class="utility-63">
+          <div class="utility-64">
+          <span class="utility-65">f</span>
+          <span class="utility-66">Facebook</span>
+          </div>
+          <span data-forge-connect="facebook" class="utility-67">Not connected</span>
+          </div>
+          <div data-forge-cards class="utility-68">
+          <div class="utility-69">
+          <div class="utility-70">
+          <span class="utility-71">Riverside Coffee Co.</span>
+          <span class="utility-72">4h</span>
+          </div>
+          <div class="utility-73">Riverside Coffee Co.</div>
+          <p class="utility-74">We're extending our weekend hours starting this Saturday! Come say hi ☕</p>
+          <div class="utility-75">♥ 89   💬 12   ↗ 6</div>
+          </div>
+          <div class="utility-76">
+          <div class="utility-77">
+          <span class="utility-78">Northgate Studio</span>
+          <span class="utility-79">8h</span>
+          </div>
+          <div class="utility-80">Northgate Studio</div>
+          <p class="utility-81">Our new client showcase is live on the site — link in comments.</p>
+          <div class="utility-82">♥ 134   💬 22   ↗ 9</div>
+          </div>
+          <div class="utility-83">
+          <div class="utility-84">
+          <span class="utility-85">The Local Market</span>
+          <span class="utility-86">2d</span>
+          </div>
+          <div class="utility-87">The Local Market</div>
+          <p class="utility-88">Thank you for another incredible farmers market season 🌽</p>
+          <div class="utility-89">♥ 210   💬 31   ↗ 14</div>
+          </div>
+          </div>
+          </div>
+          </div>
+          <script data-forge-js="social-wall.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function renderCard(post){
+          return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:10px;padding:10px 12px;background:var(--fc-bg, #ffffff);">'
+          + '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px;">'
+          + '<span style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">'+esc(post.author)+'</span>'
+          + '<span style="font-size:11px;color:var(--fc-muted, #94a3b8);white-space:nowrap;">'+esc(post.timestamp)+'</span>'
+          + '</div>'
+          + '<div style="font-size:11px;color:var(--fc-muted, #64748b);margin-bottom:6px;">'+esc(post.handle)+'</div>'
+          + '<p style="margin:0 0 8px;font-size:13px;line-height:1.45;color:var(--fc-text, #0f172a);">'+esc(post.content)+'</p>'
+          + '<div style="font-size:11px;color:var(--fc-muted, #94a3b8);">💬 '+esc(post.comments)+'   🔁 '+esc(post.shares)+'   ♥ '+esc(post.likes)+'</div>'
+          + '</div>';
+          }
+          function initWidget(root){
+          root.setAttribute("data-forge-social-wall-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          fetch("/api/"+pid+"/social-feed").then(function(r){return r.json();}).then(function(data){
+          var posts=data.posts||[];
+          var connected=data.connected||[];
+          var columns=root.querySelectorAll("[data-forge-widget='social-wall-column']");
+          columns.forEach(function(col){
+          var platform=col.getAttribute("data-platform");
+          var badge=col.querySelector("[data-forge-connect='"+platform+"']");
+          if(badge && connected.indexOf(platform)!==-1){
+          badge.textContent="Connected";
+          badge.style.opacity="1";
+          }
+          var platformPosts=posts.filter(function(p){return p.platform===platform;});
+          if(!platformPosts.length) return; // no live posts yet: leave the sample cards in place
+          var cardsEl=col.querySelector("[data-forge-cards]");
+          if(cardsEl) cardsEl.innerHTML=platformPosts.map(renderCard).join("");
+          });
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='social-wall']:not([data-forge-social-wall-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
     ],
   },
@@ -1747,64 +1726,64 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "comments-section",
         label: "Comment Thread",
-        html: `<section data-forge-comments class="block block-comments-section-1 block-comments-section">
-  <div class="block block-comments-section-2 block-comments-section">
-    <h3 class="block block-comments-section-3 block-comments-section">Comments (<span data-forge-comment-count>0</span>)</h3>
-    <div data-forge-comment-list></div>
-    <form data-forge-comment-form class="block block-comments-section-4 block-comments-section">
-      <input name="name" placeholder="Your name" required class="block block-comments-section-5 block-comments-section">
-      <textarea name="text" placeholder="Say something..." required rows="3" class="block block-comments-section-6 block-comments-section"></textarea>
-      <button type="submit" class="block block-comments-section-7 block-comments-section">Post Comment</button>
-    </form>
-    <script type="application/json" data-forge-comments-seed>[{"id":1,"author":"Priya K.","avatar":"https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75","date":"2 days ago","text":"This is exactly what I needed to read today — thank you for writing it out so clearly."},{"id":2,"author":"Marcus D.","avatar":"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75","date":"1 day ago","text":"Solid points. I'd add that the second one is easy to overlook until it bites you."},{"id":3,"author":"Renee A.","avatar":"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75","date":"5 hours ago","text":"Bookmarking this. Coming back to it next time I forget why I did it this way."}]</script>
-    <script data-forge-js="comments.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function renderComment(c){
-  return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
-    + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
-                : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
-    + '<div style="flex:1;min-width:0;">'
-    + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
-    + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
-    + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
-    + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
-    + '</div></div>';
-}
-function initWidget(root){
-  root.setAttribute("data-forge-comments-init","1");
-  var seedEl=root.querySelector("[data-forge-comments-seed]");
-  var comments=[];
-  try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
-  var list=root.querySelector("[data-forge-comment-list]");
-  var countEl=root.querySelector("[data-forge-comment-count]");
-  function renderAll(){
-    if(list) list.innerHTML=comments.map(renderComment).join("");
-    if(countEl) countEl.textContent=String(comments.length);
-  }
-  renderAll();
-  var form=root.querySelector("[data-forge-comment-form]");
-  if(form){
-    form.addEventListener("submit",function(e){
-      e.preventDefault();
-      var nameInput=form.querySelector('[name="name"]');
-      var textInput=form.querySelector('[name="text"]');
-      var name=(nameInput&&nameInput.value||"").trim();
-      var text=(textInput&&textInput.value||"").trim();
-      if(!name||!text) return;
-      comments.push({id:Date.now(),author:name,date:"Just now",text:text});
-      renderAll();
-      form.reset();
-    });
-  }
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-  </div>
-</section>`,
+        html: `<section class="block block-comments-section" data-forge-comments>
+          <div class="utility-2">
+          <h3 class="utility-3">Comments (<span data-forge-comment-count>0</span>)</h3>
+          <div data-forge-comment-list></div>
+          <form data-forge-comment-form class="utility-4">
+          <input name="name" placeholder="Your name" required class="utility-5">
+          <textarea name="text" placeholder="Say something..." required rows="3" class="utility-6"></textarea>
+          <button type="submit" class="utility-7">Post Comment</button>
+          </form>
+          <script type="application/json" data-forge-comments-seed>[{"id":1,"author":"Priya K.","avatar":"https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=75","date":"2 days ago","text":"This is exactly what I needed to read today — thank you for writing it out so clearly."},{"id":2,"author":"Marcus D.","avatar":"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75","date":"1 day ago","text":"Solid points. I'd add that the second one is easy to overlook until it bites you."},{"id":3,"author":"Renee A.","avatar":"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&q=75","date":"5 hours ago","text":"Bookmarking this. Coming back to it next time I forget why I did it this way."}]</script>
+          <script data-forge-js="comments.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function renderComment(c){
+          return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--fc-border, #e2e8f0);">'
+          + (c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:38px;height:38px;border-radius:999px;object-fit:cover;flex:none;">'
+          : '<div style="width:38px;height:38px;border-radius:999px;background:var(--fc-primary, #6366f1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none;">'+esc((c.author||"?").slice(0,1).toUpperCase())+'</div>')
+          + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-size:13px;"><strong style="color:var(--fc-text, #0f172a);">'+esc(c.author)+'</strong>'
+          + (c.mood ? ' <span style="color:var(--fc-muted, #94a3b8);">('+esc(c.mood)+')</span>' : '')
+          + ' <span style="color:var(--fc-muted, #94a3b8);">'+esc(c.date)+'</span></div>'
+          + '<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);margin-top:4px;">'+esc(c.text)+'</div>'
+          + '</div></div>';
+          }
+          function initWidget(root){
+          root.setAttribute("data-forge-comments-init","1");
+          var seedEl=root.querySelector("[data-forge-comments-seed]");
+          var comments=[];
+          try{comments=JSON.parse(seedEl?seedEl.textContent:"[]");}catch(e){comments=[];}
+          var list=root.querySelector("[data-forge-comment-list]");
+          var countEl=root.querySelector("[data-forge-comment-count]");
+          function renderAll(){
+          if(list) list.innerHTML=comments.map(renderComment).join("");
+          if(countEl) countEl.textContent=String(comments.length);
+          }
+          renderAll();
+          var form=root.querySelector("[data-forge-comment-form]");
+          if(form){
+          form.addEventListener("submit",function(e){
+          e.preventDefault();
+          var nameInput=form.querySelector('[name="name"]');
+          var textInput=form.querySelector('[name="text"]');
+          var name=(nameInput&&nameInput.value||"").trim();
+          var text=(textInput&&textInput.value||"").trim();
+          if(!name||!text) return;
+          comments.push({id:Date.now(),author:name,date:"Just now",text:text});
+          renderAll();
+          form.reset();
+          });
+          }
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-comments]:not([data-forge-comments-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+          </div>
+        </section>`,
       },
     ],
   },
@@ -1815,486 +1794,486 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "updates-block",
         label: "Latest Updates",
-        html: `<section data-forge-widget="updates" data-forge-project-id="" class="block block-zenero-updates-block-1 block-zenero-updates-block">
-  <div class="block block-zenero-updates-block-2 block-zenero-updates-block">
-    <div class="block block-zenero-updates-block-3 block-zenero-updates-block">What's new</div>
-    <h2 class="block block-zenero-updates-block-4 block-zenero-updates-block block-heading">Latest Updates</h2>
-    <div data-forge-updates-list class="block block-zenero-updates-block-5 block-zenero-updates-block">
-      <div class="block block-zenero-updates-block-6 block-zenero-updates-block">
-        <div class="block block-zenero-updates-block-7 block-zenero-updates-block">2 days ago</div>
-        <div class="block block-zenero-updates-block-8 block-zenero-updates-block">Welcome to our new site</div>
-        <div class="block block-zenero-updates-block-9 block-zenero-updates-block">We're excited to launch. Check back for regular updates.</div>
-      </div>
-      <div class="block block-zenero-updates-block-10 block-zenero-updates-block">
-        <div class="block block-zenero-updates-block-11 block-zenero-updates-block">1 week ago</div>
-        <div class="block block-zenero-updates-block-12 block-zenero-updates-block">New features coming soon</div>
-        <div class="block block-zenero-updates-block-13 block-zenero-updates-block">We're working on something special. Stay tuned.</div>
-      </div>
-      <div class="block block-zenero-updates-block-14 block-zenero-updates-block">
-        <div class="block block-zenero-updates-block-15 block-zenero-updates-block">2 weeks ago</div>
-        <div class="block block-zenero-updates-block-16 block-zenero-updates-block">Community milestone</div>
-        <div class="block block-zenero-updates-block-17 block-zenero-updates-block">Thank you to everyone who's been part of this journey.</div>
-      </div>
-    </div>
-  </div>
-  <script data-forge-js="updates.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-updates-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var list=root.querySelector("[data-forge-updates-list]");
-  if(!list) return;
-  fetch("/api/"+pid+"/updates").then(function(r){return r.json();}).then(function(data){
-    var items=(data.updates||[]).slice(0,3);
-    if(!items.length) return;
-    list.innerHTML=items.map(function(u){
-      return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">'
-        + '<div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">'+esc((u.timestamp||"").slice(0,10))+'</div>'
-        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">'+esc(u.title)+'</div>'
-        + '<div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">'+esc(u.content)+'</div>'
-        + '</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='updates']:not([data-forge-updates-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-updates-block" data-forge-widget="updates" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">What's new</div>
+          <h2 class="utility-4 block-heading">Latest Updates</h2>
+          <div data-forge-updates-list class="utility-5">
+          <div class="utility-6">
+          <div class="utility-7">2 days ago</div>
+          <div class="utility-8">Welcome to our new site</div>
+          <div class="utility-9">We're excited to launch. Check back for regular updates.</div>
+          </div>
+          <div class="utility-10">
+          <div class="utility-11">1 week ago</div>
+          <div class="utility-12">New features coming soon</div>
+          <div class="utility-13">We're working on something special. Stay tuned.</div>
+          </div>
+          <div class="utility-14">
+          <div class="utility-15">2 weeks ago</div>
+          <div class="utility-16">Community milestone</div>
+          <div class="utility-17">Thank you to everyone who's been part of this journey.</div>
+          </div>
+          </div>
+          </div>
+          <script data-forge-js="updates.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-updates-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var list=root.querySelector("[data-forge-updates-list]");
+          if(!list) return;
+          fetch("/api/"+pid+"/updates").then(function(r){return r.json();}).then(function(data){
+          var items=(data.updates||[]).slice(0,3);
+          if(!items.length) return;
+          list.innerHTML=items.map(function(u){
+          return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">'
+          + '<div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin-bottom:6px;">'+esc((u.timestamp||"").slice(0,10))+'</div>'
+          + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">'+esc(u.title)+'</div>'
+          + '<div style="font-size:13px;line-height:1.5;color:var(--fc-muted, #64748b);">'+esc(u.content)+'</div>'
+          + '</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='updates']:not([data-forge-updates-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "gallery-block",
         label: "Gallery Grid",
-        html: `<section data-forge-widget="gallery" data-forge-project-id="" class="block block-zenero-gallery-block-1 block-zenero-gallery-block">
-  <div class="block block-zenero-gallery-block-2 block-zenero-gallery-block">
-    <div class="block block-zenero-gallery-block-3 block-zenero-gallery-block">Our work</div>
-    <h2 class="block block-zenero-gallery-block-4 block-zenero-gallery-block block-heading">Gallery</h2>
-    <div data-forge-gallery-grid class="block block-zenero-gallery-block-5 block-zenero-gallery-block container block gallery-block">
-      <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-6 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-7 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-8 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-9 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-10 block-zenero-gallery-block" /><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" alt="Gallery item" class="block block-zenero-gallery-block-11 block-zenero-gallery-block" />
-    </div>
-  </div>
-  <script data-forge-js="gallery.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-gallery-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var grid=root.querySelector("[data-forge-gallery-grid]");
-  if(!grid) return;
-  fetch("/api/"+pid+"/gallery_items").then(function(r){return r.json();}).then(function(data){
-    var items=data.gallery_items||[];
-    if(!items.length) return;
-    grid.innerHTML=items.map(function(g){
-      return '<img src="'+esc(g.image_url)+'" alt="'+esc(g.alt_text||"")+'" style="width:100%;height:200px;object-fit:cover;border-radius:10px;" />';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='gallery']:not([data-forge-gallery-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-gallery-block" data-forge-widget="gallery" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">Our work</div>
+          <h2 class="utility-4 block-heading">Gallery</h2>
+          <div data-forge-gallery-grid class="utility-5 container gallery-block">
+          <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" alt="Gallery item" class="utility-6" /><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" alt="Gallery item" class="utility-7" /><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" alt="Gallery item" class="utility-8" /><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" alt="Gallery item" class="utility-9" /><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" alt="Gallery item" class="utility-10" /><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" alt="Gallery item" class="utility-11" />
+          </div>
+          </div>
+          <script data-forge-js="gallery.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-gallery-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var grid=root.querySelector("[data-forge-gallery-grid]");
+          if(!grid) return;
+          fetch("/api/"+pid+"/gallery_items").then(function(r){return r.json();}).then(function(data){
+          var items=data.gallery_items||[];
+          if(!items.length) return;
+          grid.innerHTML=items.map(function(g){
+          return '<img src="'+esc(g.image_url)+'" alt="'+esc(g.alt_text||"")+'" style="width:100%;height:200px;object-fit:cover;border-radius:10px;" />';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='gallery']:not([data-forge-gallery-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "latest-from-blog",
         label: "Latest from Blog",
-        html: `<section data-forge-widget="latest-blog" data-forge-project-id="" class="block block-zenero-latest-from-blog-1 block-zenero-latest-from-blog">
-  <div class="block block-zenero-latest-from-blog-2 block-zenero-latest-from-blog">
-    <div class="block block-zenero-latest-from-blog-3 block-zenero-latest-from-blog">From the blog</div>
-    <h2 class="block block-zenero-latest-from-blog-4 block-zenero-latest-from-blog block-heading">Latest from Blog</h2>
-    <div data-forge-blog-titles class="block block-zenero-latest-from-blog-5 block-zenero-latest-from-blog">
-      <button class="block block-zenero-latest-from-blog-6 block-zenero-latest-from-blog">Getting Started with Web Dojo</button>
-      <button class="block block-zenero-latest-from-blog-7 block-zenero-latest-from-blog">Design Tips for Better Landing Pages</button>
-      <button class="block block-zenero-latest-from-blog-8 block-zenero-latest-from-blog">Why Static Sites Still Win</button>
-    </div>
-    <div data-forge-blog-excerpt class="block block-zenero-latest-from-blog-9 block-zenero-latest-from-blog"></div>
-  </div>
-  <script data-forge-js="latest-blog.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-// Rich-text pasted from Word/Docs/etc. into the Blog tab tends to carry
-// inline style="..." (and sometimes whole <style> blocks) that fight the
-// site's own theme. Strip both before ever injecting content_html — this
-// runs on every render, so it fixes previously-pasted posts too, not just
-// new ones.
-function stripStyles(html){
-  var d=document.createElement("div");
-  d.innerHTML=html||"";
-  var styled=d.querySelectorAll("[style]");
-  for(var i=0;i<styled.length;i++) styled[i].removeAttribute("style");
-  var styleTags=d.querySelectorAll("style");
-  for(var j=0;j<styleTags.length;j++) styleTags[j].remove();
-  return d.innerHTML;
-}
-function initWidget(root){
-  root.setAttribute("data-forge-blog-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var titles=root.querySelector("[data-forge-blog-titles]");
-  var excerpt=root.querySelector("[data-forge-blog-excerpt]");
-  if(!titles) return;
-  fetch("/api/"+pid+"/blog_posts").then(function(r){return r.json();}).then(function(data){
-    var posts=(data.blog_posts||[]).slice(0,3);
-    if(!posts.length) return;
-    titles.innerHTML=posts.map(function(p){
-      return '<button data-forge-blog-id="'+esc(p.id)+'" style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;width:100%;">'+esc(p.title)+'</button>';
-    }).join("");
-    titles.querySelectorAll("[data-forge-blog-id]").forEach(function(btn){
-      btn.addEventListener("click",function(){
-        var post=posts.find(function(p){return p.id===btn.getAttribute("data-forge-blog-id");});
-        if(!post||!excerpt) return;
-        excerpt.style.display="block";
-        excerpt.innerHTML='<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);">'+esc(post.excerpt||"")+'</div>'
+        html: `<section class="block block-zenero-latest-from-blog" data-forge-widget="latest-blog" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">From the blog</div>
+          <h2 class="utility-4 block-heading">Latest from Blog</h2>
+          <div data-forge-blog-titles class="utility-5">
+          <button class="utility-6">Getting Started with Web Dojo</button>
+          <button class="utility-7">Design Tips for Better Landing Pages</button>
+          <button class="utility-8">Why Static Sites Still Win</button>
+          </div>
+          <div data-forge-blog-excerpt class="utility-9"></div>
+          </div>
+          <script data-forge-js="latest-blog.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          // Rich-text pasted from Word/Docs/etc. into the Blog tab tends to carry
+          // inline style="..." (and sometimes whole <style> blocks) that fight the
+          // site's own theme. Strip both before ever injecting content_html — this
+          // runs on every render, so it fixes previously-pasted posts too, not just
+          // new ones.
+          function stripStyles(html){
+          var d=document.createElement("div");
+          d.innerHTML=html||"";
+          var styled=d.querySelectorAll("[style]");
+          for(var i=0;i<styled.length;i++) styled[i].removeAttribute("style");
+          var styleTags=d.querySelectorAll("style");
+          for(var j=0;j<styleTags.length;j++) styleTags[j].remove();
+          return d.innerHTML;
+          }
+          function initWidget(root){
+          root.setAttribute("data-forge-blog-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var titles=root.querySelector("[data-forge-blog-titles]");
+          var excerpt=root.querySelector("[data-forge-blog-excerpt]");
+          if(!titles) return;
+          fetch("/api/"+pid+"/blog_posts").then(function(r){return r.json();}).then(function(data){
+          var posts=(data.blog_posts||[]).slice(0,3);
+          if(!posts.length) return;
+          titles.innerHTML=posts.map(function(p){
+          return '<button data-forge-blog-id="'+esc(p.id)+'" style="text-align:left;padding:12px 16px;border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;background:var(--fc-surface, #f8fafc);font-size:14px;font-weight:500;color:var(--fc-text, #0f172a);cursor:pointer;width:100%;">'+esc(p.title)+'</button>';
+          }).join("");
+          titles.querySelectorAll("[data-forge-blog-id]").forEach(function(btn){
+          btn.addEventListener("click",function(){
+          var post=posts.find(function(p){return p.id===btn.getAttribute("data-forge-blog-id");});
+          if(!post||!excerpt) return;
+          excerpt.style.display="block";
+          excerpt.innerHTML='<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);">'+esc(post.excerpt||"")+'</div>'
           + '<button data-forge-blog-read-full style="background:none;border:0;padding:0;display:inline-flex;align-items:center;gap:4px;margin-top:12px;font-size:13px;font-weight:600;color:var(--fc-primary, #0f172a);cursor:pointer;">Read Full Post <span aria-hidden="true">→</span></button>';
-        var readFull=excerpt.querySelector("[data-forge-blog-read-full]");
-        if(readFull) readFull.addEventListener("click",function(){
+          var readFull=excerpt.querySelector("[data-forge-blog-read-full]");
+          if(readFull) readFull.addEventListener("click",function(){
           excerpt.innerHTML='<div style="font-size:14px;line-height:1.6;color:var(--fc-text, #334155);">'+stripStyles(post.content_html)+'</div>';
-        });
-      });
-    });
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='latest-blog']:not([data-forge-blog-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+          });
+          });
+          });
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='latest-blog']:not([data-forge-blog-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "portfolio-timeline",
         label: "Portfolio Timeline",
-        html: `<section data-forge-widget="portfolio" data-forge-project-id="" class="block block-zenero-portfolio-timeline-1 block-zenero-portfolio-timeline">
-  <div class="block block-zenero-portfolio-timeline-2 block-zenero-portfolio-timeline">
-    <div class="block block-zenero-portfolio-timeline-3 block-zenero-portfolio-timeline">Selected work</div>
-    <h2 class="block block-zenero-portfolio-timeline-4 block-zenero-portfolio-timeline block-heading">Portfolio</h2>
-    <div data-forge-portfolio-timeline class="block block-zenero-portfolio-timeline-5 block-zenero-portfolio-timeline">
-      <div class="block block-zenero-portfolio-timeline-6 block-zenero-portfolio-timeline">
-        <div class="block block-zenero-portfolio-timeline-7 block-zenero-portfolio-timeline"></div>
-        <div class="block block-zenero-portfolio-timeline-8 block-zenero-portfolio-timeline">2024</div>
-        <div class="block block-zenero-portfolio-timeline-9 block-zenero-portfolio-timeline">Project Alpha</div>
-        <div class="block block-zenero-portfolio-timeline-10 block-zenero-portfolio-timeline">A flagship web experience.</div>
-      </div>
-      <div class="block block-zenero-portfolio-timeline-11 block-zenero-portfolio-timeline">
-        <div class="block block-zenero-portfolio-timeline-12 block-zenero-portfolio-timeline"></div>
-        <div class="block block-zenero-portfolio-timeline-13 block-zenero-portfolio-timeline">2023</div>
-        <div class="block block-zenero-portfolio-timeline-14 block-zenero-portfolio-timeline">Project Beta</div>
-        <div class="block block-zenero-portfolio-timeline-15 block-zenero-portfolio-timeline">A mobile-first redesign.</div>
-      </div>
-      <div class="block block-zenero-portfolio-timeline-16 block-zenero-portfolio-timeline">
-        <div class="block block-zenero-portfolio-timeline-17 block-zenero-portfolio-timeline"></div>
-        <div class="block block-zenero-portfolio-timeline-18 block-zenero-portfolio-timeline">2022</div>
-        <div class="block block-zenero-portfolio-timeline-19 block-zenero-portfolio-timeline">Project Gamma</div>
-        <div class="block block-zenero-portfolio-timeline-20 block-zenero-portfolio-timeline">An e-commerce buildout.</div>
-      </div>
-    </div>
-  </div>
-  <script data-forge-js="portfolio.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-portfolio-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var timeline=root.querySelector("[data-forge-portfolio-timeline]");
-  if(!timeline) return;
-  fetch("/api/"+pid+"/portfolio_items").then(function(r){return r.json();}).then(function(data){
-    var items=data.portfolio_items||[];
-    if(!items.length) return;
-    timeline.innerHTML=items.map(function(p){
-      return '<div style="position:relative;margin-bottom:24px;">'
-        + '<div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>'
-        + '<div style="font-size:12px;color:var(--fc-muted, #94a3b8);">'+esc(p.date||"")+'</div>'
-        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">'+esc(p.title)+'</div>'
-        + '<div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">'+esc(p.description||"")+'</div>'
-        + (p.link ? '<a href="'+esc(p.link)+'" style="display:inline-block;margin-top:8px;font-size:13px;font-weight:600;color:var(--fc-primary, #0f172a);text-decoration:none;">View project →</a>' : '')
-        + '</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='portfolio']:not([data-forge-portfolio-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-portfolio-timeline" data-forge-widget="portfolio" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">Selected work</div>
+          <h2 class="utility-4 block-heading">Portfolio</h2>
+          <div data-forge-portfolio-timeline class="utility-5">
+          <div class="utility-6">
+          <div class="utility-7"></div>
+          <div class="utility-8">2024</div>
+          <div class="utility-9">Project Alpha</div>
+          <div class="utility-10">A flagship web experience.</div>
+          </div>
+          <div class="utility-11">
+          <div class="utility-12"></div>
+          <div class="utility-13">2023</div>
+          <div class="utility-14">Project Beta</div>
+          <div class="utility-15">A mobile-first redesign.</div>
+          </div>
+          <div class="utility-16">
+          <div class="utility-17"></div>
+          <div class="utility-18">2022</div>
+          <div class="utility-19">Project Gamma</div>
+          <div class="utility-20">An e-commerce buildout.</div>
+          </div>
+          </div>
+          </div>
+          <script data-forge-js="portfolio.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-portfolio-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var timeline=root.querySelector("[data-forge-portfolio-timeline]");
+          if(!timeline) return;
+          fetch("/api/"+pid+"/portfolio_items").then(function(r){return r.json();}).then(function(data){
+          var items=data.portfolio_items||[];
+          if(!items.length) return;
+          timeline.innerHTML=items.map(function(p){
+          return '<div style="position:relative;margin-bottom:24px;">'
+          + '<div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>'
+          + '<div style="font-size:12px;color:var(--fc-muted, #94a3b8);">'+esc(p.date||"")+'</div>'
+          + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">'+esc(p.title)+'</div>'
+          + '<div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">'+esc(p.description||"")+'</div>'
+          + (p.link ? '<a href="'+esc(p.link)+'" style="display:inline-block;margin-top:8px;font-size:13px;font-weight:600;color:var(--fc-primary, #0f172a);text-decoration:none;">View project →</a>' : '')
+          + '</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='portfolio']:not([data-forge-portfolio-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "testimonials-from-comments",
         label: "Testimonials from Comments",
-        html: `<section data-forge-widget="testimonials" data-forge-project-id="" data-forge-platform="facebook" data-forge-post-id="" class="block block-zenero-testimonials-from-comments-1 block-zenero-testimonials-from-comments">
-  <div class="block block-zenero-testimonials-from-comments-2 block-zenero-testimonials-from-comments">
-    <div class="block block-zenero-testimonials-from-comments-3 block-zenero-testimonials-from-comments">What people say</div>
-    <h2 class="block block-zenero-testimonials-from-comments-4 block-zenero-testimonials-from-comments block-heading">Testimonials</h2>
-    <div data-forge-testimonials-list class="block block-zenero-testimonials-from-comments-5 block-zenero-testimonials-from-comments">
-      <div class="block block-zenero-testimonials-from-comments-6 block-zenero-testimonials-from-comments">
-        <div class="block block-zenero-testimonials-from-comments-7 block-zenero-testimonials-from-comments">"This product changed how we work. Highly recommended."</div>
-        <div class="block block-zenero-testimonials-from-comments-8 block-zenero-testimonials-from-comments">— Sarah M.</div>
-      </div>
-      <div class="block block-zenero-testimonials-from-comments-9 block-zenero-testimonials-from-comments">
-        <div class="block block-zenero-testimonials-from-comments-10 block-zenero-testimonials-from-comments">"Incredible support and a beautiful product."</div>
-        <div class="block block-zenero-testimonials-from-comments-11 block-zenero-testimonials-from-comments">— James K.</div>
-      </div>
-    </div>
-  </div>
-  <script data-forge-js="testimonials.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-testimonials-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  var platform=root.getAttribute("data-forge-platform")||"facebook";
-  var postId=root.getAttribute("data-forge-post-id")||"";
-  if(!pid||!postId) return;
-  var list=root.querySelector("[data-forge-testimonials-list]");
-  if(!list) return;
-  fetch("/api/"+pid+"/social-testimonials?platform="+platform+"&post_id="+postId).then(function(r){return r.json();}).then(function(data){
-    var items=data.testimonials||[];
-    if(!items.length) return;
-    list.innerHTML=items.map(function(t){
-      return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">'
-        + '<div style="font-size:13px;line-height:1.5;color:var(--fc-text, #334155);">"'+esc(t.text)+'"</div>'
-        + '<div style="font-size:12px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:8px;">— '+esc(t.author)+'</div>'
-        + '</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='testimonials']:not([data-forge-testimonials-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-testimonials-from-comments" data-forge-widget="testimonials" data-forge-project-id="" data-forge-platform="facebook" data-forge-post-id="">
+          <div class="utility-2">
+          <div class="utility-3">What people say</div>
+          <h2 class="utility-4 block-heading">Testimonials</h2>
+          <div data-forge-testimonials-list class="utility-5">
+          <div class="utility-6">
+          <div class="utility-7">"This product changed how we work. Highly recommended."</div>
+          <div class="utility-8">— Sarah M.</div>
+          </div>
+          <div class="utility-9">
+          <div class="utility-10">"Incredible support and a beautiful product."</div>
+          <div class="utility-11">— James K.</div>
+          </div>
+          </div>
+          </div>
+          <script data-forge-js="testimonials.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-testimonials-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          var platform=root.getAttribute("data-forge-platform")||"facebook";
+          var postId=root.getAttribute("data-forge-post-id")||"";
+          if(!pid||!postId) return;
+          var list=root.querySelector("[data-forge-testimonials-list]");
+          if(!list) return;
+          fetch("/api/"+pid+"/social-testimonials?platform="+platform+"&post_id="+postId).then(function(r){return r.json();}).then(function(data){
+          var items=data.testimonials||[];
+          if(!items.length) return;
+          list.innerHTML=items.map(function(t){
+          return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:16px;background:var(--fc-surface, #f8fafc);">'
+          + '<div style="font-size:13px;line-height:1.5;color:var(--fc-text, #334155);">"'+esc(t.text)+'"</div>'
+          + '<div style="font-size:12px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:8px;">— '+esc(t.author)+'</div>'
+          + '</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='testimonials']:not([data-forge-testimonials-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "timeline-block",
         label: "Timeline",
-        html: `<section data-forge-widget="timeline" data-forge-project-id="" class="block block-zenero-timeline-block-1 block-zenero-timeline-block">
-  <div class="block block-zenero-timeline-block-2 block-zenero-timeline-block">
-    <div class="block block-zenero-timeline-block-3 block-zenero-timeline-block">Our story</div>
-    <h2 class="block block-zenero-timeline-block-4 block-zenero-timeline-block block-heading">Timeline</h2>
-    <div data-forge-timeline-list class="block block-zenero-timeline-block-5 block-zenero-timeline-block">
-      <div class="block block-zenero-timeline-block-6 block-zenero-timeline-block">
-        <div class="block block-zenero-timeline-block-7 block-zenero-timeline-block"></div>
-        <div class="block block-zenero-timeline-block-8 block-zenero-timeline-block">2024</div>
-        <div class="block block-zenero-timeline-block-9 block-zenero-timeline-block">Founded</div>
-        <div class="block block-zenero-timeline-block-10 block-zenero-timeline-block">Started the company.</div>
-      </div>
-      <div class="block block-zenero-timeline-block-11 block-zenero-timeline-block">
-        <div class="block block-zenero-timeline-block-12 block-zenero-timeline-block"></div>
-        <div class="block block-zenero-timeline-block-13 block-zenero-timeline-block">2025</div>
-        <div class="block block-zenero-timeline-block-14 block-zenero-timeline-block">Launched</div>
-        <div class="block block-zenero-timeline-block-15 block-zenero-timeline-block">Shipped the first release.</div>
-      </div>
-    </div>
-  </div>
-  <script data-forge-js="timeline.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-timeline-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var list=root.querySelector("[data-forge-timeline-list]");
-  if(!list) return;
-  fetch("/api/"+pid+"/timeline_entries").then(function(r){return r.json();}).then(function(data){
-    var items=data.timeline_entries||[];
-    if(!items.length) return;
-    list.innerHTML=items.map(function(t){
-      return '<div style="position:relative;margin-bottom:24px;">'
-        + '<div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>'
-        + '<div style="font-size:12px;color:var(--fc-muted, #94a3b8);">'+esc(t.date||"")+'</div>'
-        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">'+esc(t.title)+'</div>'
-        + '<div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">'+esc(t.description||"")+'</div>'
-        + '</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='timeline']:not([data-forge-timeline-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-timeline-block" data-forge-widget="timeline" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">Our story</div>
+          <h2 class="utility-4 block-heading">Timeline</h2>
+          <div data-forge-timeline-list class="utility-5">
+          <div class="utility-6">
+          <div class="utility-7"></div>
+          <div class="utility-8">2024</div>
+          <div class="utility-9">Founded</div>
+          <div class="utility-10">Started the company.</div>
+          </div>
+          <div class="utility-11">
+          <div class="utility-12"></div>
+          <div class="utility-13">2025</div>
+          <div class="utility-14">Launched</div>
+          <div class="utility-15">Shipped the first release.</div>
+          </div>
+          </div>
+          </div>
+          <script data-forge-js="timeline.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-timeline-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var list=root.querySelector("[data-forge-timeline-list]");
+          if(!list) return;
+          fetch("/api/"+pid+"/timeline_entries").then(function(r){return r.json();}).then(function(data){
+          var items=data.timeline_entries||[];
+          if(!items.length) return;
+          list.innerHTML=items.map(function(t){
+          return '<div style="position:relative;margin-bottom:24px;">'
+          + '<div style="position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:999px;background:var(--fc-primary, #0f172a);"></div>'
+          + '<div style="font-size:12px;color:var(--fc-muted, #94a3b8);">'+esc(t.date||"")+'</div>'
+          + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-top:2px;">'+esc(t.title)+'</div>'
+          + '<div style="font-size:13px;color:var(--fc-muted, #64748b);margin-top:4px;">'+esc(t.description||"")+'</div>'
+          + '</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='timeline']:not([data-forge-timeline-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "bento-block",
         label: "Features Bento",
-        html: `<section data-forge-widget="bento" data-forge-project-id="" class="block block-zenero-bento-block-1 block-zenero-bento-block">
-  <div class="block block-zenero-bento-block-2 block-zenero-bento-block">
-    <div class="block block-zenero-bento-block-3 block-zenero-bento-block">Why us</div>
-    <h2 class="block block-zenero-bento-block-4 block-zenero-bento-block block-heading">Features</h2>
-    <div data-forge-bento-grid class="block block-zenero-bento-block-5 block-zenero-bento-block">
-      <div class="block block-zenero-bento-block-6 block-zenero-bento-block">
-        <div class="block block-zenero-bento-block-7 block-zenero-bento-block">🚀</div>
-        <div class="block block-zenero-bento-block-8 block-zenero-bento-block">Fast</div>
-        <div class="block block-zenero-bento-block-9 block-zenero-bento-block">Loads in under a second.</div>
-      </div>
-      <div class="block block-zenero-bento-block-10 block-zenero-bento-block">
-        <div class="block block-zenero-bento-block-11 block-zenero-bento-block">🔒</div>
-        <div class="block block-zenero-bento-block-12 block-zenero-bento-block">Secure</div>
-        <div class="block block-zenero-bento-block-13 block-zenero-bento-block">Built with best practices.</div>
-      </div>
-      <div class="block block-zenero-bento-block-14 block-zenero-bento-block">
-        <div class="block block-zenero-bento-block-15 block-zenero-bento-block">🎨</div>
-        <div class="block block-zenero-bento-block-16 block-zenero-bento-block">Beautiful</div>
-        <div class="block block-zenero-bento-block-17 block-zenero-bento-block">Designed to stand out.</div>
-      </div>
-    </div>
-  </div>
-  <script data-forge-js="bento.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-bento-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var grid=root.querySelector("[data-forge-bento-grid]");
-  if(!grid) return;
-  fetch("/api/"+pid+"/bento_tiles").then(function(r){return r.json();}).then(function(data){
-    var items=data.bento_tiles||[];
-    if(!items.length) return;
-    grid.innerHTML=items.map(function(b){
-      var inner='<div style="font-size:24px;margin-bottom:10px;">'+esc(b.icon)+'</div>'
-        + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">'+esc(b.title)+'</div>'
-        + '<div style="font-size:13px;color:var(--fc-muted, #64748b);">'+esc(b.description||"")+'</div>';
-      var style='border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);display:block;text-decoration:none;';
-      return b.href
-        ? '<a href="'+esc(b.href)+'" style="'+style+'">'+inner+'</a>'
-        : '<div style="'+style+'">'+inner+'</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='bento']:not([data-forge-bento-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-bento-block" data-forge-widget="bento" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">Why us</div>
+          <h2 class="utility-4 block-heading">Features</h2>
+          <div data-forge-bento-grid class="utility-5">
+          <div class="utility-6">
+          <div class="utility-7">🚀</div>
+          <div class="utility-8">Fast</div>
+          <div class="utility-9">Loads in under a second.</div>
+          </div>
+          <div class="utility-10">
+          <div class="utility-11">🔒</div>
+          <div class="utility-12">Secure</div>
+          <div class="utility-13">Built with best practices.</div>
+          </div>
+          <div class="utility-14">
+          <div class="utility-15">🎨</div>
+          <div class="utility-16">Beautiful</div>
+          <div class="utility-17">Designed to stand out.</div>
+          </div>
+          </div>
+          </div>
+          <script data-forge-js="bento.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-bento-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var grid=root.querySelector("[data-forge-bento-grid]");
+          if(!grid) return;
+          fetch("/api/"+pid+"/bento_tiles").then(function(r){return r.json();}).then(function(data){
+          var items=data.bento_tiles||[];
+          if(!items.length) return;
+          grid.innerHTML=items.map(function(b){
+          var inner='<div style="font-size:24px;margin-bottom:10px;">'+esc(b.icon)+'</div>'
+          + '<div style="font-size:15px;font-weight:600;color:var(--fc-text, #0f172a);margin-bottom:6px;">'+esc(b.title)+'</div>'
+          + '<div style="font-size:13px;color:var(--fc-muted, #64748b);">'+esc(b.description||"")+'</div>';
+          var style='border:1px solid var(--fc-border, #e2e8f0);border-radius:12px;padding:20px;background:var(--fc-surface, #f8fafc);display:block;text-decoration:none;';
+          return b.href
+          ? '<a href="'+esc(b.href)+'" style="'+style+'">'+inner+'</a>'
+          : '<div style="'+style+'">'+inner+'</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='bento']:not([data-forge-bento-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "esports-roster-live",
         label: "Esports · Roster (live)",
-        html: `<section data-forge-widget="roster" data-forge-project-id="" class="block block-zenero-esports-roster-live-1 block-zenero-esports-roster-live">
-  <div class="block block-zenero-esports-roster-live-2 block-zenero-esports-roster-live">
-    <h2 class="block block-zenero-esports-roster-live-3 block-zenero-esports-roster-live block-heading">Roster</h2>
-    <div data-forge-roster-grid class="block block-zenero-esports-roster-live-4 block-zenero-esports-roster-live">
-      <div class="block block-zenero-esports-roster-live-5 block-zenero-esports-roster-live">
-        <div class="block block-zenero-esports-roster-live-6 block-zenero-esports-roster-live">Add players in the Zenero dashboard</div>
-        <div class="block block-zenero-esports-roster-live-7 block-zenero-esports-roster-live">No roster yet</div>
-      </div>
-    </div>
-  </div>
-  <script data-forge-js="roster.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-roster-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var grid=root.querySelector("[data-forge-roster-grid]");
-  if(!grid) return;
-  fetch("/api/"+pid+"/roster_players").then(function(r){return r.json();}).then(function(data){
-    var items=data.roster_players||[];
-    if(!items.length) return;
-    grid.innerHTML=items.map(function(p){
-      return '<div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:20px 14px;text-align:center;">'
-        + '<div style="width:56px;height:56px;border-radius:999px;background:linear-gradient(135deg,var(--fc-accent, #22d3ee),var(--fc-surface, #101018));margin:0 auto 14px;"></div>'
-        + '<div style="font-size:10px;font-weight:800;color:var(--fc-accent, #22d3ee);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+esc(p.role||"")+'</div>'
-        + '<div style="font-weight:800;color:var(--fc-text, #fff);font-size:15px;margin-bottom:10px;">'+esc(p.name)+'</div>'
-        + (p.stat_value ? '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--fc-muted, #6b7280);border-top:1px solid var(--fc-border, #22222e);padding-top:8px;"><span>'+esc(p.stat_label||"")+'</span><span style="color:var(--fc-text, #fff);font-weight:700;">'+esc(p.stat_value)+'</span></div>' : '')
-        + '</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='roster']:not([data-forge-roster-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-esports-roster-live" data-forge-widget="roster" data-forge-project-id="">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Roster</h2>
+          <div data-forge-roster-grid class="utility-4">
+          <div class="utility-5">
+          <div class="utility-6">Add players in the Zenero dashboard</div>
+          <div class="utility-7">No roster yet</div>
+          </div>
+          </div>
+          </div>
+          <script data-forge-js="roster.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-roster-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var grid=root.querySelector("[data-forge-roster-grid]");
+          if(!grid) return;
+          fetch("/api/"+pid+"/roster_players").then(function(r){return r.json();}).then(function(data){
+          var items=data.roster_players||[];
+          if(!items.length) return;
+          grid.innerHTML=items.map(function(p){
+          return '<div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:12px;padding:20px 14px;text-align:center;">'
+          + '<div style="width:56px;height:56px;border-radius:999px;background:linear-gradient(135deg,var(--fc-accent, #22d3ee),var(--fc-surface, #101018));margin:0 auto 14px;"></div>'
+          + '<div style="font-size:10px;font-weight:800;color:var(--fc-accent, #22d3ee);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+esc(p.role||"")+'</div>'
+          + '<div style="font-weight:800;color:var(--fc-text, #fff);font-size:15px;margin-bottom:10px;">'+esc(p.name)+'</div>'
+          + (p.stat_value ? '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--fc-muted, #6b7280);border-top:1px solid var(--fc-border, #22222e);padding-top:8px;"><span>'+esc(p.stat_label||"")+'</span><span style="color:var(--fc-text, #fff);font-weight:700;">'+esc(p.stat_value)+'</span></div>' : '')
+          + '</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='roster']:not([data-forge-roster-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "esports-fixtures-live",
         label: "Esports · Fixtures (live)",
-        html: `<section data-forge-widget="fixtures" data-forge-project-id="" class="block block-zenero-esports-fixtures-live-1 block-zenero-esports-fixtures-live">
-  <div class="block block-zenero-esports-fixtures-live-2 block-zenero-esports-fixtures-live">
-    <h2 class="block block-zenero-esports-fixtures-live-3 block-zenero-esports-fixtures-live block-heading">Fixtures</h2>
-    <div data-forge-fixtures-list class="block block-zenero-esports-fixtures-live-4 block-zenero-esports-fixtures-live">
-      <div class="block block-zenero-esports-fixtures-live-5 block-zenero-esports-fixtures-live">Add fixtures in the Zenero dashboard.</div>
-    </div>
-  </div>
-  <script data-forge-js="fixtures.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-fixtures-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var list=root.querySelector("[data-forge-fixtures-list]");
-  if(!list) return;
-  fetch("/api/"+pid+"/fixtures").then(function(r){return r.json();}).then(function(data){
-    var items=data.fixtures||[];
-    if(!items.length) return;
-    list.innerHTML=items.map(function(f){
-      var meta=f.status==="final"
-        ? esc(f.competition||"")+' · Final'
-        : esc(f.competition||"")+(f.note?' · '+esc(f.note):'')+(f.scheduled_at?' · '+esc(f.scheduled_at):'');
-      var teams=f.status==="final"
-        ? 'vs '+esc(f.opponent)+' <span style="color:var(--fc-accent, #22d3ee);">'+esc(f.team_score||"0")+'–'+esc(f.opponent_score||"0")+'</span>'
-        : 'vs '+esc(f.opponent);
-      return '<div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:10px;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">'
-        + '<div style="font-weight:800;font-size:15px;color:var(--fc-text, #fff);">'+teams+'</div>'
-        + '<div style="color:var(--fc-muted, #6b7280);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">'+meta+'</div>'
-        + '</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='fixtures']:not([data-forge-fixtures-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-esports-fixtures-live" data-forge-widget="fixtures" data-forge-project-id="">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Fixtures</h2>
+          <div data-forge-fixtures-list class="utility-4">
+          <div class="utility-5">Add fixtures in the Zenero dashboard.</div>
+          </div>
+          </div>
+          <script data-forge-js="fixtures.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-fixtures-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var list=root.querySelector("[data-forge-fixtures-list]");
+          if(!list) return;
+          fetch("/api/"+pid+"/fixtures").then(function(r){return r.json();}).then(function(data){
+          var items=data.fixtures||[];
+          if(!items.length) return;
+          list.innerHTML=items.map(function(f){
+          var meta=f.status==="final"
+          ? esc(f.competition||"")+' · Final'
+          : esc(f.competition||"")+(f.note?' · '+esc(f.note):'')+(f.scheduled_at?' · '+esc(f.scheduled_at):'');
+          var teams=f.status==="final"
+          ? 'vs '+esc(f.opponent)+' <span style="color:var(--fc-accent, #22d3ee);">'+esc(f.team_score||"0")+'–'+esc(f.opponent_score||"0")+'</span>'
+          : 'vs '+esc(f.opponent);
+          return '<div style="background:var(--fc-surface, #101018);border:1px solid var(--fc-border, #22222e);border-radius:10px;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">'
+          + '<div style="font-weight:800;font-size:15px;color:var(--fc-text, #fff);">'+teams+'</div>'
+          + '<div style="color:var(--fc-muted, #6b7280);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">'+meta+'</div>'
+          + '</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='fixtures']:not([data-forge-fixtures-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
       {
         id: "esports-org-stats-live",
         label: "Esports · Org Stats (live)",
-        html: `<section data-forge-widget="org-stats" data-forge-project-id="" class="block block-zenero-esports-org-stats-live-1 block-zenero-esports-org-stats-live">
-  <div data-forge-org-stats-row class="block block-zenero-esports-org-stats-live-2 block-zenero-esports-org-stats-live">
-    <div class="block block-zenero-esports-org-stats-live-3 block-zenero-esports-org-stats-live">Add stats in the Zenero dashboard.</div>
-  </div>
-  <script data-forge-js="org-stats.js">(function(){
-function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
-function initWidget(root){
-  root.setAttribute("data-forge-org-stats-init","1");
-  var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
-  if(!pid) return;
-  var row=root.querySelector("[data-forge-org-stats-row]");
-  if(!row) return;
-  fetch("/api/"+pid+"/org_stats").then(function(r){return r.json();}).then(function(data){
-    var items=data.org_stats||[];
-    if(!items.length) return;
-    row.innerHTML=items.map(function(s){
-      return '<div style="text-align:center;flex:1;min-width:120px;">'
-        + '<div style="font-size:26px;font-weight:800;color:var(--fc-accent, #22d3ee);">'+esc(s.value)+'</div>'
-        + '<div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;">'+esc(s.label)+'</div>'
-        + '</div>';
-    }).join("");
-  }).catch(function(){});
-}
-function init(){
-  var roots=document.querySelectorAll("[data-forge-widget='org-stats']:not([data-forge-org-stats-init])");
-  for(var i=0;i<roots.length;i++) initWidget(roots[i]);
-}
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-})();</script>
-</section>`,
+        html: `<section class="block block-zenero-esports-org-stats-live" data-forge-widget="org-stats" data-forge-project-id="">
+          <div data-forge-org-stats-row class="utility-2">
+          <div class="utility-3">Add stats in the Zenero dashboard.</div>
+          </div>
+          <script data-forge-js="org-stats.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-org-stats-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var row=root.querySelector("[data-forge-org-stats-row]");
+          if(!row) return;
+          fetch("/api/"+pid+"/org_stats").then(function(r){return r.json();}).then(function(data){
+          var items=data.org_stats||[];
+          if(!items.length) return;
+          row.innerHTML=items.map(function(s){
+          return '<div style="text-align:center;flex:1;min-width:120px;">'
+          + '<div style="font-size:26px;font-weight:800;color:var(--fc-accent, #22d3ee);">'+esc(s.value)+'</div>'
+          + '<div style="font-size:11px;color:var(--fc-muted, #6b7280);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;">'+esc(s.label)+'</div>'
+          + '</div>';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='org-stats']:not([data-forge-org-stats-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
       },
     ],
   }, {
@@ -2304,128 +2283,128 @@ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded"
       {
         id: "oxy-hero",
         label: "Oxygene · Hero",
-        html: `<section class="block oxygene block-oxygene-hero">
-  <div class="block-oxygene-hero-inner">
-    <h1 class="block-oxygene-hero-title block-heading">Oxygen.</h1>
-    <h2 class="block-oxygene-hero-subtitle">Where design meets innovation</h2>
-    <p class="block-oxygene-hero-description">Build luminous digital experiences with a design system crafted for clarity, scale, and soul.</p>
-    <button class="block-oxygene-btn block-oxygene-btn-primary">Get Started</button>
-  </div>
-</section>`,
+        html: `<section class="block">
+          <div class="block-oxygene-hero-inner">
+          <h1 class="block-oxygene-hero-title block-heading">Oxygen.</h1>
+          <h2 class="block-oxygene-hero-subtitle">Where design meets innovation</h2>
+          <p class="block-oxygene-hero-description">Build luminous digital experiences with a design system crafted for clarity, scale, and soul.</p>
+          <button class="block-oxygene-btn block-oxygene-btn-primary">Get Started</button>
+          </div>
+        </section>`,
       },
       {
         id: "oxy-features",
         label: "Oxygene · Features Grid",
-        html: `<section class="block oxygene block-oxygene-features">
-  <div class="block-oxygene-features-header">
-    <h3 class="block-oxygene-section-title">Luminous Features</h3>
-    <p class="block-oxygene-section-description">Everything you need to build with confidence.</p>
-  </div>
-  <div class="block-oxygene-grid">
-    <div class="block-oxygene-feature-card">
-      <div class="block-oxygene-feature-icon"><i class="fas fa-palette"></i></div>
-      <h4 class="block-oxygene-feature-title">Design System</h4>
-      <p class="block-oxygene-feature-text">Comprehensive tokens, components, and patterns for cohesive design.</p>
-    </div>
-    <div class="block-oxygene-feature-card">
-      <div class="block-oxygene-feature-icon"><i class="fas fa-code"></i></div>
-      <h4 class="block-oxygene-feature-title">Clean Code</h4>
-      <p class="block-oxygene-feature-text">Semantic HTML and organized CSS that scales with your project.</p>
-    </div>
-    <div class="block-oxygene-feature-card">
-      <div class="block-oxygene-feature-icon"><i class="fas fa-bolt"></i></div>
-      <h4 class="block-oxygene-feature-title">Performance</h4>
-      <p class="block-oxygene-feature-text">Optimized for speed and accessibility across all devices.</p>
-    </div>
-    <div class="block-oxygene-feature-card">
-      <div class="block-oxygene-feature-icon"><i class="fas fa-shield-alt"></i></div>
-      <h4 class="block-oxygene-feature-title">Reliability</h4>
-      <p class="block-oxygene-feature-text">Battle-tested patterns built for real-world projects.</p>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block">
+          <div class="block-oxygene-features-header">
+          <h3 class="block-oxygene-section-title">Luminous Features</h3>
+          <p class="block-oxygene-section-description">Everything you need to build with confidence.</p>
+          </div>
+          <div class="block-oxygene-grid">
+          <div class="block-oxygene-feature-card">
+          <div class="block-oxygene-feature-icon"><i class="fas fa-palette"></i></div>
+          <h4 class="block-oxygene-feature-title">Design System</h4>
+          <p class="block-oxygene-feature-text">Comprehensive tokens, components, and patterns for cohesive design.</p>
+          </div>
+          <div class="block-oxygene-feature-card">
+          <div class="block-oxygene-feature-icon"><i class="fas fa-code"></i></div>
+          <h4 class="block-oxygene-feature-title">Clean Code</h4>
+          <p class="block-oxygene-feature-text">Semantic HTML and organized CSS that scales with your project.</p>
+          </div>
+          <div class="block-oxygene-feature-card">
+          <div class="block-oxygene-feature-icon"><i class="fas fa-bolt"></i></div>
+          <h4 class="block-oxygene-feature-title">Performance</h4>
+          <p class="block-oxygene-feature-text">Optimized for speed and accessibility across all devices.</p>
+          </div>
+          <div class="block-oxygene-feature-card">
+          <div class="block-oxygene-feature-icon"><i class="fas fa-shield-alt"></i></div>
+          <h4 class="block-oxygene-feature-title">Reliability</h4>
+          <p class="block-oxygene-feature-text">Battle-tested patterns built for real-world projects.</p>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "oxy-services",
         label: "Oxygene · Services Cards",
-        html: `<section class="block oxygene block-oxygene-services">
-  <h3 class="block-oxygene-section-title">Services</h3>
-  <p class="block-oxygene-section-description">Comprehensive solutions designed for your digital needs.</p>
-  <div class="block-oxygene-services-grid">
-    <div class="block-oxygene-service-card">
-      <div class="block-oxygene-service-accent"></div>
-      <h3 class="block-oxygene-service-title">Design</h3>
-      <div class="block-oxygene-service-icon"><i class="fas fa-palette"></i></div>
-      <p class="block-oxygene-service-description">We craft visual experiences that balance beauty with purpose.</p>
-      <button class="block-oxygene-btn block-oxygene-btn-secondary">Learn More</button>
-    </div>
-    <div class="block-oxygene-service-card">
-      <div class="block-oxygene-service-accent"></div>
-      <h3 class="block-oxygene-service-title">Development</h3>
-      <div class="block-oxygene-service-icon"><i class="fas fa-code"></i></div>
-      <p class="block-oxygene-service-description">Modern, maintainable code with clean architecture.</p>
-      <button class="block-oxygene-btn block-oxygene-btn-secondary">Learn More</button>
-    </div>
-    <div class="block-oxygene-service-card">
-      <div class="block-oxygene-service-accent"></div>
-      <h3 class="block-oxygene-service-title">Strategy</h3>
-      <div class="block-oxygene-service-icon"><i class="fas fa-chart-line"></i></div>
-      <p class="block-oxygene-service-description">Data-driven direction that keeps your brand luminous.</p>
-      <button class="block-oxygene-btn block-oxygene-btn-secondary">Learn More</button>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block">
+          <h3 class="block-oxygene-section-title">Services</h3>
+          <p class="block-oxygene-section-description">Comprehensive solutions designed for your digital needs.</p>
+          <div class="block-oxygene-services-grid">
+          <div class="block-oxygene-service-card">
+          <div class="block-oxygene-service-accent"></div>
+          <h3 class="block-oxygene-service-title">Design</h3>
+          <div class="block-oxygene-service-icon"><i class="fas fa-palette"></i></div>
+          <p class="block-oxygene-service-description">We craft visual experiences that balance beauty with purpose.</p>
+          <button class="block-oxygene-btn block-oxygene-btn-secondary">Learn More</button>
+          </div>
+          <div class="block-oxygene-service-card">
+          <div class="block-oxygene-service-accent"></div>
+          <h3 class="block-oxygene-service-title">Development</h3>
+          <div class="block-oxygene-service-icon"><i class="fas fa-code"></i></div>
+          <p class="block-oxygene-service-description">Modern, maintainable code with clean architecture.</p>
+          <button class="block-oxygene-btn block-oxygene-btn-secondary">Learn More</button>
+          </div>
+          <div class="block-oxygene-service-card">
+          <div class="block-oxygene-service-accent"></div>
+          <h3 class="block-oxygene-service-title">Strategy</h3>
+          <div class="block-oxygene-service-icon"><i class="fas fa-chart-line"></i></div>
+          <p class="block-oxygene-service-description">Data-driven direction that keeps your brand luminous.</p>
+          <button class="block-oxygene-btn block-oxygene-btn-secondary">Learn More</button>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "oxy-portfolio-timeline",
         label: "Oxygene · Stem & Leaf Timeline",
-        html: `<section class="block oxygene block-oxygene-portfolio">
-  <div class="block-oxygene-portfolio-header">
-    <h3 class="block-oxygene-section-title">Portfolio</h3>
-    <p class="block-oxygene-section-description">A timeline of projects, from foundation to finished work.</p>
-  </div>
-  <div class="block-oxygene-timeline" data-inject="portfolio-timeline">
-    <div class="block-oxygene-year-label">2026</div>
-    <div class="block-oxygene-timeline-items">
-      <div class="block-oxygene-timeline-item">
-        <div class="block-oxygene-timeline-dot"></div>
-        <div class="block-oxygene-timeline-card">Web Dojo Platform — Full-stack redesign</div>
-      </div>
-      <div class="block-oxygene-timeline-item">
-        <div class="block-oxygene-timeline-dot"></div>
-        <div class="block-oxygene-timeline-card">Avalon GEMS — 14-gem design system</div>
-      </div>
-    </div>
-  </div>
-</section>`,
+        html: `<section class="block">
+          <div class="block-oxygene-portfolio-header">
+          <h3 class="block-oxygene-section-title">Portfolio</h3>
+          <p class="block-oxygene-section-description">A timeline of projects, from foundation to finished work.</p>
+          </div>
+          <div class="block-oxygene-timeline" data-inject="portfolio-timeline">
+          <div class="block-oxygene-year-label">2026</div>
+          <div class="block-oxygene-timeline-items">
+          <div class="block-oxygene-timeline-item">
+          <div class="block-oxygene-timeline-dot"></div>
+          <div class="block-oxygene-timeline-card">Web Dojo Platform — Full-stack redesign</div>
+          </div>
+          <div class="block-oxygene-timeline-item">
+          <div class="block-oxygene-timeline-dot"></div>
+          <div class="block-oxygene-timeline-card">Avalon GEMS — 14-gem design system</div>
+          </div>
+          </div>
+          </div>
+        </section>`,
       },
       {
         id: "oxy-testimonials",
         label: "Oxygene · Testimonials Carousel",
-        html: `<section class="block oxygene block-oxygene-testimonials">
-  <h3 class="block-oxygene-section-title">What They Say</h3>
-  <p class="block-oxygene-section-description">Stories from partners who trusted the everlight.</p>
-  <div class="block-oxygene-carousel">
-    <div class="block-oxygene-carousel-wrapper">
-      <div class="block-oxygene-carousel-slides" id="carouselSlides">
-        <div class="block-oxygene-testimonial-slide">
+        html: `<section class="block">
+          <h3 class="block-oxygene-section-title">What They Say</h3>
+          <p class="block-oxygene-section-description">Stories from partners who trusted the everlight.</p>
+          <div class="block-oxygene-carousel">
+          <div class="block-oxygene-carousel-wrapper">
+          <div class="block-oxygene-carousel-slides" id="carouselSlides">
+          <div class="block-oxygene-testimonial-slide">
           <p class="block-oxygene-testimonial-quote">"Oxygen transformed how we present our work."</p>
           <div class="block-oxygene-testimonial-author">
-            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Avatar" class="block-oxygene-testimonial-avatar" />
-            <div class="block-oxygene-author-info">
-              <h5 class="block-oxygene-author-name">Sarah Chen</h5>
-              <span class="block-oxygene-author-role">Design Lead, LUMEN</span>
-            </div>
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=75" alt="Avatar" class="block-oxygene-testimonial-avatar" />
+          <div class="block-oxygene-author-info">
+          <h5 class="block-oxygene-author-name">Sarah Chen</h5>
+          <span class="block-oxygene-author-role">Design Lead, LUMEN</span>
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="block-oxygene-carousel-controls">
-      <button class="block-oxygene-carousel-btn block-oxygene-carousel-btn-prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
-      <button class="block-oxygene-carousel-btn block-oxygene-carousel-btn-next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
-    </div>
-  </div>
-</section>`,
+          </div>
+          </div>
+          </div>
+          </div>
+          <div class="block-oxygene-carousel-controls">
+          <button class="block-oxygene-carousel-btn block-oxygene-carousel-btn-prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="block-oxygene-carousel-btn block-oxygene-carousel-btn-next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
+          </div>
+          </div>
+        </section>`,
       },
     ],
   },
