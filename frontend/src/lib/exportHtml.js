@@ -6,6 +6,7 @@ import { stripInlineStyles, protectScriptPayloads } from "./stripInlineStyles.js
 import { CATEGORIES } from "./blocks.js";
 import { BLOCK_STYLES_BY_CATEGORY, BLOCK_STYLES_MEDIA_CSS, BLOCK_STYLES_CSS } from "./blockStyles.generated.js";
 import { OXYGENE_CSS } from "./oxygeneStyles.js";
+import { AVALON_GEMS_CSS } from "./avalonGemsStyles.js";
 
 export { stripInlineStyles };
 
@@ -179,6 +180,16 @@ const buildOrganizedStylesheet = ({ themeVars, base, componentBuckets, genericCo
   const sections = [
     ["Theme Variables", mergeRootBlocks(themeVars)],
     ["Base", dedupe(base).join("\n")],
+    // Phase 4b Task 3 / Oxygene / Avalon Gems: same static, project-independent
+    // stylesheets buildStandaloneHtml/buildCleanExport splice in — this
+    // multi-page assembly has its own per-category BLOCK_STYLES_BY_CATEGORY
+    // buckets below (buildComponentSections) but never included these flat
+    // constants, so blocks using them (Oxygene) rendered unstyled in the
+    // zip export even though the Design canvas and single-page export
+    // (buildStandaloneHtml, buildCleanExport) already had them.
+    ["Block Styles", BLOCK_STYLES_CSS],
+    ["Oxygene", OXYGENE_CSS],
+    ["Avalon Gems", AVALON_GEMS_CSS],
     ...buildComponentSections(componentBuckets, genericComponentCss),
     ["Animations", dedupe(animations).join("\n\n")],
     ["Media Queries", [RESPONSIVE_CSS_BODY, BLOCK_STYLES_MEDIA_CSS, ...dedupe(mediaQueries)].join("\n")],
@@ -274,6 +285,7 @@ export const buildStandaloneHtml = (project) => {
     // shadowed by the base rule.
     BLOCK_STYLES_CSS,
     OXYGENE_CSS,
+    AVALON_GEMS_CSS,
     css, // block-<cat>-<slug>-<occ> + .block rules lifted out of inline styles
     ...forge.importedCss,
     ...forge.animations,
@@ -375,6 +387,7 @@ ${customJsTag}</body>
     // Phase 4b Task 3: see buildStandaloneHtml's comment above BLOCK_STYLES_CSS.
     BLOCK_STYLES_CSS,
     OXYGENE_CSS,
+    AVALON_GEMS_CSS,
     css,
     ...forge.importedCss,
     ...forge.animations,

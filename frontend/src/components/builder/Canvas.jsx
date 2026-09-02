@@ -5,6 +5,7 @@ import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, C
 import { RESPONSIVE_CSS_BODY } from "@/lib/responsiveCss.js";
 import { BLOCK_STYLES_CSS } from "@/lib/blockStyles.generated.js";
 import { OXYGENE_CSS } from "@/lib/oxygeneStyles.js";
+import { AVALON_GEMS_CSS } from "@/lib/avalonGemsStyles.js";
 
 const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 
@@ -30,7 +31,7 @@ export const Canvas = ({
   // second one.
   useEffect(() => {
     const style = document.createElement("style");
-    style.textContent = RESPONSIVE_CSS_BODY + "\n" + BLOCK_STYLES_CSS + "\n" + OXYGENE_CSS;
+    style.textContent = RESPONSIVE_CSS_BODY + "\n" + BLOCK_STYLES_CSS + "\n" + OXYGENE_CSS + "\n" + AVALON_GEMS_CSS;
     document.head.appendChild(style);
     return () => style.parentNode && style.parentNode.removeChild(style);
   }, []);

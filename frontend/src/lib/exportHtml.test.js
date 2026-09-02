@@ -29,6 +29,13 @@ test("buildMultiPageExport writes globals.css with clearly labeled sections in t
   expect(order).toEqual([...order].sort((a, b) => a - b));
 });
 
+test("buildMultiPageExport's globals.css carries the static block/Oxygene/Avalon Gems stylesheets (regression: buildOrganizedStylesheet used to omit these entirely)", () => {
+  const { files } = buildMultiPageExport({ id: "proj1", name: "Test Site", pages: [page({})] });
+  const css = files["globals.css"];
+  expect(css).toContain("h1.gem-ruby");
+  expect(css).toContain(".block-oxygene-hero");
+});
+
 test("buildMultiPageExport extracts a data-forge-theme block into Theme Variables + Base, not left in the page's own head", () => {
   const headHtml = `<style data-forge-theme="dark">\n:root {\n  --fc-primary: #111;\n}\nbody { font-family: sans-serif; color: var(--fc-text); }\n</style>`;
   const { files } = buildMultiPageExport({ id: "proj1", name: "Test", pages: [page({ head_html: headHtml })] });
