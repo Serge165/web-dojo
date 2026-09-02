@@ -153,8 +153,7 @@ async def site_login(project_id: str, payload: SiteAuthRequest):
     return {"token": issue_site_jwt(customer["id"], project_id), "customer_id": customer["id"], "email": email}
 
 
-@site_auth_router.get("/{project_id}/site-auth/me")
-async def site_me(project_id: str, authorization: str = Header(default="")):
+async def _require_site_customer(project_id: str, authorization: str) -> dict:
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing bearer token")
     customer_id = verify_site_jwt(authorization[len("Bearer "):].strip(), project_id)
@@ -166,3 +165,32 @@ async def site_me(project_id: str, authorization: str = Header(default="")):
     if not customer:
         raise HTTPException(status_code=401, detail="Unknown account")
     return customer
+
+
+@site_auth_router.get("/{project_id}/site-auth/me")
+async def site_me(project_id: str, authorization: str = Header(default="")):
+    return await _require_site_customer(project_id, authorization)
+
+
+@site_auth_router.get("/{project_id}/site-auth/orders")
+async def site_my_orders(project_id: str, authorization: str = Header(default="")):
+    """A logged-in customer's own order history — replaces the bare "Welcome
+    back" message in the dashboard-login widget's customer tab with real
+    content. Orders are keyed by customer_email, not customer_id, so this
+    matches list_customers' approach: fetch by project_id, normalize and
+    filter email in Python (same reasoning as sqlite_compat's docstring —
+    no query complex enough here to need a Mongo-side filter)."""
+    customer = await _require_site_customer(project_id, authorization)
+    email = customer["email"]
+    all_orders = await db.orders.find(
+        {"project_id": project_id},
+        {"_id": 0, "id": 1, "amount_total": 1, "currency": 1, "status": 1,
+         "fulfillment_status": 1, "line_items": 1, "created_at": 1, "customer_email": 1},
+    ).to_list(length=None)
+    orders = [
+        {k: v for k, v in o.items() if k != "customer_email"}
+        for o in all_orders
+        if (o.get("customer_email") or "").strip().lower() == email
+    ]
+    orders.sort(key=lambda o: o.get("created_at") or "", reverse=True)
+    return {"orders": orders[:20]}

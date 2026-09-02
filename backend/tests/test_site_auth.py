@@ -113,6 +113,42 @@ class TestSiteSignupLogin:
         assert r.status_code == 401
 
 
+class TestSiteMyOrders:
+    def _insert_order(self, project_id, email, amount=1500, ref=None):
+        import asyncio
+        asyncio.run(server.db.orders.insert_one({
+            "id": ref or f"o-{uuid.uuid4().hex[:8]}", "project_id": project_id, "provider": "stripe",
+            "provider_ref": ref or "cs_x", "status": "completed", "amount_total": amount, "currency": "usd",
+            "customer_email": email, "customer_name": None, "shipping_address": None,
+            "line_items": [{"name": "Widget", "quantity": 1}], "fulfillment_status": "processing",
+            "created_at": "2026-08-21T00:00:00Z",
+        }))
+
+    def test_requires_a_bearer_token(self, client):
+        pid = _new_project(client)
+        assert client.get(f"/api/{pid}/site-auth/orders").status_code == 401
+
+    def test_returns_only_that_customers_own_orders(self, client):
+        pid = _new_project(client)
+        c = _signup(client, pid)
+        self._insert_order(pid, c["email"], amount=2500)
+        self._insert_order(pid, "someone-else@test.dev", amount=9999)  # not this customer
+
+        r = client.get(f"/api/{pid}/site-auth/orders", headers=c["headers"])
+        assert r.status_code == 200
+        orders = r.json()["orders"]
+        assert len(orders) == 1
+        assert orders[0]["amount_total"] == 2500
+        assert "customer_email" not in orders[0]  # not this customer's business to see the raw filter key back
+
+    def test_no_orders_yet_returns_an_empty_list_not_an_error(self, client):
+        pid = _new_project(client)
+        c = _signup(client, pid)
+        r = client.get(f"/api/{pid}/site-auth/orders", headers=c["headers"])
+        assert r.status_code == 200
+        assert r.json()["orders"] == []
+
+
 class TestCrossProjectIsolation:
     def test_token_from_one_project_rejected_on_another(self, client):
         pid1 = _new_project(client)

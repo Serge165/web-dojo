@@ -2313,13 +2313,32 @@ COFFEE</div>
           }
           render();
           }
-          function loggedInView(message){
-          panel.innerHTML='<div style="font-size:14px;color:var(--fc-text, #0f172a);">'+esc(message)+'</div>'
-          +'<button data-forge-logout style="margin-top:12px;background:none;border:1px solid var(--fc-border, #e2e8f0);border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;">Log out</button>';
+          function customerDashboard(email,token){
+          panel.innerHTML='<div style="font-size:14px;color:var(--fc-text, #0f172a);margin-bottom:14px;">Welcome back, '+esc(email)+'.</div>'
+          +'<div data-forge-cust-orders style="font-size:13px;color:var(--fc-muted, #94a3b8);">Loading your orders…</div>'
+          +'<button data-forge-logout style="margin-top:16px;background:none;border:1px solid var(--fc-border, #e2e8f0);border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;">Log out</button>';
           panel.querySelector("[data-forge-logout]").addEventListener("click",function(){
-          try{localStorage.removeItem(mode==="owner"?ownerKey:custKey);}catch(e){}
+          try{localStorage.removeItem(custKey);}catch(e){}
           render();
           });
+          var box=panel.querySelector("[data-forge-cust-orders]");
+          fetch("/api/"+pid+"/site-auth/orders",{headers:{Authorization:"Bearer "+token}})
+          .then(function(r){return r.ok?r.json():{orders:[]};})
+          .then(function(data){
+          var orders=data.orders||[];
+          if(!orders.length){box.innerHTML='<p style="font-size:13px;color:var(--fc-muted, #94a3b8);">No orders yet.</p>';return;}
+          box.innerHTML='<h4 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fc-muted, #64748b);margin:0 0 8px;">Your orders</h4>'
+          +'<div style="display:flex;flex-direction:column;gap:8px;">'+orders.map(function(o){
+          var amount=((o.amount_total||0)/100).toFixed(2);
+          var items=(o.line_items||[]).map(function(li){return li.name+(li.quantity>1?" x"+li.quantity:"");}).join(", ");
+          return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;padding:10px 12px;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">'+esc((o.currency||"usd").toUpperCase()+" "+amount)+'</div>'
+          +'<div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin:2px 0 4px;">'+esc((o.created_at||"").slice(0,10))+' · '+esc(o.fulfillment_status||o.status||"")+'</div>'
+          +(items?'<div style="font-size:12px;color:var(--fc-text, #334155);">'+esc(items)+'</div>':'')
+          +'</div>';
+          }).join("")+'</div>';
+          })
+          .catch(function(){box.innerHTML='';});
           }
           function ownerForm(){
           panel.innerHTML='<form data-forge-owner-form>'
@@ -2469,7 +2488,7 @@ COFFEE</div>
           if(ct){
           fetch("/api/"+pid+"/site-auth/me",{headers:{Authorization:"Bearer "+ct}})
           .then(function(r){if(!r.ok)throw new Error();return r.json();})
-          .then(function(data){loggedInView("Welcome back, "+data.email+".");})
+          .then(function(data){customerDashboard(data.email,ct);})
           .catch(function(){try{localStorage.removeItem(custKey);}catch(e){}customerForm(false);});
           } else {
           customerForm(false);
