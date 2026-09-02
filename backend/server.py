@@ -2929,6 +2929,37 @@ async def _extract_submission(request: Request) -> Submission:
     )
 
 
+def _submission_email_html(form_name: str, page_title: str, page_url: str, data: dict) -> str:
+    rows_html = "".join(
+        f"<tr><td style='padding:4px 12px 4px 0;color:#64748b;'>{html.escape(str(k))}</td>"
+        f"<td style='padding:4px 0;'>{html.escape(str(v))}</td></tr>"
+        for k, v in data.items()
+    )
+    from_line = f"<p>From: {html.escape(page_title or page_url)}</p>" if (page_title or page_url) else ""
+    return f"""<html><body style="font-family:system-ui,sans-serif;color:#1a1a1a;max-width:480px;margin:0 auto;">
+<h1 style="font-size:20px;">New submission &mdash; {html.escape(form_name)}</h1>
+{from_line}
+<table>{rows_html}</table>
+</body></html>"""
+
+
+async def _notify_submission(project_id: str, form_name: str, page_title: str, page_url: str, data: dict) -> None:
+    """Opt-in, matching commerce order emails: only sends if the project owner
+    has configured SMTP (smtp_config_enc). A form with no configured owner or
+    no SMTP is a silent no-op, same posture as _send_email itself."""
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0, "owner_id": 1})
+    owner_id = (project or {}).get("owner_id")
+    if not owner_id:
+        return
+    user = await db.users.find_one({"id": owner_id}, {"_id": 0, "email": 1})
+    to_addr = (user or {}).get("email")
+    if not to_addr:
+        return
+    subject = f"New submission — {form_name}"
+    body = _submission_email_html(form_name, page_title, page_url, data)
+    await _send_email(project_id, to_addr, subject, body)
+
+
 _THANK_YOU_HTML = (
     "<!doctype html><html><head><meta charset='utf-8'><title>Thank you</title>"
     "<style>body{margin:0;font-family:system-ui,sans-serif;background:#0d0d0d;color:#f4f4f4;"
@@ -2940,7 +2971,7 @@ _THANK_YOU_HTML = (
 
 
 @api_router.post("/submissions")
-async def create_submission(request: Request):
+async def create_submission(request: Request, background_tasks: BackgroundTasks):
     try:
         sub = await _extract_submission(request)
     except HTTPException:
@@ -2951,6 +2982,8 @@ async def create_submission(request: Request):
         raise HTTPException(status_code=400, detail="No form fields were submitted")
     doc = _serialize(sub.model_dump())
     await db.submissions.insert_one(doc.copy())
+    if sub.project_id:
+        background_tasks.add_task(_notify_submission, sub.project_id, sub.form_name, sub.page_title, sub.page_url, sub.data)
     accept = (request.headers.get("accept") or "").lower()
     if "application/json" in accept:
         return {"ok": True, "id": sub.id}

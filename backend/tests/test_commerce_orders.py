@@ -885,6 +885,56 @@ class TestSendEmail:
         mock_smtp.assert_not_called()
 
 
+class TestNotifySubmission:
+    """Form submissions (POST /api/submissions) now email the project owner,
+    reusing the same opt-in SMTP config as commerce order emails."""
+
+    @pytest.mark.asyncio
+    async def test_does_nothing_without_smtp_config(self, project_id):
+        with patch("smtplib.SMTP") as mock_smtp:
+            await server._notify_submission(project_id, "Contact form", "Home", "https://example.com/", {"name": "Ada", "message": "hi"})
+        mock_smtp.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_emails_the_project_owner_on_submission(self, project_id, auth):
+        await server.db.projects.update_one({"id": project_id}, {"$set": {"smtp_config_enc": server._encrypt(json.dumps({
+            "host": "smtp.example.com", "port": 587, "username": "user@example.com",
+            "password": "app-password", "from_address": "store@example.com",
+        }))}})
+        mock_conn = MagicMock()
+        with patch("smtplib.SMTP") as mock_smtp:
+            mock_smtp.return_value.__enter__.return_value = mock_conn
+            await server._notify_submission(project_id, "Contact form", "Home", "https://example.com/", {"name": "Ada", "message": "Hi there"})
+        mock_conn.send_message.assert_called_once()
+        sent_msg = mock_conn.send_message.call_args[0][0]
+        assert sent_msg["To"] == auth["email"]
+        assert "Contact form" in sent_msg["Subject"]
+
+    def test_submission_endpoint_triggers_owner_notification_in_the_background(self, client, project_id, auth):
+        with patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            r = client.post(
+                "/api/submissions",
+                json={"_wd_project": project_id, "_wd_form": "Contact form", "name": "Ada", "message": "Hi"},
+                headers={"Accept": "application/json"},
+            )
+        assert r.status_code == 200
+        mock_send.assert_called_once()
+        called_project_id, called_to, called_subject, _called_body = mock_send.call_args[0]
+        assert called_project_id == project_id
+        assert called_to == auth["email"]
+        assert "Contact form" in called_subject
+
+    def test_submission_without_a_project_id_sends_no_email(self, client):
+        with patch.object(server, "_send_email", new=AsyncMock()) as mock_send:
+            r = client.post(
+                "/api/submissions",
+                json={"_wd_form": "Contact form", "name": "Ada", "message": "Hi"},
+                headers={"Accept": "application/json"},
+            )
+        assert r.status_code == 200
+        mock_send.assert_not_called()
+
+
 class TestFulfillmentStatusEndpoint:
     def _seed_order(self, db, project_id, order_id, customer_email="buyer@example.com", fulfillment_status="processing"):
         db.orders.insert_one({
