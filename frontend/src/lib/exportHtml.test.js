@@ -1,4 +1,5 @@
 import { buildMultiPageExport, buildCleanExport, buildStandaloneHtml, deduplicateHeadTags, sanitizeHeadVars } from "./exportHtml";
+import { gemThemeHeadHtml } from "./themeCompiler";
 
 const page = (overrides) => ({
   id: "p1", name: "Home", slug: "index", elements: [], head_html: "", canvas_bg: "#ffffff",
@@ -215,6 +216,30 @@ test("buildCleanExport keeps the head boilerplate-only (Issues #2/#7)", () => {
   expect(css).toContain(".block-heroes-centered-1 { padding:64px; }");
   expect(css).toContain("--fc-primary: #111");
   expect(css).toContain("@media (max-width: 1024px)");
+});
+
+test("buildStandaloneHtml applies an Avalon GEMS theme (data-forge-theme block from gemThemeHeadHtml)", () => {
+  const out = buildStandaloneHtml({ id: "p1", name: "T", elements: [], head_html: gemThemeHeadHtml("sapphire") });
+  const head = out.split("</head>")[0];
+  expect(head).not.toContain("data-forge-theme");
+  expect(out).toContain("body {");
+  expect(out).toContain("background: linear-gradient(135deg, #191970");
+  expect(out).toContain("@keyframes gem-pulse");
+});
+
+test("buildMultiPageExport applies an Avalon GEMS theme identically across every page's shared globals.css", () => {
+  const project = {
+    id: "proj1", name: "T",
+    pages: [
+      page({ id: "p1", slug: "index", head_html: gemThemeHeadHtml("topaz") }),
+      page({ id: "p2", slug: "about", head_html: gemThemeHeadHtml("topaz") }),
+    ],
+  };
+  const { files } = buildMultiPageExport(project);
+  expect(files["index.html"]).not.toContain("data-forge-theme");
+  expect(files["about.html"]).not.toContain("data-forge-theme");
+  expect(files["globals.css"]).toContain("background: linear-gradient(135deg, #b8860b");
+  expect(files["globals.css"]).toContain("@keyframes gem-pulse");
 });
 
 test("buildMultiPageExport emits typed <body> tags and per-page canvas vars instead of <style> tags (Issues #3/#7)", () => {

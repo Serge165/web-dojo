@@ -1,4 +1,4 @@
-import { GEM_THEMES, getGemCss, getAllGemCss, exportWithGemTheme } from "./themeCompiler";
+import { GEM_THEMES, GEM_SWATCHES, getGemCss, getAllGemCss, exportWithGemTheme, gemThemeHeadHtml } from "./themeCompiler";
 
 describe("GEM_THEMES", () => {
   test("exports all 6 gem names", () => {
@@ -20,6 +20,14 @@ describe("getGemCss", () => {
 
   test("returns empty string for unknown gem", () => {
     expect(getGemCss("nonexistent")).toBe("");
+  });
+
+  test("joins declaration lines with real newlines, not literal backslash-n", () => {
+    // Regression: _g() used to join with the 2-char string "\\n" instead of
+    // an actual newline, so the compiled CSS shipped with literal "\n" text.
+    const css = getGemCss("ruby");
+    expect(css).not.toMatch(/\\n/);
+    expect(css.split("\n").length).toBeGreaterThan(5);
   });
 
   test("each gem includes its unique gradient colors", () => {
@@ -87,5 +95,33 @@ describe("exportWithGemTheme", () => {
       expect(result.html).toContain(`class="gem-${gem}"`);
       expect(result.css).toContain(`.gem-${gem}`);
     });
+  });
+});
+
+describe("GEM_SWATCHES", () => {
+  test("every gem theme has a 3-color swatch", () => {
+    GEM_THEMES.forEach((gem) => {
+      expect(GEM_SWATCHES[gem]).toHaveLength(3);
+      GEM_SWATCHES[gem].forEach((c) => expect(c).toMatch(/^#[0-9a-f]{6}$/));
+    });
+  });
+});
+
+describe("gemThemeHeadHtml", () => {
+  test("wraps compiled CSS in a data-forge-theme style block scoped to body", () => {
+    const head = gemThemeHeadHtml("ruby");
+    expect(head).toMatch(/^<style data-forge-theme="gem-ruby">/);
+    expect(head).toContain("</style>");
+    // Selectors rewritten from .gem-ruby to body so the existing head_html
+    // theme-injection pipeline (Builder.jsx applyTheme / extractForgeCss)
+    // can apply it with no body-class plumbing.
+    expect(head).toContain("body {");
+    expect(head).toContain("body h1, body h2, body h3 {");
+    expect(head).not.toContain(".gem-ruby");
+    expect(head).toContain("@keyframes gem-pulse");
+  });
+
+  test("returns empty string for unknown gem", () => {
+    expect(gemThemeHeadHtml("nonexistent")).toBe("");
   });
 });

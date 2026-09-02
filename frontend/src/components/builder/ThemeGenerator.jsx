@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { THEMES, themeHeadHtml, buildCustomThemeHead } from "@/lib/themes";
+import { GEM_THEMES, GEM_SWATCHES, gemThemeHeadHtml } from "@/lib/themeCompiler";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
@@ -85,6 +86,11 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
           className={`flex-1 py-1 rounded ${tab === "custom" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
           data-testid="theme-tab-custom"
         >Custom</button>
+        <button
+          onClick={() => setTab("gems")}
+          className={`flex-1 py-1 rounded ${tab === "gems" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
+          data-testid="theme-tab-gems"
+        >Gems</button>
       </div>
 
       <label className="flex items-center gap-2 text-[11px] text-[#A79C87] select-none px-0.5" data-testid="theme-scope-toggle">
@@ -176,6 +182,27 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
               data-testid="theme-custom-apply"
             >Apply theme</button>
           </div>
+        </div>
+      )}
+
+      {tab === "gems" && (
+        <div className="grid grid-cols-1 gap-2" data-testid="theme-gems">
+          {GEM_THEMES.map((gem) => (
+            <button
+              key={gem}
+              onClick={() => { onApplyTheme({ headHtml: gemThemeHeadHtml(gem), allPages }); toast.success(allPages ? `Applied ${gem} to all pages` : `Applied ${gem}`); }}
+              className="flex items-center gap-3 p-2 rounded border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60 text-left"
+              data-testid={`theme-gem-${gem}`}
+            >
+              <div className="flex -space-x-1">
+                {GEM_SWATCHES[gem].map((c, i) => (
+                  <div key={i} className="w-6 h-6 rounded-full border-2 border-[#1C1A15]" style={{ background: c }} />
+                ))}
+              </div>
+              <div className="flex-1 text-xs text-[#F1EDE2] capitalize">{gem}</div>
+            </button>
+          ))}
+          <p className="text-[10px] text-[#948C79] px-0.5">Avalon GEMS — animated gradient backgrounds with shimmering headline text.</p>
         </div>
       )}
 

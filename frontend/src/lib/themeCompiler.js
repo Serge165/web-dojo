@@ -26,7 +26,7 @@ const SHARED_ANIMATIONS = [
 ].join("\n");
 
 const GEM_CSS = {};
-const _g = (name, lines) => { GEM_CSS[name] = lines.join("\\n"); };
+const _g = (name, lines) => { GEM_CSS[name] = lines.join("\n"); };
 
 _g("ruby", [
   ".gem-ruby {",
@@ -138,6 +138,16 @@ _g("topaz", [
 /** Available gem theme names */
 export const GEM_THEMES = Object.keys(GEM_CSS);
 
+/** 3-stop swatch per gem, for UI previews (matches each gem's background gradient). */
+export const GEM_SWATCHES = {
+  ruby: ["#8b0000", "#dc143c", "#ff1744"],
+  sapphire: ["#191970", "#4169e1", "#1e90ff"],
+  emerald: ["#004d00", "#00b300", "#33ff33"],
+  diamond: ["#f0f8ff", "#e6f2ff", "#ccccff"],
+  amethyst: ["#4b0082", "#9370db", "#dda0dd"],
+  topaz: ["#b8860b", "#ffa500", "#ffb347"],
+};
+
 /**
  * Get compiled CSS for a specific gem, including shared animations.
  * @param {string} gem — gem name
@@ -154,6 +164,22 @@ export const getGemCss = (gem) => {
  */
 export const getAllGemCss = () => {
   return [SHARED_ANIMATIONS, ...GEM_THEMES.map((g) => GEM_CSS[g])].join("\n");
+};
+
+/**
+ * Compiled gem CSS as a `<style data-forge-theme>` block, scoped to `body`
+ * instead of a `.gem-{name}` class — this is what lets it plug straight into
+ * the same head_html injection pipeline every other theme in themes.js uses
+ * (Builder.jsx's applyTheme strips/replaces `data-forge-theme` blocks, and
+ * extractForgeCss routes them into every export path automatically), with
+ * no body-class plumbing needed anywhere.
+ * @param {string} gem — gem name
+ * @returns {string}
+ */
+export const gemThemeHeadHtml = (gem) => {
+  if (!GEM_CSS[gem]) return "";
+  const css = getGemCss(gem).replace(new RegExp(`\\.gem-${gem}\\b`, "g"), "body");
+  return `<style data-forge-theme="gem-${gem}">\n${css}\n</style>`;
 };
 
 /**
