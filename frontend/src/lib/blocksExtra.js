@@ -2518,7 +2518,7 @@ COFFEE</div>
       {
         id: "oxy-hero",
         label: "Oxygene · Hero",
-        html: `<section class="block">
+        html: `<section class="block oxygene block-oxygene-hero">
           <div class="block-oxygene-hero-inner">
           <h1 class="block-oxygene-hero-title block-heading">Oxygen.</h1>
           <h2 class="block-oxygene-hero-subtitle">Where design meets innovation</h2>
@@ -2530,7 +2530,7 @@ COFFEE</div>
       {
         id: "oxy-features",
         label: "Oxygene · Features Grid",
-        html: `<section class="block">
+        html: `<section class="block oxygene block-oxygene-features">
           <div class="block-oxygene-features-header">
           <h3 class="block-oxygene-section-title">Luminous Features</h3>
           <p class="block-oxygene-section-description">Everything you need to build with confidence.</p>
@@ -2562,7 +2562,7 @@ COFFEE</div>
       {
         id: "oxy-services",
         label: "Oxygene · Services Cards",
-        html: `<section class="block">
+        html: `<section class="block oxygene block-oxygene-services">
           <h3 class="block-oxygene-section-title">Services</h3>
           <p class="block-oxygene-section-description">Comprehensive solutions designed for your digital needs.</p>
           <div class="block-oxygene-services-grid">
@@ -2593,7 +2593,7 @@ COFFEE</div>
       {
         id: "oxy-portfolio-timeline",
         label: "Oxygene · Stem & Leaf Timeline",
-        html: `<section class="block">
+        html: `<section class="block oxygene block-oxygene-portfolio">
           <div class="block-oxygene-portfolio-header">
           <h3 class="block-oxygene-section-title">Portfolio</h3>
           <p class="block-oxygene-section-description">A timeline of projects, from foundation to finished work.</p>
@@ -2616,7 +2616,7 @@ COFFEE</div>
       {
         id: "oxy-testimonials",
         label: "Oxygene · Testimonials Carousel",
-        html: `<section class="block">
+        html: `<section class="block oxygene block-oxygene-testimonials">
           <h3 class="block-oxygene-section-title">What They Say</h3>
           <p class="block-oxygene-section-description">Stories from partners who trusted the everlight.</p>
           <div class="block-oxygene-carousel">

@@ -5,6 +5,7 @@ import { RESPONSIVE_CSS_BODY } from "./responsiveCss.js";
 import { stripInlineStyles, protectScriptPayloads } from "./stripInlineStyles.js";
 import { CATEGORIES } from "./blocks.js";
 import { BLOCK_STYLES_BY_CATEGORY, BLOCK_STYLES_MEDIA_CSS, BLOCK_STYLES_CSS } from "./blockStyles.generated.js";
+import { OXYGENE_CSS } from "./oxygeneStyles.js";
 
 export { stripInlineStyles };
 
@@ -272,6 +273,7 @@ export const buildStandaloneHtml = (project) => {
     // re-styled live after insertion) cascades on top rather than getting
     // shadowed by the base rule.
     BLOCK_STYLES_CSS,
+    OXYGENE_CSS,
     css, // block-<cat>-<slug>-<occ> + .block rules lifted out of inline styles
     ...forge.importedCss,
     ...forge.animations,
@@ -372,6 +374,7 @@ ${customJsTag}</body>
     ...forge.base,
     // Phase 4b Task 3: see buildStandaloneHtml's comment above BLOCK_STYLES_CSS.
     BLOCK_STYLES_CSS,
+    OXYGENE_CSS,
     css,
     ...forge.importedCss,
     ...forge.animations,

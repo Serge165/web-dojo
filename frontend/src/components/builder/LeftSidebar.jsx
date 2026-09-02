@@ -28,6 +28,7 @@ const GROUPS = [
   { id: "media", label: "Media", categoryIds: ["video", "portfolio"] },
   { id: "layouts", label: "Layouts", categoryIds: ["layout", "timelines"] },
   { id: "dashboard", label: "Dashboard", categoryIds: ["zenero"] },
+  { id: "oxygene", label: "Oxygene", categoryIds: ["oxygene"] },
   { id: "esports", label: "Esports", categoryIds: ["esports"] },
   { id: "creator", label: "Creator", categoryIds: ["creator", "social"] },
   { id: "retro", label: "Moldy Oldies", categoryIds: ["retro"] },
