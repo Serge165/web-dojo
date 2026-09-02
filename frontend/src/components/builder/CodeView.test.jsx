@@ -86,6 +86,33 @@ test("brand-new markup typed into the HTML tab still becomes a new element", () 
   expect(next[1].html).toBe("<p>hand-typed</p>");
 });
 
+test("CSS tab shows theme/animation/imported CSS from head_html, not just block styles", () => {
+  const headHtml = [
+    '<style data-forge-theme="1">:root { --fc-primary: #2563eb; }</style>',
+    '<style data-forge-anim="el1">@keyframes wd-fade-el1 { from { opacity: 0; } to { opacity: 1; } }</style>',
+    '<style data-forge-imported-css>.imported-rule { color: red; }</style>',
+  ].join("\n");
+  render(
+    <CodeView
+      project={{}}
+      elements={[heroElement]}
+      onElementsChange={jest.fn()}
+      headHtml={headHtml}
+      onHeadHtmlChange={jest.fn()}
+      customJs=""
+      onCustomJsChange={jest.fn()}
+      onSave={jest.fn()}
+      showPreview={false}
+    />
+  );
+  openTab("css");
+  const cssValue = screen.getByTestId("code-css-editor").value;
+  expect(cssValue).toMatch(/--fc-primary:\s*#2563eb/);
+  expect(cssValue).toMatch(/@keyframes wd-fade-el1/);
+  expect(cssValue).toMatch(/\.imported-rule\s*{\s*color:\s*red;\s*}/);
+  expect(cssValue).toMatch(/\.block-heroes-centered-1\s*{\s*padding:64px;\s*}/);
+});
+
 test("editing the CSS tab still writes the declaration back onto the element's inline style", () => {
   const { onElementsChange } = setup();
   openTab("css");

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { CodeEditor } from "./CodeEditor";
-import { buildStandaloneHtml, stripInlineStyles } from "@/lib/exportHtml";
+import { buildStandaloneHtml, stripInlineStyles, extractForgeCss } from "@/lib/exportHtml";
 import { reconcileElementsFromCss } from "@/lib/cssPaneSync";
 import { reconcileElementsFromHtml } from "@/lib/htmlPaneSync";
 import { MONACO_LANGUAGES } from "@/lib/monacoLanguages";
@@ -41,7 +41,37 @@ const withRootId = (html, id) => {
 // tab already showed classes for the same blocks. classMap (returned
 // alongside html/css) is what commitHtmlEdit below uses to reverse an
 // edited pane back to real inline styles before it's written to elements.
-const paneSource = (elements) => stripInlineStyles(elements.map((e) => ({ ...e, html: withRootId(e.html, e.id) })));
+//
+// The CSS tab used to show ONLY this block css — none of the other
+// globals.css sections (see GLOBALS_CSS_SPEC.md) that the real export
+// actually produces from head_html's data-forge-* blocks: theme tokens,
+// uploaded-font @font-face rules, imported CSS, per-element animation
+// keyframes, responsive overrides. Editing a theme color or adding an
+// animation silently never showed up here even though it does end up in
+// the real globals.css. buildCssPaneText appends those sections (labeled,
+// same order buildCleanExport uses) so this pane matches what actually
+// ships. Extra sections are inert on write-back — reconcileElementsFromCss
+// only recognizes classes in elements' own classMap and ignores the rest.
+const buildCssPaneText = (blockCss, headHtml) => {
+  const forge = extractForgeCss(headHtml || "");
+  const sections = [
+    ["Theme Variables", forge.themeVars.join("\n")],
+    ["Base", forge.base.join("\n")],
+    ["Blocks", blockCss],
+    ["Components (imported)", forge.importedCss.join("\n")],
+    ["Animations", forge.animations.join("\n")],
+    ["Media Queries", forge.mediaQueries.join("\n")],
+  ];
+  return sections
+    .filter(([, body]) => body && body.trim())
+    .map(([label, body]) => `/* ===== ${label} ===== */\n${body}`)
+    .join("\n\n");
+};
+
+const paneSource = (elements, headHtml) => {
+  const { html, css } = stripInlineStyles(elements.map((e) => ({ ...e, html: withRootId(e.html, e.id) })));
+  return { html, css: buildCssPaneText(css, headHtml) };
+};
 
 // elements[].html is always the real storage format (inline style="...",
 // see stripInlineStyles.js's header comment) — the classed text the HTML
@@ -87,32 +117,40 @@ export const CodeView = ({ project, elements, onElementsChange, headHtml, onHead
   const [tab, setTab] = useState("css"); // html | css | js | head — CSS first: it's the generated globals.css-equivalent, the thing most worth seeing by default
   const [headLang, setHeadLang] = useState("html");
 
-  const [htmlText, setHtmlText] = useState(() => paneSource(elements).html);
-  const [cssText, setCssText] = useState(() => paneSource(elements).css);
+  const [htmlText, setHtmlText] = useState(() => paneSource(elements, headHtml).html);
+  const [cssText, setCssText] = useState(() => paneSource(elements, headHtml).css);
 
-  // Tracks the last `elements` value THIS component itself produced, so
-  // the sync effect below can tell "an external change happened elsewhere
-  // (Design-mode canvas edit, undo/redo, page switch) — regenerate the
-  // pane text" apart from "this is our own debounced write echoing back
+  // Tracks the last `elements`/`headHtml` value THIS component itself
+  // produced, so the sync effect below can tell "an external change
+  // happened elsewhere (Design-mode canvas edit, undo/redo, page switch,
+  // a theme/animation/font applied via head_html) — regenerate the pane
+  // text" apart from "this is our own debounced write echoing back
   // through props — don't regenerate, or we'd clobber in-progress typing
   // in the other pane."
   const lastAppliedElementsRef = useRef(elements);
+  const lastAppliedHeadHtmlRef = useRef(headHtml);
   const htmlDebounceRef = useRef(null);
   const cssDebounceRef = useRef(null);
 
   useEffect(() => {
-    if (elements === lastAppliedElementsRef.current) return;
-    lastAppliedElementsRef.current = elements;
+    const elementsChanged = elements !== lastAppliedElementsRef.current;
+    const headChanged = headHtml !== lastAppliedHeadHtmlRef.current;
+    if (!elementsChanged && !headChanged) return;
+    lastAppliedHeadHtmlRef.current = headHtml;
     // A genuine external change (undo/redo, page switch, Design-mode
-    // canvas edit) invalidates any pending debounced pane edit — it was
-    // going to reconcile against the OLD base and, if left armed, would
-    // later fire and stomp this new external state with stale data.
-    clearTimeout(htmlDebounceRef.current); htmlDebounceRef.current = null;
+    // canvas edit, a theme/animation/font applied) invalidates any
+    // pending debounced CSS-pane edit — it was going to reconcile against
+    // the OLD base and, if left armed, would later fire and stomp this
+    // new external state with stale data.
     clearTimeout(cssDebounceRef.current); cssDebounceRef.current = null;
-    const { html, css } = paneSource(elements);
-    setHtmlText(html);
+    if (elementsChanged) {
+      lastAppliedElementsRef.current = elements;
+      clearTimeout(htmlDebounceRef.current); htmlDebounceRef.current = null;
+    }
+    const { html, css } = paneSource(elements, headHtml);
+    if (elementsChanged) setHtmlText(html);
     setCssText(css);
-  }, [elements]);
+  }, [elements, headHtml]);
 
   useEffect(() => () => {
     clearTimeout(htmlDebounceRef.current);

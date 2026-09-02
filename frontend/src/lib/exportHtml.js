@@ -38,7 +38,7 @@ const FORGE_FONTS_RE = /<style data-forge-fonts>([\s\S]*?)<\/style>\n?/g;
 const IMPORTED_CSS_RE = /<style data-forge-imported-css>([\s\S]*?)<\/style>\n?/g;
 const ROOT_BLOCK_RE = /:root\s*{[^}]*}/;
 
-const extractForgeCss = (headHtml) => {
+export const extractForgeCss = (headHtml) => {
   let remaining = headHtml || "";
   const themeVars = [];
   const base = [];
