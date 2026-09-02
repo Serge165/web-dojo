@@ -936,21 +936,36 @@ export default function Builder() {
   // Mirrors loadFromTemplate for the page/element/head reset, then layers the
   // name/SEO/scaffold on top. The project snapshot handed to the scaffolder
   // matches the shape exportHtml.buildMultiPageExport expects.
-  const startFromWizard = ({ tpl, name, seo }) => {
+  const startFromWizard = ({ tpl, name, seo, layouts }) => {
     const data = (tpl && tpl.data) || {};
     const projName = (name || (tpl && tpl.name) || "Untitled").trim();
     setProjectId(null);
     setProjectName(projName);
-    const templatePages = (data.pages && data.pages.length) ? data.pages : [{
+    // Option B: hand-picked Layout pages compose the project instead of a whole Template.
+    const layoutPages = (layouts || []).map((l, i) => {
+      const slug = i === 0 ? "index" : l.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      return {
+        id: uid(), name: i === 0 ? "Home" : l.label, slug, status: "draft", seo: {},
+        elements: (l.blocks || []).map((html) => ({ id: uid(), html })),
+        head_html: "", canvas_bg: l.canvasBg || "#ffffff", fonts: l.fonts || [], custom_js: "",
+      };
+    });
+    const templatePages = layoutPages.length ? layoutPages
+      : (data.pages && data.pages.length) ? data.pages : [{
       id: uid(), name: "Home", slug: "index", status: "draft", seo: {},
       elements: data.elements || [], head_html: data.head_html || "",
       canvas_bg: data.canvas_bg || "#ffffff", fonts: data.fonts || [], custom_js: data.custom_js || "",
     }];
-    const nextPages = templatePages.map((pg, i) => ({
+    const stitchedPages = templatePages.map((pg, i) => ({
       ...pg,
-      id: uid(),
+      id: pg.id || uid(),
       seo: i === 0 ? { ...(pg.seo || {}), ...seo } : (pg.seo || {}),
     }));
+    // Hand-picked layout pages each bring their own donor <nav> (with that
+    // donor's own demo items), unmerged and inconsistent page to page — see
+    // unifyNavAcrossPages. A single starter template's pages already share
+    // one coherent nav by construction, so leave that path untouched.
+    const nextPages = layoutPages.length ? unifyFooterAcrossPages(unifyNavAcrossPages(stitchedPages)) : stitchedPages;
     // Phase 4a (Task 4): a truly blank selection (template data with no
     // seeded elements) starts from the standard semantic layout skeleton
     // instead of an empty canvas, and opts the scaffold into injecting the
@@ -985,7 +1000,9 @@ export default function Builder() {
     };
     setFiles(scaffoldProjectFiles(projectSnapshot, { standardLayout: isBlankCanvas }));
     setSaveStatus("unsaved");
-    toast.success(`Scaffolded “${projName}” from “${(tpl && tpl.name) || "template"}”`);
+    toast.success(layoutPages.length
+      ? `Scaffolded “${projName}” from ${layoutPages.length} page${layoutPages.length === 1 ? "" : "s"}`
+      : `Scaffolded “${projName}” from “${(tpl && tpl.name) || "template"}”`);
   };
 
   const deleteProject = async (id) => {
