@@ -19,6 +19,64 @@ test("buildStandaloneHtml honors seo.og_type and seo.schema_type when set (e.g. 
   expect(html).toContain('"name":"Acme Widget"');
 });
 
+test("buildStandaloneHtml omits the preview-nav intercept script by default (real exports must not carry it)", () => {
+  const html = buildStandaloneHtml({ id: "p1", name: "Home", elements: [], seo: {} });
+  expect(html).not.toContain("wd-preview-nav");
+});
+
+// Regression: the Preview tab's srcDoc iframe has no real backing URL, so an
+// internal nav link like href="about.html" (the format BlockEditMenu.jsx's
+// pageHref() writes) silently failed to navigate instead of switching pages.
+// { previewNav: true } injects a click-intercept script that posts the
+// clicked href to the parent instead of letting the iframe try to navigate.
+test("buildStandaloneHtml({ previewNav: true }) injects a click-intercept script that reports internal links, ignores external/hash/mailto ones", () => {
+  const html = buildStandaloneHtml({ id: "p1", name: "Home", elements: [], seo: {} }, { previewNav: true });
+  expect(html).toContain("wd-preview-nav");
+  expect(html).toContain("window.parent.postMessage");
+  // eslint-disable-next-line no-new-func
+  const runIntercept = (href, target) => {
+    const clicked = { getAttribute: () => href, target: target || "" };
+    let posted = null;
+    let prevented = false;
+    const listeners = [];
+    const doc = {
+      addEventListener: (type, fn) => listeners.push(fn),
+    };
+    const win = {
+      document: doc,
+      parent: { postMessage: (msg) => { posted = msg; } },
+    };
+    // eslint-disable-next-line no-new-func
+    const script = html.match(/<script>\(function\(\)\{\ndocument\.addEventListener[\s\S]*?<\/script>/)[0]
+      .replace(/^<script>/, "").replace(/<\/script>$/, "");
+    new Function("document", "window", script)(doc, win);
+    const handler = listeners[0];
+    const event = {
+      target: { closest: (sel) => (sel === "a[href]" ? clicked : null) },
+      preventDefault: () => { prevented = true; },
+    };
+    handler(event);
+    return { posted, prevented };
+  };
+
+  const internal = runIntercept("about.html");
+  expect(internal.prevented).toBe(true);
+  expect(internal.posted).toEqual({ type: "wd-preview-nav", href: "about.html" });
+
+  const external = runIntercept("https://example.com");
+  expect(external.prevented).toBe(false);
+  expect(external.posted).toBeNull();
+
+  const hash = runIntercept("#section");
+  expect(hash.prevented).toBe(false);
+
+  const mailto = runIntercept("mailto:hi@example.com");
+  expect(mailto.prevented).toBe(false);
+
+  const newTab = runIntercept("about.html", "_blank");
+  expect(newTab.prevented).toBe(false);
+});
+
 test("buildMultiPageExport writes globals.css with clearly labeled sections in the right order", () => {
   const { files } = buildMultiPageExport({ id: "proj1", name: "Test Site", pages: [page({})] });
   const css = files["globals.css"];

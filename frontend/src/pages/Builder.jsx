@@ -299,6 +299,30 @@ export default function Builder() {
     pages, active_page_id: activePageId, template, analytics,
   };
 
+  // Preview mode: the active page by default, but clicking an internal nav
+  // link (see PREVIEW_NAV_SCRIPT in exportHtml.js) swaps to whichever page
+  // that link's href resolves to, so multi-page sites are actually
+  // click-through-able in Preview instead of stuck on one page.
+  const [previewPageId, setPreviewPageId] = useState(null);
+  useEffect(() => { if (mode === "preview") setPreviewPageId(activePageId); }, [mode, activePageId]);
+  useEffect(() => {
+    if (mode !== "preview") return;
+    const onMsg = (e) => {
+      if (e.data?.type !== "wd-preview-nav") return;
+      const target = pages.find((p) => pageHref(p) === e.data.href);
+      if (target) setPreviewPageId(target.id);
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [mode, pages]);
+  const previewProject = useMemo(() => {
+    if (!previewPageId || previewPageId === activePageId) return project;
+    const page = pages.find((p) => p.id === previewPageId);
+    if (!page) return project;
+    return { ...project, elements: page.elements, head_html: page.head_html, canvas_bg: page.canvas_bg, fonts: page.fonts, custom_js: page.custom_js, seo: page.seo || {} };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewPageId, activePageId, pages, projectId, projectName, files, template, analytics]);
+
   // ------------- Page ops -------------
   const switchPage = (id) => {
     const target = pages.find((p) => p.id === id);
@@ -1431,8 +1455,9 @@ export default function Builder() {
             <div className="flex items-center justify-between px-4 py-2 border-b border-[#332D22] bg-[#1C1A15] text-xs">
               <div className="flex items-center gap-2 text-[#A79C87]">
                 <Eye size={12} className="text-emerald-400" /> Live preview · {viewport} · what your visitors will see
+                {pages.length > 1 && <span className="text-[#948C79]">· {(pages.find((p) => p.id === previewPageId) || activePage)?.name || "Page"}</span>}
               </div>
-              <div className="text-[10px] text-[#948C79] font-mono">{elements.length} block{elements.length === 1 ? "" : "s"} · exit via Design tab</div>
+              <div className="text-[10px] text-[#948C79] font-mono">{previewProject.elements.length} block{previewProject.elements.length === 1 ? "" : "s"} · exit via Design tab</div>
             </div>
             <div className="flex-1 flex justify-center items-start overflow-auto p-6">
               {/* allow-same-origin is intentionally NOT set: combined with
@@ -1443,8 +1468,9 @@ export default function Builder() {
                   window.parent. allow-scripts alone keeps the origin
                   opaque, which is what actually isolates it. */}
               <iframe
+                key={previewPageId || "active"}
                 title="live-preview"
-                srcDoc={buildStandaloneHtml(project)}
+                srcDoc={buildStandaloneHtml(previewProject, { previewNav: true })}
                 className="bg-white shadow-2xl border border-[#332D22] transition-all"
                 style={{
                   width: viewport === "mobile" ? "390px" : viewport === "tablet" ? "820px" : "1280px",

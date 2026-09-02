@@ -255,7 +255,26 @@ const buildJsonLd = (project) => {
   return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
 };
 
-export const buildStandaloneHtml = (project) => {
+// Intercepts clicks on internal page links (e.g. href="about.html", the
+// format pageHref() in BlockEditMenu.jsx writes) inside a srcDoc preview
+// iframe, where they'd otherwise try to navigate to a document that doesn't
+// exist (srcDoc content has no real backing URL) and silently do nothing.
+// Reports the raw href to the parent via postMessage instead of navigating,
+// so the parent can swap in that page's own standalone HTML.
+const PREVIEW_NAV_SCRIPT = `<script>(function(){
+document.addEventListener("click", function(e){
+  var a = e.target.closest && e.target.closest("a[href]");
+  if (!a) return;
+  var href = a.getAttribute("href") || "";
+  if (!href || href.charAt(0) === "#") return;
+  if (/^([a-z][a-z0-9+.-]*:)?\\/\\//i.test(href) || /^(mailto|tel):/i.test(href)) return;
+  if (a.target && a.target !== "_self") return;
+  e.preventDefault();
+  window.parent.postMessage({ type: "wd-preview-nav", href: href.replace(/^\\.?\\//, "").split(/[?#]/)[0] }, "*");
+}, true);
+})();</script>`;
+
+export const buildStandaloneHtml = (project, opts = {}) => {
   // Standalone export must NOT carry any inline style="…" on blocks. The
   // inline styles are hoisted into the labelled per-block CSS class rules
   // (block-<cat>-<slug>-<occ> + .block marker) and a corresponding <style>
@@ -315,7 +334,7 @@ ${cleanedHead}
 <body data-wd-project="${escAttr(project.id || "")}">
 <script>window.__WD_PROJECT_ID=window.__WD_PROJECT_ID||document.body.getAttribute("data-wd-project")||"";</script>
 ${body}
-${customJsTag}</body>
+${customJsTag}${opts.previewNav ? PREVIEW_NAV_SCRIPT : ""}</body>
 </html>`;
 };
 
