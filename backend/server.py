@@ -3078,6 +3078,14 @@ _collections_mod.db = _LiveDbProxy()
 _collections_mod._require_dashboard_token = _require_dashboard_token
 app.include_router(collections_router)
 
+# Phase 9A: collaboration presence beacon (dependency-free slice; full CRDT
+# sync is a separate, larger effort — see docs/PHASE9_SPEC_RECONCILIATION_HANDOFF.md).
+from models.presence import presence_router
+import models.presence as _presence_mod
+_presence_mod.db = _LiveDbProxy()
+_presence_mod._verify_jwt = _auth_mod.verify_jwt
+app.include_router(presence_router)
+
 
 # ---------- Social Wall: config + live feed ----------
 

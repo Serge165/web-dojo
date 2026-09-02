@@ -18,6 +18,7 @@ import {
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { OutlineView } from "@/components/builder/OutlineView";
+import { getStoredUser, startPresenceLoop } from "@/lib/collab";
 import { PublishModal } from "@/components/builder/PublishModal";
 import { OnboardingTour } from "@/components/builder/OnboardingTour";
 import { ThemeGallery } from "@/components/builder/ThemeGallery";
@@ -110,6 +111,7 @@ export default function Builder() {
   const [viewport, setViewport] = useState("desktop");
   const [projectId, setProjectId] = useState(null);
   const [projectName, setProjectName] = useState("Untitled");
+  const [peers, setPeers] = useState([]);
   const [elements, setElements] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   // Ctrl+Shift+A in Design mode highlights every element that shares the
@@ -180,6 +182,17 @@ export default function Builder() {
   const doc = useMemo(() => ({ elements, canvasBg, headHtml, fonts, files, customJs }), [elements, canvasBg, headHtml, fonts, files, customJs]);
   const docRef = useRef(doc);
   useEffect(() => { docRef.current = doc; }, [doc]);
+
+  // Presence beacon (Phase 9A slice): only announces once a collab account
+  // is logged in (no login UI exists yet — this is inert until one does).
+  useEffect(() => {
+    setPeers([]);
+    if (!projectId) return;
+    const user = getStoredUser();
+    if (!user) return;
+    const stop = startPresenceLoop(projectId, user, setPeers);
+    return stop;
+  }, [projectId]);
 
   // The Zenero content dashboard is only useful once the site actually has
   // a block that reads from it — gate its entry point on that, checking
@@ -1274,6 +1287,7 @@ export default function Builder() {
         project={project}
         onOpenTransfer={() => setTransferOpen(true)}
         onSave={save} onSaveAs={saveAs} saveStatus={saveStatus} onOpenLoad={openLoad} onShare={share}
+        peers={peers}
         onPublish={() => setPublishOpen(true)}
         onStartTour={() => setTourForce((v) => v + 1)}
         onFind={() => setFindOpen(true)}

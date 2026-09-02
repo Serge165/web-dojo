@@ -19,6 +19,7 @@ export const TopBar = ({
   onStartTour,
   onFind, onAssets, onAnalytics, onTemplates, onSubmissions, onDashboard, onZeneroDashboard,
   onOpenTransfer,
+  peers,
 }) => {
   const fileRef = useRef(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -136,6 +137,19 @@ export const TopBar = ({
           </div>
         )}
 
+        {!!peers?.length && (
+          <div className="flex items-center -space-x-1.5 mr-1" data-testid="presence-peers" title={peers.map((p) => p.name || "Anonymous").join(", ")}>
+            {peers.slice(0, 5).map((p) => (
+              <div
+                key={p.user_id}
+                className="w-6 h-6 rounded-full border-2 border-[#161310] flex items-center justify-center text-[10px] font-semibold text-[#161310]"
+                style={{ background: p.color || "#C9A227" }}
+              >
+                {(p.name || "?").slice(0, 1).toUpperCase()}
+              </div>
+            ))}
+          </div>
+        )}
         <button onClick={onShare} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" title="Copy shareable preview URL" data-testid="share-btn"><Link2 size={12} /> Share</button>
         <button onClick={onPublish} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-transparent hover:bg-[#2A2416] text-[#E8C34A] border border-[#4A3F1E]" title="Upload via FTP / SFTP" data-testid="publish-btn"><Server size={12} /> Publish</button>
         <div className="h-6 w-px bg-[#332D22]" />
