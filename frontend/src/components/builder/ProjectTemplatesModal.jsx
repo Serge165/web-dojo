@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone, Upload, Link2 } from "lucide-react";
+import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone, Upload, Link2, FolderUp } from "lucide-react";
 import { buildTemplatePreviewHtml } from "@/lib/exportHtml";
-import { scanHtml } from "@/lib/importHtml";
+import { scanHtml, inlineLocalStylesheets } from "@/lib/importHtml";
 // Offline mirror of backend/starter_templates.py STARTER_TEMPLATES, generated
 // by backend/_serialize_starters.py. Used as a fetch-failure fallback in
 // refresh() so the picker isn't empty when the backend is down or
@@ -228,6 +228,46 @@ const sectionsToProjectData = (name, headHtml, sections) => ({
   active_page_id: "imported-home",
 });
 
+// Multi-page counterpart: a whole donor template folder (index.html,
+// about.html, contact.html, … + a shared styles.css) scanned page-by-page,
+// turned into the SAME multi-page project shape STARTER_TEMPLATES already
+// use — so it flows through the exact same preview/save/load/export paths,
+// globals.css consolidation included, with zero new plumbing.
+const pagesToProjectData = (name, pages) => ({
+  name,
+  canvas_bg: "#ffffff",
+  fonts: [],
+  head_html: "",
+  files: [],
+  template: { header_html: "", footer_html: "", use_template: false },
+  pages: pages.map((p, i) => ({
+    id: `imported-${i}`, name: p.name, slug: p.slug, status: "draft", seo: {},
+    elements: p.sections.map((s) => ({ id: s.id, html: s.html })),
+    head_html: p.headHtml, canvas_bg: "#ffffff", fonts: [],
+  })),
+  active_page_id: "imported-0",
+});
+
+const HTML_EXT_RE = /\.html?$/i;
+const CSS_EXT_RE = /\.css$/i;
+
+// Derives a page name/slug from a donor file's name — index.html/home.html
+// become the site's home page; every other file keeps its own name
+// (about.html -> "About", /^-/contact-us.html -> "Contact Us").
+const filePageMeta = (filename) => {
+  const base = filename.replace(HTML_EXT_RE, "");
+  const isHome = /^(index|home)$/i.test(base);
+  const slug = isHome ? "index" : (base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || base);
+  const name = isHome ? "Home" : base.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return { slug, name, isHome };
+};
+
+const readFileAsText = (file) => new Promise((resolve) => {
+  const r = new FileReader();
+  r.onload = () => resolve(String(r.result || ""));
+  r.readAsText(file);
+});
+
 // Any external site's markup + CSS, converted into Web Dojo's own block
 // model: scanHtml splits top-level markup into elements[] (same shape the
 // canvas/inspector already work with) and consolidates every <style> rule
@@ -241,6 +281,7 @@ const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose })
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [scanned, setScanned] = useState(null); // { headHtml, sections, sourceLabel }
+  const [scannedMulti, setScannedMulti] = useState(null); // { pages: [{name, slug, headHtml, sections}], sourceLabel }
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -260,6 +301,7 @@ const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose })
       const { headHtml, sections } = scanHtml(raw);
       if (sections.length === 0) { toast.error("No importable sections found in that markup"); return; }
       setScanned({ headHtml, sections, sourceLabel });
+      setScannedMulti(null);
       setName((n) => n || sourceLabel);
       toast.success(`Found ${sections.length} section${sections.length === 1 ? "" : "s"}`);
     } catch (e) {
@@ -267,8 +309,45 @@ const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose })
     } finally { setBusy(false); }
   };
 
-  const projectData = scanned ? sectionsToProjectData(name || "Imported Template", scanned.headHtml, scanned.sections) : null;
-  const previewTpl = projectData ? { id: "staged-import", name: name || "Imported Template", description, aesthetic: null, data: projectData } : null;
+  // Whole-template mode: pick every .html + .css file a donor template
+  // folder came with (a ThemeForest-style download, extracted locally) in
+  // one file dialog. Each .html file becomes its own page; sibling .css
+  // files are inlined per-page before scanning so their rules land in that
+  // page's consolidated stylesheet, same as a single-file import.
+  const doScanFiles = async (fileList) => {
+    const list = Array.from(fileList || []);
+    const htmlFiles = list.filter((f) => HTML_EXT_RE.test(f.name));
+    const cssFiles = list.filter((f) => CSS_EXT_RE.test(f.name));
+    if (htmlFiles.length === 0) { toast.error("Select at least one .html file"); return; }
+    setBusy(true);
+    try {
+      const siblingCssByName = {};
+      for (const f of cssFiles) siblingCssByName[f.name] = await readFileAsText(f);
+      const pages = [];
+      for (const f of htmlFiles) {
+        const raw = await readFileAsText(f);
+        const { headHtml, sections } = scanHtml(inlineLocalStylesheets(raw, siblingCssByName));
+        if (sections.length === 0) continue;
+        const { slug, name: pageName } = filePageMeta(f.name);
+        pages.push({ slug, name: pageName, headHtml, sections });
+      }
+      if (pages.length === 0) { toast.error("No importable sections found in those files"); return; }
+      // Exactly one page must be "index" — an index/home-named file wins;
+      // otherwise the first selected file becomes the home page.
+      if (!pages.some((p) => p.slug === "index")) pages[0] = { ...pages[0], slug: "index" };
+      setScannedMulti({ pages, sourceLabel: `${htmlFiles.length} file${htmlFiles.length === 1 ? "" : "s"}` });
+      setScanned(null);
+      setName((n) => n || "Imported Site");
+      toast.success(`Found ${pages.length} page${pages.length === 1 ? "" : "s"}`);
+    } finally { setBusy(false); }
+  };
+
+  const projectData = scannedMulti
+    ? pagesToProjectData(name || "Imported Site", scannedMulti.pages)
+    : scanned
+    ? sectionsToProjectData(name || "Imported Template", scanned.headHtml, scanned.sections)
+    : null;
+  const previewTpl = projectData ? { id: "staged-import", name: name || (scannedMulti ? "Imported Site" : "Imported Template"), description, aesthetic: null, data: projectData } : null;
 
   const doSave = async () => {
     if (!name.trim()) { toast.error("Give the template a name"); return; }
@@ -298,10 +377,11 @@ const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose })
           <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Import a template from outside Web Dojo</div>
           <button onClick={onClose} className="text-[#948C79] hover:text-[#F1EDE2]" data-testid="tpl-import-close"><X size={14} /></button>
         </div>
-        <p className="text-[11px] text-[#948C79] leading-relaxed">Any page's markup gets split into blocks and its CSS consolidated into one stylesheet that exports to the right place in globals.css, same as a built-in template.</p>
-        <div className="grid grid-cols-2 gap-1">
+        <p className="text-[11px] text-[#948C79] leading-relaxed">Any page's markup gets split into blocks and its CSS consolidated into one stylesheet that exports to the right place in globals.css, same as a built-in template. Pick a whole template folder to bring in every page it comes with.</p>
+        <div className="grid grid-cols-3 gap-1">
           <button onClick={() => setMode("paste")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "paste" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-paste"><Upload size={12} /> Paste HTML</button>
           <button onClick={() => setMode("url")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "url" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-url"><Link2 size={12} /> From URL</button>
+          <button onClick={() => setMode("files")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "files" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-files"><FolderUp size={12} /> Whole template</button>
         </div>
         {mode === "paste" ? (
           <textarea
@@ -312,7 +392,7 @@ const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose })
             className="w-full bg-[#1C1A15] border border-[#332D22] rounded p-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
             data-testid="tpl-import-paste"
           />
-        ) : (
+        ) : mode === "url" ? (
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -320,11 +400,38 @@ const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose })
             className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
             data-testid="tpl-import-url"
           />
+        ) : (
+          <label className="w-full flex flex-col items-center justify-center gap-1 py-4 rounded border border-dashed border-[#332D22] text-[#A79C87] text-xs cursor-pointer hover:border-[#C9A227]">
+            <FolderUp size={16} />
+            Select every .html + .css file in the template folder
+            <input
+              type="file"
+              multiple
+              accept=".html,.htm,.css"
+              onChange={(e) => { doScanFiles(e.target.files); e.target.value = ""; }}
+              className="hidden"
+              data-testid="tpl-import-files"
+            />
+          </label>
         )}
-        <button onClick={doScan} disabled={busy} className="w-full text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-scan">
-          {busy ? "Scanning…" : "Scan"}
-        </button>
+        {mode !== "files" && (
+          <button onClick={doScan} disabled={busy} className="w-full text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-scan">
+            {busy ? "Scanning…" : "Scan"}
+          </button>
+        )}
 
+        {scannedMulti && (
+          <div className="pt-2 border-t border-[#332D22] space-y-2">
+            <div className="text-[11px] text-[#A79C87]" data-testid="tpl-import-multi-summary">{scannedMulti.pages.length} page{scannedMulti.pages.length === 1 ? "" : "s"} detected from {scannedMulti.sourceLabel} ({scannedMulti.pages.map((p) => p.name).join(", ")})</div>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Project name" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-name" />
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-desc" />
+            <div className="grid grid-cols-3 gap-2">
+              <button onClick={() => setPreviewOpen(true)} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1" data-testid="tpl-import-preview"><Eye size={12} /> Preview</button>
+              <button onClick={doUse} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="tpl-import-use">Use this template</button>
+              <button onClick={doSave} disabled={busy} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-save">{busy ? "Saving…" : "Save as template"}</button>
+            </div>
+          </div>
+        )}
         {scanned && (
           <div className="pt-2 border-t border-[#332D22] space-y-2">
             <div className="text-[11px] text-[#A79C87]">{scanned.sections.length} section{scanned.sections.length === 1 ? "" : "s"} detected from {scanned.sourceLabel}{scanned.headHtml.includes("data-forge-imported-css") ? " · CSS consolidated" : ""}</div>
