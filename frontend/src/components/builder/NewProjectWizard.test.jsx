@@ -19,6 +19,7 @@ jest.mock("@/components/ui/dialog", () => {
 
 import { NewProjectWizard } from "./NewProjectWizard";
 import STARTER_TEMPLATES from "@/data/starterTemplates.json";
+import { PAGE_LAYOUTS } from "@/lib/pageLayouts";
 
 const FIRST = STARTER_TEMPLATES[0];
 
@@ -236,4 +237,69 @@ test("step 3 review shows template version badge", () => {
   if (FIRST.version) {
     expect(screen.getByText(new RegExp(`v${FIRST.version}`))).toBeInTheDocument();
   }
+});
+
+// ── Wizard Option B: pick your own pages ─────────────────────────────
+
+test("pages mode blocks advancing until at least one page is selected", () => {
+  renderWizard();
+  fireEvent.click(screen.getByTestId("wizard-mode-pages"));
+  expect(screen.getByTestId("wizard-pages-picker")).toBeInTheDocument();
+  expect(screen.getByTestId("wizard-next")).toBeDisabled();
+
+  const firstLayout = PAGE_LAYOUTS[0];
+  fireEvent.click(screen.getByTestId(`wizard-page-${firstLayout.id}`));
+  expect(screen.getByTestId("wizard-next")).toBeEnabled();
+});
+
+test("pages mode calls onCreate with the selected layouts", () => {
+  const { onCreate } = renderWizard();
+  fireEvent.click(screen.getByTestId("wizard-mode-pages"));
+
+  const picks = PAGE_LAYOUTS.slice(0, 2);
+  picks.forEach((l) => fireEvent.click(screen.getByTestId(`wizard-page-${l.id}`)));
+
+  fireEvent.click(screen.getByTestId("wizard-next"));
+  fireEvent.change(screen.getByTestId("wizard-name"), { target: { value: "Picked Pages Site" } });
+  fireEvent.click(screen.getByTestId("wizard-next"));
+  expect(screen.getByTestId("wizard-review-pages")).toHaveTextContent(picks[0].label);
+
+  fireEvent.click(screen.getByTestId("wizard-create"));
+  expect(onCreate).toHaveBeenCalledTimes(1);
+  const arg = onCreate.mock.calls[0][0];
+  expect(arg.name).toBe("Picked Pages Site");
+  expect(arg.layouts.map((l) => l.id).sort()).toEqual(picks.map((l) => l.id).sort());
+});
+
+// ── dashboard-login modes ──────────────────────────────────────────
+
+test("dashboard mode needs no picks and scaffolds a page with the dashboard-login block", () => {
+  const { onCreate } = renderWizard();
+  fireEvent.click(screen.getByTestId("wizard-mode-dashboard"));
+  expect(screen.getByTestId("wizard-dashboard-info")).toBeInTheDocument();
+  expect(screen.getByTestId("wizard-next")).toBeEnabled();
+
+  fireEvent.click(screen.getByTestId("wizard-next"));
+  fireEvent.change(screen.getByTestId("wizard-name"), { target: { value: "Client Portal" } });
+  fireEvent.click(screen.getByTestId("wizard-next"));
+  fireEvent.click(screen.getByTestId("wizard-create"));
+
+  expect(onCreate).toHaveBeenCalledTimes(1);
+  const arg = onCreate.mock.calls[0][0];
+  expect(arg.name).toBe("Client Portal");
+  expect(arg.layouts).toHaveLength(1);
+  expect(arg.layouts[0].blocks[0]).toContain('data-forge-widget="dashboard-login"');
+});
+
+test("dashboard/blog mode scaffolds a page with both the dashboard-login and latest-blog blocks", () => {
+  const { onCreate } = renderWizard();
+  fireEvent.click(screen.getByTestId("wizard-mode-dashboard-blog"));
+  fireEvent.click(screen.getByTestId("wizard-next"));
+  fireEvent.click(screen.getByTestId("wizard-next"));
+  fireEvent.click(screen.getByTestId("wizard-create"));
+
+  const arg = onCreate.mock.calls[0][0];
+  const html = arg.layouts[0].blocks.join("\n");
+  expect(html).toContain('data-forge-widget="dashboard-login"');
+  expect(html).toContain('data-forge-widget="latest-blog"');
 });

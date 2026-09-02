@@ -669,7 +669,29 @@ Real embeds requiring no API keys:
 
 Live preview, **Insert onto canvas**. Note: because these need no API credentials, they intentionally don't fake extras like a live/offline badge or forum threads — those would require real API access this feature doesn't have.
 
-> ⚠️ **Important:** the **Portfolio** and **Social Wall** blocks in the block Library are static demo content with hardcoded example posts/cards — they are *not* connected to any real Instagram/social account. See [§26](#26-known-limitations).
+> ⚠️ **Important:** the **Portfolio** block is static, owner-authored content — it never pulls from an external account. The **Social Wall** block shows sample cards until you connect a platform via **Social Connect** (above); once connected, it shows real posts automatically. See [§26](#26-known-limitations).
+
+### 18.4 Getting your social media API credentials
+
+Social Connect needs real credentials from each platform before Social Wall can show live posts — a site owner has to go get these from the platform itself, Web Dojo can't issue them. Each platform maps to the token + secondary ID fields you'll see in the Social Connect form:
+
+- **Facebook** (*token*, *page_id*) — Create an app at [developers.facebook.com](https://developers.facebook.com), add the **Pages API** product, and generate a **Page Access Token** for the Page you manage (Graph API Explorer works for testing; for a token that doesn't expire in an hour, exchange it for a long-lived token via the `oauth/access_token` endpoint). The `page_id` is visible on the Page's About tab or via `/me/accounts` in the Graph API Explorer.
+- **Instagram** (*token*, *user_id*) — Instagram's feed API only works for a **Business or Creator account linked to a Facebook Page**. Once linked, use the same Meta developer app as Facebook, add **Instagram Graph API**, and pull the Instagram Business Account ID via `/{page_id}?fields=instagram_business_account` in the Graph API Explorer. The token is the same Page Access Token used for Facebook.
+- **X (Twitter)** (*token*, *user_id*) — Apply for a developer account at [developer.x.com](https://developer.x.com), create a Project + App, and generate a **Bearer Token** under Keys & Tokens. The `user_id` is the numeric ID behind your handle (look it up with any "X user ID lookup" tool, or via `GET /2/users/by/username/{handle}`). Note: X's free API tier is limited and can change without much notice — treat this integration as best-effort.
+- **TikTok** (*token*, *user_id*) — Apply at [developers.tiktok.com](https://developers.tiktok.com) for API access; TikTok gates its content-reading APIs behind an approval process that can take days to weeks and isn't guaranteed. Budget for this lag if TikTok matters for launch, and treat it as the platform most likely to not be ready in time.
+- **LinkedIn** (*token*, *company_id*) — Create an app at [developer.linkedin.com](https://www.linkedin.com/developers/apps), request access to the **Community Management API** (requires your company Page to be verified and, in practice, LinkedIn's review), and generate an OAuth token with `r_organization_social` scope. The `company_id` is the numeric ID in your company Page's admin URL.
+- **YouTube** (*token*, *channel_id*) — In [Google Cloud Console](https://console.cloud.google.com), create a project, enable the **YouTube Data API v3**, and generate an **API key** (Credentials → Create Credentials → API key) — this is the simplest of the six, no OAuth needed since it only reads public channel data. The `channel_id` is on your channel's "About" page under "Share channel."
+
+None of these credentials are ever written into the exported site's HTML — they're sent straight to Social Connect and stored encrypted on the server, and only the resulting post content is served back to visitors. Expect the approval/verification steps (Meta business verification, TikTok's review, LinkedIn's Page verification) to be the slow part — the token-generation itself is usually a few minutes once access is granted.
+
+### 18.5 Dashboard Login block
+
+The **Dashboard Login** block (Library → Zenero) adds a login-gated members area to a published site, with two independent tabs:
+
+- **Owner Login** — unlocks with the site's dashboard password (the same one used by the Zenero Content Dashboard, [§18.2](#182-social-connect-dashboard)). On first login for a site that's never had a password set, it prompts you to choose one. Once unlocked, it shows a read-only summary of what's currently live on the site — recent Updates, Blog posts, Bento tiles, Timeline entries, and Social Wall posts — pulled from the same data the rest of the site already displays publicly. To actually add or edit that content, use the Zenero Content Dashboard in the Builder; this block is a viewing surface, not an editor.
+- **Customer Login** — lets visitors create their own account (email + password) and log back in later, scoped to this project only. What a logged-in customer sees is intentionally minimal for now (a welcome message) — this is a placeholder pending further scope.
+
+**Customizing the wording:** the block embeds a small JSON config right in the exported HTML (search for `data-forge-dashboard-copy`), which controls the owner-dashboard welcome text, the empty-state message, and the section headings (Updates / From the Blog / Highlights / Timeline / Social Wall). Edit the JSON values directly in the exported file to change the copy — no rebuild or re-export required, since the block reads it at page load.
 
 ---
 
@@ -856,8 +878,9 @@ Read this section before sharing any project link.
 
 Be aware of these so you don't build around a false assumption:
 
-- **Portfolio and Social Wall blocks are static demo content.** They use hardcoded example cards/posts (Portfolio uses CSS-only `:has()` filtering; Social Wall has fake posts) — neither connects to a real account or live feed. If you want a live social feed, use the **Social Connect** tool ([§18.2](#182-social-connect-dashboard)) instead.
-- **There is no Blog/Update block category.** If you need a blog, you'll be composing it from generic content blocks rather than a dedicated blog system.
+- **Portfolio is static, owner-authored content.** It's edited by hand from the Zenero dashboard ([§18.2](#182-social-connect-dashboard)/Zenero Content Dashboard) and doesn't pull from any external account — that's by design, not a gap.
+- **Social Wall shows sample cards until you connect an account.** Out of the box it displays hardcoded example posts so the layout previews well; once you add real API credentials via **Social Connect** ([§18.2](#182-social-connect-dashboard), see [§18.4](#184-getting-your-social-media-api-credentials) for how to obtain them), the block automatically swaps in live posts for any platform you've connected — no re-export needed.
+- **Blog/Updates are a real content system, not a placeholder.** The Zenero Content Dashboard has dedicated Blog, Updates, Bento, and Timeline tabs backed by their own storage; the **Blog** and **Latest Updates** blocks in the Library render that content live.
 - **The SEO scoring system may lag the rest of the app.** Depending on your build, treat its checklist as a helpful guide rather than a guaranteed-complete audit — verify manually for anything critical.
 - **Livestream embeds don't fake status.** The Twitch/YouTube/Discord embeds show the real embed only — no synthetic "live now" badge or forum thread, since faking those would require API access the feature doesn't have.
 - **`BlockEditMenu.jsx` and `BlockEditMenu_real.jsx` both exist in the codebase** — if you're troubleshooting an Edit-tab quirk, be aware there are two implementations in play at different points in the project's history.

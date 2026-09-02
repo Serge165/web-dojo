@@ -3013,6 +3013,15 @@ _content_mod.db = _LiveDbProxy()
 _content_mod.require_project_access = _auth_mod.require_project_access
 _content_mod._require_dashboard_token = _require_dashboard_token
 
+# Per-project customer accounts for exported static sites (distinct from the
+# global builder_auth users above and from the single-shared-secret dashboard
+# password) — see models/site_auth.py docstring.
+from models import site_auth as _site_auth_mod
+_site_auth_mod.db = _LiveDbProxy()
+_site_auth_mod._hash_password = _hash_password
+_site_auth_mod._verify_password = _verify_password
+_site_auth_mod._DASHBOARD_KEY_PATH = _DASHBOARD_KEY_PATH
+
 app.include_router(api_router)
 
 # Serve uploaded block assets (gallery/bento/timeline images) statically so
@@ -3023,6 +3032,7 @@ app.include_router(zenero_router)
 app.include_router(funnel_router)
 app.include_router(_auth_mod.builder_auth_router)
 app.include_router(_content_router)
+app.include_router(_site_auth_mod.site_auth_router)
 
 
 # ---------- Social Wall: config + live feed ----------

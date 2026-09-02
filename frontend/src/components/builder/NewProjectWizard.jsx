@@ -9,6 +9,8 @@ import {
   Monitor, Smartphone, Tablet, History,
 } from "lucide-react";
 import STARTER_TEMPLATES from "@/data/starterTemplates.json";
+import { PAGE_LAYOUTS, CATEGORY_ORDER, CATEGORY_META } from "@/lib/pageLayouts";
+import { EXTRA_CATEGORIES } from "@/lib/blocksExtra";
 import { computeSeoChecks, scoreColor } from "@/lib/seoScore";
 import {
   truncateForSerp, truncateDescriptionForSerp,
@@ -23,6 +25,25 @@ const SCHEMA_TYPES = [
 const inputCls =
   "w-full bg-[#15130E] border border-[#332D22] rounded px-2.5 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-indigo-500";
 const labelCls = "block text-[10px] uppercase tracking-wider text-[#948C79] mb-1";
+
+// "New Dashboard" / "New Dashboard/Blog" modes reuse the exported-site
+// dashboard-login widget (owner unlock + real visitor accounts) already
+// defined in blocksExtra.js rather than duplicating its markup here.
+const ZENERO_BLOCKS = (EXTRA_CATEGORIES.find((c) => c.id === "zenero") || {}).blocks || [];
+const DASHBOARD_LOGIN_HTML = (ZENERO_BLOCKS.find((b) => b.id === "dashboard-login") || {}).html || "";
+const LATEST_BLOG_HTML = (ZENERO_BLOCKS.find((b) => b.id === "latest-from-blog") || {}).html || "";
+const DASHBOARD_MODE_LAYOUTS = {
+  dashboard: [{
+    id: "dashboard-login-page", label: "Dashboard",
+    blocks: [DASHBOARD_LOGIN_HTML].filter(Boolean),
+    canvasBg: "#ffffff", fonts: [],
+  }],
+  "dashboard-blog": [{
+    id: "dashboard-blog-page", label: "Dashboard + Blog",
+    blocks: [DASHBOARD_LOGIN_HTML, LATEST_BLOG_HTML].filter(Boolean),
+    canvasBg: "#ffffff", fonts: [],
+  }],
+};
 
 const SEO_FIELDS = [
   { key: "title", label: "SEO title", type: "text", span: 2, testId: "wizard-seo-title" },
@@ -232,7 +253,13 @@ const SearchResultPreview = ({ seo, device }) => {
 export const NewProjectWizard = ({ open, onClose, onCreate }) => {
   const first = STARTER_TEMPLATES[0] || null;
   const [step, setStep] = useState(1);
+  // "template" = Option A (fork one whole starter template). "pages" = Option
+  // B (compose the site from hand-picked Layout pages, no shared template).
+  const [mode, setMode] = useState("template");
   const [tplId, setTplId] = useState(first ? first.id : null);
+  const [layoutIds, setLayoutIds] = useState([]);
+  const [layoutQuery, setLayoutQuery] = useState("");
+  const [layoutCat, setLayoutCat] = useState("all");
   const [name, setName] = useState(first ? first.name : "Untitled");
   const [seo, setSeo] = useState(() => autoSeo(first, first ? first.name : "Untitled"));
   const [previewDevice, setPreviewDevice] = useState("mobile");
@@ -240,7 +267,11 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
   useEffect(() => {
     if (!open) return;
     setStep(1);
+    setMode("template");
     setTplId(first ? first.id : null);
+    setLayoutIds([]);
+    setLayoutQuery("");
+    setLayoutCat("all");
     setName(first ? first.name : "Untitled");
     setSeo(autoSeo(first, first ? first.name : "Untitled"));
     setPreviewDevice("mobile");
@@ -251,6 +282,26 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
     [tplId, first]
   );
 
+  const selectedLayouts = useMemo(() => {
+    if (mode === "dashboard" || mode === "dashboard-blog") return DASHBOARD_MODE_LAYOUTS[mode];
+    return PAGE_LAYOUTS.filter((l) => layoutIds.includes(l.id));
+  }, [layoutIds, mode]);
+
+  const filteredLayouts = useMemo(() => {
+    const query = layoutQuery.trim().toLowerCase();
+    return PAGE_LAYOUTS.filter((l) => {
+      if (layoutCat !== "all" && l.category !== layoutCat) return false;
+      if (!query) return true;
+      return (`${l.label} ${l.category} ${l.description}`).toLowerCase().includes(query);
+    });
+  }, [layoutQuery, layoutCat]);
+
+  const groupedLayouts = useMemo(() => {
+    const map = {};
+    filteredLayouts.forEach((l) => { (map[l.category] = map[l.category] || []).push(l); });
+    return CATEGORY_ORDER.filter((c) => map[c]).map((c) => ({ category: c, items: map[c] }));
+  }, [filteredLayouts]);
+
   const selectTpl = (id) => {
     const t = STARTER_TEMPLATES.find((x) => x.id === id) || first;
     if (!t) return;
@@ -259,9 +310,18 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
     setSeo(autoSeo(t, t.name));
   };
 
+  const toggleLayout = (id) => setLayoutIds((ids) => (
+    ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]
+  ));
+
   const updateSeo = (patch) => setSeo((s) => ({ ...s, ...patch }));
+  const canAdvance = step !== 1 || mode === "template" || selectedLayouts.length > 0;
   const create = () => {
-    onCreate({ tpl, name: (name || (tpl && tpl.name) || "Untitled").trim(), seo });
+    if (mode === "template") {
+      onCreate({ tpl, name: (name || (tpl && tpl.name) || "Untitled").trim(), seo });
+    } else {
+      onCreate({ layouts: selectedLayouts, name: (name || "Untitled").trim(), seo });
+    }
     onClose();
   };
 
@@ -278,7 +338,9 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
           </DialogTitle>
           <DialogDescription className="text-xs text-[#948C79]">
             {step === 1
-              ? "Choose a starter template"
+              ? (mode === "template" ? "Choose a starter template"
+                : mode === "pages" ? "Pick the pages your site needs"
+                : "A login-gated dashboard page, ready to wire up")
               : step === 2
               ? "Name your project & customize SEO metadata"
               : "Review and create your scaffold"}
@@ -288,28 +350,128 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
         <div className="px-4 py-3 max-h-[60vh] overflow-y-auto">
           {/* ── Step 1: Template picker ─────────────────────────── */}
           {step === 1 && (
-            <div className="grid grid-cols-2 gap-2.5" data-testid="wizard-step-1-body">
-              {STARTER_TEMPLATES.map((t) => (
-                <div key={t.id} className="group relative">
-                  <button
-                    onClick={() => selectTpl(t.id)}
-                    data-testid={`wizard-tpl-${t.id}`}
-                    className={`text-left p-2.5 rounded border text-xs transition-colors w-full ${
-                      tplId === t.id
-                        ? "border-indigo-500 bg-indigo-500/10"
-                        : "border-[#332D22] hover:border-[#948C79]"
-                    }`}
-                  >
-                    <div className="font-medium truncate pr-1">{t.name}</div>
-                    <div className="text-[10px] text-[#948C79] truncate">
-                      {t.description}
+            <div data-testid="wizard-step-1-body">
+              <div className="flex flex-wrap gap-1.5 mb-3" data-testid="wizard-mode-toggle">
+                <button
+                  onClick={() => setMode("template")}
+                  data-testid="wizard-mode-template"
+                  className={`flex-1 text-xs px-3 py-1.5 rounded border ${mode === "template" ? "border-indigo-500 bg-indigo-500/10 text-[#F1EDE2]" : "border-[#332D22] text-[#948C79] hover:text-[#F1EDE2]"}`}
+                >
+                  Whole template
+                </button>
+                <button
+                  onClick={() => setMode("pages")}
+                  data-testid="wizard-mode-pages"
+                  className={`flex-1 text-xs px-3 py-1.5 rounded border ${mode === "pages" ? "border-indigo-500 bg-indigo-500/10 text-[#F1EDE2]" : "border-[#332D22] text-[#948C79] hover:text-[#F1EDE2]"}`}
+                >
+                  Pick your own pages
+                </button>
+                <button
+                  onClick={() => setMode("dashboard")}
+                  data-testid="wizard-mode-dashboard"
+                  className={`flex-1 text-xs px-3 py-1.5 rounded border ${mode === "dashboard" ? "border-indigo-500 bg-indigo-500/10 text-[#F1EDE2]" : "border-[#332D22] text-[#948C79] hover:text-[#F1EDE2]"}`}
+                >
+                  New Dashboard
+                </button>
+                <button
+                  onClick={() => setMode("dashboard-blog")}
+                  data-testid="wizard-mode-dashboard-blog"
+                  className={`flex-1 text-xs px-3 py-1.5 rounded border ${mode === "dashboard-blog" ? "border-indigo-500 bg-indigo-500/10 text-[#F1EDE2]" : "border-[#332D22] text-[#948C79] hover:text-[#F1EDE2]"}`}
+                >
+                  New Dashboard/Blog
+                </button>
+              </div>
+
+              {(mode === "dashboard" || mode === "dashboard-blog") ? (
+                <div className="rounded border border-[#332D22] bg-[#15130E] p-4 text-xs" data-testid="wizard-dashboard-info">
+                  <div className="font-medium text-[#F1EDE2] mb-1.5">
+                    {mode === "dashboard" ? "New Dashboard" : "New Dashboard/Blog"}
+                  </div>
+                  <p className="text-[#948C79] leading-relaxed">
+                    Scaffolds a single page with a login-gated dashboard: an owner unlock
+                    form plus real visitor sign-up/login, both wired to your project once
+                    it's saved. Set the owner's dashboard password from the builder's
+                    Zenero panel (or the widget's own first-time setup) after creating
+                    the project.
+                    {mode === "dashboard-blog" && " Also includes the Latest from Blog widget."}
+                  </p>
+                </div>
+              ) : mode === "template" ? (
+                <div className="grid grid-cols-2 gap-2.5">
+                  {STARTER_TEMPLATES.map((t) => (
+                    <div key={t.id} className="group relative">
+                      <button
+                        onClick={() => selectTpl(t.id)}
+                        data-testid={`wizard-tpl-${t.id}`}
+                        className={`text-left p-2.5 rounded border text-xs transition-colors w-full ${
+                          tplId === t.id
+                            ? "border-indigo-500 bg-indigo-500/10"
+                            : "border-[#332D22] hover:border-[#948C79]"
+                        }`}
+                      >
+                        <div className="font-medium truncate pr-1">{t.name}</div>
+                        <div className="text-[10px] text-[#948C79] truncate">
+                          {t.description}
+                        </div>
+                      </button>
+                      <div className="px-2.5 pb-2">
+                        <TemplateVersionBadge template={t} />
+                      </div>
                     </div>
-                  </button>
-                  <div className="px-2.5 pb-2">
-                    <TemplateVersionBadge template={t} />
+                  ))}
+                </div>
+              ) : (
+                <div data-testid="wizard-pages-picker">
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    <input
+                      value={layoutQuery}
+                      onChange={(e) => setLayoutQuery(e.target.value)}
+                      placeholder="Search pages…"
+                      className={inputCls + " mb-1.5"}
+                      data-testid="wizard-pages-search"
+                    />
+                    <div className="flex flex-wrap gap-1">
+                      {["all", ...CATEGORY_ORDER].map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => setLayoutCat(c)}
+                          className={`px-2 py-0.5 rounded-full text-[10px] border ${layoutCat === c ? "bg-indigo-600 border-indigo-500 text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"}`}
+                          data-testid={`wizard-pages-cat-${c}`}
+                        >
+                          {c === "all" ? "All" : c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-[#948C79] mb-1.5">
+                    {selectedLayouts.length} page{selectedLayouts.length === 1 ? "" : "s"} selected
+                  </div>
+                  <div className="space-y-2 max-h-[38vh] overflow-y-auto pr-1">
+                    {groupedLayouts.map((grp) => (
+                      <div key={grp.category}>
+                        <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1 flex items-center gap-1.5">
+                          <span style={{ background: CATEGORY_META[grp.category]?.color || "#6366f1", width: 6, height: 6, borderRadius: 999 }} />
+                          {grp.category}
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {grp.items.map((l) => (
+                            <button
+                              key={l.id}
+                              onClick={() => toggleLayout(l.id)}
+                              data-testid={`wizard-page-${l.id}`}
+                              className={`text-left px-2.5 py-2 rounded-md text-xs border ${layoutIds.includes(l.id) ? "bg-indigo-600/20 border-indigo-500/60 text-[#F1EDE2]" : "bg-[#15130E] border-[#332D22] text-[#E4DECE] hover:border-indigo-500/40"}`}
+                            >
+                              <div className="font-medium truncate">{l.label}</div>
+                              <div className="text-[10px] text-[#948C79] truncate">{l.description}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    {groupedLayouts.length === 0 && <div className="text-[11px] text-[#948C79] text-center p-4">No pages match "{layoutQuery}"</div>}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           )}
 
@@ -412,14 +574,25 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
 
                 <SearchResultPreview seo={seo} device={previewDevice} />
 
-                {tpl && (
+                {mode === "template" ? (
+                  tpl && (
+                    <div className="rounded border border-[#332D22] bg-[#15130E] p-3">
+                      <h4 className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1">
+                        Template
+                      </h4>
+                      <p className="text-xs text-[#E4DECE]">{tpl.name}</p>
+                      <p className="text-[10px] text-[#948C79] mt-0.5">
+                        v{tpl.version || "1.0.0"} · {tpl.aesthetic}
+                      </p>
+                    </div>
+                  )
+                ) : (
                   <div className="rounded border border-[#332D22] bg-[#15130E] p-3">
                     <h4 className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1">
-                      Template
+                      Pages ({selectedLayouts.length})
                     </h4>
-                    <p className="text-xs text-[#E4DECE]">{tpl.name}</p>
-                    <p className="text-[10px] text-[#948C79] mt-0.5">
-                      v{tpl.version || "1.0.0"} · {tpl.aesthetic}
+                    <p className="text-xs text-[#E4DECE]">
+                      {selectedLayouts.map((l) => l.label).join(", ") || "None selected yet"}
                     </p>
                   </div>
                 )}
@@ -431,15 +604,26 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
           {step === 3 && (
             <div className="space-y-3 text-xs" data-testid="wizard-step-3-body">
               <div className="rounded border border-[#332D22] bg-[#15130E] p-3 space-y-1">
-                <div className="text-[#948C79]">Template</div>
-                <div className="text-[#F1EDE2] font-medium">
-                  {tpl && tpl.name}
-                  {tpl && tpl.version && (
-                    <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0 h-4 border-[#332D22] text-[#948C79]">
-                      v{tpl.version}
-                    </Badge>
-                  )}
-                </div>
+                {mode === "template" ? (
+                  <>
+                    <div className="text-[#948C79]">Template</div>
+                    <div className="text-[#F1EDE2] font-medium">
+                      {tpl && tpl.name}
+                      {tpl && tpl.version && (
+                        <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0 h-4 border-[#332D22] text-[#948C79]">
+                          v{tpl.version}
+                        </Badge>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-[#948C79]">Pages ({selectedLayouts.length})</div>
+                    <div className="text-[#F1EDE2] font-medium" data-testid="wizard-review-pages">
+                      {selectedLayouts.map((l) => l.label).join(", ")}
+                    </div>
+                  </>
+                )}
                 <div className="text-[#948C79] mt-2">Project name</div>
                 <div className="text-[#F1EDE2] font-medium" data-testid="wizard-review-name">
                   {name || (tpl && tpl.name)}
@@ -469,8 +653,9 @@ export const NewProjectWizard = ({ open, onClose, onCreate }) => {
           </button>
           {step < 3 ? (
             <button
-              onClick={() => setStep(step + 1)}
-              className="flex items-center gap-1 text-xs px-4 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2] font-medium"
+              onClick={() => canAdvance && setStep(step + 1)}
+              disabled={!canAdvance}
+              className={`flex items-center gap-1 text-xs px-4 py-1.5 rounded font-medium ${canAdvance ? "bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2]" : "bg-[#332D22] text-[#948C79] cursor-not-allowed"}`}
               data-testid="wizard-next"
             >
               Next <ChevronRight size={13} />

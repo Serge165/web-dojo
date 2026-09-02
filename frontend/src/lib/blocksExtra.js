@@ -2275,6 +2275,222 @@ COFFEE</div>
           })();</script>
         </section>`,
       },
+      {
+        id: "dashboard-login",
+        label: "Dashboard Login",
+        html: `<section class="block block-zenero-dashboard-login" data-forge-widget="dashboard-login" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">Members area</div>
+          <h2 class="utility-4 block-heading">Dashboard Login</h2>
+          <div data-forge-dashboard-root class="utility-5">
+          <div class="utility-6">
+          <button data-forge-dashboard-tab="customer" class="utility-7">Customer Login</button>
+          <button data-forge-dashboard-tab="owner" class="utility-8">Owner Login</button>
+          </div>
+          <div data-forge-dashboard-panel class="utility-9"></div>
+          </div>
+          </div>
+          <script type="application/json" data-forge-dashboard-copy>{"ownerWelcome":"Welcome back — here's what's live on your site.","emptyText":"Nothing published yet. Add content from the Builder's Zenero dashboard.","sections":{"updates":"Updates","blog":"From the Blog","bento":"Highlights","timeline":"Timeline","social":"Social Wall"}}</script>
+          <script data-forge-js="dashboard-login.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-dashboard-login-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var panel=root.querySelector("[data-forge-dashboard-panel]");
+          var tabs=root.querySelectorAll("[data-forge-dashboard-tab]");
+          if(!panel) return;
+          var ownerKey="wd_owner_token_"+pid;
+          var custKey="wd_customer_token_"+pid;
+          var mode="customer";
+          var fieldStyle="display:block;width:100%;padding:10px 12px;margin-bottom:10px;border:1px solid var(--fc-border, #e2e8f0);border-radius:6px;font-size:14px;box-sizing:border-box;";
+          var btnStyle="width:100%;padding:10px;border:0;border-radius:6px;background:var(--fc-primary, #0f172a);color:#fff;font-size:14px;font-weight:600;cursor:pointer;";
+          function setMode(m){
+          mode=m;
+          for(var i=0;i<tabs.length;i++){
+          var t=tabs[i];
+          t.style.opacity=t.getAttribute("data-forge-dashboard-tab")===m?"1":"0.55";
+          }
+          render();
+          }
+          function loggedInView(message){
+          panel.innerHTML='<div style="font-size:14px;color:var(--fc-text, #0f172a);">'+esc(message)+'</div>'
+          +'<button data-forge-logout style="margin-top:12px;background:none;border:1px solid var(--fc-border, #e2e8f0);border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;">Log out</button>';
+          panel.querySelector("[data-forge-logout]").addEventListener("click",function(){
+          try{localStorage.removeItem(mode==="owner"?ownerKey:custKey);}catch(e){}
+          render();
+          });
+          }
+          function ownerForm(){
+          panel.innerHTML='<form data-forge-owner-form>'
+          +'<input data-forge-owner-pw type="password" placeholder="Dashboard password" required style="'+fieldStyle+'">'
+          +'<button type="submit" style="'+btnStyle+'">Unlock owner dashboard</button>'
+          +'<div data-forge-owner-error style="margin-top:8px;font-size:13px;color:#dc2626;"></div>'
+          +'</form>';
+          var form=panel.querySelector("[data-forge-owner-form]");
+          form.addEventListener("submit",function(ev){
+          ev.preventDefault();
+          var pw=panel.querySelector("[data-forge-owner-pw]").value;
+          var err=panel.querySelector("[data-forge-owner-error]");
+          err.textContent="";
+          fetch("/api/dashboard/"+pid+"/unlock",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})})
+          .then(function(r){
+          if(r.ok) return r.json().then(function(data){return{ok:true,data:data};});
+          return r.json().catch(function(){return{};}).then(function(body){return{ok:false,status:r.status,detail:(body&&body.detail)||""};});
+          })
+          .then(function(res){
+          if(res.ok){
+          try{localStorage.setItem(ownerKey,res.data.token);}catch(e){}
+          render();
+          return;
+          }
+          if(res.status===401 && /not set/i.test(res.detail||"")){
+          ownerSetupForm(pw);
+          return;
+          }
+          err.textContent="Incorrect password.";
+          })
+          .catch(function(){err.textContent="Incorrect password.";});
+          });
+          }
+          function ownerSetupForm(prefillPw){
+          panel.innerHTML='<div style="font-size:13px;color:var(--fc-muted, #64748b);margin-bottom:10px;">No dashboard password has been set yet. Choose one now — this becomes the owner password for this site.</div>'
+          +'<form data-forge-owner-setup-form>'
+          +'<input data-forge-owner-setup-pw type="password" placeholder="Choose a dashboard password (6+ characters)" required minlength="6" value="'+esc(prefillPw||"")+'" style="'+fieldStyle+'">'
+          +'<button type="submit" style="'+btnStyle+'">Set owner password</button>'
+          +'<button type="button" data-forge-owner-setup-cancel style="width:100%;margin-top:8px;padding:8px;border:0;background:none;font-size:13px;color:var(--fc-muted, #64748b);cursor:pointer;text-decoration:underline;">Back</button>'
+          +'<div data-forge-owner-setup-error style="margin-top:8px;font-size:13px;color:#dc2626;"></div>'
+          +'</form>';
+          panel.querySelector("[data-forge-owner-setup-cancel]").addEventListener("click",function(){ownerForm();});
+          var form=panel.querySelector("[data-forge-owner-setup-form]");
+          form.addEventListener("submit",function(ev){
+          ev.preventDefault();
+          var pw=panel.querySelector("[data-forge-owner-setup-pw]").value;
+          var err=panel.querySelector("[data-forge-owner-setup-error]");
+          err.textContent="";
+          fetch("/api/dashboard/"+pid+"/set-password",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})})
+          .then(function(r){if(!r.ok)throw new Error();return fetch("/api/dashboard/"+pid+"/unlock",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});})
+          .then(function(r){if(!r.ok)throw new Error();return r.json();})
+          .then(function(data){
+          try{localStorage.setItem(ownerKey,data.token);}catch(e){}
+          render();
+          })
+          .catch(function(){err.textContent="Could not set the password — try again.";});
+          });
+          }
+          function getCopy(){
+          var el=root.querySelector("[data-forge-dashboard-copy]");
+          var defaults={ownerWelcome:"Welcome back — here's what's live on your site.",emptyText:"Nothing published yet.",sections:{updates:"Updates",blog:"From the Blog",bento:"Highlights",timeline:"Timeline",social:"Social Wall"}};
+          try{
+          var parsed=JSON.parse(el?el.textContent:"{}");
+          return {
+          ownerWelcome: parsed.ownerWelcome || defaults.ownerWelcome,
+          emptyText: parsed.emptyText || defaults.emptyText,
+          sections: Object.assign({}, defaults.sections, parsed.sections || {}),
+          };
+          }catch(e){return defaults;}
+          }
+          function ownerDashboard(){
+          var copy=getCopy();
+          panel.innerHTML='<div style="font-size:14px;color:var(--fc-text, #0f172a);margin-bottom:14px;">'+esc(copy.ownerWelcome)+'</div>'
+          +'<div data-forge-dash-sections></div>'
+          +'<button data-forge-logout style="margin-top:16px;background:none;border:1px solid var(--fc-border, #e2e8f0);border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;">Log out</button>';
+          panel.querySelector("[data-forge-logout]").addEventListener("click",function(){
+          try{localStorage.removeItem(ownerKey);}catch(e){}
+          render();
+          });
+          var container=panel.querySelector("[data-forge-dash-sections]");
+          function card(title,meta,body){
+          return '<div style="border:1px solid var(--fc-border, #e2e8f0);border-radius:8px;padding:10px 12px;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--fc-text, #0f172a);">'+esc(title)+'</div>'
+          +(meta?'<div style="font-size:11px;color:var(--fc-muted, #94a3b8);margin:2px 0 4px;">'+esc(meta)+'</div>':'')
+          +(body?'<div style="font-size:12px;color:var(--fc-text, #334155);">'+esc(body)+'</div>':'')
+          +'</div>';
+          }
+          function section(key,items,renderItem){
+          if(!items||!items.length) return;
+          var box=document.createElement("div");
+          box.style.cssText="margin-bottom:18px;";
+          box.innerHTML='<h4 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--fc-muted, #64748b);margin:0 0 8px;">'+esc(copy.sections[key])+'</h4>'
+          +'<div style="display:flex;flex-direction:column;gap:8px;">'+items.map(renderItem).join("")+'</div>';
+          container.appendChild(box);
+          }
+          var getJson=function(path,fallback){
+          return fetch("/api/"+pid+path).then(function(r){return r.ok?r.json():fallback;}).catch(function(){return fallback;});
+          };
+          Promise.all([
+          getJson("/updates",{updates:[]}),
+          getJson("/blog_posts",{blog_posts:[]}),
+          getJson("/bento_tiles",{bento_tiles:[]}),
+          getJson("/timeline_entries",{timeline_entries:[]}),
+          getJson("/social-feed",{posts:[]}),
+          ]).then(function(res){
+          section("updates",(res[0].updates||[]).slice(0,5),function(u){return card(u.title,u.timestamp,u.content);});
+          section("blog",(res[1].blog_posts||[]).slice(0,5),function(b){return card(b.title,"",b.excerpt);});
+          section("bento",(res[2].bento_tiles||[]).slice(0,6),function(b){return card((b.icon?b.icon+" ":"")+b.title,"",b.description);});
+          section("timeline",(res[3].timeline_entries||[]).slice(0,5),function(t){return card(t.title,t.date,t.description);});
+          section("social",(res[4].posts||[]).slice(0,5),function(p){return card(p.author||p.platform,p.timestamp,p.content);});
+          if(!container.children.length){
+          container.innerHTML='<p style="font-size:13px;color:var(--fc-muted, #94a3b8);">'+esc(copy.emptyText)+'</p>';
+          }
+          });
+          }
+          function customerForm(signup){
+          panel.innerHTML='<form data-forge-customer-form>'
+          +'<input data-forge-customer-email type="email" placeholder="Email" required style="'+fieldStyle+'">'
+          +'<input data-forge-customer-pw type="password" placeholder="Password" required style="'+fieldStyle+'">'
+          +'<button type="submit" style="'+btnStyle+'">'+(signup?"Sign up":"Log in")+'</button>'
+          +'<button type="button" data-forge-customer-toggle style="width:100%;margin-top:8px;padding:8px;border:0;background:none;font-size:13px;color:var(--fc-muted, #64748b);cursor:pointer;text-decoration:underline;">'+(signup?"Already have an account? Log in":"Need an account? Sign up")+'</button>'
+          +'<div data-forge-customer-error style="margin-top:8px;font-size:13px;color:#dc2626;"></div>'
+          +'</form>';
+          var form=panel.querySelector("[data-forge-customer-form]");
+          panel.querySelector("[data-forge-customer-toggle]").addEventListener("click",function(){customerForm(!signup);});
+          form.addEventListener("submit",function(ev){
+          ev.preventDefault();
+          var email=panel.querySelector("[data-forge-customer-email]").value;
+          var pw=panel.querySelector("[data-forge-customer-pw]").value;
+          var err=panel.querySelector("[data-forge-customer-error]");
+          err.textContent="";
+          fetch("/api/"+pid+"/site-auth/"+(signup?"signup":"login"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email,password:pw})})
+          .then(function(r){if(!r.ok)throw new Error();return r.json();})
+          .then(function(data){
+          try{localStorage.setItem(custKey,data.token);}catch(e){}
+          render();
+          })
+          .catch(function(){err.textContent=signup?"Could not sign up — check your details.":"Incorrect email or password.";});
+          });
+          }
+          function render(){
+          if(mode==="owner"){
+          var ot=null;try{ot=localStorage.getItem(ownerKey);}catch(e){}
+          if(ot) ownerDashboard(); else ownerForm();
+          } else {
+          var ct=null;try{ct=localStorage.getItem(custKey);}catch(e){}
+          if(ct){
+          fetch("/api/"+pid+"/site-auth/me",{headers:{Authorization:"Bearer "+ct}})
+          .then(function(r){if(!r.ok)throw new Error();return r.json();})
+          .then(function(data){loggedInView("Welcome back, "+data.email+".");})
+          .catch(function(){try{localStorage.removeItem(custKey);}catch(e){}customerForm(false);});
+          } else {
+          customerForm(false);
+          }
+          }
+          }
+          for(var i=0;i<tabs.length;i++){
+          (function(t){
+          t.addEventListener("click",function(){setMode(t.getAttribute("data-forge-dashboard-tab"));});
+          })(tabs[i]);
+          }
+          setMode("customer");
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='dashboard-login']:not([data-forge-dashboard-login-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
+      },
     ],
   }, {
     id: "oxygene",
