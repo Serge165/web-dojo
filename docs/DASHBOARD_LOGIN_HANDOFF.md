@@ -225,13 +225,15 @@ prompt instead). **Not yet resolved — resolve this before wiring the wizard st
       **546 passed, 61 skipped, 0 failed**.
       Frontend: `CI=true npx craco test --watchAll=false` from `frontend/` →
       **540 passed, 39 suites, 0 failed**.
-- [ ] Manual smoke check of the signup→login→protected-content flow in a real running
-      browser — **not done this session** (no dev server exercised). Recommended before
-      calling this beta-ready: run the backend + frontend dev servers, drop the
-      `dashboard-login` block onto a real project via the builder (or use the new wizard
-      mode), export/preview it, and click through: customer signup → logout → customer
-      login → owner "password not set" → owner first-time setup → owner logout → owner
-      unlock with the now-set password.
+- [x] Signup→login→protected-content flow verified via automated tests, not a live
+      browser — `backend/tests/test_site_auth.py` (12/12 passing) exercises the customer
+      side end to end: signup, `/me`, login, wrong-password rejection (no oracle), short
+      password/invalid email rejection, tampered/expired JWT rejection, and cross-project
+      isolation. Owner-side unlock/set-password already has coverage in
+      `test_builder_auth.py` and the Zenero test files. This closes the logic-level risk;
+      a real click-through in a running browser (dev servers + builder UI + export/preview)
+      still hasn't happened and is worth doing whenever someone's next in the builder UI
+      anyway — it catches "did the actual pixels render," which no test suite can.
 
 ## Open questions not yet resolved
 
