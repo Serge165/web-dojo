@@ -34,6 +34,7 @@ import { TemplateApplyModal } from "@/components/builder/TemplateApplyModal";
 import { applyTemplate } from "@/lib/projectManager";
 import { FormBuilderModal } from "@/components/builder/FormBuilderModal";
 import { AddPageModal } from "@/components/builder/AddPageModal";
+import { parseNavbarTree, setNavbarItems, pageHref, unifyNavAcrossPages, unifyFooterAcrossPages, propagateSharedBlockEdit } from "@/components/builder/BlockEditMenu";
 import { NewProjectModal } from "@/components/builder/NewProjectModal";
 import { NewProjectWizard } from "@/components/builder/NewProjectWizard";
 import { PaymentButtonModal } from "@/components/builder/PaymentButtonModal";
@@ -303,15 +304,30 @@ export default function Builder() {
     setCustomJs("");
     setSelectedId(null);
   };
+  // Appends a nav link to `newPage` inside any nav block found in `html`,
+  // unless that page is already linked. No-op when `html` has no <nav>.
+  const patchNavHtml = (html, newPage) => {
+    if (!html || !/<nav\b/i.test(html)) return html;
+    const tree = parseNavbarTree(html);
+    const href = pageHref(newPage);
+    const already = tree.items.some((n) => n.href === href || (n.children || []).some((c) => c.href === href));
+    if (already) return html;
+    return setNavbarItems(html, [...tree.items, { label: newPage.name, href, children: [] }]);
+  };
   const addPageFromLayout = (layout) => {
     const id = uid();
     const els = (layout.blocks || []).map((html) => ({ id: uid(), html: html.replaceAll('project_id: ""', `project_id: "${projectId || ""}"`) }));
     const bg = layout.canvasBg || "#ffffff";
     const fnts = layout.fonts || [];
+    const slug = layout.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const newPage = { id, name: layout.label, slug, type: "page", status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: bg, fonts: fnts, custom_js: "" };
     setPages((ps) => {
       const persisted = ps.map((p) => p.id === activePageId ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs } : p);
-      return [...persisted, { id, name: layout.label, slug: layout.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), type: "page", status: "draft", seo: {}, elements: els, head_html: "", canvas_bg: bg, fonts: fnts, custom_js: "" }];
+      return unifyFooterAcrossPages(unifyNavAcrossPages([...persisted, newPage]));
     });
+    if (template.use_template && template.header_html) {
+      setTemplate((t) => ({ ...t, header_html: patchNavHtml(t.header_html, newPage) }));
+    }
     setActivePageId(id);
     setElements(els);
     setHeadHtml("");
@@ -452,7 +468,10 @@ export default function Builder() {
   };
   const toggleVisible = (id) => setElements((els) => els.map((e) => e.id === id ? { ...e, hidden: !e.hidden } : e));
   const setZIndex = (id, z) => setElements((els) => els.map((e) => e.id === id ? { ...e, zIndex: z } : e));
-  const editHtml = (id, html) => setElements((els) => els.map((e) => e.id === id ? { ...e, html } : e));
+  const editHtml = (id, html) => {
+    setElements((els) => els.map((e) => e.id === id ? { ...e, html } : e));
+    setPages((ps) => propagateSharedBlockEdit(ps, activePageId, html));
+  };
   const replaceSelectedHtml = (html) => { if (!selected) return; editHtml(selected.id, html); };
 
   const editingFile = useMemo(() => files.find((f) => f.id === editingFileId) || null, [files, editingFileId]);

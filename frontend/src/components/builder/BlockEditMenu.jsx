@@ -716,6 +716,52 @@ export const setNavItems = (html, items) =>
 
 export const pageHref = (page) => `${(page.slug || "index").replace(/\.html$/, "")}.html`;
 
+// Multi-page projects composed from several donor layouts (the wizard's
+// "pick your own pages" mode, and repeated "Add Page from Layout") each pull
+// in that layout's own <nav> block untouched — so every donor's own demo
+// items survive forever and every page shows a different nav from its
+// siblings. This picks the first page's nav as the canonical markup, points
+// its items at every real page, and stamps that same nav onto every page
+// that has one — replacing, not merging with, whatever items were there.
+export const unifyNavAcrossPages = (pages) => {
+  const source = pages.find((p) => (p.elements || []).some((el) => /<nav\b/i.test(el.html || "")));
+  if (!source) return pages;
+  const navEl = source.elements.find((el) => /<nav\b/i.test(el.html || ""));
+  const items = pages.map((p) => ({ label: p.name, href: pageHref(p), children: [] }));
+  const canonicalHtml = setNavbarItems(navEl.html, items);
+  return pages.map((p) => ({
+    ...p,
+    elements: (p.elements || []).map((el) => (/<nav\b/i.test(el.html || "") ? { ...el, html: canonicalHtml } : el)),
+  }));
+};
+
+// Same donor-layout problem as unifyNavAcrossPages, but footers carry no
+// per-page links to re-derive — the first page's footer markup is simply
+// stamped onto every other page's footer block verbatim.
+export const unifyFooterAcrossPages = (pages) => {
+  const source = pages.find((p) => (p.elements || []).some((el) => /<footer\b/i.test(el.html || "")));
+  if (!source) return pages;
+  const footerEl = source.elements.find((el) => /<footer\b/i.test(el.html || ""));
+  return pages.map((p) => ({
+    ...p,
+    elements: (p.elements || []).map((el) => (/<footer\b/i.test(el.html || "") ? { ...el, html: footerEl.html } : el)),
+  }));
+};
+
+// unifyNavAcrossPages/unifyFooterAcrossPages only run at page-creation time.
+// Without this, editing the navbar or footer on one page (NavbarEditor, or
+// any block editor touching a footer block) re-diverges the pages the
+// moment the user saves the edit, since each page keeps its own element
+// copy. Called from Builder.jsx's editHtml on every block edit.
+export const propagateSharedBlockEdit = (pages, activePageId, html) => {
+  const tagRe = /<nav\b/i.test(html) ? /<nav\b/i : /<footer\b/i.test(html) ? /<footer\b/i : null;
+  if (!tagRe) return pages;
+  return pages.map((p) => (p.id === activePageId ? p : {
+    ...p,
+    elements: (p.elements || []).map((el) => (tagRe.test(el.html || "") ? { ...el, html } : el)),
+  }));
+};
+
 const PagePickerModal = ({ pages, onPick, onClose }) => {
   const [external, setExternal] = useState("");
   return (

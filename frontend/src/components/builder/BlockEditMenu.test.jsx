@@ -15,6 +15,9 @@ import {
   setNavbarVariant,
   NAVBAR_VARIANTS,
   pageHref,
+  unifyNavAcrossPages,
+  unifyFooterAcrossPages,
+  propagateSharedBlockEdit,
   parseTimelineEntries,
   setTimelineEntries,
   parseBentoItems,
@@ -300,6 +303,72 @@ describe("navbar tree + dropdowns (Phase 2A/2B)", () => {
     const out = setNavbarItems(flatNavHtml, items);
     const parsed = parseNavbarTree(out).items;
     expect(parsed).toEqual(items);
+  });
+
+  // Wizard-composed multi-page projects (Builder's "pick your own pages"
+  // mode, and single "Add Page from Layout") each pull a <nav> block from a
+  // different donor layout. Nothing ever reconciled those navs, so every
+  // donor's own demo items (e.g. "Rooms", "Dining", "Book now") survived
+  // forever and each page showed a different nav from its siblings.
+  test("unifyNavAcrossPages replaces every page's nav items with one real, shared item list", () => {
+    const demoNav = `<nav><div><a href="#">Home</a><a href="#">Rooms</a><a href="#">Dining</a><a href="#">Book now</a></div></nav>`;
+    const otherDonorNav = `<nav><div><a href="#">Menu</a><a href="#">Reservations</a></div></nav>`;
+    const pages = [
+      { name: "Home", slug: "index", elements: [{ id: "1", html: demoNav }] },
+      { name: "About · Modern", slug: "about-modern", elements: [{ id: "2", html: otherDonorNav }] },
+      { name: "Contact", slug: "contact", elements: [{ id: "3", html: "<p>no nav here</p>" }] },
+    ];
+
+    const out = unifyNavAcrossPages(pages);
+
+    const items = [
+      { label: "Home", href: "index.html", children: [] },
+      { label: "About · Modern", href: "about-modern.html", children: [] },
+      { label: "Contact", href: "contact.html", children: [] },
+    ];
+    // Every page that had a nav now shows the identical, real item list —
+    // demo items (Rooms/Dining/Book now/Menu/Reservations) are gone.
+    expect(parseNavbarTree(out[0].elements[0].html).items).toEqual(items);
+    expect(parseNavbarTree(out[1].elements[0].html).items).toEqual(items);
+    expect(out[0].elements[0].html).toBe(out[1].elements[0].html);
+    // Pages without a nav block are left alone.
+    expect(out[2].elements[0].html).toBe("<p>no nav here</p>");
+  });
+
+  test("unifyFooterAcrossPages stamps the first page's footer onto every other page", () => {
+    const footerA = `<footer><p>&copy; Donor A</p></footer>`;
+    const footerB = `<footer><p>&copy; Donor B</p></footer>`;
+    const pages = [
+      { name: "Home", slug: "index", elements: [{ id: "1", html: footerA }] },
+      { name: "About", slug: "about", elements: [{ id: "2", html: footerB }] },
+      { name: "Contact", slug: "contact", elements: [{ id: "3", html: "<p>no footer here</p>" }] },
+    ];
+
+    const out = unifyFooterAcrossPages(pages);
+
+    expect(out[0].elements[0].html).toBe(footerA);
+    expect(out[1].elements[0].html).toBe(footerA);
+    expect(out[2].elements[0].html).toBe("<p>no footer here</p>");
+  });
+
+  // Creation-time unification (above) only runs once. Without this, editing
+  // the navbar or footer on one page re-diverges the pages the moment the
+  // edit is saved, since each page keeps its own element copy.
+  test("propagateSharedBlockEdit mirrors a nav/footer edit onto every other page's matching block, leaving other pages' non-matching content untouched", () => {
+    const pages = [
+      { id: "home", elements: [{ id: "1", html: "<nav>old</nav>" }] },
+      { id: "about", elements: [{ id: "2", html: "<nav>old</nav>" }] },
+      { id: "contact", elements: [{ id: "3", html: "<p>unrelated</p>" }] },
+    ];
+
+    const out = propagateSharedBlockEdit(pages, "home", "<nav>new</nav>");
+
+    expect(out[0].elements[0].html).toBe("<nav>old</nav>"); // active page updates via setElements, not here
+    expect(out[1].elements[0].html).toBe("<nav>new</nav>");
+    expect(out[2].elements[0].html).toBe("<p>unrelated</p>");
+
+    // Non-nav/footer edits are a no-op.
+    expect(propagateSharedBlockEdit(pages, "home", "<p>plain edit</p>")).toBe(pages);
   });
 });
 
