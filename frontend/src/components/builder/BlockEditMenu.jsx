@@ -167,8 +167,6 @@ export const detectBlockShape = (html) => {
 // background) and video-hero (has both video AND heading/CTA text, both
 // must be editable at once).
 
-const HERO_SHAPE_RE = /<section\b[^>]*>[\s\S]*<h1\b/i; // same heuristic detectBlockKind used for "hero"
-
 export const detectHeadingRegion = (html) => {
   if (!html) return false;
   if (/^\s*<nav\b/i.test(html) || /\bfooter\b/i.test((html.match(/^\s*<[a-z]+[^>]*class="([^"]*)"/i) || [])[1] || "")) return false;
@@ -184,7 +182,11 @@ export const detectMediaRegion = (html) => {
   // threshold) as a media region.
   if (imgCount >= 1 && imgCount <= 2) return "image";
   if (/background(?:-image)?:\s*[^;"]*(?:url\(|var\(--block-bg-image)/i.test(html)) return "bg";
-  if (imgCount === 0 && HERO_SHAPE_RE.test(html)) return "bg-empty"; // parallax-hero-fullbleed case
+  // Any heading-bearing block with no image/video/bg found is offered a
+  // background control — covers both Web Dojo's own <section><h1> heroes
+  // (parallax-hero-fullbleed) and donor markup that builds the same shape
+  // out of a plain <div> wrapper, which the old <section>-only check missed.
+  if (imgCount === 0 && detectHeadingRegion(html)) return "bg-empty";
   return null;
 };
 
@@ -204,6 +206,11 @@ export const detectContentRegion = (html) => {
   if (imgCount >= 3 && (/\bcontainer block\b/.test(html) || /(display:\s*grid|column-count)/i.test(html))) return "gallery";
   if (/\bcontainer block\b/.test(html) && /<h3[\s>]/i.test(html) && (html.match(/<h3\b/gi) || []).length >= 3) return "bento";
   if (/display:\s*grid/i.test(html) && /<h3[\s>]/i.test(html)) return "bento";
+  // Same h3-count threshold detectBlockKind's "card" fallback used —
+  // independent of the CSS display mechanism, so donor card-grids built
+  // with flexbox/framework grid classes (Bootstrap row/col-*, etc.) still
+  // land on the dedicated bento editor instead of falling to generic-only.
+  if ((html.match(/<h3\b/gi) || []).length >= 2) return "bento";
   return null;
 };
 

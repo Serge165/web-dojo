@@ -598,6 +598,19 @@ describe("detectRegions", () => {
     expect(regions.content).toBe("navbar");
   });
 
+  it("donor hero built from a plain <div> (no <section>, no Web Dojo classes) still gets a background media region", () => {
+    const html = '<div class="hero-wrap bg-dark py-5"><div class="container"><h1 class="display-4 text-white">Welcome to Acme</h1><p class="lead text-white-50">We build things fast.</p><a href="#" class="btn btn-primary btn-lg">Get Started</a></div></div>';
+    const regions = detectRegions(html);
+    expect(regions.heading).toBe(true);
+    expect(regions.media).toBe("bg-empty");
+  });
+
+  it("donor Bootstrap card-grid (row/col-*, no display:grid, no container block marker) still lands on the bento region", () => {
+    const html = '<section class="features py-5"><div class="container"><div class="row"><div class="col-md-4"><h3>Fast</h3><p>Blazing speed.</p></div><div class="col-md-4"><h3>Secure</h3><p>Locked down.</p></div><div class="col-md-4"><h3>Simple</h3><p>Easy to use.</p></div></div></div></section>';
+    const regions = detectRegions(html);
+    expect(regions.content).toBe("bento");
+  });
+
   it("card grid with 3+ images each in its own card wrapper, no migration marker, is NOT classified as gallery", () => {
     const html = '<section class="block"><h2 class="block block-heading">Our Team</h2><div class="block"><div class="block"><img src="a.jpg"/><p class="block">Alice</p></div><div class="block"><img src="b.jpg"/><p class="block">Bob</p></div><div class="block"><img src="c.jpg"/><p class="block">Carol</p></div></div></section>';
     const regions = detectRegions(html);
