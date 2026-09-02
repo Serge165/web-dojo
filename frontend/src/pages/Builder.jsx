@@ -1571,7 +1571,7 @@ export default function Builder() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="new-project-confirm-cancel">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => window.location.reload()} className="bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="new-project-confirm-discard">Discard & start new</AlertDialogAction>
+            <AlertDialogAction onClick={() => { setNewProjectConfirmOpen(false); setNewProjectOpen(true); }} className="bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="new-project-confirm-discard">Discard & start new</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
