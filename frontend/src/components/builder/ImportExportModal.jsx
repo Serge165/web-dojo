@@ -1,10 +1,12 @@
 import React, { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { FileCode2, FileArchive, Braces, Copy, Link2, Upload, Download } from "lucide-react";
+import { FileCode2, FileArchive, Braces, Copy, Link2, Upload, Download, Boxes } from "lucide-react";
 import { downloadStandalone, downloadZip, downloadProjectJson, buildStandaloneHtml } from "@/lib/exportHtml";
 import { scanHtml } from "@/lib/importHtml";
 import { warnAboutSeoThenRun } from "@/lib/seoExportGuard";
+import { ExporterModal } from "./ExporterModal";
+import { featureEnabled } from "@/lib/featureFlags";
 
 const Row = ({ icon: Icon, title, desc, action, label, testId, tone = "default" }) => (
   <button onClick={action} className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors ${tone === "accent" ? "border-indigo-500/40 bg-indigo-500/5 hover:bg-indigo-500/10" : "border-[#332D22] bg-[#1C1A15] hover:border-indigo-500/40"}`} data-testid={testId}>
@@ -27,6 +29,7 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
   const [pasteHtml, setPasteHtml] = useState("");
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showExporters, setShowExporters] = useState(false);
   const fileRef = useRef(null);
   const jsonRef = useRef(null);
 
@@ -88,6 +91,9 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
             <>
               <Row icon={FileCode2} title="Standalone HTML" desc="One .html file with inline CSS" label=".html" action={() => warnAboutSeoThenRun(project, () => downloadStandalone(project))} testId="exp-standalone" />
               <Row icon={FileArchive} title="Clean HTML + CSS" desc="Separate index.html + globals.css" label=".zip" action={() => warnAboutSeoThenRun(project, () => downloadZip(project))} testId="exp-zip" />
+              {featureEnabled("frameworkExports") && (
+                <Row icon={Boxes} title="Framework project" desc="Runnable Astro or Next.js scaffold of this site" label=".zip" action={() => setShowExporters(true)} testId="exp-framework" />
+              )}
               <Row icon={Braces} title="Web Dojo project" desc="Full editable project — re-import anytime" label=".json" action={() => downloadProjectJson(project)} testId="exp-json" />
               <Row icon={Copy} title="Copy full HTML" desc="Copy the page markup to your clipboard" action={copyHtml} testId="exp-copy" />
               <div className="text-[10px] uppercase tracking-wider text-[#948C79] pt-3 pb-1">Send to a design / hosting tool</div>
@@ -124,6 +130,7 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
           )}
         </div>
       </DialogContent>
+      <ExporterModal open={showExporters} onClose={() => setShowExporters(false)} project={project} />
     </Dialog>
   );
 };

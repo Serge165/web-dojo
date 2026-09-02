@@ -44,6 +44,9 @@ import { ImportExportModal } from "@/components/builder/ImportExportModal";
 import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
 import { EcommerceDashboardModal } from "@/components/builder/EcommerceDashboardModal";
 import { ZeneroDashboardModal } from "@/components/builder/ZeneroDashboardModal";
+import { featureEnabled } from "@/lib/featureFlags";
+import { saveSnapshot, getSnapshot, enqueue, flushQueue } from "@/lib/localdb";
+
 import { buildStandaloneHtml, downloadStandalone, downloadZip } from "@/lib/exportHtml";
 import { scaffoldProjectFiles } from "@/lib/projectScaffold";
 import { STANDARD_LAYOUT_SECTIONS } from "@/lib/standardLayout";
@@ -56,7 +59,7 @@ import { upsertRootVar, removeRootVarsForElement } from "@/lib/rootVars";
 import { patchFirstStyle, removeStyleProp } from "@/lib/patchRootStyle";
 import { upsertResponsiveOverridesCss } from "@/lib/responsiveOverrides";
 import { upsertAnalyticsHead } from "@/lib/analyticsSnippets";
-import { buildAppliedAnimation, buildOnScrollBootstrapScript, ONSCROLL_BOOTSTRAP_MARKER } from "@/lib/animations";
+import { buildAppliedAnimation, buildOnScrollBootstrapScript, buildClickBootstrapScript, ONSCROLL_BOOTSTRAP_MARKER, CLICK_BOOTSTRAP_MARKER } from "@/lib/animations";
 import { buildFontsStyleBlock, fontFamilyFromFilename } from "@/lib/fonts";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -230,6 +233,21 @@ export default function Builder() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saveWatch]);
   useEffect(() => () => clearTimeout(autosaveTimerRef.current), []);
+
+  // Phase 9E: flush queued offline saves as soon as connectivity returns —
+  // independent of the autosave loop, which only runs on user activity.
+  useEffect(() => {
+    if (!featureEnabled("localFirst")) return;
+    const onOnline = async () => {
+      const sent = await flushQueue(async (entry) => {
+        if (entry.method === "post") await axios.post(entry.url, entry.payload);
+        else await axios.put(entry.url, entry.payload);
+      });
+      if (sent > 0) toast.success(`Back online — synced ${sent} offline save${sent === 1 ? "" : "s"}`);
+    };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, []);
 
   const undo = () => {
     const p = pastRef.current;
@@ -576,13 +594,47 @@ export default function Builder() {
   const ensureOnScrollBootstrap = (h) => (h || "").includes(ONSCROLL_BOOTSTRAP_MARKER)
     ? h
     : `${h ? h + "\n" : ""}${buildOnScrollBootstrapScript()}`;
+  // Phase 9D: click-triggered animations share the same one-script dedupe
+  // pattern as on-scroll — the .wd-click-play class is removed, a reflow is
+  // forced, then the class re-added so every click replays the animation.
+  const ensureClickBootstrap = (h) => (h || "").includes(CLICK_BOOTSTRAP_MARKER)
+    ? h
+    : `${h ? h + "\n" : ""}${buildClickBootstrapScript()}`;
 
   // Applies one already-built animation result onto one element's html —
   // shared by both applyAnimation (single-select) and applyAnimationToIds
-  // (multi-select), so the on-scroll/regular branch is only written once.
-  const applyAnimationToHtml = (html, elementId, applied) => applied.onScroll
-    ? addAttrToFirstTag(addAttrToFirstTag(removeStyleProp(html, "animation"), "data-forge-el-id", elementId), "data-wd-onscroll", "1")
-    : patchFirstStyle(removeAttrFromFirstTag(html, "data-wd-onscroll"), { animation: applied.shorthand });
+  // (multi-select), so the per-trigger branch is only written once.
+  // Phase 9D trigger branches (each defensively strips the other triggers'
+  // attributes so re-applying with a different trigger never leaves stale
+  // hooks behind):
+  //   scroll → data-wd-onscroll (played by the on-scroll bootstrap)
+  //   click  → data-wd-onclick  (replayed by the click bootstrap)
+  //   hover  → pure CSS :hover rule keyed on data-forge-el-id (no JS)
+  //   load   → inline `animation:` style (the original default behaviour)
+  const applyAnimationToHtml = (html, elementId, applied) => {
+    if (applied.onScroll) {
+      return addAttrToFirstTag(
+        addAttrToFirstTag(removeStyleProp(removeAttrFromFirstTag(html, "data-wd-onclick"), "animation"), "data-forge-el-id", elementId),
+        "data-wd-onscroll", "1"
+      );
+    }
+    if (applied.click) {
+      return addAttrToFirstTag(
+        addAttrToFirstTag(removeStyleProp(removeAttrFromFirstTag(html, "data-wd-onscroll"), "animation"), "data-forge-el-id", elementId),
+        "data-wd-onclick", "1"
+      );
+    }
+    if (applied.trigger === "hover") {
+      return addAttrToFirstTag(
+        removeStyleProp(removeAttrFromFirstTag(removeAttrFromFirstTag(html, "data-wd-onscroll"), "data-wd-onclick"), "animation"),
+        "data-forge-el-id", elementId
+      );
+    }
+    return patchFirstStyle(
+      removeAttrFromFirstTag(removeAttrFromFirstTag(html, "data-wd-onscroll"), "data-wd-onclick"),
+      { animation: applied.shorthand }
+    );
+  };
 
   const applyAnimation = (config) => {
     if (!selected) return;
@@ -592,7 +644,9 @@ export default function Builder() {
       : e));
     setHeadHtml((h) => {
       const next = upsertAnimStyleBlock(h, selected.id, applied.styleBlock);
-      return applied.onScroll ? ensureOnScrollBootstrap(next) : next;
+      if (applied.onScroll) return ensureOnScrollBootstrap(next);
+      if (applied.click) return ensureClickBootstrap(next);
+      return next;
     });
   };
 
@@ -605,14 +659,16 @@ export default function Builder() {
     if (!ids || !ids.length || !clip) return;
     let head = headHtml;
     let usedOnScroll = false;
+    let usedClick = false;
     setElements((els) => els.map((e) => {
       if (!ids.includes(e.id)) return e;
       const applied = buildAppliedAnimation({ elementId: e.id, ...clip });
       head = upsertAnimStyleBlock(head, e.id, applied.styleBlock);
       usedOnScroll = usedOnScroll || applied.onScroll;
+      usedClick = usedClick || !!applied.click;
       return { ...e, html: applyAnimationToHtml(e.html, e.id, applied) };
     }));
-    setHeadHtml(usedOnScroll ? ensureOnScrollBootstrap(head) : head);
+    setHeadHtml(usedOnScroll ? ensureOnScrollBootstrap(head) : usedClick ? ensureClickBootstrap(head) : head);
   }, [headHtml]);
 
   const applyTheme = useCallback(({ headHtml: themeHead, canvasBg: themeBg, googleFont, allPages }) => {
@@ -803,18 +859,45 @@ export default function Builder() {
       pages: mergedPages, active_page_id: activePageId, template, analytics,
     };
     try {
-      if (projectId) {
-        await axios.put(`${API}/projects/${projectId}`, savePayload);
-      } else {
-        const res = await axios.post(`${API}/projects`, savePayload);
-        setProjectId(res.data.id);
+      // Phase 9E local-first: mirror the exact payload into IndexedDB BEFORE
+      // the network call — a crash mid-save (or an offline save) still leaves
+      // the work durably on disk, and the offline queue below replays it.
+      if (featureEnabled("localFirst")) saveSnapshot(savePayload);
+      let online = false;
+      try {
+        if (projectId) {
+          await axios.put(`${API}/projects/${projectId}`, savePayload);
+        } else {
+          const res = await axios.post(`${API}/projects`, savePayload);
+          setProjectId(res.data.id);
+        }
+        online = true;
+      } catch (netErr) {
+        // Phase 9E: offline queue — failed saves of existing projects are
+        // recorded and replayed automatically on the next successful save
+        // (which the autosave loop keeps trying every ~2.5s of activity, and
+        // the reconnect listener flushes immediately). Creates can't be
+        // queued (the id comes from the server), but their payload is still
+        // in the IndexedDB snapshot above.
+        if (featureEnabled("localFirst") && projectId) {
+          enqueue({ method: "put", url: `${API}/projects/${projectId}`, payload: savePayload });
+        }
+        throw netErr;
       }
       setSaveStatus("saved");
       if (!silent) toast.success("Project saved");
     } catch (e) {
       setSaveStatus("error");
-      if (!silent) toast.error(`Save failed${e.response ? ` (${e.response.status})` : ""}`);
+      if (!silent) toast.error(`Save failed${e.response ? ` (${e.response.status})` : " — kept locally, will sync when back online"}`);
       console.error("Save error:", e?.response?.data || e?.message || e);
+    }
+    // Phase 9E: on any successful save, drain the offline queue oldest-first.
+    if (featureEnabled("localFirst")) {
+      const sent = await flushQueue(async (entry) => {
+        if (entry.method === "post") await axios.post(entry.url, entry.payload);
+        else await axios.put(entry.url, entry.payload);
+      });
+      if (sent > 0 && !silent) toast.success(`Synced ${sent} offline save${sent === 1 ? "" : "s"}`);
     }
   };
   const save = () => { clearTimeout(autosaveTimerRef.current); persist(false); };
@@ -857,9 +940,21 @@ export default function Builder() {
   };
 
   const loadProject = async (id) => {
+    // Phase 9E: try the network first; on failure fall back to the last
+    // IndexedDB snapshot so the project stays editable fully offline.
+    let p = null;
     try {
       const res = await axios.get(`${API}/projects/${id}`);
-      const p = res.data;
+      p = res.data;
+    } catch { /* offline fallback below */ }
+    if (!p && featureEnabled("localFirst")) {
+      try {
+        const snap = await getSnapshot(id);
+        if (snap) { p = snap; toast.info("Offline — loaded local copy"); }
+      } catch { p = null; }
+    }
+    if (!p) { toast.error("Failed to load"); return; }
+    try {
       setProjectId(p.id); setProjectName(p.name);
       // Hydrate pages (with legacy fallback).
       let nextPages;

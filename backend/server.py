@@ -1467,6 +1467,9 @@ class PublishRequest(BaseModel):
     include_zip: bool = False
     html_filename: str = "index.html"
     css_filename: str = "globals.css"
+    framework: Optional[str] = None  # None | astro | nextjs (Phase 9C)
+    expand_collections: bool = True   # expand {%collection.field%} tokens (Phase 9B)
+
 
 
 def _tag_name_at(s, offset):
@@ -2105,6 +2108,28 @@ async def publish_project(project_id: str, payload: PublishRequest):
     # so a traversal value there must never reach the filesystem.
     _validate_publish_filename(payload.html_filename or "index.html")
     files = _build_multi_page_bundle(doc, css_name)
+
+    # Phase 9B: expand {%collection.field%} / {%collection.count%} tokens
+    # against the project's generic collections before the bundle ships.
+    # Expansion never blocks a publish — failures degrade to empty strings.
+    if payload.expand_collections:
+        try:
+            from models.collections import expand_collection_tokens
+            for fname in list(files.keys()):
+                if fname.endswith(".html"):
+                    files[fname] = await expand_collection_tokens(project_id, files[fname])
+        except Exception:
+            pass
+
+    # Phase 9C: optional framework transform (astro | nextjs) — rewrites the
+    # bundle into a ready-to-build framework project (public/ assets,
+    # package.json, config) so FTP/SFTP can publish beyond plain static HTML.
+    framework = (payload.framework or "").lower()
+    if framework:
+        if framework not in ("astro", "nextjs"):
+            raise HTTPException(status_code=400, detail="framework must be one of: astro, nextjs")
+        from models.framework_export import apply_astro_transform, apply_nextjs_transform
+        files = (apply_astro_transform if framework == "astro" else apply_nextjs_transform)(files, doc.get("name"))
 
     if payload.include_zip:
         try:
@@ -3033,6 +3058,13 @@ app.include_router(funnel_router)
 app.include_router(_auth_mod.builder_auth_router)
 app.include_router(_content_router)
 app.include_router(_site_auth_mod.site_auth_router)
+
+# Phase 9B: generic user-defined collections (extends the Zenero stack).
+from models.collections import collections_router
+import models.collections as _collections_mod
+_collections_mod.db = _LiveDbProxy()
+_collections_mod._require_dashboard_token = _require_dashboard_token
+app.include_router(collections_router)
 
 
 # ---------- Social Wall: config + live feed ----------

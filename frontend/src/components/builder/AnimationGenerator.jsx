@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ANIMATION_PRESETS, ANIMATION_CATEGORIES, ANIMATION_LIBRARIES, GSAP_PRESETS, FRAMER_PRESETS, buildKeyframes, buildAnimationShorthand, buildLibraryAnimation } from "@/lib/animations";
+import { ANIMATION_PRESETS, ANIMATION_CATEGORIES, ANIMATION_LIBRARIES, ANIMATION_TRIGGERS, GSAP_PRESETS, FRAMER_PRESETS, buildKeyframes, buildAnimationShorthand, buildLibraryAnimation } from "@/lib/animations";
 import { setAnimClip } from "@/lib/animClipboard";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,12 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
   const [delay, setDelay] = useState(0);
   const [timing, setTiming] = useState("cubic-bezier(0.22, 1, 0.36, 1)");
   const [iteration, setIteration] = useState("1");
+  // Phase 9D: how the animation plays. Empty string = "follow the preset's
+  // natural trigger" (on-scroll presets play on scroll, everything else on
+  // page load) — so picking a preset keeps its default until the user picks
+  // an explicit trigger.
+  const [trigger, setTrigger] = useState("");
+  const effTrigger = trigger || (preset.category === "on-scroll" ? "scroll" : "load");
 
   const name = `forge_${preset.id.replace(/-/g, "_")}`;
   const keyframes = buildKeyframes(name, preset.frames);
@@ -25,13 +31,13 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
   // Keeps the Layers panel's multi-select "Apply to N" batch bar in sync
   // with whatever's currently dialed in here — see lib/animClipboard.js.
   useEffect(() => {
-    setAnimClip({ preset, duration, delay, timing, iteration });
-  }, [preset, duration, delay, timing, iteration]);
+    setAnimClip({ preset, duration, delay, timing, iteration, trigger: effTrigger });
+  }, [preset, duration, delay, timing, iteration, effTrigger]);
 
   const apply = () => {
     if (!selected) { toast.error("Select an element first"); return; }
-    onApplyAnimation({ preset, duration, delay, timing, iteration });
-    toast.success(`Applied ${preset.label}`);
+    onApplyAnimation({ preset, duration, delay, timing, iteration, trigger: effTrigger });
+    toast.success(`Applied ${preset.label} (${effTrigger})`);
   };
 
   return (
@@ -68,6 +74,19 @@ export const AnimationGenerator = ({ selected, onApplyAnimation }) => {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Trigger</label>
+          <div className="grid grid-cols-2 gap-1.5">
+            {ANIMATION_TRIGGERS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTrigger(t.id)}
+                className={`text-[11px] py-1.5 rounded border ${effTrigger === t.id ? "border-[#C9A227] bg-[#2A2416] text-[#F1EDE2]" : "border-[#332D22] bg-[#242019] text-[#F1EDE2] hover:bg-[#332D22]"}`}
+                data-testid={`anim-trigger-${t.id}`}
+              >{t.label}</button>
+            ))}
+          </div>
+        </div>
         <div>
           <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Duration ({duration}s)</label>
           <input type="range" min={0.1} max={5} step={0.1} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="w-full" data-testid="anim-duration" />

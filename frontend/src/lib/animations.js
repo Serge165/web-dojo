@@ -391,20 +391,90 @@ document.addEventListener('DOMContentLoaded', function () {
 // Builds everything needed to apply one animation config to one element —
 // the single source of truth Builder.jsx's applyAnimation (single-select)
 // and applyAnimationToIds (multi-select batch apply) both call, so the
-// on-scroll/regular branch only has to be written once. Each call gets a
+// per-trigger branch only has to be written once. Each call gets a
 // fresh unique keyframes name so applying the same preset to many
 // elements (or re-applying to one) never collides.
-export const buildAppliedAnimation = ({ elementId, preset, duration, delay, timing, iteration }) => {
+//
+// Phase 9D: `trigger` selects how the animation plays —
+//   "load"   → inline `animation:` style (plays on page load — the original
+//              behaviour, still the default)
+//   "scroll" → .wd-inview class played by the shared IntersectionObserver
+//              bootstrap (buildOnScrollCss + data-wd-onscroll attr)
+//   "hover"  → pure CSS `:hover` rule — no JS at all (replays every hover)
+//   "click"  → .wd-click-play class added by the shared click bootstrap
+//              (buildClickBootstrapScript + data-wd-onclick attr), which
+//              removes/reflows/re-adds the class so every click replays it
+export const buildAppliedAnimation = ({ elementId, preset, duration, delay, timing, iteration, trigger }) => {
   const uniqueName = `forge_${preset.id.replace(/-/g, "_")}_${Math.random().toString(36).slice(2, 8)}`;
-  if (preset.category === "on-scroll") {
+  const mode = trigger || (preset.category === "on-scroll" ? "scroll" : "load");
+  if (mode === "scroll") {
     return {
+      trigger: "scroll",
       onScroll: true,
       styleBlock: buildOnScrollCss({ name: uniqueName, elementId, frames: preset.frames, duration, timing, delay, iteration }),
     };
   }
+  if (mode === "hover") {
+    return {
+      trigger: "hover",
+      onScroll: false,
+      styleBlock: buildHoverCss({ name: uniqueName, elementId, frames: preset.frames, duration, timing, delay, iteration }),
+    };
+  }
+  if (mode === "click") {
+    return {
+      trigger: "click",
+      onScroll: false,
+      click: true,
+      styleBlock: buildClickCss({ name: uniqueName, elementId, frames: preset.frames, duration, timing, delay, iteration }),
+    };
+  }
   return {
+    trigger: "load",
     onScroll: false,
     styleBlock: buildKeyframes(uniqueName, preset.frames),
     shorthand: buildAnimationShorthand({ name: uniqueName, duration, timing, delay, iteration }),
   };
 };
+
+// ---------- Phase 9D: hover + click triggers ----------
+
+// Trigger options for AnimationGenerator.jsx — display order = play order
+// of invasiveness (load → scroll → hover → click).
+export const ANIMATION_TRIGGERS = [
+  { id: "load", label: "Page load" },
+  { id: "scroll", label: "On scroll" },
+  { id: "hover", label: "On hover" },
+  { id: "click", label: "On click" },
+];
+
+// Pure-CSS hover trigger: no bootstrap script, no attribute beyond the
+// data-forge-el-id the caller stamps anyway. The animation shorthand sits
+// on the :hover state so it replays on every hover-in.
+export const buildHoverCss = ({ name, elementId, frames, duration, timing, delay, iteration }) =>
+  `${buildKeyframes(name, frames)}
+[data-forge-el-id="${elementId}"]:hover { animation: ${buildAnimationShorthand({ name, duration, timing, delay, iteration })}; }`;
+
+// Click trigger: the animation lives on a .wd-click-play class (scoped to
+// the element id like buildOnScrollCss does) and the shared bootstrap below
+// toggles that class per click.
+export const buildClickCss = ({ name, elementId, frames, duration, timing, delay, iteration }) =>
+  `${buildKeyframes(name, frames)}
+.wd-click-play[data-forge-el-id="${elementId}"] { animation: ${buildAnimationShorthand({ name, duration, timing, delay, iteration })}; }`;
+
+// One shared, content-identical click-replay script — same dedupe-marker
+// pattern as the on-scroll bootstrap (callers check CLICK_BOOTSTRAP_MARKER
+// before appending, never once per element). Removing the class, forcing a
+// reflow via void offsetWidth, then re-adding it restarts the CSS animation
+// on every click.
+export const CLICK_BOOTSTRAP_MARKER = "data-forge-click-script";
+export const buildClickBootstrapScript = () => `<script ${CLICK_BOOTSTRAP_MARKER}="1">
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  var el = t && t.closest ? t.closest('[data-wd-onclick]') : null;
+  if (!el) return;
+  el.classList.remove('wd-click-play');
+  void el.offsetWidth;
+  el.classList.add('wd-click-play');
+});
+</script>`;

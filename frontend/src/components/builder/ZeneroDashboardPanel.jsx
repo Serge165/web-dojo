@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Plus, Trash2, Pencil, X, Save, Upload, Eye, GripVertical, Share2 } from "lucide-react";
+import { Plus, Trash2, Pencil, X, Save, Upload, Eye, GripVertical, Share2, Database } from "lucide-react";
 import { SocialConnectModal } from "@/components/builder/SocialConnectModal";
 
 const API = process.env.REACT_APP_BACKEND_URL || "";
@@ -20,6 +20,7 @@ const TABS = [
   { id: "roster", label: "Roster" },
   { id: "fixtures", label: "Fixtures" },
   { id: "org-stats", label: "Org Stats" },
+  { id: "collections", label: "Collections" },
   { id: "social", label: "Social" },
 ];
 
@@ -99,6 +100,20 @@ export default function ZeneroDashboardPanel({ projectId }) {
   // of prompting for a second password just to reach the same connect form.
   const [socialOpen, setSocialOpen] = useState(false);
 
+  // Generic collections (Phase 9B) — user-defined schemas + items.
+  const [collections, setCollections] = useState([]);
+  const [activeColl, setActiveColl] = useState(null); // selected CollectionDef
+  const [collItems, setCollItems] = useState([]);
+  const [newColName, setNewColName] = useState("");
+  const [newColLabel, setNewColLabel] = useState("");
+  const [newFieldKey, setNewFieldKey] = useState("");
+  const [newFieldLabel, setNewFieldLabel] = useState("");
+  const [newFieldType, setNewFieldType] = useState("text");
+  const [newItemData, setNewItemData] = useState({});
+  const [newColFields, setNewColFields] = useState([]);
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [collTokenHint, setCollTokenHint] = useState("");
+
   const unlock = async () => {
     setError("");
     setLoading(true);
@@ -125,7 +140,7 @@ export default function ZeneroDashboardPanel({ projectId }) {
   const loadAll = async (tok) => {
     const headers = { "X-Dashboard-Token": tok };
     try {
-      const [u, g, b, p, t, bt, rp, fx, os] = await Promise.all([
+      const [u, g, b, p, t, bt, rp, fx, os, cols] = await Promise.all([
         fetch(`${API}/api/${projectId}/updates`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/gallery_items`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/blog_posts`, { headers }).then((r) => r.json()),
@@ -135,6 +150,7 @@ export default function ZeneroDashboardPanel({ projectId }) {
         fetch(`${API}/api/${projectId}/roster_players`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/fixtures`, { headers }).then((r) => r.json()),
         fetch(`${API}/api/${projectId}/org_stats`, { headers }).then((r) => r.json()),
+        fetch(`${API}/api/${projectId}/collections`, { headers }).then((r) => r.json()),
       ]);
       setUpdates(u.updates || []);
       setGalleryItems(g.gallery_items || []);
@@ -145,9 +161,84 @@ export default function ZeneroDashboardPanel({ projectId }) {
       setRosterPlayers(rp.roster_players || []);
       setFixtures(fx.fixtures || []);
       setOrgStats(os.org_stats || []);
+      setCollections(cols.collections || []);
     } catch {
       setError("Couldn't load content. Please try again.");
     }
+  };
+
+  // ---------- Generic collections (Phase 9B) ----------
+  const selectCollection = async (def) => {
+    setActiveColl(def);
+    setCollItems([]);
+    setNewItemData({});
+    setEditingItemId(null);
+    try {
+      const res = await fetch(`${API}/api/${projectId}/collections/${def.id}/items`, { headers: { "X-Dashboard-Token": token } });
+      const body = await res.json();
+      setCollItems(body.items || []);
+      const fieldKeys = (def.fields || []).map((f) => f.key).join(", ");
+      setCollTokenHint(fieldKeys ? `{%${def.name}.field%} where field is one of: ${fieldKeys}` : `{%${def.name}.count%}`);
+    } catch {
+      setCollItems([]);
+    }
+  };
+
+  const createCollection = async () => {
+    if (!newColName.trim()) return;
+    try {
+      const res = await api("/collections", {
+        method: "POST",
+        body: { name: newColName.trim(), label: newColLabel, fields: newColFields },
+      });
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        setError(b.detail || "Couldn't create collection");
+        return;
+      }
+      const body = await res.json();
+      setNewColName(""); setNewColLabel(""); setNewColFields([]);
+      await loadAll(token);
+      await selectCollection(body);
+    } catch {
+      setError("Couldn't create collection");
+    }
+  };
+
+  const deleteCollection = async (def) => {
+    if (!window.confirm(`Delete collection "${def.name}" and all its items?`)) return;
+    await api(`/collections/${def.id}`, { method: "DELETE" });
+    setActiveColl(null); setCollItems([]);
+    await loadAll(token);
+  };
+
+  const saveItem = async () => {
+    if (!activeColl) return;
+    // Keep only values that belong to the schema and are non-empty.
+    const clean = {};
+    (activeColl.fields || []).forEach((f) => {
+      const v = newItemData[f.key];
+      if (v !== undefined && v !== "") clean[f.key] = v;
+    });
+    const res = await api(
+      editingItemId ? `/collections/${activeColl.id}/items/${editingItemId}` : `/collections/${activeColl.id}/items`,
+      { method: editingItemId ? "PUT" : "POST", body: { data: clean } }
+    );
+    if (!res.ok) { const b = await res.json().catch(() => ({})); setError(b.detail || "Couldn't save item"); return; }
+    setNewItemData({}); setEditingItemId(null);
+    await selectCollection(activeColl);
+  };
+
+  const editItem = (it) => {
+    setNewItemData(it.data || {});
+    setEditingItemId(it.id);
+  };
+
+  const deleteItem = async (itemId) => {
+    if (!activeColl) return;
+    await api(`/collections/${activeColl.id}/items/${itemId}`, { method: "DELETE" });
+    if (editingItemId === itemId) { setEditingItemId(null); setNewItemData({}); }
+    await selectCollection(activeColl);
   };
 
   const api = (path, options = {}) => {
@@ -887,6 +978,109 @@ export default function ZeneroDashboardPanel({ projectId }) {
             ))}
             {orgStats.length === 0 && <p className="text-xs text-[#948C79]">No org stats yet.</p>}
           </div>
+        </div>
+      )}
+
+      {/* ---------- Collections Tab (Phase 9B) ---------- */}
+      {tab === "collections" && (
+        <div className="space-y-4" data-testid="zenero-collections-tab">
+          <div className="space-y-2 border border-[#332D22] rounded p-3">
+            <div className="text-xs font-medium text-[#F1EDE2] flex items-center gap-1.5">
+              <Database size={14} className="text-[#C9A227]" /> New collection
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={labelCls}>Name (slug)</label>
+                <input value={newColName} onChange={(e) => setNewColName(e.target.value)} className={inputCls} placeholder="menu_items" data-testid="col-name" />
+              </div>
+              <div>
+                <label className={labelCls}>Label</label>
+                <input value={newColLabel} onChange={(e) => setNewColLabel(e.target.value)} className={inputCls} placeholder="Menu items" data-testid="col-label" />
+              </div>
+            </div>
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] block">Fields</div>
+            {newColFields.map((f, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-[#E4DECE]">
+                <span className="bg-[#242019] border border-[#332D22] rounded px-2 py-1">{f.key}</span>
+                <span className="text-[#948C79]">{f.type}</span>
+                <button onClick={() => setNewColFields(newColFields.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300">✕</button>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <input value={newFieldKey} onChange={(e) => setNewFieldKey(e.target.value)} className={inputCls} placeholder="field_key" data-testid="col-field-key" />
+              <select value={newFieldType} onChange={(e) => setNewFieldType(e.target.value)} className={inputCls} data-testid="col-field-type">
+                {["text", "textarea", "number", "image", "url", "date", "boolean"].map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <button
+                onClick={() => { if (!newFieldKey.trim()) return; setNewColFields([...newColFields, { key: newFieldKey.trim(), label: newFieldLabel || newFieldKey.trim(), type: newFieldType }]); setNewFieldKey(""); setNewFieldLabel(""); }}
+                className={btnGhost} data-testid="col-add-field"
+              >Add field</button>
+            </div>
+            <button onClick={createCollection} className={btnPrimary} data-testid="col-create">
+              <Plus size={12} className="inline mr-1" />Create collection
+            </button>
+          </div>
+          <div className="space-y-2">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] block">Your collections</div>
+            {collections.map((def) => (
+              <div key={def.id} className="flex items-center justify-between border border-[#332D22] rounded p-3">
+                <button onClick={() => selectCollection(def)} className="flex items-center gap-2 text-left">
+                  <Database size={14} className="text-[#C9A227]" />
+                  <span className="text-sm text-[#F1EDE2] font-medium">{def.label || def.name}</span>
+                  <span className="text-xs text-[#948C79] font-mono">{"{%"}{def.name}.field{"%}"}</span>
+                </button>
+                <button onClick={() => deleteCollection(def)} className={btnDanger} data-testid={`col-delete-${def.id}`}><Trash2 size={12} /></button>
+              </div>
+            ))}
+            {collections.length === 0 && <p className="text-xs text-[#948C79]">No custom collections yet.</p>}
+          </div>
+
+          {activeColl && (
+            <div className="space-y-2 border border-[#332D22] rounded p-3">
+              <div className="text-xs font-medium text-[#F1EDE2] flex items-center justify-between">
+                <span>{editingItemId ? `Edit item in ${activeColl.label || activeColl.name}` : `Add item to ${activeColl.label || activeColl.name}`}</span>
+                <code className="text-[10px] text-[#948C79]">{collTokenHint}</code>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {(activeColl.fields || []).map((f) => (
+                  <div key={f.key}>
+                    <label className={labelCls}>{f.label || f.key}</label>
+                    {f.type === "textarea" ? (
+                      <textarea value={newItemData[f.key] || ""} onChange={(e) => setNewItemData({ ...newItemData, [f.key]: e.target.value })} className={inputCls} rows={2} />
+                    ) : f.type === "boolean" ? (
+                      <select value={newItemData[f.key] === true ? "true" : newItemData[f.key] === false ? "false" : ""} onChange={(e) => setNewItemData({ ...newItemData, [f.key]: e.target.value === "true" })} className={inputCls}>
+                        <option value="">—</option>
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                      </select>
+                    ) : (
+                      <input type={f.type === "number" ? "number" : "text"} value={newItemData[f.key] || ""} onChange={(e) => setNewItemData({ ...newItemData, [f.key]: e.target.value })} className={inputCls} placeholder={f.type} />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button onClick={saveItem} className={btnPrimary} data-testid="col-add-item">
+                {editingItemId ? <><Save size={12} className="inline mr-1" />Save item</> : <><Plus size={12} className="inline mr-1" />Add item</>}
+              </button>
+
+              <div className="space-y-1.5">
+                {collItems.map((it) => (
+                  <div key={it.id} className="flex items-center justify-between border border-[#332D22] rounded p-2.5">
+                    <div className="text-xs text-[#E4DECE] truncate">
+                      {(activeColl.fields || []).slice(0, 4).map((f) => (
+                        <span key={f.key} className="mr-3"><span className="text-[#948C79]">{f.key}:</span> {(it.data || {})[f.key] !== undefined && (it.data || {})[f.key] !== "" ? String((it.data || {})[f.key]) : "—"}</span>
+                      ))}
+                    </div>
+                    <div className="flex gap-1 flex-none">
+                      <button onClick={() => editItem(it)} className={btnGhost} title="Edit" data-testid={`col-edit-item-${it.id}`}><Pencil size={12} /></button>
+                      <button onClick={() => deleteItem(it.id)} className={btnDanger} data-testid={`col-delete-item-${it.id}`}><Trash2 size={12} /></button>
+                    </div>
+                  </div>
+                ))}
+                {collItems.length === 0 && <p className="text-xs text-[#948C79]">No items yet.</p>}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
