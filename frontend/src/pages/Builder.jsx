@@ -1559,6 +1559,7 @@ export default function Builder() {
         projectId={projectId}
         projectName={projectName}
         onEnsureSaved={ensureSaved}
+        hasDashboardLogin={pages.some((p) => (p.elements || []).some((e) => e.html?.includes('data-forge-widget="dashboard-login"')))}
       />
 
       <TemplateEditor

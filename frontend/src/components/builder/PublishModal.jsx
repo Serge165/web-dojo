@@ -24,7 +24,7 @@ const EMPTY = {
 // Modal that gathers FTP / FTPS / SFTP credentials, supports saving
 // reusable presets (with optional encrypted-password storage), then
 // POSTs to the backend to upload the generated site.
-export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSaved }) => {
+export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSaved, hasDashboardLogin }) => {
   const [form, setForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
@@ -34,11 +34,45 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
   const [presetName, setPresetName] = useState("");
   const [savePassword, setSavePassword] = useState(true);
 
+  // Owner dashboard password gate: the dashboard-login widget's first-use
+  // set-password call is unauthenticated (nothing to steal yet), but once a
+  // project publishes, its id is public and baked into the exported HTML —
+  // so anyone who finds the live site could claim the owner password first.
+  // Prompt the actual owner to claim it before that window opens.
+  const [pwStatus, setPwStatus] = useState(null); // null=unchecked, true=set, false=not set
+  const [ownerPw, setOwnerPw] = useState("");
+  const [settingPw, setSettingPw] = useState(false);
+
   const update = (patch) => setForm((f) => ({ ...f, ...patch }));
 
   useEffect(() => {
-    if (open) refreshPresets();
-  }, [open]);
+    if (!open) return;
+    refreshPresets();
+    setPwStatus(null);
+    if (hasDashboardLogin && projectId) {
+      axios
+        .get(`${API}/dashboard/${projectId}/password-status`)
+        .then((r) => setPwStatus(!!r.data.is_set))
+        .catch(() => setPwStatus(true)); // fail open — don't block publish on a status-check error
+    }
+  }, [open, hasDashboardLogin, projectId]);
+
+  const setOwnerPassword = async () => {
+    if (!ownerPw || ownerPw.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setSettingPw(true);
+    try {
+      await axios.post(`${API}/dashboard/${projectId}/set-password`, { password: ownerPw });
+      setPwStatus(true);
+      toast.success("Owner dashboard password set");
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Could not set the password");
+    } finally {
+      setSettingPw(false);
+    }
+  };
 
   const refreshPresets = async () => {
     try {
@@ -200,6 +234,34 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
             <span className="text-[#A79C87]">Web Dojo encrypts saved passwords with Fernet on the server. Live upload creds are used once and not logged.</span>
           </div>
 
+          {hasDashboardLogin && pwStatus === false && (
+            <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 space-y-2" data-testid="publish-owner-password-gate">
+              <div className="flex items-start gap-2 text-[11px] text-amber-300">
+                <ShieldAlert size={12} className="mt-0.5 shrink-0" />
+                <span>
+                  This project has a dashboard-login widget but no owner password set yet. Once
+                  published, anyone who finds the live site could claim it first — set one now.
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={ownerPw}
+                  onChange={(e) => setOwnerPw(e.target.value)}
+                  className={inputCls}
+                  placeholder="Owner dashboard password (6+ chars)"
+                  data-testid="publish-owner-password-input"
+                />
+                <button
+                  onClick={setOwnerPassword}
+                  disabled={settingPw}
+                  className="text-[11px] px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2] whitespace-nowrap"
+                  data-testid="publish-owner-password-set"
+                >{settingPw ? "Setting…" : "Set password"}</button>
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Protocol</label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -319,9 +381,10 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
             <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="publish-cancel">Close</button>
             <button
               onClick={publish}
-              disabled={busy}
+              disabled={busy || (hasDashboardLogin && pwStatus === false)}
               className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2] flex items-center gap-1.5"
               data-testid="publish-submit"
+              title={hasDashboardLogin && pwStatus === false ? "Set an owner dashboard password first" : undefined}
             >
               {busy ? "Uploading…" : "Publish now"}
             </button>

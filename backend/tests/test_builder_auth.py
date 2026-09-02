@@ -220,3 +220,10 @@ class TestDashboardGateIntegration:
         assert r.status_code == 401
         # Old password still works — nothing was rotated.
         assert client.post(f"/api/dashboard/{pid}/unlock", json={"password": "hunter22"}).status_code == 200
+
+    def test_password_status_reflects_whether_a_password_is_set(self, client):
+        owner = _register(client)
+        pid = _new_project(client, owner)
+        assert client.get(f"/api/dashboard/{pid}/password-status").json() == {"is_set": False}
+        client.post(f"/api/dashboard/{pid}/set-password", json={"password": "first-pass-1"})
+        assert client.get(f"/api/dashboard/{pid}/password-status").json() == {"is_set": True}

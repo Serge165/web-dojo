@@ -675,6 +675,18 @@ async def unlock_dashboard(project_id: str, payload: DashboardPasswordRequest):
     return {"token": _issue_dashboard_token(project_id, stored)}
 
 
+@api_router.get("/dashboard/{project_id}/password-status")
+async def dashboard_password_status(project_id: str):
+    """Whether an owner dashboard password has been set yet. Used by the
+    Publish flow to prompt the real owner to claim the password before the
+    exported site's unauthenticated first-use set-password window becomes
+    publicly reachable by anyone who finds the (public, unsecret) project_id."""
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0, "id": 1, "dashboard_password_hash": 1})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return {"is_set": bool(project.get("dashboard_password_hash"))}
+
+
 async def _require_dashboard_token(project_id: str, x_dashboard_token: Optional[str] = Header(default=None)) -> None:
     project = await db.projects.find_one({"id": project_id}, {"_id": 0, "dashboard_password_hash": 1})
     current_hash = (project or {}).get("dashboard_password_hash") or ""
