@@ -1,4 +1,9 @@
 import { buildCartRuntimeHtml } from "./cart";
+import { EXTRA_CATEGORIES } from "./blocksExtra";
+
+// Pulls a Zenero live-content block's HTML straight from the block library so
+// layouts here stay wired to the same dashboard-managed widget everyone else uses.
+const zeneroBlockHtml = (id) => EXTRA_CATEGORIES.find((c) => c.id === "zenero").blocks.find((b) => b.id === id).html;
 
 // Prebuilt, editable page layouts (WordPress-style) for the "Add page" picker.
 // Every layout is a list of portable HTML blocks (inline styles) so it survives
@@ -818,14 +823,105 @@ export const PAGE_LAYOUTS = [
     simpleList(T.bold, "Day one", [["9:00", "Keynote — The next decade of the web", "Main stage"], ["11:00", "Workshop — Design systems at scale", "Room A"], ["14:00", "Panel — Building in public", "Main stage"], ["16:30", "Fireside chat + Q&A", "Main stage"]]),
     pricing(T.bold), footer(T.bold, "STACK 2026"),
   ]),
+
+  // ---------------- Landing ----------------
+  // Funnel page: no site nav (a landing page is a fork of standard pages —
+  // it doesn't inherit the site's main navigation), funnel-tracking
+  // checkpoints baked in via data attributes, and a live Zenero content
+  // block so the page shows real, dashboard-managed content instead of a
+  // static placeholder.
+  layout("landing-page", "Landing", "Landing Page", "High-conversion funnel page with tracked checkpoints and a live content block.", T.modern, [
+    `<section data-funnel-checkpoint="entry" style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:32px;background:linear-gradient(135deg,#0f172a,#1e293b);font-family:Manrope,system-ui,sans-serif;">
+  <div style="max-width:720px;">
+    <div style="display:inline-block;padding:6px 14px;border:1px solid rgba(255,255,255,.35);border-radius:999px;font-size:12px;color:#fff;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;">Limited time offer</div>
+    <h1 style="font-size:64px;line-height:1.05;letter-spacing:-0.03em;margin:0 0 20px;color:#fff;">Your headline goes here</h1>
+    <p style="font-size:18px;color:rgba(255,255,255,.85);margin:0 0 32px;">A compelling subheadline that drives action and explains the value proposition.</p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button data-funnel-checkpoint="checkpoint_a" style="background:#C9A227;color:#0f172a;border:0;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">Get Started Free</button>
+      <button style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);padding:14px 28px;border-radius:8px;font-size:15px;cursor:pointer;">Learn More</button>
+    </div>
+  </div>
+</section>`,
+    `<section data-funnel-checkpoint="checkpoint_b" style="padding:72px 32px;background:#ffffff;font-family:Manrope,system-ui,sans-serif;">
+  <div style="max-width:1120px;margin:0 auto;">
+    <h2 style="font-size:34px;letter-spacing:-0.02em;margin:0 0 32px;color:#0f172a;text-align:center;">Why choose us</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+      <div style="padding:24px;border:1px solid #e2e8f0;border-radius:12px;">
+        <div style="font-size:28px;margin-bottom:12px;">⚡</div>
+        <div style="font-weight:700;font-size:16px;color:#0f172a;margin-bottom:8px;">Fast</div>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#64748b;">Lightning-fast performance that keeps visitors engaged.</p>
+      </div>
+      <div style="padding:24px;border:1px solid #e2e8f0;border-radius:12px;">
+        <div style="font-size:28px;margin-bottom:12px;">🛡️</div>
+        <div style="font-weight:700;font-size:16px;color:#0f172a;margin-bottom:8px;">Secure</div>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#64748b;">Enterprise-grade security built into every layer.</p>
+      </div>
+      <div style="padding:24px;border:1px solid #e2e8f0;border-radius:12px;">
+        <div style="font-size:28px;margin-bottom:12px;">📈</div>
+        <div style="font-weight:700;font-size:16px;color:#0f172a;margin-bottom:8px;">Scalable</div>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#64748b;">Grows with you from first user to millions.</p>
+      </div>
+    </div>
+  </div>
+</section>`,
+    zeneroBlockHtml("updates-block"),
+    `<section data-funnel-checkpoint="conversion" style="padding:72px 32px;background:#f8fafc;font-family:Manrope,system-ui,sans-serif;">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px;">
+    <h2 style="font-size:24px;margin:0 0 20px;color:#0f172a;text-align:center;">Get started today</h2>
+    <form data-funnel-form>
+      <label style="display:block;font-size:12px;color:#64748b;margin-bottom:6px;">Name</label>
+      <input required style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid #cbd5e1;margin-bottom:14px;font-size:14px;" />
+      <label style="display:block;font-size:12px;color:#64748b;margin-bottom:6px;">Email</label>
+      <input type="email" required style="width:100%;box-sizing:border-box;padding:11px 14px;border-radius:8px;border:1px solid #cbd5e1;margin-bottom:16px;font-size:14px;" />
+      <button type="submit" style="width:100%;padding:13px;background:#C9A227;color:#0f172a;border:0;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">Claim Your Spot</button>
+    </form>
+  </div>
+  <script>(function(){
+    // Funnel tracking: fires events to the backend as visitors progress
+    // through checkpoints. Uses the project_id baked into the page.
+    var pid = window.__WD_PROJECT_ID || "";
+    if (!pid) return;
+    var visitorId = localStorage.getItem("wd_visitor_id") || ("v_" + Math.random().toString(36).slice(2, 10));
+    localStorage.setItem("wd_visitor_id", visitorId);
+    var variant = localStorage.getItem("wd_variant") || "control";
+    function fire(checkpoint) {
+      fetch("/api/funnels/" + pid + "/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkpoint: checkpoint, visitor_id: visitorId, variant: variant })
+      }).catch(function(){});
+    }
+    fire("entry");
+    document.addEventListener("click", function(e) {
+      var el = e.target.closest("[data-funnel-checkpoint]");
+      if (el) fire(el.getAttribute("data-funnel-checkpoint"));
+    });
+    document.addEventListener("submit", function(e) {
+      if (e.target.hasAttribute("data-funnel-form")) fire("conversion");
+    });
+  })();</script>
+</section>`,
+  ]),
+
+  // ---------------- Gallery ----------------
+  // Items are managed live from the Zenero dashboard (ZeneroDashboardPanel's
+  // Gallery tab) via the same dashboard-managed widget used elsewhere — no
+  // rebuild/republish needed when the owner adds or removes photos.
+  layout("gallery-live", "Gallery", "Gallery · Live", "Photo/work gallery whose items are managed from the Zenero dashboard.", T.modern, [
+    nav(T.modern, BRAND),
+    heroCenter(T.modern, { eyebrow: "Gallery", title: "Our work, always up to date", sub: "Add or remove photos from the dashboard — this page updates itself." }),
+    zeneroBlockHtml("gallery-block"),
+    footer(T.modern, BRAND),
+  ]),
 ];
 
-export const CATEGORY_ORDER = ["Home", "About", "Services", "Blog", "Portfolio", "Contact", "FAQ", "Pricing", "Team", "Testimonials", "Coming soon", "404", "Shop", "Industry"];
+export const CATEGORY_ORDER = ["Home", "About", "Services", "Blog", "Portfolio", "Gallery", "Contact", "FAQ", "Pricing", "Team", "Testimonials", "Landing", "Coming soon", "404", "Shop", "Industry"];
 
 export const CATEGORY_META = {
   Home: { color: "#4f46e5" }, About: { color: "#0ea5e9" }, Services: { color: "#0891b2" },
-  Blog: { color: "#b45309" }, Portfolio: { color: "#7c3aed" }, Contact: { color: "#059669" },
+  Blog: { color: "#b45309" }, Portfolio: { color: "#7c3aed" }, Gallery: { color: "#ea580c" },
+  Contact: { color: "#059669" },
   FAQ: { color: "#d97706" }, Pricing: { color: "#e11d48" }, Team: { color: "#2563eb" },
-  Testimonials: { color: "#db2777" }, "Coming soon": { color: "#f43f5e" }, "404": { color: "#64748b" },
+  Testimonials: { color: "#db2777" }, Landing: { color: "#0d9488" }, "Coming soon": { color: "#f43f5e" }, "404": { color: "#64748b" },
   Shop: { color: "#16a34a" }, Industry: { color: "#a855f7" },
 };
