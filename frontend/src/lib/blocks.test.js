@@ -19,4 +19,13 @@ describe("featureBoxesTemplate", () => {
     expect(featureBoxesTemplate(8)).toContain("repeat(4,1fr)");
     expect(featureBoxesTemplate(3)).toContain("repeat(3,1fr)");
   });
+
+  test("overrides the site-wide mobile grid collapse to stay 2 columns", () => {
+    const html = featureBoxesTemplate(8);
+    expect(html).toContain('class="fb-grid"');
+    expect(html).toMatch(/@media \(max-width: 1024px\) \{ \.fb-grid\[style\*="grid-template-columns"\] \{ grid-template-columns: repeat\(2,1fr\) !important; \} \}/);
+    expect(html).toMatch(/@media \(max-width: 767px\) \{ \.fb-grid\[style\*="grid-template-columns"\] \{ grid-template-columns: repeat\(2,1fr\) !important; \} \}/);
+    expect(html).toContain("@container (max-width: 1024px)");
+    expect(html).toContain("@container (max-width: 767px)");
+  });
 });

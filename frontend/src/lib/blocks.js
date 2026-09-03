@@ -627,10 +627,21 @@ export const featureBoxesTemplate = (count = 8) => {
       <p style="margin:0 0 16px;font-size:13px;line-height:1.7;color:var(--fc-muted, #64748b);">${item.desc}</p>
       <button style="background:var(--fc-primary, #0f172a);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Learn more</button>
     </div>`).join("");
+  // The site-wide responsive rule collapses any inline-style grid to a
+  // single column below 1024/767px ([style*="grid-template-columns"] in
+  // responsiveCss.js). Feature boxes should stay a 2-column grid there
+  // instead, so this overrides it with a higher-specificity !important
+  // rule scoped to this block's own class.
   return `<section style="padding:72px 32px;background:var(--fc-bg, #ffffff);font-family:Manrope,system-ui,sans-serif;">
+  <style>
+  @media (max-width: 1024px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
+  @media (max-width: 767px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
+  @container (max-width: 1024px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
+  @container (max-width: 767px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
+  </style>
   <div style="max-width:1200px;margin:0 auto;">
   <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 40px;color:var(--fc-text, #0f172a);text-align:center;">Why choose us</h2>
-  <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:24px;">${cards}
+  <div class="fb-grid" style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:24px;">${cards}
   </div>
   </div>
 </section>`;
