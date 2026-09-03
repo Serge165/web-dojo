@@ -1880,6 +1880,102 @@ COFFEE</div>
         </section>`,
       },
       {
+        id: "gallery-masonry-block",
+        label: "Gallery Masonry",
+        html: `<section class="block block-zenero-gallery-masonry-block" data-forge-widget="gallery" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">Our work</div>
+          <h2 class="utility-4 block-heading">Gallery</h2>
+          <div data-forge-gallery-grid class="utility-5 container gallery-masonry-block">
+          <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" alt="Gallery item" class="utility-6" /><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" alt="Gallery item" class="utility-7" /><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" alt="Gallery item" class="utility-8" /><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" alt="Gallery item" class="utility-9" /><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" alt="Gallery item" class="utility-10" /><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" alt="Gallery item" class="utility-11" />
+          </div>
+          </div>
+          <script data-forge-js="gallery-masonry.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function initWidget(root){
+          root.setAttribute("data-forge-gallery-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var grid=root.querySelector("[data-forge-gallery-grid]");
+          if(!grid) return;
+          fetch("/api/"+pid+"/gallery_items").then(function(r){return r.json();}).then(function(data){
+          var items=data.gallery_items||[];
+          if(!items.length) return;
+          grid.innerHTML=items.map(function(g){
+          return '<img src="'+esc(g.image_url)+'" alt="'+esc(g.alt_text||"")+'" style="width:100%;display:block;margin-bottom:16px;border-radius:10px;" />';
+          }).join("");
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='gallery']:not([data-forge-gallery-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
+      },
+      {
+        id: "gallery-filter-block",
+        label: "Gallery Filterable",
+        html: `<section class="block block-zenero-gallery-filter-block" data-forge-widget="gallery" data-forge-project-id="">
+          <div class="utility-2">
+          <div class="utility-3">Our work</div>
+          <h2 class="utility-4 block-heading">Gallery</h2>
+          <div data-forge-gallery-filters class="utility-5"></div>
+          <div data-forge-gallery-grid class="utility-6 container gallery-filter-block">
+          <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&q=70" alt="Gallery item" class="utility-7" /><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&q=70" alt="Gallery item" class="utility-8" /><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=70" alt="Gallery item" class="utility-9" /><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=70" alt="Gallery item" class="utility-10" /><img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&q=70" alt="Gallery item" class="utility-11" /><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70" alt="Gallery item" class="utility-12" />
+          </div>
+          </div>
+          <script data-forge-js="gallery-filter.js">(function(){
+          function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+          function btnStyle(active){
+          return "padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--fc-border, #e2e8f0);"
+          +(active?"background:var(--fc-primary, #0f172a);color:#fff;":"background:var(--fc-surface, #f8fafc);color:var(--fc-text, #334155);");
+          }
+          function renderGrid(grid,items){
+          grid.innerHTML=items.map(function(g){
+          return '<img src="'+esc(g.image_url)+'" alt="'+esc(g.alt_text||"")+'" style="width:100%;height:200px;object-fit:cover;border-radius:10px;" />';
+          }).join("");
+          }
+          function initWidget(root){
+          root.setAttribute("data-forge-gallery-init","1");
+          var pid=root.getAttribute("data-forge-project-id")||window.__WD_PROJECT_ID||"";
+          if(!pid) return;
+          var grid=root.querySelector("[data-forge-gallery-grid]");
+          var filters=root.querySelector("[data-forge-gallery-filters]");
+          if(!grid||!filters) return;
+          fetch("/api/"+pid+"/gallery_items").then(function(r){return r.json();}).then(function(data){
+          var items=data.gallery_items||[];
+          if(!items.length) return;
+          var categories=[];
+          for(var i=0;i<items.length;i++){
+          var c=items[i].category||"general";
+          if(categories.indexOf(c)===-1) categories.push(c);
+          }
+          filters.innerHTML='<button type="button" data-filter="all" style="'+btnStyle(true)+'">All</button>'+categories.map(function(c){
+          return '<button type="button" data-filter="'+esc(c)+'" style="'+btnStyle(false)+'">'+esc(c)+'</button>';
+          }).join("");
+          renderGrid(grid,items);
+          filters.addEventListener("click",function(e){
+          var btn=e.target.closest("[data-filter]");
+          if(!btn) return;
+          var current=filters.querySelectorAll("[data-filter]");
+          for(var j=0;j<current.length;j++) current[j].setAttribute("style",btnStyle(false));
+          btn.setAttribute("style",btnStyle(true));
+          var f=btn.getAttribute("data-filter");
+          renderGrid(grid, f==="all" ? items : items.filter(function(g){return (g.category||"general")===f;}));
+          });
+          }).catch(function(){});
+          }
+          function init(){
+          var roots=document.querySelectorAll("[data-forge-widget='gallery']:not([data-forge-gallery-init])");
+          for(var i=0;i<roots.length;i++) initWidget(roots[i]);
+          }
+          if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+          })();</script>
+        </section>`,
+      },
+      {
         id: "latest-from-blog",
         label: "Latest from Blog",
         html: `<section class="block block-zenero-latest-from-blog" data-forge-widget="latest-blog" data-forge-project-id="">

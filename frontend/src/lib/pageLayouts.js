@@ -907,10 +907,22 @@ export const PAGE_LAYOUTS = [
   // Items are managed live from the Zenero dashboard (ZeneroDashboardPanel's
   // Gallery tab) via the same dashboard-managed widget used elsewhere — no
   // rebuild/republish needed when the owner adds or removes photos.
-  layout("gallery-live", "Gallery", "Gallery · Live", "Photo/work gallery whose items are managed from the Zenero dashboard.", T.modern, [
+  layout("gallery-live", "Gallery", "Gallery · Grid", "Uniform photo grid whose items are managed from the Zenero dashboard.", T.modern, [
     nav(T.modern, BRAND),
     heroCenter(T.modern, { eyebrow: "Gallery", title: "Our work, always up to date", sub: "Add or remove photos from the dashboard — this page updates itself." }),
     zeneroBlockHtml("gallery-block"),
+    footer(T.modern, BRAND),
+  ]),
+  layout("gallery-masonry", "Gallery", "Gallery · Masonry", "Pinterest-style variable-height gallery, managed from the Zenero dashboard.", T.modern, [
+    nav(T.modern, BRAND),
+    heroCenter(T.modern, { eyebrow: "Gallery", title: "Our work, always up to date", sub: "Add or remove photos from the dashboard — this page updates itself." }),
+    zeneroBlockHtml("gallery-masonry-block"),
+    footer(T.modern, BRAND),
+  ]),
+  layout("gallery-filter", "Gallery", "Gallery · Filterable", "Category-filterable portfolio gallery — filter buttons are built from each photo's category, managed from the Zenero dashboard.", T.modern, [
+    nav(T.modern, BRAND),
+    heroCenter(T.modern, { eyebrow: "Gallery", title: "Our work, always up to date", sub: "Filter by category — categories come straight from the dashboard." }),
+    zeneroBlockHtml("gallery-filter-block"),
     footer(T.modern, BRAND),
   ]),
 ];

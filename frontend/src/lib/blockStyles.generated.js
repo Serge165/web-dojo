@@ -1501,6 +1501,33 @@ export const BLOCK_STYLES_BY_CATEGORY = {
 .block-zenero-gallery-block .utility-10 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
 .block-zenero-gallery-block .utility-11 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
 
+/* gallery-masonry-block */
+.block-zenero-gallery-masonry-block { padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:Manrope,system-ui,sans-serif; }
+.block-zenero-gallery-masonry-block .utility-2 { max-width:1080px;margin:0 auto; }
+.block-zenero-gallery-masonry-block .utility-3 { font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px; }
+.block-zenero-gallery-masonry-block .utility-4 { font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a); }
+.block-zenero-gallery-masonry-block .utility-5 { column-count:3;column-gap:16px; }
+.block-zenero-gallery-masonry-block .utility-6 { width:100%;display:block;margin-bottom:16px;border-radius:10px; }
+.block-zenero-gallery-masonry-block .utility-7 { width:100%;display:block;margin-bottom:16px;border-radius:10px; }
+.block-zenero-gallery-masonry-block .utility-8 { width:100%;display:block;margin-bottom:16px;border-radius:10px; }
+.block-zenero-gallery-masonry-block .utility-9 { width:100%;display:block;margin-bottom:16px;border-radius:10px; }
+.block-zenero-gallery-masonry-block .utility-10 { width:100%;display:block;margin-bottom:16px;border-radius:10px; }
+.block-zenero-gallery-masonry-block .utility-11 { width:100%;display:block;margin-bottom:16px;border-radius:10px; }
+
+/* gallery-filter-block */
+.block-zenero-gallery-filter-block { padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:Manrope,system-ui,sans-serif; }
+.block-zenero-gallery-filter-block .utility-2 { max-width:1080px;margin:0 auto; }
+.block-zenero-gallery-filter-block .utility-3 { font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-muted, #64748b);margin-bottom:6px; }
+.block-zenero-gallery-filter-block .utility-4 { font-size:28px;letter-spacing:-0.02em;margin:0 0 24px;color:var(--fc-text, #0f172a); }
+.block-zenero-gallery-filter-block .utility-5 { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px; }
+.block-zenero-gallery-filter-block .utility-6 { display:grid;grid-template-columns:repeat(3,1fr);gap:12px; }
+.block-zenero-gallery-filter-block .utility-7 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
+.block-zenero-gallery-filter-block .utility-8 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
+.block-zenero-gallery-filter-block .utility-9 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
+.block-zenero-gallery-filter-block .utility-10 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
+.block-zenero-gallery-filter-block .utility-11 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
+.block-zenero-gallery-filter-block .utility-12 { width:100%;height:200px;object-fit:cover;border-radius:10px; }
+
 /* latest-from-blog */
 .block-zenero-latest-from-blog { padding:56px 32px;background:var(--fc-bg, #ffffff);font-family:Manrope,system-ui,sans-serif; }
 .block-zenero-latest-from-blog .utility-2 { max-width:720px;margin:0 auto; }
@@ -1700,6 +1727,10 @@ export const BLOCK_STYLES_MEDIA_CSS = `@media (max-width: 1024px) { .block-compo
 @media (max-width: 767px) { .block-zenero-updates-block .utility-5 { grid-template-columns: 1fr !important; } }
 @media (max-width: 1024px) { .block-zenero-gallery-block .utility-5 { grid-template-columns: 1fr !important; } }
 @media (max-width: 767px) { .block-zenero-gallery-block .utility-5 { grid-template-columns: 1fr !important; } }
+@media (max-width: 1024px) { .block-zenero-gallery-masonry-block .utility-5 { column-count: 2 !important; } }
+@media (max-width: 767px) { .block-zenero-gallery-masonry-block .utility-5 { column-count: 1 !important; } }
+@media (max-width: 1024px) { .block-zenero-gallery-filter-block .utility-6 { grid-template-columns: 1fr !important; } }
+@media (max-width: 767px) { .block-zenero-gallery-filter-block .utility-6 { grid-template-columns: 1fr !important; } }
 @media (max-width: 1024px) { .block-zenero-testimonials-from-comments .utility-5 { grid-template-columns: 1fr !important; } }
 @media (max-width: 767px) { .block-zenero-testimonials-from-comments .utility-5 { grid-template-columns: 1fr !important; } }
 @media (max-width: 1024px) { .block-zenero-bento-block .utility-5 { grid-template-columns: 1fr !important; } }
