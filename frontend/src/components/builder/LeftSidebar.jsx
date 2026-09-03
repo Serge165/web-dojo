@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { CATEGORIES, cardTemplate, WEB_SAFE_FONTS } from "@/lib/blocks";
+import { CATEGORIES, cardTemplate, featureBoxesTemplate, WEB_SAFE_FONTS } from "@/lib/blocks";
 import { ChevronDown, ChevronRight, Type, Plus, Trash2, Search, X, Share2, Radio } from "lucide-react";
 import { FileTree } from "./FileTree";
 import { ComponentThumbnail } from "./ComponentThumbnail";
@@ -56,6 +56,7 @@ export const LeftSidebar = ({
   const [open, setOpen] = useState({ components: true, navbars: true, heroes: true, sections: true });
   const [groupOpen, setGroupOpen] = useState({ navigation: true, hero: true, content: true });
   const [cardCount, setCardCount] = useState(3);
+  const [featureBoxCount, setFeatureBoxCount] = useState(8);
   const [gFont, setGFont] = useState("Inter");
   const [q, setQ] = useState("");
 
@@ -238,6 +239,27 @@ export const LeftSidebar = ({
                 className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] flex items-center justify-center gap-1"
                 data-testid="cards-insert-btn"
               ><Plus size={12} /> Insert card row</button>
+            </div>
+          </div>
+
+          {/* Feature boxes with count */}
+          <div className="border-b border-[#332D22]">
+            <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-[#E4DECE]">Feature Boxes</div>
+            <div className="px-3 pb-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] text-[#948C79]">Count</label>
+                <input
+                  type="number" min={2} max={8} value={featureBoxCount}
+                  onChange={(e) => setFeatureBoxCount(Math.min(8, Math.max(2, Number(e.target.value) || 2)))}
+                  className="w-16 bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+                  data-testid="feature-boxes-count-input"
+                />
+              </div>
+              <button
+                onClick={() => onAddBlock(featureBoxesTemplate(featureBoxCount))}
+                className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] flex items-center justify-center gap-1"
+                data-testid="feature-boxes-insert-btn"
+              ><Plus size={12} /> Insert feature boxes</button>
             </div>
           </div>
 

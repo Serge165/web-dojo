@@ -600,6 +600,42 @@ export const cardTemplate = (count = 3) => {
 </section>`;
 };
 
+// Content pool for featureBoxesTemplate, ordered so slicing to the first N
+// items (2-8) always reads as a coherent "why choose us" set rather than a
+// random subset.
+export const FEATURE_BOX_ITEMS = [
+  { icon: `<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>`, title: "Fast Performance", desc: "Optimized for speed so your pages load instantly." },
+  { icon: `<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/>`, title: "Secure by Default", desc: "Built-in protections keep your data safe." },
+  { icon: `<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>`, title: "24/7 Support", desc: "Real people ready to help whenever you need it." },
+  { icon: `<path d="M18 20V10M12 20V4M6 20v-6"/>`, title: "Actionable Insights", desc: "Track what matters with clear, simple analytics." },
+  { icon: `<path d="M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/>`, title: "Easy Integrations", desc: "Connect the tools you already use in minutes." },
+  { icon: `<path d="M4 6h10M4 12h6M4 18h13M17 4v4M14 10v4M20 16v4"/>`, title: "Full Customization", desc: "Tailor every detail to match your brand." },
+  { icon: `<path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>`, title: "Built for Teams", desc: "Collaborate smoothly with shared workspaces." },
+  { icon: `<path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0112 5a5.5 5.5 0 019.5 7c-2.5 4.5-9.5 9-9.5 9z"/>`, title: "Trusted & Reliable", desc: "Consistent uptime you and your customers can count on." },
+];
+
+// Icon + header + paragraph + button cards, count-configurable (2-8, the
+// common range for this pattern). Columns cap at 4 so 2-3 card grids don't
+// stretch across an under-filled row; 5-8 cards wrap onto a second row.
+export const featureBoxesTemplate = (count = 8) => {
+  const n = Math.max(2, Math.min(8, Number.isFinite(count) ? Math.round(count) : 8));
+  const cols = Math.min(n, 4);
+  const cards = FEATURE_BOX_ITEMS.slice(0, n).map((item) => `
+    <div style="padding:24px;border:1px solid var(--fc-border, #e2e8f0);border-radius:14px;background:var(--fc-surface, #f8fafc);">
+      <div style="width:44px;height:44px;border-radius:10px;background:var(--fc-primary, #0f172a);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg></div>
+      <div style="font-weight:700;font-size:16px;color:var(--fc-text, #0f172a);margin:0 0 8px;">${item.title}</div>
+      <p style="margin:0 0 16px;font-size:13px;line-height:1.7;color:var(--fc-muted, #64748b);">${item.desc}</p>
+      <button style="background:var(--fc-primary, #0f172a);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Learn more</button>
+    </div>`).join("");
+  return `<section style="padding:72px 32px;background:var(--fc-bg, #ffffff);font-family:Manrope,system-ui,sans-serif;">
+  <div style="max-width:1200px;margin:0 auto;">
+  <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 40px;color:var(--fc-text, #0f172a);text-align:center;">Why choose us</h2>
+  <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:24px;">${cards}
+  </div>
+  </div>
+</section>`;
+};
+
 export const WEB_SAFE_FONTS = [
   "Manrope, sans-serif",
   "system-ui, sans-serif",

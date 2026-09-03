@@ -647,65 +647,6 @@ export const EXTRA_CATEGORIES = [
           </div>
         </section>`,
       },
-      {
-        id: "feature-boxes",
-        label: "Feature Boxes · 8",
-        html: `<section class="block block-services-feature-boxes">
-          <div class="utility-2">
-          <h2 class="utility-3 block-heading">Why choose us</h2>
-          <div class="utility-4">
-          <div class="utility-5">
-          <div class="utility-6"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
-          <div class="utility-7">Fast Performance</div>
-          <p class="utility-8">Optimized for speed so your pages load instantly.</p>
-          <button class="utility-9">Learn more</button>
-          </div>
-          <div class="utility-10">
-          <div class="utility-11"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></div>
-          <div class="utility-12">Secure by Default</div>
-          <p class="utility-13">Built-in protections keep your data safe.</p>
-          <button class="utility-14">Learn more</button>
-          </div>
-          <div class="utility-15">
-          <div class="utility-16"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
-          <div class="utility-17">24/7 Support</div>
-          <p class="utility-18">Real people ready to help whenever you need it.</p>
-          <button class="utility-19">Learn more</button>
-          </div>
-          <div class="utility-20">
-          <div class="utility-21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
-          <div class="utility-22">Actionable Insights</div>
-          <p class="utility-23">Track what matters with clear, simple analytics.</p>
-          <button class="utility-24">Learn more</button>
-          </div>
-          <div class="utility-25">
-          <div class="utility-26"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg></div>
-          <div class="utility-27">Easy Integrations</div>
-          <p class="utility-28">Connect the tools you already use in minutes.</p>
-          <button class="utility-29">Learn more</button>
-          </div>
-          <div class="utility-30">
-          <div class="utility-31"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h6M4 18h13M17 4v4M14 10v4M20 16v4"/></svg></div>
-          <div class="utility-32">Full Customization</div>
-          <p class="utility-33">Tailor every detail to match your brand.</p>
-          <button class="utility-34">Learn more</button>
-          </div>
-          <div class="utility-35">
-          <div class="utility-36"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
-          <div class="utility-37">Built for Teams</div>
-          <p class="utility-38">Collaborate smoothly with shared workspaces.</p>
-          <button class="utility-39">Learn more</button>
-          </div>
-          <div class="utility-40">
-          <div class="utility-41"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0112 5a5.5 5.5 0 019.5 7c-2.5 4.5-9.5 9-9.5 9z"/></svg></div>
-          <div class="utility-42">Trusted &amp; Reliable</div>
-          <p class="utility-43">Consistent uptime you and your customers can count on.</p>
-          <button class="utility-44">Learn more</button>
-          </div>
-          </div>
-          </div>
-        </section>`,
-      },
     ],
   },
   {
