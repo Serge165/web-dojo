@@ -647,6 +647,87 @@ export const EXTRA_CATEGORIES = [
           </div>
         </section>`,
       },
+      {
+        id: "feature-boxes",
+        label: "Feature Boxes · 8",
+        html: `<section class="block block-services-feature-boxes">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">Why choose us</h2>
+          <div class="utility-4">
+          <div class="utility-5">
+          <div class="utility-6"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+          <div class="utility-7">Fast Performance</div>
+          <p class="utility-8">Optimized for speed so your pages load instantly.</p>
+          <button class="utility-9">Learn more</button>
+          </div>
+          <div class="utility-10">
+          <div class="utility-11"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></div>
+          <div class="utility-12">Secure by Default</div>
+          <p class="utility-13">Built-in protections keep your data safe.</p>
+          <button class="utility-14">Learn more</button>
+          </div>
+          <div class="utility-15">
+          <div class="utility-16"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
+          <div class="utility-17">24/7 Support</div>
+          <p class="utility-18">Real people ready to help whenever you need it.</p>
+          <button class="utility-19">Learn more</button>
+          </div>
+          <div class="utility-20">
+          <div class="utility-21"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
+          <div class="utility-22">Actionable Insights</div>
+          <p class="utility-23">Track what matters with clear, simple analytics.</p>
+          <button class="utility-24">Learn more</button>
+          </div>
+          <div class="utility-25">
+          <div class="utility-26"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg></div>
+          <div class="utility-27">Easy Integrations</div>
+          <p class="utility-28">Connect the tools you already use in minutes.</p>
+          <button class="utility-29">Learn more</button>
+          </div>
+          <div class="utility-30">
+          <div class="utility-31"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h6M4 18h13M17 4v4M14 10v4M20 16v4"/></svg></div>
+          <div class="utility-32">Full Customization</div>
+          <p class="utility-33">Tailor every detail to match your brand.</p>
+          <button class="utility-34">Learn more</button>
+          </div>
+          <div class="utility-35">
+          <div class="utility-36"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <div class="utility-37">Built for Teams</div>
+          <p class="utility-38">Collaborate smoothly with shared workspaces.</p>
+          <button class="utility-39">Learn more</button>
+          </div>
+          <div class="utility-40">
+          <div class="utility-41"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0112 5a5.5 5.5 0 019.5 7c-2.5 4.5-9.5 9-9.5 9z"/></svg></div>
+          <div class="utility-42">Trusted &amp; Reliable</div>
+          <p class="utility-43">Consistent uptime you and your customers can count on.</p>
+          <button class="utility-44">Learn more</button>
+          </div>
+          </div>
+          </div>
+        </section>`,
+      },
+    ],
+  },
+  {
+    id: "about",
+    label: "About",
+    blocks: [
+      {
+        id: "about-social",
+        label: "About Us",
+        html: `<section class="block block-about-social">
+          <div class="utility-2">
+          <h2 class="utility-3 block-heading">About Us</h2>
+          <p class="utility-4">We're a small team building thoughtful, well-crafted products. What started as a weekend project has grown into a company trusted by thousands of customers who care about quality as much as we do.</p>
+          <div class="utility-5">
+          <a href="#" class="utility-6" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.6c-2 0-2.3 0-3.1.05-.8.04-1.3.16-1.8.34a3.6 3.6 0 00-1.3.85c-.4.4-.65.8-.85 1.3-.18.5-.3 1-.34 1.8C4.6 9.7 4.6 10 4.6 12s0 2.3.05 3.1c.04.8.16 1.3.34 1.8.2.5.45.9.85 1.3.4.4.8.65 1.3.85.5.18 1 .3 1.8.34.8.05 1.1.05 3.1.05s2.3 0 3.1-.05c.8-.04 1.3-.16 1.8-.34.5-.2.9-.45 1.3-.85.4-.4.65-.8.85-1.3.18-.5.3-1 .34-1.8.05-.8.05-1.1.05-3.1s0-2.3-.05-3.1c-.04-.8-.16-1.3-.34-1.8a3.6 3.6 0 00-.85-1.3 3.6 3.6 0 00-1.3-.85c-.5-.18-1-.3-1.8-.34C14.3 4.6 14 4.6 12 4.6zm0 2.16a5.24 5.24 0 110 10.48 5.24 5.24 0 010-10.48zm0 8.64a3.4 3.4 0 100-6.8 3.4 3.4 0 000 6.8zm5.65-8.86a1.22 1.22 0 11-2.44 0 1.22 1.22 0 012.44 0z"/></svg></a>
+          <a href="#" class="utility-7" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-7.5h2.5l.5-3h-3V8.5c0-.9.3-1.5 1.6-1.5H16.5V4.3C16.2 4.3 15.2 4 14 4c-2.4 0-4 1.5-4 4.1V10.5H7.5v3H10V21h3.5z"/></svg></a>
+          <a href="#" class="utility-8" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5.001A2.5 2.5 0 014.98 3.5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.98 1.83-2 3.76-2 4.02 0 4.76 2.5 4.76 5.76V21h-4v-5.85c0-1.4-.03-3.2-2-3.2-2 0-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+          <a href="#" class="utility-9" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 00-7 3.7A11.6 11.6 0 013 4.9a4.1 4.1 0 001.3 5.5c-.7 0-1.3-.2-1.9-.5v.1c0 2 1.4 3.6 3.3 4a4.1 4.1 0 01-1.9.1c.5 1.6 2.1 2.8 3.9 2.9A8.2 8.2 0 012 18.6a11.6 11.6 0 006.3 1.8c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.1z"/></svg></a>
+          </div>
+          </div>
+        </section>`,
+      },
     ],
   },
   {
