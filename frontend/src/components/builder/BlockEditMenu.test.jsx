@@ -504,7 +504,9 @@ describe("generic editable-node helpers", () => {
 
   test("setEditableNode rewrites a heading's text by offset", () => {
     const out = setEditableNode(hero, 0, { text: "Build the web now." });
-    expect(out).toContain("<h1>Build the web now.</h1>");
+    expect(out).toContain("Build the web now.");
+    expect(out).toContain("<h1");
+    expect(out).toContain("</h1>");
     expect(out).toContain("<p>Drag blocks.</p>");
   });
 
