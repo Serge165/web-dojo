@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FileCode2, FileArchive, Braces, Copy, Link2, Upload, Download, Boxes } from "lucide-react";
 import { downloadStandalone, downloadZip, downloadProjectJson, buildStandaloneHtml } from "@/lib/exportHtml";
-import { scanHtml } from "@/lib/importHtml";
+import { scanHtml, inlineLocalStylesheets } from "@/lib/importHtml";
 import { warnAboutSeoThenRun } from "@/lib/seoExportGuard";
 import { ExporterModal } from "./ExporterModal";
 import { featureEnabled } from "@/lib/featureFlags";
@@ -30,8 +30,10 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [showExporters, setShowExporters] = useState(false);
+  const [multiFileImport, setMultiFileImport] = useState(null); // { html: File, css: File[] }
   const fileRef = useRef(null);
   const jsonRef = useRef(null);
+  const multiFileRef = useRef(null);
 
   const copyHtml = async () => { await navigator.clipboard.writeText(buildStandaloneHtml(project)); toast.success("Full HTML copied to clipboard"); };
 
@@ -77,6 +79,47 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
     r.readAsText(f); e.target.value = "";
   };
 
+  const handleMultiFileSelection = async (e) => {
+    const files = Array.from(e.target.files || []);
+    const htmlFiles = files.filter((f) => /\.html?$/i.test(f.name));
+    const cssFiles = files.filter((f) => /\.css$/i.test(f.name));
+    if (htmlFiles.length === 0) { toast.error("Select at least one .html file"); e.target.value = ""; return; }
+    if (cssFiles.length === 0) { toast.error("Select at least one .css file to import together"); e.target.value = ""; return; }
+    // For now, use first HTML file + all CSS files
+    setMultiFileImport({ html: htmlFiles[0], css: cssFiles });
+    e.target.value = "";
+  };
+
+  const doMultiFileImport = async () => {
+    if (!multiFileImport) return;
+    setBusy(true);
+    try {
+      const { html, css } = multiFileImport;
+      const htmlText = await new Promise((resolve) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result || ""));
+        r.readAsText(html);
+      });
+      const cssByName = {};
+      for (const f of css) {
+        const text = await new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result || ""));
+          r.readAsText(f);
+        });
+        cssByName[f.name] = text;
+      }
+      const { headHtml, sections } = scanHtml(inlineLocalStylesheets(htmlText, cssByName));
+      onImportSections({ headHtml, sections });
+      toast.success(`Imported ${sections.length} section${sections.length === 1 ? "" : "s"} + CSS → globals.css`);
+      setMultiFileImport(null);
+      onClose();
+    } catch (e) {
+      toast.error("Failed to import files");
+      console.error("Multi-file import error:", e);
+    } finally { setBusy(false); }
+  };
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-2xl max-h-[90vh] overflow-hidden p-0" data-testid="transfer-modal">
@@ -120,11 +163,27 @@ export const ImportExportModal = ({ open, onClose, project, onImportSections, on
                 <div className="flex justify-end mt-2"><button onClick={doPaste} className="text-xs px-4 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2]" data-testid="imp-paste-btn">Scan & Import</button></div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => fileRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1C1A15] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-html-file-btn"><Upload size={14} /> Import .html file</button>
-                <button onClick={() => jsonRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1C1A15] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-json-file-btn"><Braces size={14} /> Import .json project</button>
-              </div>
+              {multiFileImport ? (
+                <div className="rounded-lg border border-indigo-500/40 bg-indigo-500/5 p-3">
+                  <div className="text-xs text-[#F1EDE2] font-medium mb-2">Ready to import:</div>
+                  <div className="text-[11px] text-[#A79C87] mb-3">
+                    <div>HTML: {multiFileImport.html.name}</div>
+                    <div>CSS files: {multiFileImport.css.map((f) => f.name).join(", ")}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setMultiFileImport(null)} className="flex-1 text-xs px-3 py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="imp-multi-cancel">Cancel</button>
+                    <button onClick={doMultiFileImport} disabled={busy} className="flex-1 text-xs px-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-[#F1EDE2] disabled:opacity-50" data-testid="imp-multi-confirm">{busy ? "Importing…" : "Confirm & Import"}</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => fileRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1C1A15] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-html-file-btn"><Upload size={14} /> Import .html file</button>
+                  <button onClick={() => multiFileRef.current?.click()} className="flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1C1A15] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-multi-file-btn"><Upload size={14} /> HTML + CSS</button>
+                  <button onClick={() => jsonRef.current?.click()} className="col-span-2 flex items-center justify-center gap-2 p-3 rounded-lg border border-[#332D22] bg-[#1C1A15] text-xs text-[#F1EDE2] hover:border-indigo-500/40" data-testid="imp-json-file-btn"><Braces size={14} /> Import .json project</button>
+                </div>
+              )}
               <input ref={fileRef} type="file" accept=".html,.htm,text/html" onChange={handleHtmlFile} className="hidden" />
+              <input ref={multiFileRef} type="file" accept=".html,.htm,.css" multiple onChange={handleMultiFileSelection} className="hidden" />
               <input ref={jsonRef} type="file" accept=".json,application/json" onChange={handleJsonFile} className="hidden" />
             </>
           )}

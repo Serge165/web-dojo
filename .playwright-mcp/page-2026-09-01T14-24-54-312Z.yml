@@ -1,0 +1,102 @@
+- generic [active] [ref=f1e1]:
+  - heading "nav-transparent overlay test" [level=2] [ref=f1e2]
+  - navigation [ref=f1e3]:
+    - generic [ref=f1e4]: AURORA
+    - generic [ref=f1e5]:
+      - link "Home" [ref=f1e6] [cursor=pointer]:
+        - /url: "#"
+      - link "Rooms" [ref=f1e7] [cursor=pointer]:
+        - /url: "#"
+      - link "Dining" [ref=f1e8] [cursor=pointer]:
+        - /url: "#"
+    - button "Book now" [ref=f1e9] [cursor=pointer]
+  - generic [ref=f1e10]: HERO CONTENT BELOW NAV
+  - separator [ref=f1e12]
+  - heading "social-wall-columns test" [level=2] [ref=f1e13]
+  - generic [ref=f1e14]:
+    - generic [ref=f1e15]: Live from social
+    - generic [ref=f1e16]:
+      - generic [ref=f1e17]:
+        - generic [ref=f1e18]:
+          - generic [ref=f1e19]:
+            - generic [ref=f1e20]: 𝕏
+            - generic [ref=f1e21]: Twitter / X
+          - generic [ref=f1e22] [cursor=pointer]: Not connected
+        - generic [ref=f1e23]:
+          - generic [ref=f1e24]:
+            - generic [ref=f1e25]:
+              - generic [ref=f1e26]: Web Dojo
+              - generic [ref=f1e27]: 2h
+            - generic [ref=f1e28]: "@webdojo_hq"
+            - paragraph [ref=f1e29]: Just shipped dark mode across every export. Thanks for the 200+ bug reports that got us here 🙏
+            - generic [ref=f1e30]: 💬 12 🔁 34 ♥ 156
+          - generic [ref=f1e31]:
+            - generic [ref=f1e32]:
+              - generic [ref=f1e33]: Sam Reyes
+              - generic [ref=f1e34]: 5h
+            - generic [ref=f1e35]: "@designer_sam"
+            - paragraph [ref=f1e36]: Client sent over "make it pop" for the fourth time today. I have achieved zen.
+            - generic [ref=f1e37]: 💬 8 🔁 3 ♥ 91
+          - generic [ref=f1e38]:
+            - generic [ref=f1e39]:
+              - generic [ref=f1e40]: Kai Nakamura
+              - generic [ref=f1e41]: 1d
+            - generic [ref=f1e42]: "@buildwithkai"
+            - paragraph [ref=f1e43]: "Hot take: the best websites still load in under a second. Fight me."
+            - generic [ref=f1e44]: 💬 41 🔁 12 ♥ 203
+      - generic [ref=f1e45]:
+        - generic [ref=f1e46]:
+          - generic [ref=f1e47]:
+            - generic [ref=f1e48]: 📷
+            - generic [ref=f1e49]: Instagram
+          - generic [ref=f1e50] [cursor=pointer]: Not connected
+        - generic [ref=f1e51]:
+          - generic [ref=f1e52]:
+            - generic [ref=f1e53]:
+              - generic [ref=f1e54]: studio.northlane
+              - generic [ref=f1e55]: 3h
+            - generic [ref=f1e56]: Studio Northlane
+            - paragraph [ref=f1e57]: Behind the scenes from today's shoot 🎬
+            - generic [ref=f1e58]: ♥ 412 💬 18
+          - generic [ref=f1e59]:
+            - generic [ref=f1e60]:
+              - generic [ref=f1e61]: mira.codes
+              - generic [ref=f1e62]: 6h
+            - generic [ref=f1e63]: Mira Chen
+            - paragraph [ref=f1e64]: New desk setup, finally organized after 6 months 📐
+            - generic [ref=f1e65]: ♥ 289 💬 24
+          - generic [ref=f1e66]:
+            - generic [ref=f1e67]:
+              - generic [ref=f1e68]: thefolio.club
+              - generic [ref=f1e69]: 1d
+            - generic [ref=f1e70]: The Folio Club
+            - paragraph [ref=f1e71]: Portfolio review night was a hit — thank you to everyone who came out.
+            - generic [ref=f1e72]: ♥ 567 💬 41
+        - generic [ref=f1e73]:
+          - generic [ref=f1e74]:
+            - generic [ref=f1e75]:
+              - generic [ref=f1e76]: f
+              - generic [ref=f1e77]: Facebook
+            - generic [ref=f1e78] [cursor=pointer]: Not connected
+          - generic [ref=f1e79]:
+            - generic [ref=f1e80]:
+              - generic [ref=f1e81]:
+                - generic [ref=f1e82]: Riverside Coffee Co.
+                - generic [ref=f1e83]: 4h
+              - generic [ref=f1e84]: Riverside Coffee Co.
+              - paragraph [ref=f1e85]: We're extending our weekend hours starting this Saturday! Come say hi ☕
+              - generic [ref=f1e86]: ♥ 89 💬 12 ↗ 6
+            - generic [ref=f1e87]:
+              - generic [ref=f1e88]:
+                - generic [ref=f1e89]: Northgate Studio
+                - generic [ref=f1e90]: 8h
+              - generic [ref=f1e91]: Northgate Studio
+              - paragraph [ref=f1e92]: Our new client showcase is live on the site — link in comments.
+              - generic [ref=f1e93]: ♥ 134 💬 22 ↗ 9
+            - generic [ref=f1e94]:
+              - generic [ref=f1e95]:
+                - generic [ref=f1e96]: The Local Market
+                - generic [ref=f1e97]: 2d
+              - generic [ref=f1e98]: The Local Market
+              - paragraph [ref=f1e99]: Thank you for another incredible farmers market season 🌽
+              - generic [ref=f1e100]: ♥ 210 💬 31 ↗ 14

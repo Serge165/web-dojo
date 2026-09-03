@@ -1,0 +1,785 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - banner:
+          - generic:
+            - generic:
+              - generic: ◤
+              - generic: Web Dojo
+            - textbox:
+              - /placeholder: Untitled project
+              - text: SaaS — Minimal — copy
+            - generic:
+              - button
+              - button [disabled]
+          - generic:
+            - generic:
+              - button
+              - button
+              - button
+          - generic:
+            - button: Import
+            - button: Export
+            - button: Share
+            - button: Publish
+            - generic:
+              - button
+              - button
+              - button
+              - button
+              - button
+              - button
+            - generic: Saved
+            - button: Save
+            - button: Open
+            - button
+        - generic:
+          - generic:
+            - button: File
+          - generic:
+            - button: Edit
+          - generic:
+            - button: Find
+          - generic:
+            - button: View
+          - generic:
+            - button: Help
+        - generic:
+          - generic:
+            - generic: Home
+            - combobox
+            - button
+          - generic:
+            - generic: Pricing
+            - combobox
+            - button
+          - generic:
+            - generic: About
+            - combobox
+            - button
+          - button: Page
+          - button: SEO
+          - button: Template
+        - generic:
+          - generic:
+            - button: Design
+            - button: Code
+            - button: Split View
+            - button: Outline
+            - button: Preview
+        - generic:
+          - generic:
+            - complementary:
+              - generic:
+                - button: Edit
+                - button: Library
+                - button: Layout
+                - button: Forms
+                - button: Shop
+                - button: Files
+                - button: Snips
+                - button: Saved
+              - generic:
+                - generic:
+                  - generic: Pages
+                  - generic:
+                    - button:
+                      - generic: Home
+                      - generic: /
+                    - button:
+                      - generic: Pricing
+                      - generic: /pricing
+                    - button:
+                      - generic: About
+                      - generic: /about
+                - generic:
+                  - generic: Project files
+                  - generic:
+                    - button
+                    - button
+                    - button
+                - generic: Drop a folder here, click the + icons to create, or use the upload button.
+            - button
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Preview · 4 block s · desktop
+                    - generic: 1200 × auto
+                  - generic:
+                    - generic:
+                      - generic:
+                        - banner:
+                          - link:
+                            - /url: index.html
+                            - text: Fieldnote
+                          - navigation:
+                            - link:
+                              - /url: pricing.html
+                              - text: Pricing
+                            - link:
+                              - /url: about.html
+                              - text: About
+                            - link:
+                              - /url: "#"
+                              - text: Start free
+                      - generic:
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - heading [level=1]: Simple, usage-based pricing
+                          - paragraph: No seat minimums. No annual lock-in.
+                      - generic:
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: Starter
+                              - generic: $0
+                              - generic: up to 3 seats, forever
+                              - link:
+                                - /url: "#"
+                                - text: Start free
+                            - generic:
+                              - generic: Team
+                              - generic: $12
+                              - generic: per seat / month
+                              - link:
+                                - /url: "#"
+                                - text: Start 14-day trial
+                            - generic:
+                              - generic: Scale
+                              - generic: Custom
+                              - generic: volume pricing + SSO
+                              - link:
+                                - /url: "#"
+                                - text: Talk to sales
+                      - generic:
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                    - generic:
+                      - generic:
+                        - contentinfo: © 2026 Fieldnote — built by a small team that ships
+                      - generic:
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+          - generic:
+            - button
+            - complementary:
+              - generic:
+                - generic: Inspector
+                - generic: no selection
+              - generic:
+                - button: Color
+                - button: Tokens
+                - button: Gradient
+                - button: Pattern
+                - button: SVG BG
+                - button: Style
+                - button: Responsive
+                - button: Variants
+                - button: Shape
+                - button: BG
+                - button: Blend
+                - button: Divider
+                - button: Motion
+                - button: Text FX
+                - button: Theme
+                - button: CDN
+                - button: Page
+              - generic:
+                - generic:
+                  - generic:
+                    - button
+                    - generic:
+                      - generic: Hue
+                      - slider: "221"
+                    - generic:
+                      - generic: Alpha
+                      - slider: "100"
+                    - generic:
+                      - generic:
+                        - generic: Hex
+                        - textbox: "#2563eb"
+                    - generic:
+                      - generic:
+                        - generic: R
+                        - spinbutton: "37"
+                      - generic:
+                        - generic: G
+                        - spinbutton: "99"
+                      - generic:
+                        - generic: B
+                        - spinbutton: "235"
+                    - generic:
+                      - generic:
+                        - generic: H
+                        - spinbutton: "221"
+                      - generic:
+                        - generic: S
+                        - spinbutton: "83"
+                      - generic:
+                        - generic: L
+                        - spinbutton: "53"
+                  - generic:
+                    - button [disabled]: Apply background
+                    - button [disabled]: Apply text color
+                  - generic: Select an element on the canvas to apply.
+              - generic:
+                - button:
+                  - generic: Layers · 4
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 4 layers
+                      - button: Effects
+                    - generic:
+                      - generic: "Check all:"
+                      - button [disabled]: Effected
+                      - button: All · 4
+                    - generic:
+                      - generic:
+                        - checkbox
+                        - button
+                        - button: footer · © 2026 Fieldnote — built b
+                        - spinbutton: "0"
+                        - button
+                        - button
+                        - button
+                      - generic:
+                        - checkbox
+                        - button
+                        - button: section · Starter $0 up to 3 seats
+                        - spinbutton: "0"
+                        - button
+                        - button
+                        - button
+                      - generic:
+                        - checkbox
+                        - button
+                        - button: section · Simple, usage-based pricin
+                        - spinbutton: "0"
+                        - button
+                        - button
+                        - button
+                      - generic:
+                        - checkbox
+                        - button
+                        - button: header · Fieldnote Pricing About
+                        - spinbutton: "0"
+                        - button
+                        - button
+                        - button
+        - contentinfo:
+          - generic:
+            - generic: Pricing
+            - generic: 4 block s
+            - generic: design
+            - generic: desktop
+          - generic:
+            - generic: 100 %
+            - generic: Saved
+      - region "Notifications alt+T"
+  - dialog [ref=f4e3373]:
+    - heading "Project templates" [level=2] [ref=f4e3375]
+    - generic [ref=f4e3376]:
+      - generic [ref=f4e3377]:
+        - textbox "Search by name, description or aesthetic…" [active] [ref=f4e3382]
+        - generic [ref=f4e3383]:
+          - button "All · 57" [ref=f4e3384] [cursor=pointer]
+          - button "art-nouveau" [ref=f4e3385] [cursor=pointer]
+          - button "barbiecore" [ref=f4e3386] [cursor=pointer]
+          - button "bauhaus" [ref=f4e3387] [cursor=pointer]
+          - button "blog" [ref=f4e3388] [cursor=pointer]
+          - button "bloomcore" [ref=f4e3389] [cursor=pointer]
+          - button "blueprint" [ref=f4e3390] [cursor=pointer]
+          - button "brutalism" [ref=f4e3391] [cursor=pointer]
+          - button "cassette-futurism" [ref=f4e3392] [cursor=pointer]
+          - button "corp-memphis" [ref=f4e3393] [cursor=pointer]
+          - button "cottagecore" [ref=f4e3394] [cursor=pointer]
+          - button "cyberpunk" [ref=f4e3395] [cursor=pointer]
+          - button "dark-academia" [ref=f4e3396] [cursor=pointer]
+          - button "diffused-worlds" [ref=f4e3397] [cursor=pointer]
+          - button "dreamcore" [ref=f4e3398] [cursor=pointer]
+          - button "editorial-warm" [ref=f4e3399] [cursor=pointer]
+          - button "esports-agnostic" [ref=f4e3400] [cursor=pointer]
+          - button "esports-arctic" [ref=f4e3401] [cursor=pointer]
+          - button "esports-cobalt" [ref=f4e3402] [cursor=pointer]
+          - button "esports-crimson" [ref=f4e3403] [cursor=pointer]
+          - button "esports-ember" [ref=f4e3404] [cursor=pointer]
+          - button "esports-emerald" [ref=f4e3405] [cursor=pointer]
+          - button "esports-gold" [ref=f4e3406] [cursor=pointer]
+          - button "esports-mint" [ref=f4e3407] [cursor=pointer]
+          - button "esports-mono" [ref=f4e3408] [cursor=pointer]
+          - button "esports-rose" [ref=f4e3409] [cursor=pointer]
+          - button "esports-sky" [ref=f4e3410] [cursor=pointer]
+          - button "esports-teal" [ref=f4e3411] [cursor=pointer]
+          - button "esports-violet" [ref=f4e3412] [cursor=pointer]
+          - button "forum-throwback" [ref=f4e3413] [cursor=pointer]
+          - button "frutiger-aero" [ref=f4e3414] [cursor=pointer]
+          - button "geocities-homepage" [ref=f4e3415] [cursor=pointer]
+          - button "goblincore" [ref=f4e3416] [cursor=pointer]
+          - button "grunge-zine" [ref=f4e3417] [cursor=pointer]
+          - button "kidcore" [ref=f4e3418] [cursor=pointer]
+          - button "livejournal-throwback" [ref=f4e3419] [cursor=pointer]
+          - button "memphis" [ref=f4e3420] [cursor=pointer]
+          - button "modern-agency-editorial" [ref=f4e3421] [cursor=pointer]
+          - button "modern-agency-grid" [ref=f4e3422] [cursor=pointer]
+          - button "modern-portfolio-creative" [ref=f4e3423] [cursor=pointer]
+          - button "modern-portfolio-minimal" [ref=f4e3424] [cursor=pointer]
+          - button "modern-restaurant-bistro" [ref=f4e3425] [cursor=pointer]
+          - button "modern-saas-bold" [ref=f4e3426] [cursor=pointer]
+          - button "modern-saas-minimal" [ref=f4e3427] [cursor=pointer]
+          - button "modern-service-business" [ref=f4e3428] [cursor=pointer]
+          - button "modern-shop-grid" [ref=f4e3429] [cursor=pointer]
+          - button "modern-shop-product" [ref=f4e3430] [cursor=pointer]
+          - button "myspace-throwback" [ref=f4e3431] [cursor=pointer]
+          - button "neubrutalism" [ref=f4e3432] [cursor=pointer]
+          - button "newspaper" [ref=f4e3433] [cursor=pointer]
+          - button "retro-futurism" [ref=f4e3434] [cursor=pointer]
+          - button "scandi-minimal" [ref=f4e3435] [cursor=pointer]
+          - button "solar-punk" [ref=f4e3436] [cursor=pointer]
+          - button "swiss" [ref=f4e3437] [cursor=pointer]
+          - button "vaporwave" [ref=f4e3438] [cursor=pointer]
+          - button "win95" [ref=f4e3439] [cursor=pointer]
+          - button "xanga-throwback" [ref=f4e3440] [cursor=pointer]
+          - button "y2k" [ref=f4e3441] [cursor=pointer]
+      - generic [ref=f4e3442]:
+        - generic [ref=f4e3443]:
+          - generic [ref=f4e3446]: Starter gallery · aesthetics
+          - generic [ref=f4e3447]: 57 showing
+        - generic [ref=f4e3448]:
+          - button "esports-agnostic Preview Esports Org — Color Agnostic HUD-style esports org site. Colors bind to whatever theme is applied." [ref=f4e3449] [cursor=pointer]:
+            - generic [ref=f4e3450]:
+              - generic [ref=f4e3451]: esports-agnostic
+              - generic [ref=f4e3452]: Preview
+            - generic [ref=f4e3457]:
+              - generic [ref=f4e3458]: Esports Org — Color Agnostic
+              - generic [ref=f4e3461]: HUD-style esports org site. Colors bind to whatever theme is applied.
+          - button "esports-mono Preview Esports Org — Mono Ops HUD-style esports org site, monochrome — live badge, roster, fixtures, shop." [ref=f4e3462] [cursor=pointer]:
+            - generic [ref=f4e3463]:
+              - generic [ref=f4e3464]: esports-mono
+              - generic [ref=f4e3465]: Preview
+            - generic [ref=f4e3470]:
+              - generic [ref=f4e3471]: Esports Org — Mono Ops
+              - generic [ref=f4e3474]: HUD-style esports org site, monochrome — live badge, roster, fixtures, shop.
+          - button "esports-rose Preview Esports Org — Rose Frag HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3475] [cursor=pointer]:
+            - generic [ref=f4e3476]:
+              - generic [ref=f4e3477]: esports-rose
+              - generic [ref=f4e3478]: Preview
+            - generic [ref=f4e3483]:
+              - generic [ref=f4e3484]: Esports Org — Rose Frag
+              - generic [ref=f4e3487]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-sky Preview Esports Org — Sky Static HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3488] [cursor=pointer]:
+            - generic [ref=f4e3489]:
+              - generic [ref=f4e3490]: esports-sky
+              - generic [ref=f4e3491]: Preview
+            - generic [ref=f4e3496]:
+              - generic [ref=f4e3497]: Esports Org — Sky Static
+              - generic [ref=f4e3500]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-emerald Preview Esports Org — Emerald Line HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3501] [cursor=pointer]:
+            - generic [ref=f4e3502]:
+              - generic [ref=f4e3503]: esports-emerald
+              - generic [ref=f4e3504]: Preview
+            - generic [ref=f4e3509]:
+              - generic [ref=f4e3510]: Esports Org — Emerald Line
+              - generic [ref=f4e3513]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-arctic Preview Esports Org — Arctic White HUD-style esports org site, light mode — live badge, roster, fixtures, shop." [ref=f4e3514] [cursor=pointer]:
+            - generic [ref=f4e3515]:
+              - generic [ref=f4e3516]: esports-arctic
+              - generic [ref=f4e3517]: Preview
+            - generic [ref=f4e3522]:
+              - generic [ref=f4e3523]: Esports Org — Arctic White
+              - generic [ref=f4e3526]: HUD-style esports org site, light mode — live badge, roster, fixtures, shop.
+          - button "esports-teal Preview Esports Org — Teal Frequency HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3527] [cursor=pointer]:
+            - generic [ref=f4e3528]:
+              - generic [ref=f4e3529]: esports-teal
+              - generic [ref=f4e3530]: Preview
+            - generic [ref=f4e3535]:
+              - generic [ref=f4e3536]: Esports Org — Teal Frequency
+              - generic [ref=f4e3539]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-ember Preview Esports Org — Ember Orange HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3540] [cursor=pointer]:
+            - generic [ref=f4e3541]:
+              - generic [ref=f4e3542]: esports-ember
+              - generic [ref=f4e3543]: Preview
+            - generic [ref=f4e3548]:
+              - generic [ref=f4e3549]: Esports Org — Ember Orange
+              - generic [ref=f4e3552]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-gold Preview Esports Org — Gold Standard HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3553] [cursor=pointer]:
+            - generic [ref=f4e3554]:
+              - generic [ref=f4e3555]: esports-gold
+              - generic [ref=f4e3556]: Preview
+            - generic [ref=f4e3561]:
+              - generic [ref=f4e3562]: Esports Org — Gold Standard
+              - generic [ref=f4e3565]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-violet Preview Esports Org — Violet Wave HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3566] [cursor=pointer]:
+            - generic [ref=f4e3567]:
+              - generic [ref=f4e3568]: esports-violet
+              - generic [ref=f4e3569]: Preview
+            - generic [ref=f4e3574]:
+              - generic [ref=f4e3575]: Esports Org — Violet Wave
+              - generic [ref=f4e3578]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-cobalt Preview Esports Org — Cobalt Surge HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3579] [cursor=pointer]:
+            - generic [ref=f4e3580]:
+              - generic [ref=f4e3581]: esports-cobalt
+              - generic [ref=f4e3582]: Preview
+            - generic [ref=f4e3587]:
+              - generic [ref=f4e3588]: Esports Org — Cobalt Surge
+              - generic [ref=f4e3591]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-crimson Preview Esports Org — Crimson Protocol HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3592] [cursor=pointer]:
+            - generic [ref=f4e3593]:
+              - generic [ref=f4e3594]: esports-crimson
+              - generic [ref=f4e3595]: Preview
+            - generic [ref=f4e3600]:
+              - generic [ref=f4e3601]: Esports Org — Crimson Protocol
+              - generic [ref=f4e3604]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "esports-mint Preview Esports Org — Mint Circuit HUD-style esports org site — live badge, roster, fixtures, shop." [ref=f4e3605] [cursor=pointer]:
+            - generic [ref=f4e3606]:
+              - generic [ref=f4e3607]: esports-mint
+              - generic [ref=f4e3608]: Preview
+            - generic [ref=f4e3613]:
+              - generic [ref=f4e3614]: Esports Org — Mint Circuit
+              - generic [ref=f4e3617]: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button "forum-throwback Preview Web Forum Throwback A classic phpBB/vBulletin-style forum thread — per-post user rail, quote/edit icons, and a working reply box." [ref=f4e3618] [cursor=pointer]:
+            - generic [ref=f4e3619]:
+              - generic [ref=f4e3620]: forum-throwback
+              - generic [ref=f4e3621]: Preview
+            - generic [ref=f4e3626]:
+              - generic [ref=f4e3627]: Web Forum Throwback
+              - generic [ref=f4e3630]: A classic phpBB/vBulletin-style forum thread — per-post user rail, quote/edit icons, and a working reply box.
+          - button "geocities-homepage Preview GeoCities Personal Homepage Maximalist late-90s chaos — tiled starfield, scrolling marquee, hit counter, and a guestbook. The loud cousin of the journal throwbacks." [ref=f4e3631] [cursor=pointer]:
+            - generic [ref=f4e3632]:
+              - generic [ref=f4e3633]: geocities-homepage
+              - generic [ref=f4e3634]: Preview
+            - generic [ref=f4e3639]:
+              - generic [ref=f4e3640]: GeoCities Personal Homepage
+              - generic [ref=f4e3643]: Maximalist late-90s chaos — tiled starfield, scrolling marquee, hit counter, and a guestbook. The loud cousin of the journal throwbacks.
+          - button "myspace-throwback Preview MySpace Throwback A faithful mid-2000s MySpace-style profile — Top 8, autoplay music banner, About Me box, and working comments." [ref=f4e3644] [cursor=pointer]:
+            - generic [ref=f4e3645]:
+              - generic [ref=f4e3646]: myspace-throwback
+              - generic [ref=f4e3647]: Preview
+            - generic [ref=f4e3652]:
+              - generic [ref=f4e3653]: MySpace Throwback
+              - generic [ref=f4e3656]: A faithful mid-2000s MySpace-style profile — Top 8, autoplay music banner, About Me box, and working comments.
+          - button "modern-service-business Preview Service Business Split hero with a schedule preview, services list with price and duration. Colors bind to whatever theme is applied." [ref=f4e3657] [cursor=pointer]:
+            - generic [ref=f4e3658]:
+              - generic [ref=f4e3659]: modern-service-business
+              - generic [ref=f4e3660]: Preview
+            - generic [ref=f4e3665]:
+              - generic [ref=f4e3666]: Service Business
+              - generic [ref=f4e3669]: Split hero with a schedule preview, services list with price and duration. Colors bind to whatever theme is applied.
+          - button "modern-restaurant-bistro Preview Restaurant — Modern Bistro Split hero and menu with a textured accent panel, plus a reservation CTA. Colors bind to whatever theme is applied." [ref=f4e3670] [cursor=pointer]:
+            - generic [ref=f4e3671]:
+              - generic [ref=f4e3672]: modern-restaurant-bistro
+              - generic [ref=f4e3673]: Preview
+            - generic [ref=f4e3678]:
+              - generic [ref=f4e3679]: Restaurant — Modern Bistro
+              - generic [ref=f4e3682]: Split hero and menu with a textured accent panel, plus a reservation CTA. Colors bind to whatever theme is applied.
+          - button "modern-portfolio-creative Preview Portfolio — Creative Grid Image-forward masonry portfolio for photographers, illustrators, and visual designers. Colors bind to whatever theme is applied." [ref=f4e3683] [cursor=pointer]:
+            - generic [ref=f4e3684]:
+              - generic [ref=f4e3685]: modern-portfolio-creative
+              - generic [ref=f4e3686]: Preview
+            - generic [ref=f4e3691]:
+              - generic [ref=f4e3692]: Portfolio — Creative Grid
+              - generic [ref=f4e3695]: Image-forward masonry portfolio for photographers, illustrators, and visual designers. Colors bind to whatever theme is applied.
+          - button "modern-portfolio-minimal Preview Portfolio — Minimal Personal A quiet, centered personal site — name, role, selected work. Colors bind to whatever theme is applied." [ref=f4e3696] [cursor=pointer]:
+            - generic [ref=f4e3697]:
+              - generic [ref=f4e3698]: modern-portfolio-minimal
+              - generic [ref=f4e3699]: Preview
+            - generic [ref=f4e3704]:
+              - generic [ref=f4e3705]: Portfolio — Minimal Personal
+              - generic [ref=f4e3708]: A quiet, centered personal site — name, role, selected work. Colors bind to whatever theme is applied.
+          - button "modern-shop-grid Preview E-commerce — Shop Grid Catalog-style storefront with a masonry product grid. Colors bind to whatever theme is applied." [ref=f4e3709] [cursor=pointer]:
+            - generic [ref=f4e3710]:
+              - generic [ref=f4e3711]: modern-shop-grid
+              - generic [ref=f4e3712]: Preview
+            - generic [ref=f4e3717]:
+              - generic [ref=f4e3718]: E-commerce — Shop Grid
+              - generic [ref=f4e3721]: Catalog-style storefront with a masonry product grid. Colors bind to whatever theme is applied.
+          - 'button "modern-shop-product Preview E-commerce — Single Product Product-focused landing page: split hero, an asymmetric spec list, and a clear buy CTA. Colors bind to whatever theme is applied." [ref=f4e3722] [cursor=pointer]':
+            - generic [ref=f4e3723]:
+              - generic [ref=f4e3724]: modern-shop-product
+              - generic [ref=f4e3725]: Preview
+            - generic [ref=f4e3730]:
+              - generic [ref=f4e3731]: E-commerce — Single Product
+              - generic [ref=f4e3734]: "Product-focused landing page: split hero, an asymmetric spec list, and a clear buy CTA. Colors bind to whatever theme is applied."
+          - button "modern-agency-editorial Preview Agency — Editorial Big type, numbered services, a text-forward alternative to a project grid. Colors bind to whatever theme is applied." [ref=f4e3735] [cursor=pointer]:
+            - generic [ref=f4e3736]:
+              - generic [ref=f4e3737]: modern-agency-editorial
+              - generic [ref=f4e3738]: Preview
+            - generic [ref=f4e3743]:
+              - generic [ref=f4e3744]: Agency — Editorial
+              - generic [ref=f4e3747]: Big type, numbered services, a text-forward alternative to a project grid. Colors bind to whatever theme is applied.
+          - button "modern-agency-grid Preview Agency — Grid Portfolio-forward studio site with a project grid. Colors bind to whatever theme is applied." [ref=f4e3748] [cursor=pointer]:
+            - generic [ref=f4e3749]:
+              - generic [ref=f4e3750]: modern-agency-grid
+              - generic [ref=f4e3751]: Preview
+            - generic [ref=f4e3756]:
+              - generic [ref=f4e3757]: Agency — Grid
+              - generic [ref=f4e3760]: Portfolio-forward studio site with a project grid. Colors bind to whatever theme is applied.
+          - button "modern-saas-bold Preview SaaS — Bold Asymmetric split hero, a stat rail, and a numbered case for switching. Colors bind to whatever theme is applied." [ref=f4e3761] [cursor=pointer]:
+            - generic [ref=f4e3762]:
+              - generic [ref=f4e3763]: modern-saas-bold
+              - generic [ref=f4e3764]: Preview
+            - generic [ref=f4e3769]:
+              - generic [ref=f4e3770]: SaaS — Bold
+              - generic [ref=f4e3773]: Asymmetric split hero, a stat rail, and a numbered case for switching. Colors bind to whatever theme is applied.
+          - button "modern-saas-minimal Preview SaaS — Minimal Asymmetric split hero with a layered panel mockup, one clear call to action. Colors bind to whatever theme is applied." [ref=f4e3774] [cursor=pointer]:
+            - generic [ref=f4e3775]:
+              - generic [ref=f4e3776]: modern-saas-minimal
+              - generic [ref=f4e3777]: Preview
+            - generic [ref=f4e3782]:
+              - generic [ref=f4e3783]: SaaS — Minimal
+              - generic [ref=f4e3786]: Asymmetric split hero with a layered panel mockup, one clear call to action. Colors bind to whatever theme is applied.
+          - button "dreamcore Preview Dreamcore Hazy pastels, floating orbs, unresolved nostalgia — the internet as a half-remembered dream." [ref=f4e3787] [cursor=pointer]:
+            - generic [ref=f4e3788]:
+              - generic [ref=f4e3789]: dreamcore
+              - generic [ref=f4e3790]: Preview
+            - generic [ref=f4e3795]:
+              - generic [ref=f4e3796]: Dreamcore
+              - generic [ref=f4e3799]: Hazy pastels, floating orbs, unresolved nostalgia — the internet as a half-remembered dream.
+          - button "livejournal-throwback Preview LiveJournal Throwback A faithful LiveJournal-style journal — userpics, current mood/music, tags, and working comments." [ref=f4e3800] [cursor=pointer]:
+            - generic [ref=f4e3801]:
+              - generic [ref=f4e3802]: livejournal-throwback
+              - generic [ref=f4e3803]: Preview
+            - generic [ref=f4e3808]:
+              - generic [ref=f4e3809]: LiveJournal Throwback
+              - generic [ref=f4e3812]: A faithful LiveJournal-style journal — userpics, current mood/music, tags, and working comments.
+          - button "xanga-throwback Preview Xanga Throwback A faithful 2000s Xanga-style journal — mood icons, eProps, a music widget, and working comments." [ref=f4e3813] [cursor=pointer]:
+            - generic [ref=f4e3814]:
+              - generic [ref=f4e3815]: xanga-throwback
+              - generic [ref=f4e3816]: Preview
+            - generic [ref=f4e3821]:
+              - generic [ref=f4e3822]: Xanga Throwback
+              - generic [ref=f4e3825]: A faithful 2000s Xanga-style journal — mood icons, eProps, a music widget, and working comments.
+          - button "blog Preview Blog A clean, readable editorial blog — featured post, recent posts, and working comments." [ref=f4e3826] [cursor=pointer]:
+            - generic [ref=f4e3827]:
+              - generic [ref=f4e3828]: blog
+              - generic [ref=f4e3829]: Preview
+            - generic [ref=f4e3834]:
+              - generic [ref=f4e3835]: Blog
+              - generic [ref=f4e3838]: A clean, readable editorial blog — featured post, recent posts, and working comments.
+          - button "goblincore Preview Goblincore Mossy earth, mushrooms, shiny things — feral cottagecore." [ref=f4e3839] [cursor=pointer]:
+            - generic [ref=f4e3840]:
+              - generic [ref=f4e3841]: goblincore
+              - generic [ref=f4e3842]: Preview
+            - generic [ref=f4e3847]:
+              - generic [ref=f4e3848]: Goblincore
+              - generic [ref=f4e3851]: Mossy earth, mushrooms, shiny things — feral cottagecore.
+          - button "swiss Preview Swiss Modernism Helvetica-ish, red accents, strict grid — 1957 shows up on time." [ref=f4e3852] [cursor=pointer]:
+            - generic [ref=f4e3853]:
+              - generic [ref=f4e3854]: swiss
+              - generic [ref=f4e3855]: Preview
+            - generic [ref=f4e3860]:
+              - generic [ref=f4e3861]: Swiss Modernism
+              - generic [ref=f4e3864]: Helvetica-ish, red accents, strict grid — 1957 shows up on time.
+          - button "art-nouveau Preview Art Nouveau Organic curves, gold & emerald, Mucha-inspired botanic lines." [ref=f4e3865] [cursor=pointer]:
+            - generic [ref=f4e3866]:
+              - generic [ref=f4e3867]: art-nouveau
+              - generic [ref=f4e3868]: Preview
+            - generic [ref=f4e3873]:
+              - generic [ref=f4e3874]: Art Nouveau
+              - generic [ref=f4e3877]: Organic curves, gold & emerald, Mucha-inspired botanic lines.
+          - button "grunge-zine Preview Grunge Zine Photocopy black + red, cutouts, torn edges, mixed serif/sans chaos." [ref=f4e3878] [cursor=pointer]:
+            - generic [ref=f4e3879]:
+              - generic [ref=f4e3880]: grunge-zine
+              - generic [ref=f4e3881]: Preview
+            - generic [ref=f4e3886]:
+              - generic [ref=f4e3887]: Grunge Zine
+              - generic [ref=f4e3890]: Photocopy black + red, cutouts, torn edges, mixed serif/sans chaos.
+          - button "win95 Preview Windows 95 System font, gray title bars, drop-shadow buttons — early-desktop nostalgia." [ref=f4e3891] [cursor=pointer]:
+            - generic [ref=f4e3892]:
+              - generic [ref=f4e3893]: win95
+              - generic [ref=f4e3894]: Preview
+            - generic [ref=f4e3899]:
+              - generic [ref=f4e3900]: Windows 95
+              - generic [ref=f4e3903]: System font, gray title bars, drop-shadow buttons — early-desktop nostalgia.
+          - button "barbiecore Preview Barbiecore Hot pink everything, gloss, unapologetic maximal cute." [ref=f4e3904] [cursor=pointer]:
+            - generic [ref=f4e3905]:
+              - generic [ref=f4e3906]: barbiecore
+              - generic [ref=f4e3907]: Preview
+            - generic [ref=f4e3912]:
+              - generic [ref=f4e3913]: Barbiecore
+              - generic [ref=f4e3916]: Hot pink everything, gloss, unapologetic maximal cute.
+          - button "newspaper Preview Newspaper Editorial Broadsheet columns, drop caps, Playfair headlines — a very old-fashioned homepage." [ref=f4e3917] [cursor=pointer]:
+            - generic [ref=f4e3918]:
+              - generic [ref=f4e3919]: newspaper
+              - generic [ref=f4e3920]: Preview
+            - generic [ref=f4e3925]:
+              - generic [ref=f4e3926]: Newspaper Editorial
+              - generic [ref=f4e3929]: Broadsheet columns, drop caps, Playfair headlines — a very old-fashioned homepage.
+          - button "cassette-futurism Preview Cassette Futurism 1970s tape-deck sci-fi — beige plastic, amber LEDs, chunky bevels." [ref=f4e3930] [cursor=pointer]:
+            - generic [ref=f4e3931]:
+              - generic [ref=f4e3932]: cassette-futurism
+              - generic [ref=f4e3933]: Preview
+            - generic [ref=f4e3938]:
+              - generic [ref=f4e3939]: Cassette Futurism
+              - generic [ref=f4e3942]: 1970s tape-deck sci-fi — beige plastic, amber LEDs, chunky bevels.
+          - button "diffused-worlds Preview Diffused Worlds Soft blur, dreamy pastels, atmospheric — 2026 counter to hard-edged UI." [ref=f4e3943] [cursor=pointer]:
+            - generic [ref=f4e3944]:
+              - generic [ref=f4e3945]: diffused-worlds
+              - generic [ref=f4e3946]: Preview
+            - generic [ref=f4e3951]:
+              - generic [ref=f4e3952]: Diffused Worlds
+              - generic [ref=f4e3955]: Soft blur, dreamy pastels, atmospheric — 2026 counter to hard-edged UI.
+          - button "editorial-warm Preview Editorial Warm Cream backgrounds, custom serifs, warm counter-aesthetic to techno-futurism." [ref=f4e3956] [cursor=pointer]:
+            - generic [ref=f4e3957]:
+              - generic [ref=f4e3958]: editorial-warm
+              - generic [ref=f4e3959]: Preview
+            - generic [ref=f4e3964]:
+              - generic [ref=f4e3965]: Editorial Warm
+              - generic [ref=f4e3968]: Cream backgrounds, custom serifs, warm counter-aesthetic to techno-futurism.
+          - button "blueprint Preview Blueprint Cyan grid on navy — engineering drawings, over-explained." [ref=f4e3969] [cursor=pointer]:
+            - generic [ref=f4e3970]:
+              - generic [ref=f4e3971]: blueprint
+              - generic [ref=f4e3972]: Preview
+            - generic [ref=f4e3977]:
+              - generic [ref=f4e3978]: Blueprint
+              - generic [ref=f4e3981]: Cyan grid on navy — engineering drawings, over-explained.
+          - button "kidcore Preview Kidcore Scrapbook Crayons, doodles, primary colours — 2026's anti-AI-slop antidote." [ref=f4e3982] [cursor=pointer]:
+            - generic [ref=f4e3983]:
+              - generic [ref=f4e3984]: kidcore
+              - generic [ref=f4e3985]: Preview
+            - generic [ref=f4e3990]:
+              - generic [ref=f4e3991]: Kidcore Scrapbook
+              - generic [ref=f4e3994]: Crayons, doodles, primary colours — 2026's anti-AI-slop antidote.
+          - button "corp-memphis Preview Corp Memphis Flat illustration vibe — mint, purple, oversized limbs everywhere." [ref=f4e3995] [cursor=pointer]:
+            - generic [ref=f4e3996]:
+              - generic [ref=f4e3997]: corp-memphis
+              - generic [ref=f4e3998]: Preview
+            - generic [ref=f4e4003]:
+              - generic [ref=f4e4004]: Corp Memphis
+              - generic [ref=f4e4007]: Flat illustration vibe — mint, purple, oversized limbs everywhere.
+          - button "neubrutalism Preview Neubrutalism Flat blocks, thick borders, hard shadows — 2020s remix of brutalism." [ref=f4e4008] [cursor=pointer]:
+            - generic [ref=f4e4009]:
+              - generic [ref=f4e4010]: neubrutalism
+              - generic [ref=f4e4011]: Preview
+            - generic [ref=f4e4016]:
+              - generic [ref=f4e4017]: Neubrutalism
+              - generic [ref=f4e4020]: Flat blocks, thick borders, hard shadows — 2020s remix of brutalism.
+          - button "bloomcore Preview Bloomcore Floral pastels, handwritten headlines, everything in bloom." [ref=f4e4021] [cursor=pointer]:
+            - generic [ref=f4e4022]:
+              - generic [ref=f4e4023]: bloomcore
+              - generic [ref=f4e4024]: Preview
+            - generic [ref=f4e4029]:
+              - generic [ref=f4e4030]: Bloomcore
+              - generic [ref=f4e4033]: Floral pastels, handwritten headlines, everything in bloom.
+          - button "retro-futurism Preview Retro-Futurism 1970s space-station optimism — orange, brown, cream, tomorrow." [ref=f4e4034] [cursor=pointer]:
+            - generic [ref=f4e4035]:
+              - generic [ref=f4e4036]: retro-futurism
+              - generic [ref=f4e4037]: Preview
+            - generic [ref=f4e4042]:
+              - generic [ref=f4e4043]: Retro-Futurism
+              - generic [ref=f4e4046]: 1970s space-station optimism — orange, brown, cream, tomorrow.
+          - button "memphis Preview Memphis Group Squiggles, terrazzo, and 1985 having far too much fun." [ref=f4e4047] [cursor=pointer]:
+            - generic [ref=f4e4048]:
+              - generic [ref=f4e4049]: memphis
+              - generic [ref=f4e4050]: Preview
+            - generic [ref=f4e4055]:
+              - generic [ref=f4e4056]: Memphis Group
+              - generic [ref=f4e4059]: Squiggles, terrazzo, and 1985 having far too much fun.
+          - button "scandi-minimal Preview Scandi Minimal Whitespace as luxury. Two tones. One good serif." [ref=f4e4060] [cursor=pointer]:
+            - generic [ref=f4e4061]:
+              - generic [ref=f4e4062]: scandi-minimal
+              - generic [ref=f4e4063]: Preview
+            - generic [ref=f4e4068]:
+              - generic [ref=f4e4069]: Scandi Minimal
+              - generic [ref=f4e4072]: Whitespace as luxury. Two tones. One good serif.
+          - button "bauhaus Preview Bauhaus Primary colours and pure geometry — 1919 shows up early." [ref=f4e4073] [cursor=pointer]:
+            - generic [ref=f4e4074]:
+              - generic [ref=f4e4075]: bauhaus
+              - generic [ref=f4e4076]: Preview
+            - generic [ref=f4e4081]:
+              - generic [ref=f4e4082]: Bauhaus
+              - generic [ref=f4e4085]: Primary colours and pure geometry — 1919 shows up early.
+          - button "brutalism Preview Web Brutalism Loud, bare, deliberately ugly, and impossible to ignore." [ref=f4e4086] [cursor=pointer]:
+            - generic [ref=f4e4087]:
+              - generic [ref=f4e4088]: brutalism
+              - generic [ref=f4e4089]: Preview
+            - generic [ref=f4e4094]:
+              - generic [ref=f4e4095]: Web Brutalism
+              - generic [ref=f4e4098]: Loud, bare, deliberately ugly, and impossible to ignore.
+          - button "cyberpunk Preview Cyberpunk Neon skylines, black terminals, hot pink alerts, moody rain." [ref=f4e4099] [cursor=pointer]:
+            - generic [ref=f4e4100]:
+              - generic [ref=f4e4101]: cyberpunk
+              - generic [ref=f4e4102]: Preview
+            - generic [ref=f4e4107]:
+              - generic [ref=f4e4108]: Cyberpunk
+              - generic [ref=f4e4111]: Neon skylines, black terminals, hot pink alerts, moody rain.
+          - button "vaporwave Preview Vaporwave Sunset gradient, roman busts, mall music, aesthetic™." [ref=f4e4112] [cursor=pointer]:
+            - generic [ref=f4e4113]:
+              - generic [ref=f4e4114]: vaporwave
+              - generic [ref=f4e4115]: Preview
+            - generic [ref=f4e4120]:
+              - generic [ref=f4e4121]: Vaporwave
+              - generic [ref=f4e4124]: Sunset gradient, roman busts, mall music, aesthetic™.
+          - button "y2k Preview Y2K Chrome Bubblegum pink, chrome, low-poly stars, sparkly clip-art energy." [ref=f4e4125] [cursor=pointer]:
+            - generic [ref=f4e4126]:
+              - generic [ref=f4e4127]: y2k
+              - generic [ref=f4e4128]: Preview
+            - generic [ref=f4e4133]:
+              - generic [ref=f4e4134]: Y2K Chrome
+              - generic [ref=f4e4137]: Bubblegum pink, chrome, low-poly stars, sparkly clip-art energy.
+          - button "cottagecore Preview Cottagecore Sourdough, embroidery, kettle on the stove, sun through gingham." [ref=f4e4138] [cursor=pointer]:
+            - generic [ref=f4e4139]:
+              - generic [ref=f4e4140]: cottagecore
+              - generic [ref=f4e4141]: Preview
+            - generic [ref=f4e4146]:
+              - generic [ref=f4e4147]: Cottagecore
+              - generic [ref=f4e4150]: Sourdough, embroidery, kettle on the stove, sun through gingham.
+          - button "solar-punk Preview Solar Punk Hopeful ecotopia — mossy greens, sunlit gold, living tech." [ref=f4e4151] [cursor=pointer]:
+            - generic [ref=f4e4152]:
+              - generic [ref=f4e4153]: solar-punk
+              - generic [ref=f4e4154]: Preview
+            - generic [ref=f4e4159]:
+              - generic [ref=f4e4160]: Solar Punk
+              - generic [ref=f4e4163]: Hopeful ecotopia — mossy greens, sunlit gold, living tech.
+          - button "dark-academia Preview Dark Academia Candlelit libraries, oxblood leather, and Latin quotations." [ref=f4e4164] [cursor=pointer]:
+            - generic [ref=f4e4165]:
+              - generic [ref=f4e4166]: dark-academia
+              - generic [ref=f4e4167]: Preview
+            - generic [ref=f4e4172]:
+              - generic [ref=f4e4173]: Dark Academia
+              - generic [ref=f4e4176]: Candlelit libraries, oxblood leather, and Latin quotations.
+          - button "frutiger-aero Preview Frutiger Aero Glossy, aqua, back-of-a-Windows-Vista-box optimism." [ref=f4e4177] [cursor=pointer]:
+            - generic [ref=f4e4178]:
+              - generic [ref=f4e4179]: frutiger-aero
+              - generic [ref=f4e4180]: Preview
+            - generic [ref=f4e4185]:
+              - generic [ref=f4e4186]: Frutiger Aero
+              - generic [ref=f4e4189]: Glossy, aqua, back-of-a-Windows-Vista-box optimism.
+      - generic [ref=f4e4190]:
+        - generic [ref=f4e4191]:
+          - generic [ref=f4e4192]: Your templates
+          - button "Import a template" [ref=f4e4195] [cursor=pointer]
+        - generic [ref=f4e4199]: No custom templates yet — save your current project below.
+      - generic [ref=f4e4200]:
+        - generic [ref=f4e4201]: Save current project as template
+        - textbox "Template name" [ref=f4e4202]
+        - textbox "Short description" [ref=f4e4203]
+        - button "Save as template" [ref=f4e4204] [cursor=pointer]
+      - button "Close" [ref=f4e4206] [cursor=pointer]
+    - button "Close" [ref=f4e4207] [cursor=pointer]

@@ -1,0 +1,19 @@
+{
+  "id": "session-1788355243843",
+  "startedAt": "2026-09-02T13:20:43.844Z",
+  "cwd": "/run/media/januszeal/Data/Downloads/web-dojo-main",
+  "context": {
+    "lastMatchedPatterns": [
+      "insight-1788355032147-q97d",
+      "insight-1788355032147-385m"
+    ]
+  },
+  "metrics": {
+    "edits": 1,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "updatedAt": "2026-09-02T13:36:06.348Z",
+  "restoredAt": "2026-09-02T13:21:58.781Z"
+}

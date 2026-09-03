@@ -1,0 +1,13 @@
+{
+  "id": "session-1788359962740",
+  "startedAt": "2026-09-02T14:39:22.740Z",
+  "cwd": "/run/media/januszeal/Data/Downloads/web-dojo-main/frontend",
+  "context": {},
+  "metrics": {
+    "edits": 163,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "restoredAt": "2026-09-03T19:57:44.866Z"
+}

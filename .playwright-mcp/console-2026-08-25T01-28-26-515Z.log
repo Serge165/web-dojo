@@ -1,0 +1,4 @@
+[    1234ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1200798ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:406594:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1200800ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/16408d6d-a7ac-4760-94dc-452e850d4493:0

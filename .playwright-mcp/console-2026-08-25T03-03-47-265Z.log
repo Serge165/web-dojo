@@ -1,0 +1,27 @@
+[      85ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   23413ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   23445ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   31432ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   31443ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   31478ms] [ERROR] Blocked script execution in 'about:srcdoc' because the document's frame is sandboxed and the 'allow-scripts' permission is not set. @ about:srcdoc:0
+[ 1843077ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:407568:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1843078ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/4b0cedc3-e68e-44f9-9776-27cad6347d09:0
+[ 1911384ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:407568:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1911385ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/4b0cedc3-e68e-44f9-9776-27cad6347d09:0
+[ 1936105ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:407568:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1936106ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/4b0cedc3-e68e-44f9-9776-27cad6347d09:0
+[ 1958427ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:407568:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1958427ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/4b0cedc3-e68e-44f9-9776-27cad6347d09:0
+[ 1962180ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:407568:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1962182ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/4b0cedc3-e68e-44f9-9776-27cad6347d09:0
+[ 1966830ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:407568:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1966831ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/4b0cedc3-e68e-44f9-9776-27cad6347d09:0
+[ 1985505ms] [WARNING] Could not create web worker(s). Falling back to loading web worker code in main thread, which might cause UI freezes. Please see https://github.com/microsoft/monaco-editor#faq @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1985506ms] [WARNING] You must define a function MonacoEnvironment.getWorkerUrl or MonacoEnvironment.getWorker @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1996344ms] [WARNING] You must define a function MonacoEnvironment.getWorkerUrl or MonacoEnvironment.getWorker @ https://assets.emergent.sh/scripts/emergent-main.js:55

@@ -1,0 +1,285 @@
+- generic [ref=f4e3]:
+  - generic [ref=f4e4]:
+    - banner [ref=f4e5]:
+      - generic [ref=f4e6]:
+        - generic [ref=f4e7]:
+          - generic [ref=f4e8]: ◤
+          - generic [ref=f4e9]: Web Dojo
+        - textbox "Untitled project" [ref=f4e11]: SaaS — Minimal — copy
+        - generic [ref=f4e13]:
+          - button "Undo (Cmd+Z)" [ref=f4e14] [cursor=pointer]
+          - button "Redo (Cmd+Shift+Z)" [disabled] [ref=f4e18]
+      - generic [ref=f4e23]:
+        - button "desktop" [ref=f4e24] [cursor=pointer]
+        - button "tablet" [ref=f4e27] [cursor=pointer]
+        - button "mobile" [ref=f4e30] [cursor=pointer]
+      - generic [ref=f4e33]:
+        - button "Import" [ref=f4e34] [cursor=pointer]
+        - button "Export" [ref=f4e38] [cursor=pointer]
+        - button "Share" [ref=f4e44] [cursor=pointer]
+        - button "Publish" [ref=f4e48] [cursor=pointer]
+        - generic [ref=f4e53]:
+          - button "Find & Replace (Cmd+F)" [ref=f4e54] [cursor=pointer]
+          - button "Design tokens (colors/fonts/spacing)" [ref=f4e58] [cursor=pointer]
+          - button "Analytics" [ref=f4e65] [cursor=pointer]
+          - button "Project templates" [ref=f4e68] [cursor=pointer]
+          - button "Form submissions inbox" [ref=f4e73] [cursor=pointer]
+          - button "E-commerce dashboard (orders, customers, analytics, insights)" [ref=f4e77] [cursor=pointer]
+        - generic [ref=f4e2718]: Saved
+        - button "Save" [ref=f4e85] [cursor=pointer]
+        - button "Open" [ref=f4e90] [cursor=pointer]
+        - button "Restart onboarding tour" [ref=f4e93] [cursor=pointer]
+    - generic [ref=f4e97]:
+      - button "File" [ref=f4e99] [cursor=pointer]
+      - button "Edit" [ref=f4e101] [cursor=pointer]
+      - button "Find" [ref=f4e103] [cursor=pointer]
+      - button "View" [ref=f4e105] [cursor=pointer]
+      - button "Help" [ref=f4e107] [cursor=pointer]
+    - generic [ref=f4e108]:
+      - generic [ref=f4e2125] [cursor=pointer]:
+        - generic "Draft" [ref=f4e2126]
+        - generic "Double-click to rename" [ref=f4e2127]: Home
+        - combobox "Workflow status" [ref=f4e2128]:
+          - option "Draft" [selected]
+          - option "Review"
+          - option "Published"
+        - button "Delete page" [ref=f4e2129]
+      - generic [ref=f4e2133] [cursor=pointer]:
+        - generic "Draft" [ref=f4e2134]
+        - generic "Double-click to rename" [ref=f4e2135]: Pricing
+        - combobox "Workflow status" [ref=f4e2136]:
+          - option "Draft" [selected]
+          - option "Review"
+          - option "Published"
+        - button "Delete page" [ref=f4e2137]
+      - generic [ref=f4e2141] [cursor=pointer]:
+        - generic "Draft" [ref=f4e2142]
+        - generic "Double-click to rename" [ref=f4e2143]: About
+        - combobox "Workflow status" [ref=f4e2144]:
+          - option "Draft" [selected]
+          - option "Review"
+          - option "Published"
+        - button "Delete page" [ref=f4e2145]
+      - button "Page" [ref=f4e113] [cursor=pointer]
+      - button "SEO" [ref=f4e115] [cursor=pointer]
+      - button "Template" [ref=f4e119] [cursor=pointer]
+    - generic [ref=f4e123]:
+      - button "Design" [ref=f4e124] [cursor=pointer]
+      - button "Code" [ref=f4e127] [cursor=pointer]
+      - button "Split View" [ref=f4e132] [cursor=pointer]
+      - button "Outline" [ref=f4e135] [cursor=pointer]
+      - button "Preview" [ref=f4e139] [cursor=pointer]
+    - generic [ref=f4e143]:
+      - generic [ref=f4e144]:
+        - complementary [ref=f4e145]:
+          - generic [ref=f4e146]:
+            - button "Edit" [ref=f4e147] [cursor=pointer]
+            - button "Library" [ref=f4e148] [cursor=pointer]
+            - button "Layout" [ref=f4e149] [cursor=pointer]
+            - button "Forms" [ref=f4e150] [cursor=pointer]
+            - button "Shop" [ref=f4e151] [cursor=pointer]
+            - button "Files" [active] [ref=f4e152] [cursor=pointer]
+            - button "Snips" [ref=f4e153] [cursor=pointer]
+            - button "Saved" [ref=f4e154] [cursor=pointer]
+          - generic [ref=f4e3092]:
+            - generic [ref=f4e3093]:
+              - generic [ref=f4e3094]: Pages
+              - generic [ref=f4e3095]:
+                - button "Home /" [ref=f4e3096] [cursor=pointer]:
+                  - generic [ref=f4e3100]: Home
+                  - generic [ref=f4e3101]: /
+                - button "Pricing /pricing" [ref=f4e3102] [cursor=pointer]:
+                  - generic [ref=f4e3106]: Pricing
+                  - generic [ref=f4e3107]: /pricing
+                - button "About /about" [ref=f4e3108] [cursor=pointer]:
+                  - generic [ref=f4e3112]: About
+                  - generic [ref=f4e3113]: /about
+            - generic [ref=f4e3114]:
+              - generic [ref=f4e3115]: Project files
+              - generic [ref=f4e3116]:
+                - button "Upload folder" [ref=f4e3117] [cursor=pointer]
+                - button "New file" [ref=f4e3121] [cursor=pointer]
+                - button "New folder" [ref=f4e3125] [cursor=pointer]
+            - generic [ref=f4e3128]: Drop a folder here, click the + icons to create, or use the upload button.
+        - button "Collapse library" [ref=f4e805] [cursor=pointer]
+      - generic [ref=f4e811]:
+        - generic [ref=f4e812]:
+          - generic [ref=f4e813]: Preview · 4 block s · desktop
+          - generic [ref=f4e814]: 1200 × auto
+        - generic [ref=f4e815]:
+          - generic [ref=f4e2490]:
+            - banner [ref=f4e3057]:
+              - link "Fieldnote" [ref=f4e3058] [cursor=pointer]:
+                - /url: index.html
+              - navigation [ref=f4e3059]:
+                - link "Pricing" [ref=f4e3060] [cursor=pointer]:
+                  - /url: pricing.html
+                - link "About" [ref=f4e3061] [cursor=pointer]:
+                  - /url: about.html
+                - link "Start free" [ref=f4e3062] [cursor=pointer]:
+                  - /url: "#"
+            - generic [ref=f4e2498]:
+              - button "Edit text inline" [ref=f4e2499] [cursor=pointer]
+              - button "Save as component" [ref=f4e2503] [cursor=pointer]
+              - button "Move up" [ref=f4e2508] [cursor=pointer]
+              - button "Move down" [ref=f4e2511] [cursor=pointer]
+              - button "Duplicate" [ref=f4e2514] [cursor=pointer]
+              - button "Delete" [ref=f4e2518] [cursor=pointer]
+          - generic [ref=f4e2523]:
+            - generic [ref=f4e3065]:
+              - generic [ref=f4e3066]: Now in open beta
+              - heading "Software that gets out of your way." [level=1] [ref=f4e3067]
+              - paragraph [ref=f4e3068]: One tool for the whole team, none of the setup tax. Start free, upgrade when it actually pays for itself.
+              - generic [ref=f4e3069]:
+                - link "Start free" [ref=f4e3070] [cursor=pointer]:
+                  - /url: "#"
+                - link "See pricing" [ref=f4e3071] [cursor=pointer]:
+                  - /url: pricing.html
+            - generic [ref=f4e2537]:
+              - button "Edit text inline" [ref=f4e2538] [cursor=pointer]
+              - button "Save as component" [ref=f4e2542] [cursor=pointer]
+              - button "Move up" [ref=f4e2547] [cursor=pointer]
+              - button "Move down" [ref=f4e2550] [cursor=pointer]
+              - button "Duplicate" [ref=f4e2553] [cursor=pointer]
+              - button "Delete" [ref=f4e2557] [cursor=pointer]
+          - generic [ref=f4e2562]:
+            - generic [ref=f4e3076]:
+              - generic [ref=f4e3077]:
+                - heading "Built around the workflow your team already has" [level=3] [ref=f4e3079]
+                - paragraph [ref=f4e3080]: Not the one we wish they had. Connect your tools, keep the habits, skip the retraining.
+              - generic [ref=f4e3081]:
+                - generic [ref=f4e3082]:
+                  - heading "Set up in minutes" [level=3] [ref=f4e3083]
+                  - paragraph [ref=f4e3084]: No consultant, no onboarding call.
+                - generic [ref=f4e3085]:
+                  - heading "Usage-based pricing" [level=3] [ref=f4e3086]
+                  - paragraph [ref=f4e3087]: Same rate whether it is 3 people or 300.
+            - generic [ref=f4e2577]:
+              - button "Edit text inline" [ref=f4e2578] [cursor=pointer]
+              - button "Save as component" [ref=f4e2582] [cursor=pointer]
+              - button "Move up" [ref=f4e2587] [cursor=pointer]
+              - button "Move down" [ref=f4e2590] [cursor=pointer]
+              - button "Duplicate" [ref=f4e2593] [cursor=pointer]
+              - button "Delete" [ref=f4e2597] [cursor=pointer]
+          - generic [ref=f4e2602]:
+            - contentinfo [ref=f4e3088]: © 2026 Fieldnote — built by a small team that ships
+            - generic [ref=f4e2605]:
+              - button "Edit text inline" [ref=f4e2606] [cursor=pointer]
+              - button "Save as component" [ref=f4e2610] [cursor=pointer]
+              - button "Move up" [ref=f4e2615] [cursor=pointer]
+              - button "Move down" [ref=f4e2618] [cursor=pointer]
+              - button "Duplicate" [ref=f4e2621] [cursor=pointer]
+              - button "Delete" [ref=f4e2625] [cursor=pointer]
+      - generic [ref=f4e819]:
+        - button "Collapse inspector" [ref=f4e820] [cursor=pointer]
+        - complementary [ref=f4e823]:
+          - generic [ref=f4e824]:
+            - generic [ref=f4e825]: Inspector
+            - generic [ref=f4e826]: no selection
+          - generic [ref=f4e827]:
+            - button "Color" [ref=f4e828] [cursor=pointer]
+            - button "Tokens" [ref=f4e829] [cursor=pointer]
+            - button "Gradient" [ref=f4e830] [cursor=pointer]
+            - button "Pattern" [ref=f4e831] [cursor=pointer]
+            - button "SVG BG" [ref=f4e832] [cursor=pointer]
+            - button "Style" [ref=f4e833] [cursor=pointer]
+            - button "Responsive" [ref=f4e834] [cursor=pointer]
+            - button "Variants" [ref=f4e835] [cursor=pointer]
+            - button "Shape" [ref=f4e836] [cursor=pointer]
+            - button "BG" [ref=f4e837] [cursor=pointer]
+            - button "Blend" [ref=f4e838] [cursor=pointer]
+            - button "Divider" [ref=f4e839] [cursor=pointer]
+            - button "Motion" [ref=f4e840] [cursor=pointer]
+            - button "Text FX" [ref=f4e841] [cursor=pointer]
+            - button "Theme" [ref=f4e842] [cursor=pointer]
+            - button "CDN" [ref=f4e843] [cursor=pointer]
+            - button "Page" [ref=f4e844] [cursor=pointer]
+          - generic [ref=f4e846]:
+            - generic [ref=f4e847]:
+              - button [ref=f4e848]
+              - generic [ref=f4e851]:
+                - generic [ref=f4e852]: Hue
+                - slider [ref=f4e853]: "221"
+              - generic [ref=f4e854]:
+                - generic [ref=f4e855]: Alpha
+                - slider [ref=f4e856]: "100"
+              - generic [ref=f4e858]:
+                - generic [ref=f4e859]: Hex
+                - textbox [ref=f4e860]: "#2563eb"
+              - generic [ref=f4e863]:
+                - generic [ref=f4e864]:
+                  - generic [ref=f4e865]: R
+                  - spinbutton [ref=f4e866]: "37"
+                - generic [ref=f4e867]:
+                  - generic [ref=f4e868]: G
+                  - spinbutton [ref=f4e869]: "99"
+                - generic [ref=f4e870]:
+                  - generic [ref=f4e871]: B
+                  - spinbutton [ref=f4e872]: "235"
+              - generic [ref=f4e873]:
+                - generic [ref=f4e874]:
+                  - generic [ref=f4e875]: H
+                  - spinbutton [ref=f4e876]: "221"
+                - generic [ref=f4e877]:
+                  - generic [ref=f4e878]: S
+                  - spinbutton [ref=f4e879]: "83"
+                - generic [ref=f4e880]:
+                  - generic [ref=f4e881]: L
+                  - spinbutton [ref=f4e882]: "53"
+            - generic [ref=f4e883]:
+              - button "Apply background" [disabled] [ref=f4e884]
+              - button "Apply text color" [disabled] [ref=f4e885]
+            - generic [ref=f4e886]: Select an element on the canvas to apply.
+          - generic [ref=f4e887]:
+            - button "Layers · 4" [ref=f4e2629] [cursor=pointer]
+            - generic [ref=f4e897]:
+              - generic [ref=f4e898]:
+                - generic [ref=f4e899]: 4 layers
+                - button "Effects" [ref=f4e900] [cursor=pointer]
+              - generic [ref=f4e2630]:
+                - generic [ref=f4e2631]: "Check all:"
+                - button "Effected" [disabled] [ref=f4e2635]
+                - button "All · 4" [ref=f4e2638] [cursor=pointer]
+              - generic [ref=f4e903]:
+                - generic [ref=f4e2639]:
+                  - checkbox "Select for batch paste" [ref=f4e2640]
+                  - button "Toggle visibility" [ref=f4e2641] [cursor=pointer]
+                  - button "footer · © 2026 Fieldnote — built b" [ref=f4e2645] [cursor=pointer]
+                  - spinbutton "z-index" [ref=f4e2646]: "0"
+                  - button "Move up" [ref=f4e2647] [cursor=pointer]
+                  - button "Move down" [ref=f4e2650] [cursor=pointer]
+                  - button "Delete" [ref=f4e2653] [cursor=pointer]
+                - generic [ref=f4e2657]:
+                  - checkbox "Select for batch paste" [ref=f4e2658]
+                  - button "Toggle visibility" [ref=f4e2659] [cursor=pointer]
+                  - button "section · Built around the workflow" [ref=f4e2663] [cursor=pointer]
+                  - spinbutton "z-index" [ref=f4e2664]: "0"
+                  - button "Move up" [ref=f4e2665] [cursor=pointer]
+                  - button "Move down" [ref=f4e2668] [cursor=pointer]
+                  - button "Delete" [ref=f4e2671] [cursor=pointer]
+                - generic [ref=f4e2675]:
+                  - checkbox "Select for batch paste" [ref=f4e2676]
+                  - button "Toggle visibility" [ref=f4e2677] [cursor=pointer]
+                  - button "section · Now in open beta Software" [ref=f4e2681] [cursor=pointer]
+                  - spinbutton "z-index" [ref=f4e2682]: "0"
+                  - button "Move up" [ref=f4e2683] [cursor=pointer]
+                  - button "Move down" [ref=f4e2686] [cursor=pointer]
+                  - button "Delete" [ref=f4e2689] [cursor=pointer]
+                - generic [ref=f4e2693]:
+                  - checkbox "Select for batch paste" [ref=f4e2694]
+                  - button "Toggle visibility" [ref=f4e2695] [cursor=pointer]
+                  - button "header · Fieldnote Pricing About" [ref=f4e2699] [cursor=pointer]
+                  - spinbutton "z-index" [ref=f4e2700]: "0"
+                  - button "Move up" [ref=f4e2701] [cursor=pointer]
+                  - button "Move down" [ref=f4e2704] [cursor=pointer]
+                  - button "Delete" [ref=f4e2707] [cursor=pointer]
+    - contentinfo [ref=f4e905]:
+      - generic [ref=f4e906]:
+        - generic [ref=f4e907]: Home
+        - generic [ref=f4e908]: 4 block s
+        - generic [ref=f4e909]: design
+        - generic [ref=f4e910]: desktop
+      - generic [ref=f4e911]:
+        - generic [ref=f4e912]: 100 %
+        - generic [ref=f4e3089]: Saved
+  - region "Notifications alt+T"
