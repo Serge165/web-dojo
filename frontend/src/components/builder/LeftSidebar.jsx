@@ -36,7 +36,7 @@ const GROUPS = [
 
 export const LeftSidebar = ({
   onAddBlock, onAddFont, onAddFontFile, fonts,
-  files, onFilesChange, onFileClick, onImportFile,
+  files, onFilesChange, onFileClick, onImportFile, onInsertAllHtml,
   savedComponents, onDeleteSavedComponent,
   onWrapSelection, hasSelection,
   selectedHtml, selectedId, onEditSelected,
@@ -382,7 +382,7 @@ export const LeftSidebar = ({
       )}
 
       {tab === "files" && (
-        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onImportFile} pages={pages} activePageId={activePageId} onSwitchPage={onSwitchPage} onJsChange={onJsChange} />
+        <FileTree files={files} onChange={onFilesChange} onFileClick={onFileClick} onInsertHtml={onImportFile} onInsertAllHtml={onInsertAllHtml} pages={pages} activePageId={activePageId} onSwitchPage={onSwitchPage} onJsChange={onJsChange} />
       )}
 
       {tab === "saved" && (

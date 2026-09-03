@@ -11,6 +11,7 @@ export function TreeNode(props) {
   const onRequestRename = props.onRequestRename;
   const onFileClick = props.onFileClick;
   const onInsertHtml = props.onInsertHtml;
+  const onInsertAllHtml = props.onInsertAllHtml;
 
   if (node.type === "folder") {
     const open = expanded[node.path] ?? depth === 0;
@@ -42,6 +43,16 @@ export function TreeNode(props) {
           >
             <FolderPlus size={11} />
           </button>
+          {onInsertAllHtml && node.path ? (
+            <button
+              onClick={() => onInsertAllHtml(node.path)}
+              className="opacity-0 group-hover:opacity-100 text-[10px] text-emerald-400 hover:text-emerald-300 px-1"
+              title="Import all .html files in this folder"
+              data-testid={`tree-insert-all-${node.path}`}
+            >
+              import all
+            </button>
+          ) : null}
           {node.path ? (
             <button
               onClick={() => onRemove(node.path)}

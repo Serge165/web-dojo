@@ -332,6 +332,7 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [
             onRequestRename={openRename}
             onFileClick={onFileClick}
             onInsertHtml={onInsertHtml}
+            onInsertAllHtml={props.onInsertAllHtml}
           />
         )}
       </div>

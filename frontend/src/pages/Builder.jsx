@@ -787,6 +787,18 @@ export default function Builder() {
     onImportSections(scanHtml(inlineLocalStylesheets(content, siblingCssByName)));
   };
   const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
+  const onInsertAllHtml = (folderPath) => {
+    const htmlFiles = files.filter((f) => f.type === "file" && /\.html?$/i.test(f.path) && f.path.startsWith(folderPath + "/"));
+    if (htmlFiles.length === 0) { toast.info("No .html files found in this folder"); return; }
+    const siblingCssByName = {};
+    files.forEach((f) => { if (/\.css$/i.test(f.path) && f.path.startsWith(folderPath + "/")) siblingCssByName[f.path.split("/").pop()] = f.content; });
+    let imported = 0;
+    htmlFiles.forEach((f) => {
+      const { sections } = scanHtml(inlineLocalStylesheets(f.content, siblingCssByName));
+      sections.forEach((sec) => { addBlock(sec.html); imported++; });
+    });
+    toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"} from ${htmlFiles.length} file${htmlFiles.length === 1 ? "" : "s"}`);
+  };
 
   // The Shop tab's "Add cart + checkout" button used to call onAddBlock
   // directly, so clicking it twice (e.g. after tweaking the accent/currency
@@ -1393,6 +1405,7 @@ export default function Builder() {
                 onFilesChange={setFiles}
                 onFileClick={(node) => node.type !== "folder" && setEditingFileId(node.id)}
                 onImportFile={onImportFile}
+                onInsertAllHtml={onInsertAllHtml}
                 savedComponents={savedComponents}
                 onDeleteSavedComponent={deleteSavedComponent}
                 onWrapSelection={wrapSelectionWithContainer}
