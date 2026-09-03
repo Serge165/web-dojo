@@ -798,15 +798,36 @@ export default function Builder() {
         siblingCssByName[f.path.split("/").pop()] = f.content;
       }
     });
-    let imported = 0;
-    let allHeadHtml = '';
-    htmlFiles.forEach((f) => {
-      const { headHtml, sections } = scanHtml(inlineLocalStylesheets(f.content, siblingCssByName));
-      if (headHtml) allHeadHtml += (allHeadHtml ? '\n' : '') + headHtml;
+
+    if (htmlFiles.length === 1) {
+      const { headHtml, sections } = scanHtml(inlineLocalStylesheets(htmlFiles[0].content, siblingCssByName));
+      if (headHtml) setHeadHtml((cur) => cur ? cur + '\n' + headHtml : headHtml);
+      let imported = 0;
       sections.forEach((sec) => { addBlock(sec.html); imported++; });
-    });
-    if (allHeadHtml) setHeadHtml((cur) => cur ? cur + '\n' + allHeadHtml : allHeadHtml);
-    toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"} from ${htmlFiles.length} file${htmlFiles.length === 1 ? "" : "s"}`);
+      toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"}`);
+    } else {
+      const newPages = htmlFiles.map((f, idx) => {
+        const { headHtml, sections } = scanHtml(inlineLocalStylesheets(f.content, siblingCssByName));
+        const pageId = uid();
+        const fileName = f.path.split('/').pop().replace(/\.html?$/i, '');
+        const slug = fileName === 'index' ? 'index' : fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        return {
+          id: pageId,
+          name: fileName === 'index' ? 'Home' : fileName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+          slug: slug,
+          status: 'draft',
+          seo: {},
+          elements: sections.map((sec) => ({ id: uid(), html: sec.html })),
+          head_html: headHtml || '',
+          canvas_bg: '#ffffff',
+          fonts: [],
+          custom_js: '',
+        };
+      });
+      setPages((p) => [...p, ...newPages]);
+      if (newPages.length > 0) setActivePageId(newPages[0].id);
+      toast.success(`Imported ${newPages.length} page${newPages.length === 1 ? "" : "s"}`);
+    }
   };
 
   // The Shop tab's "Add cart + checkout" button used to call onAddBlock

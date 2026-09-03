@@ -46,11 +46,11 @@ export function TreeNode(props) {
           {onInsertAllHtml && node.path ? (
             <button
               onClick={() => onInsertAllHtml(node.path)}
-              className="opacity-0 group-hover:opacity-100 text-[10px] text-emerald-400 hover:text-emerald-300 px-1"
-              title="Import all .html files in this folder"
+              className="text-[10px] text-emerald-400 hover:text-emerald-300 px-1 font-medium"
+              title="Import all .html files in this folder as blocks + pages"
               data-testid={`tree-insert-all-${node.path}`}
             >
-              import all
+              📥 import all
             </button>
           ) : null}
           {node.path ? (
