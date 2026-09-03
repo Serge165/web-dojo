@@ -1052,33 +1052,33 @@ export default function Builder() {
   // Load a saved project template as a fresh project.
   const loadFromTemplate = (tpl) => {
     try {
-      if (!tpl) { toast.error(“Template not found”); return; }
+      if (!tpl) { toast.error('Template not found'); return; }
       const data = tpl.data || {};
-      const templateName = tpl.name || “Untitled”;
+      const templateName = tpl.name || 'Untitled';
       setProjectId(null);
-      setProjectName(`${templateName} — copy`);
+      setProjectName(templateName + ' - copy');
       const templatePages = (data.pages && Array.isArray(data.pages) && data.pages.length) ? data.pages : [{
-        id: uid(), name: “Home”, slug: “index”, status: “draft”, seo: {},
-        elements: (Array.isArray(data.elements) ? data.elements : []) || [], head_html: data.head_html || “”,
-        canvas_bg: data.canvas_bg || “#ffffff”, fonts: (Array.isArray(data.fonts) ? data.fonts : []) || [], custom_js: data.custom_js || “”,
+        id: uid(), name: 'Home', slug: 'index', status: 'draft', seo: {},
+        elements: (Array.isArray(data.elements) ? data.elements : []) || [], head_html: data.head_html || '',
+        canvas_bg: data.canvas_bg || '#ffffff', fonts: (Array.isArray(data.fonts) ? data.fonts : []) || [], custom_js: data.custom_js || '',
       }];
       const nextPages = templatePages.map((pg) => pg ? { ...pg, id: uid() } : null).filter(Boolean);
-      if (!nextPages.length) { toast.error(“Template has no pages”); return; }
+      if (!nextPages.length) { toast.error('Template has no pages'); return; }
       setPages(nextPages);
       setActivePageId(nextPages[0].id);
       setElements(nextPages[0].elements || []);
-      setHeadHtml(nextPages[0].head_html || “”);
-      setCanvasBg(nextPages[0].canvas_bg || “#ffffff”);
+      setHeadHtml(nextPages[0].head_html || '');
+      setCanvasBg(nextPages[0].canvas_bg || '#ffffff');
       setFonts(nextPages[0].fonts || []);
-      setCustomJs(nextPages[0].custom_js || “”);
-      setTemplate(data.template || { header_html: “”, footer_html: “”, use_template: false });
+      setCustomJs(nextPages[0].custom_js || '');
+      setTemplate(data.template || { header_html: '', footer_html: '', use_template: false });
       setAnalytics(data.analytics || {});
       setFiles(data.files || []);
       setSelectedId(null); setPast([]); setFuture([]);
-      toast.success(`Started new project from “${templateName}”`);
+      toast.success('Started new project from ' + templateName);
     } catch (e) {
-      console.error(“Failed to load template:”, e);
-      toast.error(`Failed to load template: ${e.message}`);
+      console.error('Failed to load template:', e);
+      toast.error('Failed to load template: ' + e.message);
     }
   };
 
