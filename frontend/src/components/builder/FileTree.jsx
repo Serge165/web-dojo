@@ -114,7 +114,7 @@ const readEntry = (entry, prefix = "") =>
     }
   });
 
-export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [], activePageId = null, onSwitchPage = null, onJsChange = null }) => {
+export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, onInsertAllHtml, pages = [], activePageId = null, onSwitchPage = null, onJsChange = null }) => {
   const tree = useMemo(() => buildTree(files), [files]);
   const [expanded, setExpanded] = useState({ "": true });
   const [dragging, setDragging] = useState(false);
@@ -332,7 +332,7 @@ export const FileTree = ({ files, onChange, onFileClick, onInsertHtml, pages = [
             onRequestRename={openRename}
             onFileClick={onFileClick}
             onInsertHtml={onInsertHtml}
-            onInsertAllHtml={props.onInsertAllHtml}
+            onInsertAllHtml={onInsertAllHtml}
           />
         )}
       </div>
