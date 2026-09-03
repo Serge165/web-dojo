@@ -78,6 +78,32 @@ const readFirstAttr = (tag, attr) => {
   return m ? m[1].replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&lt;/g, "<") : "";
 };
 
+const readStyleProp = (tag, prop) => {
+  const style = readFirstAttr(tag, "style");
+  const match = style.match(new RegExp(`${prop}\\s*:\\s*([^;]+);?`));
+  return match ? match[1].trim() : "";
+};
+
+const updateStyleProp = (tag, prop, value) => {
+  const style = readFirstAttr(tag, "style");
+  let newStyle;
+  if (value) {
+    if (style.includes(`${prop}:`)) {
+      newStyle = style.replace(new RegExp(`${prop}\\s*:[^;]+;?`), `${prop}:${value};`);
+    } else {
+      newStyle = style ? `${style}${prop}:${value};` : `${prop}:${value};`;
+    }
+  } else {
+    newStyle = style.replace(new RegExp(`${prop}\\s*:[^;]+;?`), "").trim();
+  }
+  if (/\bstyle="/i.test(tag)) {
+    return tag.replace(/(style=")[^"]*(")/i, `$1${escAttrLocal(newStyle)}$2`);
+  } else if (newStyle) {
+    return tag.replace(/>$/, ` style="${escAttrLocal(newStyle)}">`);
+  }
+  return tag;
+};
+
 const moveItem = (arr, idx, delta) => {
   const next = [...arr];
   const j = idx + delta;
@@ -1269,18 +1295,25 @@ export const parseEditableNodes = (html, limit = 24) => {
       node.kind = "button";
       node.text = decodeEntities(stripTags(inner));
       node.label = node.text || "Button";
+      node.textAlign = readStyleProp(outer, "text-align") || "center";
     } else {
       node.kind = "text";
       node.text = decodeEntities(stripTags(inner));
       node.label = headingLabel(tag.toLowerCase());
+      node.textAlign = readStyleProp(outer, "text-align") || "center";
     }
     out.push(node);
   }
   return out;
 };
 
-const rebuildContainer = (outer, tag, text) => {
-  const openTag = (outer.match(/^<[^>]*>/) || [""])[0];
+const rebuildContainer = (outer, tag, text, textAlign) => {
+  let openTag = (outer.match(/^<[^>]*>/) || [""])[0];
+  if (textAlign && textAlign !== "left") {
+    openTag = updateStyleProp(openTag, "text-align", textAlign);
+  } else if (textAlign === "left") {
+    openTag = updateStyleProp(openTag, "text-align", "");
+  }
   return `${openTag}${escTextLocal(text)}</${tag}>`;
 };
 
@@ -1308,8 +1341,8 @@ export const setEditableNode = (html, id, patch) => {
   let newOuter;
   if (node.tag.toLowerCase() === "img") newOuter = rebuildImg(node.outer, patch.src ?? node.src, patch.alt ?? node.alt);
   else if (node.tag.toLowerCase() === "a") newOuter = rebuildLink(node.outer, patch.href ?? node.href, patch.text ?? node.text);
-  else if (node.tag.toLowerCase() === "button") newOuter = rebuildContainer(node.outer, "button", patch.text ?? node.text);
-  else newOuter = rebuildContainer(node.outer, node.tag, patch.text ?? node.text);
+  else if (node.tag.toLowerCase() === "button") newOuter = rebuildContainer(node.outer, "button", patch.text ?? node.text, patch.textAlign ?? node.textAlign);
+  else newOuter = rebuildContainer(node.outer, node.tag, patch.text ?? node.text, patch.textAlign ?? node.textAlign);
   return html.slice(0, node.start) + newOuter + html.slice(node.start + node.outer.length);
 };
 
@@ -1369,7 +1402,14 @@ const GenericBlockEditor = ({ html, onChange, projectId = null, blockId = null }
               <input value={n.href} aria-label={`${n.label} URL`} className={inputCls} data-testid={`generic-href-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { href: e.target.value }))} />
             </>
           ) : (
-            <input value={n.text} aria-label={`${n.label} text`} className={inputCls} data-testid={`generic-text-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { text: e.target.value }))} />
+            <>
+              <input value={n.text} aria-label={`${n.label} text`} className={inputCls} data-testid={`generic-text-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { text: e.target.value }))} />
+              <select value={n.textAlign || "center"} aria-label={`${n.label} text align`} className={inputCls} data-testid={`generic-align-${n.id}`} onChange={(e) => onChange(setEditableNode(html, n.id, { textAlign: e.target.value }))}>
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </>
           )}
         </div>
       ))}
