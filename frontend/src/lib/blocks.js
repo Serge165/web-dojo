@@ -621,27 +621,16 @@ export const featureBoxesTemplate = (count = 8) => {
   const n = Math.max(2, Math.min(8, Number.isFinite(count) ? Math.round(count) : 8));
   const cols = Math.min(n, 4);
   const cards = FEATURE_BOX_ITEMS.slice(0, n).map((item) => `
-    <div style="padding:24px;border:1px solid var(--fc-border, #e2e8f0);border-radius:14px;background:var(--fc-surface, #f8fafc);">
-      <div style="width:44px;height:44px;border-radius:10px;background:var(--fc-primary, #0f172a);display:flex;align-items:center;justify-content:center;margin-bottom:14px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg></div>
+    <div style="padding:24px;border:1px solid var(--fc-border, #e2e8f0);border-radius:14px;background:var(--fc-surface, #f8fafc);text-align:center;">
+      <div style="width:44px;height:44px;border-radius:10px;background:var(--fc-primary, #0f172a);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg></div>
       <div style="font-weight:700;font-size:16px;color:var(--fc-text, #0f172a);margin:0 0 8px;">${item.title}</div>
       <p style="margin:0 0 16px;font-size:13px;line-height:1.7;color:var(--fc-muted, #64748b);">${item.desc}</p>
       <button style="background:var(--fc-primary, #0f172a);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Learn more</button>
     </div>`).join("");
-  // The site-wide responsive rule collapses any inline-style grid to a
-  // single column below 1024/767px ([style*="grid-template-columns"] in
-  // responsiveCss.js). Feature boxes should stay a 2-column grid there
-  // instead, so this overrides it with a higher-specificity !important
-  // rule scoped to this block's own class.
   return `<section style="padding:72px 32px;background:var(--fc-bg, #ffffff);font-family:Manrope,system-ui,sans-serif;">
-  <style>
-  @media (max-width: 1024px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
-  @media (max-width: 767px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
-  @container (max-width: 1024px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
-  @container (max-width: 767px) { .fb-grid[style*="grid-template-columns"] { grid-template-columns: repeat(2,1fr) !important; } }
-  </style>
   <div style="max-width:1200px;margin:0 auto;">
   <h2 style="font-size:34px;letter-spacing:-.02em;margin:0 0 40px;color:var(--fc-text, #0f172a);text-align:center;">Why choose us</h2>
-  <div class="fb-grid" style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:24px;">${cards}
+  <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:24px;">${cards}
   </div>
   </div>
 </section>`;

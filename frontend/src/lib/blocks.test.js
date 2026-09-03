@@ -20,12 +20,10 @@ describe("featureBoxesTemplate", () => {
     expect(featureBoxesTemplate(3)).toContain("repeat(3,1fr)");
   });
 
-  test("overrides the site-wide mobile grid collapse to stay 2 columns", () => {
-    const html = featureBoxesTemplate(8);
-    expect(html).toContain('class="fb-grid"');
-    expect(html).toMatch(/@media \(max-width: 1024px\) \{ \.fb-grid\[style\*="grid-template-columns"\] \{ grid-template-columns: repeat\(2,1fr\) !important; \} \}/);
-    expect(html).toMatch(/@media \(max-width: 767px\) \{ \.fb-grid\[style\*="grid-template-columns"\] \{ grid-template-columns: repeat\(2,1fr\) !important; \} \}/);
-    expect(html).toContain("@container (max-width: 1024px)");
-    expect(html).toContain("@container (max-width: 767px)");
+  test("centers each card's contents so single-column mobile stacking looks right", () => {
+    const html = featureBoxesTemplate(3);
+    const cardCount = (html.match(/text-align:center/g) || []).length;
+    expect(cardCount).toBe(3 + 1); // 3 cards + the heading
+    expect(html).toContain("margin:0 auto 14px");
   });
 });
