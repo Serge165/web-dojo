@@ -793,10 +793,13 @@ export default function Builder() {
     const siblingCssByName = {};
     files.forEach((f) => { if (/\.css$/i.test(f.path) && f.path.startsWith(folderPath + "/")) siblingCssByName[f.path.split("/").pop()] = f.content; });
     let imported = 0;
+    let allHeadHtml = '';
     htmlFiles.forEach((f) => {
-      const { sections } = scanHtml(inlineLocalStylesheets(f.content, siblingCssByName));
+      const { headHtml, sections } = scanHtml(inlineLocalStylesheets(f.content, siblingCssByName));
+      if (headHtml) allHeadHtml += (allHeadHtml ? '\n' : '') + headHtml;
       sections.forEach((sec) => { addBlock(sec.html); imported++; });
     });
+    if (allHeadHtml) setHeadHtml((cur) => cur ? cur + '\n' + allHeadHtml : allHeadHtml);
     toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"} from ${htmlFiles.length} file${htmlFiles.length === 1 ? "" : "s"}`);
   };
 
