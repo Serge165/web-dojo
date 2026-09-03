@@ -791,7 +791,13 @@ export default function Builder() {
     const htmlFiles = files.filter((f) => f.type === "file" && /\.html?$/i.test(f.path) && f.path.startsWith(folderPath + "/"));
     if (htmlFiles.length === 0) { toast.info("No .html files found in this folder"); return; }
     const siblingCssByName = {};
-    files.forEach((f) => { if (/\.css$/i.test(f.path) && f.path.startsWith(folderPath + "/")) siblingCssByName[f.path.split("/").pop()] = f.content; });
+    files.forEach((f) => {
+      if (/\.css$/i.test(f.path) && f.path.startsWith(folderPath + "/")) {
+        const relPath = f.path.slice(folderPath.length + 1);
+        siblingCssByName[relPath] = f.content;
+        siblingCssByName[f.path.split("/").pop()] = f.content;
+      }
+    });
     let imported = 0;
     let allHeadHtml = '';
     htmlFiles.forEach((f) => {
