@@ -315,6 +315,19 @@ export default function Builder() {
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
   }, [mode, pages]);
+  // Restore Design mode state when switching between pages
+  useEffect(() => {
+    if (mode === "preview") return;
+    const activePage = pages.find((p) => p.id === activePageId);
+    if (activePage) {
+      setElements(activePage.elements || []);
+      setHeadHtml(activePage.head_html || "");
+      setCanvasBg(activePage.canvas_bg || "#ffffff");
+      setFonts(activePage.fonts || []);
+      setCustomJs(activePage.custom_js || "");
+    }
+  }, [activePageId, pages, mode]);
+
   const previewProject = useMemo(() => {
     if (!previewPageId || previewPageId === activePageId) return project;
     const page = pages.find((p) => p.id === previewPageId);
@@ -848,7 +861,9 @@ export default function Builder() {
       if (htmlFiles.length === 1) {
         const inlined = inlineLocalStylesheets(htmlFiles[0].content, siblingCssByName);
         const { headHtml, sections } = scanHtml(inlined);
+        const bgColor = extractBodyBackgroundColor(inlined);
         if (headHtml) setHeadHtml((cur) => cur ? cur + '\n' + headHtml : headHtml);
+        if (bgColor !== '#ffffff') setCanvasBg(bgColor);
         let imported = 0;
         sections.forEach((sec) => { addBlock(sec.html); imported++; });
         toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"}`);
@@ -861,7 +876,7 @@ export default function Builder() {
             const pageId = uid();
             const fileName = f.path.split('/').pop().replace(/\.html?$/i, '');
             const slug = fileName === 'index' ? 'index' : fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            const bgColor = extractBodyBackgroundColor(f.content);
+            const bgColor = extractBodyBackgroundColor(inlined);
 
             // Add first file's sections to current canvas immediately
             if (idx === 0) {
