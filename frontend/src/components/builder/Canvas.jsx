@@ -69,7 +69,7 @@ export const Canvas = ({
           and flex-stack rules never fire in Design mode, since this
           isn't an iframe and @media only sees the real browser window,
           not this div's toggled width. */}
-      <div className="mx-auto my-6 transition-all duration-200" style={{ width: `min(${w}px, 96%)`, zoom: `${zoom}%`, containerType: "inline-size" }}>
+      <div className="my-6 transition-all duration-200" style={{ width: `min(${w}px, 100%)`, zoom: `${zoom}%`, containerType: "inline-size" }}>
         <div className="text-[10px] uppercase tracking-wider text-[#948C79] px-1 pb-1 flex items-center justify-between">
           <span>Preview · {elements.length} block{elements.length === 1 ? "" : "s"} · {viewport}</span>
           <span className="font-mono">{w} × auto</span>
