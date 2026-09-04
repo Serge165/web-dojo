@@ -24,6 +24,171 @@ const consolidateStyleTags = (doc) => {
   return [...new Set(rules)].join("\n\n");
 };
 
+// Reorganize imported JavaScript with educational section headings for code structure teaching.
+// Groups code into logical sections: setup, utilities, event handlers, and initialization.
+const reorganizeImportedJs = (js) => {
+  if (!js || typeof js !== 'string') return js || '';
+
+  const sections = {
+    setup: [],
+    utilities: [],
+    events: [],
+    init: [],
+    other: []
+  };
+
+  // Split by major patterns
+  const lines = js.split('\n');
+  let currentBlock = '';
+
+  for (const line of lines) {
+    currentBlock += line + '\n';
+
+    // Detect section patterns
+    if (line.match(/const|let|var/) && line.match(/=\s*({|\[|function|async|=>)/)) {
+      // Variable/constant declarations with initialization
+      if (line.match(/config|settings|options|const/i)) {
+        sections.setup.push(currentBlock.trim());
+        currentBlock = '';
+      }
+    }
+    if (line.match(/function|const.*=.*\(|=>/) && !line.match(/addEventListener|on|handler/i)) {
+      // Function definitions (utilities)
+      if (currentBlock.match(/\n\s*\}/)) {
+        sections.utilities.push(currentBlock.trim());
+        currentBlock = '';
+      }
+    }
+    if (line.match(/addEventListener|\.on\(|\.click\(|\.submit\(/i)) {
+      // Event listeners
+      if (currentBlock.match(/\n\s*[;}]/)) {
+        sections.events.push(currentBlock.trim());
+        currentBlock = '';
+      }
+    }
+    if (line.match(/init|main\(\)|DOMContentLoaded|window\.onload/i)) {
+      // Initialization code
+      if (currentBlock.match(/\n\s*\}/)) {
+        sections.init.push(currentBlock.trim());
+        currentBlock = '';
+      }
+    }
+  }
+
+  if (currentBlock.trim()) {
+    sections.other.push(currentBlock.trim());
+  }
+
+  // Build organized JavaScript with educational headings
+  const output = [];
+
+  if (sections.setup.length) {
+    output.push(`// ===== CONFIGURATION / SETUP =====\n${sections.setup.join('\n\n')}`);
+  }
+
+  if (sections.utilities.length) {
+    output.push(`// ===== UTILITY FUNCTIONS =====\n${sections.utilities.join('\n\n')}`);
+  }
+
+  if (sections.events.length) {
+    output.push(`// ===== EVENT LISTENERS =====\n${sections.events.join('\n\n')}`);
+  }
+
+  if (sections.init.length) {
+    output.push(`// ===== INITIALIZATION =====\n${sections.init.join('\n\n')}`);
+  }
+
+  if (sections.other.length) {
+    output.push(`// ===== OTHER CODE =====\n${sections.other.join('\n\n')}`);
+  }
+
+  return output.length ? output.join('\n\n') : js;
+};
+
+// Reorganize imported HTML with educational section headings for document structure teaching.
+// Adds commented section labels showing where different parts of the page structure go.
+const reorganizeImportedHtml = (html) => {
+  if (!html || typeof html !== 'string') return html || '';
+
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Extract major sections
+    const head = doc.head ? doc.head.innerHTML : '';
+    const header = doc.querySelector('header')?.outerHTML || '';
+    const nav = doc.querySelector('nav')?.outerHTML || '';
+    const main = doc.querySelector('main')?.outerHTML ||
+                 doc.querySelector('section')?.outerHTML || '';
+    const footer = doc.querySelector('footer')?.outerHTML || '';
+    let bodyContent = doc.body ? doc.body.innerHTML : '';
+
+    // Rebuild with educational structure
+    let output = '<!DOCTYPE html>\n<html lang="en">\n<head>\n';
+    output += '  <!-- ===== META / DOCTYPE ===== -->\n';
+    output += '  <meta charset="UTF-8">\n';
+    output += '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n\n';
+    output += '  <!-- ===== STYLES ===== -->\n';
+
+    // Extract style tags and link elements
+    const styles = doc.querySelectorAll('style');
+    const links = doc.querySelectorAll('link[rel="stylesheet"]');
+
+    if (links.length) {
+      links.forEach((link) => {
+        output += `  ${link.outerHTML}\n`;
+      });
+      output += '\n';
+    }
+
+    if (styles.length) {
+      styles.forEach((style) => {
+        output += `  <style>\n    ${style.textContent?.trim()}\n  </style>\n`;
+      });
+      output += '\n';
+    }
+
+    output += '  <!-- ===== SCRIPTS (non-critical) ===== -->\n';
+    output += '  <!-- Place non-blocking scripts here -->\n\n';
+
+    output += '</head>\n<body>\n';
+    output += '  <!-- ===== HEADER ===== -->\n';
+    if (header) output += `  ${header}\n\n`;
+
+    output += '  <!-- ===== NAVIGATION ===== -->\n';
+    if (nav) output += `  ${nav}\n\n`;
+
+    output += '  <!-- ===== MAIN CONTENT ===== -->\n';
+    if (main) output += `  ${main}\n\n`;
+    else output += '  <main>\n    <!-- Page content goes here -->\n  </main>\n\n';
+
+    output += '  <!-- ===== FOOTER ===== -->\n';
+    if (footer) output += `  ${footer}\n\n`;
+
+    output += '  <!-- ===== SCRIPTS (critical/deferred) ===== -->\n';
+    output += '  <!-- Place deferred scripts here for better performance -->\n';
+
+    // Extract script tags
+    const scripts = doc.querySelectorAll('script');
+    if (scripts.length) {
+      scripts.forEach((script) => {
+        if (script.src) {
+          output += `  <script src="${script.src}" defer></script>\n`;
+        } else if (script.textContent?.trim()) {
+          output += `  <script>\n    ${script.textContent?.trim()}\n  </script>\n`;
+        }
+      });
+    }
+
+    output += '</body>\n</html>';
+
+    return output;
+  } catch (err) {
+    console.warn('Error reorganizing HTML:', err);
+    return html;
+  }
+};
+
 // Reorganize imported CSS into Web Dojo's globals.css structure with proper sections.
 // Parses CSS to categorize rules and places them in the correct section with headings.
 const reorganizeImportedCss = (css) => {
@@ -243,3 +408,8 @@ export const scanHtml = (raw) => {
     return { headHtml: '', sections: [] };
   }
 };
+
+// Export educational HTML/CSS/JS reorganization functions for learning purposes
+export const reorganizeImportedHtmlEducational = reorganizeImportedHtml;
+export const reorganizeImportedJsEducational = reorganizeImportedJs;
+export const reorganizeImportedCssEducational = reorganizeImportedCss;
