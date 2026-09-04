@@ -865,7 +865,7 @@ export default function Builder() {
         const { headHtml, sections } = scanHtml(inlined);
         const bgColor = extractBodyBackgroundColor(inlined);
         if (headHtml) setHeadHtml((cur) => cur ? cur + '\n' + headHtml : headHtml);
-        if (bgColor !== '#ffffff') setCanvasBg(bgColor);
+        setCanvasBg(bgColor);
         let imported = 0;
         sections.forEach((sec) => { addBlock(sec.html); imported++; });
         toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"}`);
