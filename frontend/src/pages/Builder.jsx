@@ -316,6 +316,7 @@ export default function Builder() {
     return () => window.removeEventListener("message", onMsg);
   }, [mode, pages]);
   // Restore Design mode state when switching between pages
+  // Note: pages not in deps to avoid circular updates with save-state effect
   useEffect(() => {
     if (mode === "preview") return;
     const activePage = pages.find((p) => p.id === activePageId);
@@ -326,7 +327,8 @@ export default function Builder() {
       setFonts(activePage.fonts || []);
       setCustomJs(activePage.custom_js || "");
     }
-  }, [activePageId, pages, mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePageId, mode]);
 
   const previewProject = useMemo(() => {
     if (!previewPageId || previewPageId === activePageId) return project;
