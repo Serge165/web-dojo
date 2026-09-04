@@ -785,8 +785,9 @@ export default function Builder() {
     reader.readAsDataURL(file);
   };
 
-  const onImportSections = ({ headHtml: h, sections }) => {
+  const onImportSections = ({ headHtml: h, sections, bgColor }) => {
     if (h) setHeadHtml((cur) => cur ? cur + "\n" + h : h);
+    if (bgColor) setCanvasBg(bgColor);
     setImportedSections(sections); setImportOpen(true);
   };
   // FileTree's "insert" button (a whole HTML file from an imported
@@ -799,7 +800,10 @@ export default function Builder() {
   const onImportFile = (content) => {
     const siblingCssByName = {};
     files.forEach((f) => { if (/\.css$/i.test(f.path)) siblingCssByName[f.path.split("/").pop()] = f.content; });
-    onImportSections(scanHtml(inlineLocalStylesheets(content, siblingCssByName)));
+    const inlined = inlineLocalStylesheets(content, siblingCssByName);
+    const { headHtml, sections } = scanHtml(inlined);
+    const bgColor = extractBodyBackgroundColor(inlined);
+    onImportSections({ headHtml, sections, bgColor });
   };
   const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
   const insertAllImportedSections = () => {
