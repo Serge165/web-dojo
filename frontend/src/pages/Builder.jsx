@@ -815,30 +815,72 @@ export default function Builder() {
       const body = doc.body;
       if (!body) return '#ffffff';
 
-      // 1. Check body tag's style attribute (e.g., style="background-color: #f0f0f0;")
-      const styleAttr = body.getAttribute('style') || '';
-      const inlineMatch = styleAttr.match(/background(?:-color)?\s*:\s*([^;]+)/i);
-      if (inlineMatch) return inlineMatch[1].trim();
-
-      // 2. Check computed style from style tags
+      // Extract CSS variables first for fallback resolution
+      const cssVars = {};
       const styles = doc.querySelectorAll('style');
       for (const style of styles) {
         const text = style.textContent || '';
-        // Match: body { ... background: #color ... }
-        const bodyBgMatch = text.match(/body\s*\{[^}]*background(?:-color)?\s*:\s*([^;!}]+)/i);
-        if (bodyBgMatch) return bodyBgMatch[1].trim();
+        // Extract :root or root variables: --name: value;
+        const rootMatch = text.match(/:?root\s*\{([^}]*)\}/i);
+        if (rootMatch) {
+          const vars = rootMatch[1].matchAll(/--[\w-]+\s*:\s*([^;]+);/g);
+          for (const m of vars) {
+            const varName = m[0].split(':')[0].trim();
+            cssVars[varName] = m[1].trim();
+          }
+        }
       }
 
-      // 3. Check for body { background-color: ... } in external stylesheets
-      const links = doc.querySelectorAll('link[rel="stylesheet"]');
-      // Note: We can't load external stylesheets in DOMParser context, so skip
+      // Helper to resolve CSS variables recursively
+      const resolveVar = (value) => {
+        if (!value) return null;
+        const varMatch = value.match(/var\(--?([\w-]+)(?:\s*,\s*([^)]+))?\)/);
+        if (varMatch) {
+          const [, varName, fallback] = varMatch;
+          const resolved = cssVars['--' + varName] || cssVars[varName];
+          return resolved ? resolved.trim() : (fallback ? fallback.trim() : null);
+        }
+        return value.trim();
+      };
 
-      // 4. Check main wrapper div (common pattern)
-      const main = doc.querySelector('main, [role="main"]');
+      // 1. Check body tag's inline style
+      const styleAttr = body.getAttribute('style') || '';
+      const inlineMatch = styleAttr.match(/background(?:-color)?\s*:\s*([^;]+)/i);
+      if (inlineMatch) {
+        const resolved = resolveVar(inlineMatch[1]);
+        if (resolved) return resolved;
+      }
+
+      // 2. Check CSS rules for body { background / background-color }
+      for (const style of styles) {
+        const text = style.textContent || '';
+        // Match: body { ... background: value ... } or body { ... background-color: value ... }
+        const bodyBgMatch = text.match(/body\s*\{[^}]*(background(?:-color)?)\s*:\s*([^;!}]+)/i);
+        if (bodyBgMatch) {
+          const resolved = resolveVar(bodyBgMatch[2]);
+          if (resolved) return resolved;
+        }
+      }
+
+      // 3. Check :root or root for background-related variables
+      for (const style of styles) {
+        const text = style.textContent || '';
+        const rootMatch = text.match(/:?root\s*\{[^}]*(background(?:-color)?)\s*:\s*([^;!}]+)/i);
+        if (rootMatch) {
+          const resolved = resolveVar(rootMatch[2]);
+          if (resolved) return resolved;
+        }
+      }
+
+      // 4. Fallback: check main wrapper div or other common container
+      const main = doc.querySelector('main, [role="main"], .container, .wrapper');
       if (main) {
         const mainStyle = main.getAttribute('style') || '';
         const mainMatch = mainStyle.match(/background(?:-color)?\s*:\s*([^;]+)/i);
-        if (mainMatch) return mainMatch[1].trim();
+        if (mainMatch) {
+          const resolved = resolveVar(mainMatch[1]);
+          if (resolved) return resolved;
+        }
       }
 
       return '#ffffff';
