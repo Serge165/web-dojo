@@ -792,6 +792,29 @@ export default function Builder() {
     setImportOpen(false);
     toast.success(`Imported all ${importedSections.length} section${importedSections.length === 1 ? "" : "s"}`);
   };
+
+  const extractBodyBackgroundColor = (html) => {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const body = doc.body;
+      if (!body) return '#ffffff';
+      // Check inline style first
+      const bgColor = body.style.backgroundColor;
+      if (bgColor) return bgColor;
+      // Check computed style by looking at CSS rules
+      const styles = doc.querySelectorAll('style');
+      for (const style of styles) {
+        const text = style.textContent || '';
+        const bodyBgMatch = text.match(/body\s*\{[^}]*background(?:-color)?\s*:\s*([^;!]+)/i);
+        if (bodyBgMatch) return bodyBgMatch[1].trim();
+      }
+      return '#ffffff';
+    } catch (err) {
+      console.warn('Error extracting body background:', err);
+      return '#ffffff';
+    }
+  };
   const onInsertAllHtml = (folderPath) => {
     try {
       const htmlFiles = files.filter((f) => f.type === "file" && /\.html?$/i.test(f.path) && f.path.startsWith(folderPath + "/"));
@@ -821,6 +844,7 @@ export default function Builder() {
             const pageId = uid();
             const fileName = f.path.split('/').pop().replace(/\.html?$/i, '');
             const slug = fileName === 'index' ? 'index' : fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const bgColor = extractBodyBackgroundColor(f.content);
             return {
               id: pageId,
               name: fileName === 'index' ? 'Home' : fileName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -829,7 +853,7 @@ export default function Builder() {
               seo: {},
               elements: sections.map((sec) => ({ id: uid(), html: sec.html })),
               head_html: headHtml || '',
-              canvas_bg: '#ffffff',
+              canvas_bg: bgColor,
               fonts: [],
               custom_js: '',
             };
