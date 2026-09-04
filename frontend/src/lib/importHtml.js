@@ -51,14 +51,27 @@ const captureDivSoup = (doc, seen, found) => {
 const STYLESHEET_LINK_RE = /<link\b[^>]*rel=["']stylesheet["'][^>]*>/gi;
 const HREF_RE = /href=["']([^"']+)["']/i;
 export const inlineLocalStylesheets = (html, siblingCssByName) => {
-  if (!siblingCssByName || !html) return html;
-  return html.replace(STYLESHEET_LINK_RE, (tag) => {
-    const hrefMatch = tag.match(HREF_RE);
-    const href = hrefMatch && hrefMatch[1];
-    if (!href || /^([a-z]+:)?\/\//i.test(href)) return tag;
-    const css = siblingCssByName[href.split("/").pop()];
-    return css ? `<style>${css}</style>` : tag;
-  });
+  if (!html || typeof html !== 'string') return html || '';
+  if (!siblingCssByName || typeof siblingCssByName !== 'object') return html;
+
+  try {
+    return html.replace(STYLESHEET_LINK_RE, (tag) => {
+      try {
+        const hrefMatch = tag.match(HREF_RE);
+        const href = hrefMatch && hrefMatch[1];
+        if (!href || /^([a-z]+:)?\/\//i.test(href)) return tag;
+        const fileName = href.split("/").pop();
+        const css = siblingCssByName[href] || siblingCssByName[fileName];
+        return css ? `<style>${css}</style>` : tag;
+      } catch (err) {
+        console.warn('Error processing stylesheet link:', tag, err);
+        return tag;
+      }
+    });
+  } catch (err) {
+    console.error('inlineLocalStylesheets error:', err);
+    return html;
+  }
 };
 
 const generateResponsiveScalingCss = () => {
@@ -87,47 +100,66 @@ section[style*="1200"], section[style*="1000"], section[style*="960"] {
 };
 
 export const scanHtml = (raw) => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(raw, "text/html");
-
-  const consolidatedCss = consolidateStyleTags(doc);
-  const responsiveCss = generateResponsiveScalingCss();
-  const restHead = doc.head ? doc.head.innerHTML.trim() : "";
-  const headHtml = [
-    consolidatedCss ? `<style data-forge-imported-css>\n${consolidatedCss}\n${responsiveCss}\n</style>` : responsiveCss ? `<style data-forge-imported-css>\n${responsiveCss}\n</style>` : "",
-    restHead,
-  ].filter(Boolean).join("\n");
-
-  const seen = new Set();
-  const found = [];
-
-  SEMANTIC_SELECTORS.forEach((sel) => {
-    doc.body.querySelectorAll(sel).forEach((el) => {
-      if (seen.has(el)) return;
-      // avoid nested capture (only take top-most)
-      let p = el.parentElement;
-      let nested = false;
-      while (p && p !== doc.body) {
-        if (seen.has(p)) { nested = true; break; }
-        p = p.parentElement;
-      }
-      if (nested) return;
-      seen.add(el);
-      found.push({
-        id: `imported-${found.length}`,
-        label: el.tagName.toLowerCase() + (el.id ? "#" + el.id : el.className ? "." + String(el.className).split(" ")[0] : ""),
-        html: el.outerHTML,
-      });
-    });
-  });
-
-  if (found.length === 0) captureDivSoup(doc, seen, found);
-
-  // Fallback: if still nothing (e.g. a body with only text nodes), treat
-  // the whole body as one block.
-  if (found.length === 0 && doc.body && doc.body.innerHTML.trim()) {
-    found.push({ id: "imported-body", label: "body", html: doc.body.innerHTML });
+  if (!raw || typeof raw !== 'string') {
+    console.warn('scanHtml: invalid input', { raw: typeof raw });
+    return { headHtml: '', sections: [] };
   }
 
-  return { headHtml, sections: found };
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(raw, "text/html");
+
+    // Check for parsing errors
+    if (doc.getElementsByTagName('parsererror').length > 0) {
+      console.warn('DOMParser returned error', doc.documentElement.textContent);
+    }
+
+    const consolidatedCss = consolidateStyleTags(doc);
+    const responsiveCss = generateResponsiveScalingCss();
+    const restHead = doc.head ? doc.head.innerHTML.trim() : "";
+    const headHtml = [
+      consolidatedCss ? `<style data-forge-imported-css>\n${consolidatedCss}\n${responsiveCss}\n</style>` : responsiveCss ? `<style data-forge-imported-css>\n${responsiveCss}\n</style>` : "",
+      restHead,
+    ].filter(Boolean).join("\n");
+
+    const seen = new Set();
+    const found = [];
+
+    SEMANTIC_SELECTORS.forEach((sel) => {
+      try {
+        doc.body.querySelectorAll(sel).forEach((el) => {
+          if (seen.has(el)) return;
+          // avoid nested capture (only take top-most)
+          let p = el.parentElement;
+          let nested = false;
+          while (p && p !== doc.body) {
+            if (seen.has(p)) { nested = true; break; }
+            p = p.parentElement;
+          }
+          if (nested) return;
+          seen.add(el);
+          found.push({
+            id: `imported-${found.length}`,
+            label: el.tagName.toLowerCase() + (el.id ? "#" + el.id : el.className ? "." + String(el.className).split(" ")[0] : ""),
+            html: el.outerHTML,
+          });
+        });
+      } catch (err) {
+        console.warn(`Error querying selector "${sel}":`, err);
+      }
+    });
+
+    if (found.length === 0) captureDivSoup(doc, seen, found);
+
+    // Fallback: if still nothing (e.g. a body with only text nodes), treat
+    // the whole body as one block.
+    if (found.length === 0 && doc.body && doc.body.innerHTML.trim()) {
+      found.push({ id: "imported-body", label: "body", html: doc.body.innerHTML });
+    }
+
+    return { headHtml, sections: found };
+  } catch (err) {
+    console.error('scanHtml fatal error:', err);
+    return { headHtml: '', sections: [] };
+  }
 };

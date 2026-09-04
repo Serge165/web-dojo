@@ -788,45 +788,59 @@ export default function Builder() {
   };
   const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
   const onInsertAllHtml = (folderPath) => {
-    const htmlFiles = files.filter((f) => f.type === "file" && /\.html?$/i.test(f.path) && f.path.startsWith(folderPath + "/"));
-    if (htmlFiles.length === 0) { toast.info("No .html files found in this folder"); return; }
-    const siblingCssByName = {};
-    files.forEach((f) => {
-      if (/\.css$/i.test(f.path) && f.path.startsWith(folderPath + "/")) {
-        const relPath = f.path.slice(folderPath.length + 1);
-        siblingCssByName[relPath] = f.content;
-        siblingCssByName[f.path.split("/").pop()] = f.content;
-      }
-    });
-
-    if (htmlFiles.length === 1) {
-      const { headHtml, sections } = scanHtml(inlineLocalStylesheets(htmlFiles[0].content, siblingCssByName));
-      if (headHtml) setHeadHtml((cur) => cur ? cur + '\n' + headHtml : headHtml);
-      let imported = 0;
-      sections.forEach((sec) => { addBlock(sec.html); imported++; });
-      toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"}`);
-    } else {
-      const newPages = htmlFiles.map((f, idx) => {
-        const { headHtml, sections } = scanHtml(inlineLocalStylesheets(f.content, siblingCssByName));
-        const pageId = uid();
-        const fileName = f.path.split('/').pop().replace(/\.html?$/i, '');
-        const slug = fileName === 'index' ? 'index' : fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        return {
-          id: pageId,
-          name: fileName === 'index' ? 'Home' : fileName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-          slug: slug,
-          status: 'draft',
-          seo: {},
-          elements: sections.map((sec) => ({ id: uid(), html: sec.html })),
-          head_html: headHtml || '',
-          canvas_bg: '#ffffff',
-          fonts: [],
-          custom_js: '',
-        };
+    try {
+      const htmlFiles = files.filter((f) => f.type === "file" && /\.html?$/i.test(f.path) && f.path.startsWith(folderPath + "/"));
+      if (htmlFiles.length === 0) { toast.info("No .html files found in this folder"); return; }
+      const siblingCssByName = {};
+      files.forEach((f) => {
+        if (/\.css$/i.test(f.path) && f.path.startsWith(folderPath + "/")) {
+          const relPath = f.path.slice(folderPath.length + 1);
+          siblingCssByName[relPath] = f.content;
+          siblingCssByName[f.path.split("/").pop()] = f.content;
+        }
       });
-      setPages((p) => [...p, ...newPages]);
-      if (newPages.length > 0) setActivePageId(newPages[0].id);
-      toast.success(`Imported ${newPages.length} page${newPages.length === 1 ? "" : "s"}`);
+
+      if (htmlFiles.length === 1) {
+        const inlined = inlineLocalStylesheets(htmlFiles[0].content, siblingCssByName);
+        const { headHtml, sections } = scanHtml(inlined);
+        if (headHtml) setHeadHtml((cur) => cur ? cur + '\n' + headHtml : headHtml);
+        let imported = 0;
+        sections.forEach((sec) => { addBlock(sec.html); imported++; });
+        toast.success(`Imported ${imported} block${imported === 1 ? "" : "s"}`);
+      } else {
+        const newPages = htmlFiles.map((f, idx) => {
+          try {
+            const inlined = inlineLocalStylesheets(f.content, siblingCssByName);
+            const parsed = scanHtml(inlined);
+            const { headHtml, sections } = parsed;
+            const pageId = uid();
+            const fileName = f.path.split('/').pop().replace(/\.html?$/i, '');
+            const slug = fileName === 'index' ? 'index' : fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            return {
+              id: pageId,
+              name: fileName === 'index' ? 'Home' : fileName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+              slug: slug,
+              status: 'draft',
+              seo: {},
+              elements: sections.map((sec) => ({ id: uid(), html: sec.html })),
+              head_html: headHtml || '',
+              canvas_bg: '#ffffff',
+              fonts: [],
+              custom_js: '',
+            };
+          } catch (err) {
+            console.error(`Error parsing ${f.path}:`, err);
+            toast.error(`Failed to parse ${f.path}: ${err.message}`);
+            throw err;
+          }
+        });
+        setPages((p) => [...p, ...newPages]);
+        if (newPages.length > 0) setActivePageId(newPages[0].id);
+        toast.success(`Imported ${newPages.length} page${newPages.length === 1 ? "" : "s"}`);
+      }
+    } catch (err) {
+      console.error('onInsertAllHtml error:', err);
+      toast.error(`Import failed: ${err.message}`);
     }
   };
 
