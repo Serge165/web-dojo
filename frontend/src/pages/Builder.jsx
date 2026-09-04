@@ -799,16 +799,33 @@ export default function Builder() {
       const doc = parser.parseFromString(html, 'text/html');
       const body = doc.body;
       if (!body) return '#ffffff';
-      // Check inline style first
-      const bgColor = body.style.backgroundColor;
-      if (bgColor) return bgColor;
-      // Check computed style by looking at CSS rules
+
+      // 1. Check body tag's style attribute (e.g., style="background-color: #f0f0f0;")
+      const styleAttr = body.getAttribute('style') || '';
+      const inlineMatch = styleAttr.match(/background(?:-color)?\s*:\s*([^;]+)/i);
+      if (inlineMatch) return inlineMatch[1].trim();
+
+      // 2. Check computed style from style tags
       const styles = doc.querySelectorAll('style');
       for (const style of styles) {
         const text = style.textContent || '';
-        const bodyBgMatch = text.match(/body\s*\{[^}]*background(?:-color)?\s*:\s*([^;!]+)/i);
+        // Match: body { ... background: #color ... }
+        const bodyBgMatch = text.match(/body\s*\{[^}]*background(?:-color)?\s*:\s*([^;!}]+)/i);
         if (bodyBgMatch) return bodyBgMatch[1].trim();
       }
+
+      // 3. Check for body { background-color: ... } in external stylesheets
+      const links = doc.querySelectorAll('link[rel="stylesheet"]');
+      // Note: We can't load external stylesheets in DOMParser context, so skip
+
+      // 4. Check main wrapper div (common pattern)
+      const main = doc.querySelector('main, [role="main"]');
+      if (main) {
+        const mainStyle = main.getAttribute('style') || '';
+        const mainMatch = mainStyle.match(/background(?:-color)?\s*:\s*([^;]+)/i);
+        if (mainMatch) return mainMatch[1].trim();
+      }
+
       return '#ffffff';
     } catch (err) {
       console.warn('Error extracting body background:', err);
@@ -845,6 +862,13 @@ export default function Builder() {
             const fileName = f.path.split('/').pop().replace(/\.html?$/i, '');
             const slug = fileName === 'index' ? 'index' : fileName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             const bgColor = extractBodyBackgroundColor(f.content);
+
+            // Add first file's sections to current canvas immediately
+            if (idx === 0) {
+              if (headHtml) setHeadHtml((cur) => cur ? cur + '\n' + headHtml : headHtml);
+              sections.forEach((sec) => addBlock(sec.html));
+            }
+
             return {
               id: pageId,
               name: fileName === 'index' ? 'Home' : fileName.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
@@ -865,7 +889,7 @@ export default function Builder() {
         });
         setPages((p) => [...p, ...newPages]);
         if (newPages.length > 0) setActivePageId(newPages[0].id);
-        toast.success(`Imported ${newPages.length} page${newPages.length === 1 ? "" : "s"}`);
+        toast.success(`Imported ${newPages.length} page${newPages.length === 1 ? "" : "s"} with blocks populated`);
       }
     } catch (err) {
       console.error('onInsertAllHtml error:', err);
@@ -1668,7 +1692,7 @@ export default function Builder() {
       </Dialog>
 
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-2xl" data-testid="import-sections-modal">
+        <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-4xl" data-testid="import-sections-modal">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>Imported sections — {importedSections.length}</DialogTitle>

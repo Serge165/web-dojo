@@ -1,0 +1,167 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]: ◤
+          - generic [ref=e9]: Web Dojo
+        - textbox "Untitled project" [ref=e11]: Untitled
+        - generic [ref=e13]:
+          - button "Undo (Cmd+Z)" [disabled] [ref=e14]
+          - button "Redo (Cmd+Shift+Z)" [disabled] [ref=e18]
+      - generic [ref=e23]:
+        - button "desktop" [ref=e24] [cursor=pointer]
+        - button "tablet" [ref=e27] [cursor=pointer]
+        - button "mobile" [ref=e30] [cursor=pointer]
+      - generic [ref=e33]:
+        - button "Import" [ref=e34] [cursor=pointer]
+        - button "Export" [ref=e38] [cursor=pointer]
+        - button "Share" [ref=e44] [cursor=pointer]
+        - button "Publish" [ref=e48] [cursor=pointer]
+        - generic [ref=e53]:
+          - button "Find & Replace (Cmd+F)" [ref=e54] [cursor=pointer]
+          - button "Design tokens (colors/fonts/spacing)" [ref=e58] [cursor=pointer]
+          - button "Analytics" [ref=e65] [cursor=pointer]
+          - button "Project templates" [ref=e68] [cursor=pointer]
+          - button "Form submissions inbox" [ref=e73] [cursor=pointer]
+          - button "E-commerce dashboard (orders, customers, analytics, insights)" [ref=e77] [cursor=pointer]
+        - generic [ref=e966]: Save failed
+        - generic [ref=e85]:
+          - button "Save" [ref=e86] [cursor=pointer]
+          - button [ref=e91] [cursor=pointer]
+        - button "Open" [ref=e94] [cursor=pointer]
+        - button "Restart onboarding tour" [ref=e97] [cursor=pointer]
+    - generic [ref=e101]:
+      - button "File" [ref=e103] [cursor=pointer]
+      - button "Edit" [ref=e105] [cursor=pointer]
+      - button "Find" [ref=e107] [cursor=pointer]
+      - button "View" [ref=e109] [cursor=pointer]
+      - button "Help" [ref=e111] [cursor=pointer]
+    - generic [ref=e112]:
+      - generic [ref=e113] [cursor=pointer]:
+        - generic "Draft" [ref=e114]
+        - generic "Double-click to rename" [ref=e115]: Home
+        - combobox "Workflow status" [ref=e116]:
+          - option "Draft" [selected]
+          - option "Review"
+          - option "Published"
+        - combobox "Page type — pages are unique content; layouts are reusable templates" [ref=e117]:
+          - option "Page" [selected]
+          - option "Layout"
+      - button "Page" [ref=e118] [cursor=pointer]
+      - button "SEO" [ref=e120] [cursor=pointer]
+      - button "Template" [ref=e124] [cursor=pointer]
+    - generic [ref=e128]:
+      - button "Design" [ref=e129] [cursor=pointer]
+      - button "Code" [ref=e132] [cursor=pointer]
+      - button "Split View" [ref=e137] [cursor=pointer]
+      - button "Outline" [ref=e140] [cursor=pointer]
+      - button "Preview" [ref=e144] [cursor=pointer]
+    - generic [ref=e148]:
+      - generic [ref=e149]:
+        - complementary [ref=e150]:
+          - generic [ref=e151]:
+            - button "Edit" [ref=e152] [cursor=pointer]
+            - button "Library" [ref=e153] [cursor=pointer]
+            - button "Layout" [ref=e154] [cursor=pointer]
+            - button "Forms" [ref=e155] [cursor=pointer]
+            - button "Shop" [ref=e156] [cursor=pointer]
+            - button "Files" [active] [ref=e157] [cursor=pointer]
+            - button "Snips" [ref=e158] [cursor=pointer]
+            - button "Saved" [ref=e159] [cursor=pointer]
+          - generic [ref=e969]:
+            - generic [ref=e970]:
+              - generic [ref=e971]: Pages
+              - button "Home /" [ref=e973] [cursor=pointer]:
+                - generic [ref=e977]: Home
+                - generic [ref=e978]: /
+            - generic [ref=e979]:
+              - generic [ref=e980]: Project files
+              - generic [ref=e981]:
+                - button "Upload folder" [ref=e982] [cursor=pointer]
+                - button "New file" [ref=e986] [cursor=pointer]
+                - button "New folder" [ref=e990] [cursor=pointer]
+            - generic [ref=e993]: Drop a folder here, click the + icons to create, or use the upload button.
+        - button "Collapse library" [ref=e857] [cursor=pointer]
+      - generic [ref=e863]:
+        - generic [ref=e864]:
+          - generic [ref=e865]: Preview · 0 block s · desktop
+          - generic [ref=e866]: 1200 × auto
+        - generic [ref=e867]: Drag blocks here from the left library, or double-click any block.
+      - generic [ref=e871]:
+        - button "Collapse inspector" [ref=e872] [cursor=pointer]
+        - complementary [ref=e875]:
+          - generic [ref=e876]:
+            - generic [ref=e877]: Inspector
+            - generic [ref=e878]: no selection
+          - generic [ref=e879]:
+            - button "Color" [ref=e880] [cursor=pointer]
+            - button "Tokens" [ref=e881] [cursor=pointer]
+            - button "Gradient" [ref=e882] [cursor=pointer]
+            - button "Pattern" [ref=e883] [cursor=pointer]
+            - button "SVG BG" [ref=e884] [cursor=pointer]
+            - button "Style" [ref=e885] [cursor=pointer]
+            - button "Responsive" [ref=e886] [cursor=pointer]
+            - button "Variants" [ref=e887] [cursor=pointer]
+            - button "Shape" [ref=e888] [cursor=pointer]
+            - button "BG" [ref=e889] [cursor=pointer]
+            - button "Blend" [ref=e890] [cursor=pointer]
+            - button "Divider" [ref=e891] [cursor=pointer]
+            - button "Motion" [ref=e892] [cursor=pointer]
+            - button "Text FX" [ref=e893] [cursor=pointer]
+            - button "Theme" [ref=e894] [cursor=pointer]
+            - button "CDN" [ref=e895] [cursor=pointer]
+            - button "Page" [ref=e896] [cursor=pointer]
+          - generic [ref=e898]:
+            - generic [ref=e899]:
+              - button [ref=e900]
+              - generic [ref=e903]:
+                - generic [ref=e904]: Hue
+                - slider [ref=e905]: "221"
+              - generic [ref=e906]:
+                - generic [ref=e907]: Alpha
+                - slider [ref=e908]: "100"
+              - generic [ref=e910]:
+                - generic [ref=e911]: Hex
+                - textbox [ref=e912]: "#2563eb"
+              - generic [ref=e915]:
+                - generic [ref=e916]:
+                  - generic [ref=e917]: R
+                  - spinbutton [ref=e918]: "37"
+                - generic [ref=e919]:
+                  - generic [ref=e920]: G
+                  - spinbutton [ref=e921]: "99"
+                - generic [ref=e922]:
+                  - generic [ref=e923]: B
+                  - spinbutton [ref=e924]: "235"
+              - generic [ref=e925]:
+                - generic [ref=e926]:
+                  - generic [ref=e927]: H
+                  - spinbutton [ref=e928]: "221"
+                - generic [ref=e929]:
+                  - generic [ref=e930]: S
+                  - spinbutton [ref=e931]: "83"
+                - generic [ref=e932]:
+                  - generic [ref=e933]: L
+                  - spinbutton [ref=e934]: "53"
+            - generic [ref=e935]:
+              - button "Apply background" [disabled] [ref=e936]
+              - button "Apply text color" [disabled] [ref=e937]
+            - generic [ref=e938]: Select an element on the canvas to apply.
+          - generic [ref=e939]:
+            - button "Layers · 0" [ref=e940] [cursor=pointer]
+            - generic [ref=e949]:
+              - generic [ref=e950]:
+                - generic [ref=e951]: 0 layers
+                - button "Effects" [ref=e952] [cursor=pointer]
+              - generic [ref=e955]: No layers yet — drop a block on the canvas.
+    - contentinfo [ref=e957]:
+      - generic [ref=e958]:
+        - generic [ref=e959]: Home
+        - generic [ref=e960]: 0 block s
+        - generic [ref=e961]: design
+        - generic [ref=e962]: desktop
+      - generic [ref=e963]:
+        - generic [ref=e964]: 100 %
+        - generic [ref=e995]: Save failed
+  - region "Notifications alt+T"
