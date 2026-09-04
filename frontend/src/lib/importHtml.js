@@ -61,14 +61,40 @@ export const inlineLocalStylesheets = (html, siblingCssByName) => {
   });
 };
 
+const generateResponsiveScalingCss = () => {
+  // Make imported blocks scale responsively to fit canvas width
+  // without breaking layout. This CSS overrides fixed-width containers
+  // from imported templates, allowing them to adapt to different viewport sizes.
+  return `
+/* Responsive scaling for imported blocks */
+[style*="width:"] {
+  max-width: 100%;
+}
+div[style*="1200"], div[style*="1000"], div[style*="960"],
+section[style*="1200"], section[style*="1000"], section[style*="960"] {
+  width: 100% !important;
+}
+/* Prevent horizontal overflow on mobile */
+@container (max-width: 500px) {
+  body > div, body > section, body > main {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+  `;
+};
+
 export const scanHtml = (raw) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(raw, "text/html");
 
   const consolidatedCss = consolidateStyleTags(doc);
+  const responsiveCss = generateResponsiveScalingCss();
   const restHead = doc.head ? doc.head.innerHTML.trim() : "";
   const headHtml = [
-    consolidatedCss ? `<style data-forge-imported-css>\n${consolidatedCss}\n</style>` : "",
+    consolidatedCss ? `<style data-forge-imported-css>\n${consolidatedCss}\n${responsiveCss}\n</style>` : responsiveCss ? `<style data-forge-imported-css>\n${responsiveCss}\n</style>` : "",
     restHead,
   ].filter(Boolean).join("\n");
 
