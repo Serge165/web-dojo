@@ -24,6 +24,85 @@ const consolidateStyleTags = (doc) => {
   return [...new Set(rules)].join("\n\n");
 };
 
+// Reorganize imported CSS into Web Dojo's globals.css structure with proper sections.
+// Parses CSS to categorize rules and places them in the correct section with headings.
+const reorganizeImportedCss = (css) => {
+  if (!css || typeof css !== 'string') return css || '';
+
+  const sections = {
+    themeVars: [],
+    base: [],
+    animations: [],
+    mediaQueries: [],
+    components: []
+  };
+
+  // Split by @-rules and regular rules for categorization
+  const lines = css.split('\n');
+  let currentRule = '';
+  let inBlock = false;
+  let blockCount = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    currentRule += line + '\n';
+
+    // Count braces to track block nesting
+    blockCount += (line.match(/\{/g) || []).length;
+    blockCount -= (line.match(/\}/g) || []).length;
+
+    // When block closes (blockCount returns to 0), we have a complete rule
+    if (blockCount === 0 && currentRule.trim()) {
+      const trimmed = currentRule.trim();
+
+      // Categorize the rule
+      if (trimmed.match(/:\s*--[\w-]+\s*;/) || trimmed.match(/^:?root\s*\{/i)) {
+        // CSS custom properties / variables
+        sections.themeVars.push(trimmed);
+      } else if (trimmed.match(/^@keyframes/i)) {
+        // Animations
+        sections.animations.push(trimmed);
+      } else if (trimmed.match(/^@media/i)) {
+        // Media queries
+        sections.mediaQueries.push(trimmed);
+      } else if (trimmed.match(/^(html|body|[*]|reset|:root|form|input|button|a|h[1-6]|p|table)/i)) {
+        // Base/reset styles
+        sections.base.push(trimmed);
+      } else {
+        // Component/block styles (default)
+        sections.components.push(trimmed);
+      }
+
+      currentRule = '';
+    }
+  }
+
+  // Build organized stylesheet with Web Dojo headings
+  const output = [];
+
+  if (sections.themeVars.length) {
+    output.push(`/* ===== Theme Variables ===== */\n${sections.themeVars.join('\n\n')}`);
+  }
+
+  if (sections.base.length) {
+    output.push(`/* ===== Base ===== */\n${sections.base.join('\n\n')}`);
+  }
+
+  if (sections.components.length) {
+    output.push(`/* ===== Components ===== */\n${sections.components.join('\n\n')}`);
+  }
+
+  if (sections.animations.length) {
+    output.push(`/* ===== Animations ===== */\n${sections.animations.join('\n\n')}`);
+  }
+
+  if (sections.mediaQueries.length) {
+    output.push(`/* ===== Media Queries ===== */\n${sections.mediaQueries.join('\n\n')}`);
+  }
+
+  return output.length ? output.join('\n\n') : css;
+};
+
 const SEMANTIC_SELECTORS = ["header", "nav", "section", "footer", "main > *", "article"];
 // Real-world templates (marketplace downloads, agency exports) very often
 // skip semantic HTML5 tags entirely and structure the page as top-level
@@ -115,10 +194,11 @@ export const scanHtml = (raw) => {
     }
 
     const consolidatedCss = consolidateStyleTags(doc);
+    const organizedCss = consolidatedCss ? reorganizeImportedCss(consolidatedCss) : "";
     const responsiveCss = generateResponsiveScalingCss();
     const restHead = doc.head ? doc.head.innerHTML.trim() : "";
     const headHtml = [
-      consolidatedCss ? `<style data-forge-imported-css>\n${consolidatedCss}\n${responsiveCss}\n</style>` : responsiveCss ? `<style data-forge-imported-css>\n${responsiveCss}\n</style>` : "",
+      organizedCss ? `<style data-forge-imported-css>\n${organizedCss}\n${responsiveCss}\n</style>` : responsiveCss ? `<style data-forge-imported-css>\n${responsiveCss}\n</style>` : "",
       restHead,
     ].filter(Boolean).join("\n");
 
