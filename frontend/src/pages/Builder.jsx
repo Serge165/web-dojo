@@ -787,6 +787,11 @@ export default function Builder() {
     onImportSections(scanHtml(inlineLocalStylesheets(content, siblingCssByName)));
   };
   const insertImportedSection = (sec) => { addBlock(sec.html); toast.success(`Inserted ${sec.label}`); };
+  const insertAllImportedSections = () => {
+    importedSections.forEach((sec) => addBlock(sec.html));
+    setImportOpen(false);
+    toast.success(`Imported all ${importedSections.length} section${importedSections.length === 1 ? "" : "s"}`);
+  };
   const onInsertAllHtml = (folderPath) => {
     try {
       const htmlFiles = files.filter((f) => f.type === "file" && /\.html?$/i.test(f.path) && f.path.startsWith(folderPath + "/"));
@@ -1640,8 +1645,19 @@ export default function Builder() {
 
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
         <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-2xl" data-testid="import-sections-modal">
-          <DialogHeader><DialogTitle>Imported sections — {importedSections.length}</DialogTitle></DialogHeader>
-          <div className="text-xs text-[#A79C87] mb-2">Detected components from your HTML. Click to add to canvas.</div>
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Imported sections — {importedSections.length}</DialogTitle>
+              <button
+                onClick={insertAllImportedSections}
+                className="px-3 py-1 text-xs font-medium rounded bg-[#C9A227] text-black hover:bg-[#D9BC55] transition-colors"
+                data-testid="import-all-sections-btn"
+              >
+                Import All
+              </button>
+            </div>
+          </DialogHeader>
+          <div className="text-xs text-[#A79C87] mb-2">Detected components from your HTML. Click individual items to add, or use "Import All" above.</div>
           <div className="space-y-1 max-h-[420px] overflow-y-auto">
             {importedSections.map((s) => (
               <button
