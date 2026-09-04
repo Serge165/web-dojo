@@ -92,7 +92,35 @@ export const RightSidebar = ({
 
       <div className="flex-1 overflow-y-auto p-3">
         {tab === "color" && (
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {!selected && (
+              <div className="pb-4 border-b border-[#332D22]">
+                <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-2">Canvas Background</label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={canvasBg}
+                    onChange={(e) => onCanvasBg && onCanvasBg(e.target.value)}
+                    className="w-12 h-10 rounded cursor-pointer"
+                    data-testid="canvas-bg-color-input"
+                  />
+                  <div className="flex-1">
+                    <div className="text-xs text-[#E4DECE] font-mono">{canvasBg}</div>
+                    <div
+                      className="w-full h-6 rounded mt-1 border border-[#332D22]"
+                      style={{ background: canvasBg }}
+                      data-testid="canvas-bg-preview"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={() => onCanvasBg && onCanvasBg('#ffffff')}
+                  className="text-xs mt-2 py-1 px-2 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
+                  data-testid="canvas-bg-reset-btn"
+                >Reset to white</button>
+              </div>
+            )}
+
             <ColorPicker
               value={lastColor.hex}
               alpha={lastColor.alpha}
@@ -112,7 +140,7 @@ export const RightSidebar = ({
                 data-testid="apply-color-btn"
               >Apply text color</button>
             </div>
-            {!selected && <div className="text-[11px] text-[#948C79]">Select an element on the canvas to apply.</div>}
+            {selected && <div className="text-[11px] text-[#948C79]">Element color editing active.</div>}
           </div>
         )}
 

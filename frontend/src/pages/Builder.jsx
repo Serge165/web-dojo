@@ -127,6 +127,16 @@ export default function Builder() {
   const [savedComponents, setSavedComponents] = useState([]);
   const [loadOpen, setLoadOpen] = useState(false);
   const [projects, setProjects] = useState([]);
+
+  // Update canvas background color and inject CSS variable
+  const handleCanvasBgChange = (color) => {
+    setCanvasBg(color);
+    // Inject/update --body-bg CSS variable in head_html
+    const varStyle = `<style data-forge-body-bg>:root { --body-bg: ${color}; } body { background: var(--body-bg); }</style>`;
+    const updated = headHtml.replace(/<style data-forge-body-bg>.*?<\/style>/s, varStyle) ||
+                    (headHtml ? headHtml + '\n' + varStyle : varStyle);
+    setHeadHtml(updated);
+  };
   const [importOpen, setImportOpen] = useState(false);
   const [importedSections, setImportedSections] = useState([]);
   const [publishOpen, setPublishOpen] = useState(false);
@@ -1703,7 +1713,7 @@ export default function Builder() {
                 onApplyAnimation={applyAnimation}
                 onApplyTheme={applyTheme}
                 canvasBg={canvasBg}
-                onCanvasBg={setCanvasBg}
+                onCanvasBg={handleCanvasBgChange}
                 headHtml={headHtml}
                 onHeadHtmlChange={setHeadHtml}
                 onAddBlock={(html, atIndex) => addBlock(html, atIndex)}
