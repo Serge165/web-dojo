@@ -15,6 +15,26 @@
           "sidecar": true
         }
       ]
+    },
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-message",
+    {
+      "comment": "The .webdj format is a user-chosen document file, so the path is whatever the native picker returns — it may be on an external drive or any mount, not just $HOME. Scope is therefore unrestricted, but only for single-file read/write; directory listing, remove, rename and mkdir are deliberately not granted.",
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     }
   ]
 }

@@ -3,6 +3,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { TopBar } from "@/components/builder/TopBar";
 import { MenuBar } from "@/components/builder/MenuBar";
+import { useProjectFile } from "@/hooks/useProjectFile";
+import { isTauri } from "@/lib/projectFileHandler";
 import { CommandPalette } from "@/components/builder/CommandPalette";
 import { StatusBar } from "@/components/builder/StatusBar";
 import { LeftSidebar } from "@/components/builder/LeftSidebar";
@@ -1119,7 +1121,91 @@ export default function Builder() {
       if (sent > 0 && !silent) toast.success(`Synced ${sent} offline save${sent === 1 ? "" : "s"}`);
     }
   };
-  const save = () => { clearTimeout(autosaveTimerRef.current); persist(false); };
+  // --- .webdj native project files (desktop build only) --------------------
+  // The browser build keeps projects on the backend; the desktop build can
+  // additionally save a self-contained .webdj document to disk. Both paths
+  // stay live: Ctrl+S persists to the backend as always, and also writes the
+  // .webdj file when one is open.
+  const webdjEnabled = isTauri();
+
+  const mergedPages = useCallback(() => pages.map((p) =>
+    p.id === activePageId
+      ? { ...p, elements, head_html: headHtml, canvas_bg: canvasBg, fonts, custom_js: customJs }
+      : p
+  ), [pages, activePageId, elements, headHtml, canvasBg, fonts, customJs]);
+
+  const toWebdjProject = useCallback(() => ({
+    name: projectName,
+    projectId,
+    activePageId,
+    pages: mergedPages(),
+    blocks: elements,
+    theme: { template, fonts, canvasBg },
+    editorState: { activePageId, analytics },
+    files,
+  }), [projectName, projectId, activePageId, mergedPages, elements, template, fonts, canvasBg, analytics, files]);
+
+  const applyWebdjProject = useCallback((p) => {
+    if (!p) return;
+    const nextPages = (p.pages && p.pages.length)
+      ? p.pages.map((pg) => ({
+          id: pg.id || uid(),
+          name: pg.name || "Home",
+          slug: pg.slug || "index",
+          status: pg.status || "draft",
+          seo: pg.seo || {},
+          elements: (pg.elements || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })),
+          head_html: pg.head_html || "",
+          canvas_bg: pg.canvas_bg || "#ffffff",
+          fonts: pg.fonts || [],
+          custom_js: pg.custom_js || "",
+        }))
+      : [{
+          id: uid(), name: p.name || "Home", slug: "index", status: "draft", seo: {},
+          elements: (p.blocks || []).map((e) => ({ id: e.id || uid(), html: e.html, hidden: !!e.hidden, zIndex: e.zIndex || 0 })),
+          head_html: "", canvas_bg: "#ffffff", fonts: [], custom_js: "",
+        }];
+    const activeId = nextPages.find((x) => x.id === p.activePageId)?.id || nextPages[0].id;
+    const active = nextPages.find((x) => x.id === activeId);
+    // A file opened from disk is not yet a backend project — clearing the id
+    // makes the next backend save create one rather than overwrite an
+    // unrelated project that happens to share the id.
+    setProjectId(null);
+    setProjectName(p.name || "Untitled");
+    setPages(nextPages);
+    setActivePageId(activeId);
+    setElements(active.elements || []);
+    setHeadHtml(active.head_html || "");
+    setCanvasBg(active.canvas_bg || "#ffffff");
+    setFonts(active.fonts || []);
+    setCustomJs(active.custom_js || "");
+    setTemplate(p.theme?.template || { header_html: "", footer_html: "", use_template: false });
+    setAnalytics(p.editorState?.analytics || {});
+    setFiles(p.files || []);
+    setSelectedId(null); setPast([]); setFuture([]);
+    setSaveStatus("unsaved");
+  }, []);
+
+  const webdj = useProjectFile(toWebdjProject, applyWebdjProject);
+
+  // projectFileHandler reports outcomes as a `notification` CustomEvent so it
+  // stays free of any toast library; relay those to the UI.
+  useEffect(() => {
+    const onNotify = (e) => {
+      const { type, message } = e.detail || {};
+      if (type === "error") toast.error(message);
+      else if (type === "success") toast.success(message);
+      else toast.info(message);
+    };
+    document.addEventListener("notification", onNotify);
+    return () => document.removeEventListener("notification", onNotify);
+  }, []);
+
+  const save = () => {
+    clearTimeout(autosaveTimerRef.current);
+    persist(false);
+    if (webdjEnabled && webdj.filePath) webdj.save();
+  };
 
   const saveAs = async () => {
     const newName = prompt("Save a copy as…", projectName + " (copy)");
@@ -1215,6 +1301,9 @@ export default function Builder() {
       setAnalytics(p.analytics || {});
       setFiles(p.files || []);
       setSelectedId(null); setLoadOpen(false); setPast([]); setFuture([]);
+      // This project came from the backend, not from disk — detach any open
+      // .webdj so Ctrl+S cannot overwrite that file with a different project.
+      webdj.reset();
       toast.success(`Loaded ${p.name}`);
     } catch { toast.error("Failed to load"); }
   };
@@ -1245,6 +1334,7 @@ export default function Builder() {
       setAnalytics(data.analytics || {});
       setFiles(data.files || []);
       setSelectedId(null); setPast([]); setFuture([]);
+      webdj.reset();
       toast.success('Started new project from ' + templateName);
     } catch (e) {
       console.error('Failed to load template:', e);
@@ -1436,6 +1526,10 @@ export default function Builder() {
         { id: "open", label: "Open project…", icon: FolderOpen, onRun: openLoad },
         { id: "save", label: "Save", shortcut: "Ctrl+S", icon: Save, onRun: save },
         { id: "save-as", label: "Save As…", shortcut: "Ctrl+Shift+S", icon: Save, onRun: saveAs },
+        ...(webdjEnabled ? [
+          { id: "open-webdj", label: "Open Project File… (.webdj)", icon: FolderOpen, onRun: webdj.open },
+          { id: "save-webdj", label: "Save Project File As… (.webdj)", icon: Save, onRun: webdj.saveAs },
+        ] : []),
         { id: "export-html", label: "Export standalone .html", icon: Download, onRun: () => downloadStandalone(project) },
         { id: "export-zip", label: "Export HTML + CSS (.zip)", icon: Download, onRun: () => downloadZip(project) },
         { id: "share", label: "Copy shareable preview URL", icon: Upload, onRun: share },
@@ -1519,6 +1613,8 @@ export default function Builder() {
       <MenuBar
         project={project}
         onNew={newProject} onOpen={openLoad} onSave={save} onSaveAs={saveAs}
+        webdjEnabled={webdjEnabled} webdjFileName={webdj.fileName}
+        onOpenWebdj={webdj.open} onSaveWebdjAs={webdj.saveAs}
         onUndo={undo} onRedo={redo} canUndo={past.length > 0} canRedo={future.length > 0}
         onCut={cutEl} onCopy={copyEl} onPaste={pasteEl} hasSelection={!!selected}
         onSearchBlocks={focusLibrarySearch} onFindReplace={() => setFindOpen(true)}

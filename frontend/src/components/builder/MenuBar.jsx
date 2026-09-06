@@ -7,6 +7,7 @@ import { downloadStandalone, downloadZip } from "@/lib/exportHtml";
 export const MenuBar = ({
   project,
   onNew, onOpen, onSave, onSaveAs,
+  webdjEnabled, webdjFileName, onOpenWebdj, onSaveWebdjAs,
   onUndo, onRedo, canUndo, canRedo,
   onCut, onCopy, onPaste, hasSelection,
   onSearchBlocks, onFindReplace,
@@ -34,6 +35,16 @@ export const MenuBar = ({
         { label: "Open…", onClick: onOpen },
         { label: "Save", shortcut: "Ctrl+S", onClick: onSave },
         { label: "Save As…", shortcut: "Ctrl+Shift+S", onClick: onSaveAs },
+        // Native .webdj project files exist only in the desktop build; the
+        // browser has no filesystem to save them to.
+        ...(webdjEnabled ? [
+          { sep: true },
+          { label: "Open Project File… (.webdj)", onClick: onOpenWebdj },
+          {
+            label: webdjFileName ? `Save Project File As… (now ${webdjFileName})` : "Save Project File As… (.webdj)",
+            onClick: onSaveWebdjAs,
+          },
+        ] : []),
         { sep: true },
         { label: "Export standalone .html", onClick: () => downloadStandalone(project) },
         { label: "Export HTML + CSS (.zip)", onClick: () => downloadZip(project) },

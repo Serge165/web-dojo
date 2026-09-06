@@ -12,6 +12,10 @@ struct SidecarProcess(Mutex<Option<CommandChild>>);
 pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_shell::init())
+    // Required by the .webdj project format: native file pickers plus the
+    // read/write calls that back them.
+    .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_fs::init())
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
