@@ -42,25 +42,32 @@
 
 ---
 
-## ⚠️ Blocking: System Dependencies
+## ✅ Resolved: System Dependencies
 
-### Required for Linux Builds (AppImage, DEB, RPM)
+### Required for Linux Builds (AppImage, DEB, RPM) — Ubuntu 26.04
 
-Install via terminal with:
 ```bash
-sudo dnf install -y \
-  webkit2gtk-4.0-devel \
-  openssl-devel \
-  libxcb-devel \
-  cairo-devel \
-  pango-devel \
-  libfuse-devel \
-  glib2-devel
+sudo apt install -y \
+  libwebkit2gtk-4.1-dev \
+  libssl-dev \
+  libxcb1-dev \
+  libcairo2-dev \
+  libpango1.0-dev \
+  libfuse-dev \
+  libglib2.0-dev \
+  librsvg2-dev
 ```
 
 **Needed because:**
-- **webkit2gtk-4.0-devel** — WebView runtime for app UI (required)
-- **libfuse-devel** — AppImage filesystem support (user mentioned installing)
+- **libwebkit2gtk-4.1-dev** — WebView runtime for app UI. Must be **4.1**;
+  `webkit2gtk-4.0` is deprecated and unavailable on Ubuntu 26.04. Without it,
+  the `javascriptcore-rs-sys` build script fails during `cargo tauri build`.
+- **libfuse-dev** — AppImage filesystem support
+- **librsvg2-dev** — supplies `librsvg-2.0.pc`. `linuxdeploy-plugin-gtk` reads
+  that file's `libdir` to find the SVG pixbuf loader; Ubuntu ships the runtime
+  `librsvg-2.so.2` without the `.pc`, and the plugin then exits 1. Tauri
+  swallows the plugin's stderr and reports only
+  `failed to bundle project: 'failed to run linuxdeploy'`.
 - **Others** — X11 graphics, crypto, font rendering
 
 ### Check Installation Status
@@ -108,12 +115,12 @@ Check that all three exist in `src-tauri/target/release/bundle/`:
 
 | Platform | Build Target | System | Status | Notes |
 |----------|--------------|--------|--------|-------|
-| **Linux (AppImage)** | appimage | Fedora | ⚠️ Blocked on deps | Self-contained executable |
-| **Linux (Debian)** | deb | Fedora | ⚠️ Blocked on deps | .deb installer package |
-| **Linux (RPM)** | rpm | Fedora | ⚠️ Blocked on deps | .rpm installer package |
-| **Windows (EXE)** | exe | Fedora | ❌ Needs cross-compile | Requires MinGW or native Windows |
-| **Windows (MSI)** | msi | Fedora | ❌ Needs cross-compile | Requires MinGW or native Windows |
-| **macOS (DMG)** | dmg | Fedora | ❌ Needs cross-compile | Requires macOS or VM |
+| **Linux (AppImage)** | appimage | Ubuntu 26.04 | ✅ Built & launch-tested | Self-contained executable, ~130 MB |
+| **Linux (Debian)** | deb | Ubuntu 26.04 | ✅ Built | .deb installer package |
+| **Linux (RPM)** | rpm | Ubuntu 26.04 | ✅ Built (untested — no RPM host) | .rpm installer package |
+| **Windows (EXE)** | nsis | Ubuntu 26.04 | ❌ Needs cross-compile | Requires MinGW or native Windows |
+| **Windows (MSI)** | msi | Ubuntu 26.04 | ❌ Needs cross-compile | Requires MinGW or native Windows |
+| **macOS (DMG)** | dmg | Ubuntu 26.04 | ❌ Needs cross-compile | Requires macOS or VM |
 
 ---
 
@@ -153,13 +160,13 @@ This launches the app in dev mode with hot reload (even without webkit2gtk).
 ## 🎯 Immediate Action Items
 
 ### For You (User)
-- [ ] Run: `sudo dnf install -y webkit2gtk-4.0-devel openssl-devel libxcb-devel cairo-devel pango-devel libfuse-devel glib2-devel`
-- [ ] Run dependency check: `bash /tmp/claude-1000/-home-januszeal-Downloads-web-dojo-main/b4881bfa-ca6e-421c-be0c-1d9f6b37500f/scratchpad/tauri-deps-check.sh`
-- [ ] Test Linux build: `cd src-tauri && source $HOME/.cargo/env && cargo tauri build`
+- [x] Run: `sudo apt install -y libwebkit2gtk-4.1-dev libssl-dev libxcb1-dev libcairo2-dev libpango1.0-dev libfuse-dev libglib2.0-dev librsvg2-dev`
+- [x] Run dependency check: `bash test-tauri-build.sh`
+- [x] Test Linux build: `cd src-tauri && source $HOME/.cargo/env && cargo tauri build`
 
 ### Next Session (Me)
-- [ ] Verify Linux build outputs
-- [ ] Test AppImage execution
+- [x] Verify Linux build outputs
+- [x] Test AppImage execution
 - [ ] Set up cross-compilation for Windows (if needed)
 - [ ] Prepare macOS build environment docs (if needed)
 - [ ] Create CI/CD pipeline for automated builds
@@ -199,9 +206,12 @@ Latest commits (this session):
 
 ---
 
-**Status: ⏳ AWAITING DEPENDENCY INSTALLATION**
+**Status: ✅ LINUX BUILDS WORKING**
 
-All configuration done. Blocked on `sudo dnf install` for required libraries. Once installed, can proceed immediately to testing multi-platform builds.
+AppImage, DEB and RPM all build from `cargo tauri build` on Ubuntu 26.04. The
+AppImage was launch-tested: it mounts, opens its 1400×900 window, and starts the
+`webdojo-backend` sidecar on `127.0.0.1:8787`. Windows and macOS bundles still
+need native hosts.
 
 ---
 

@@ -18,7 +18,7 @@
 
 ### Build Targets Configuration
 
-**Linux (Fedora) - Builds all three targets:**
+**Linux (Ubuntu 26.04) - Builds all three targets:**
 Updated `src-tauri/tauri.conf.json` with:
 ```json
 "targets": [
@@ -34,7 +34,7 @@ Updated `src-tauri/tauri.conf.json` with:
 
 ## Platform-Specific Requirements
 
-### Linux (AppImage, DEB, RPM) ✅ Buildable on Fedora
+### Linux (AppImage, DEB, RPM) ✅ Buildable on Ubuntu 26.04
 
 **Installed:**
 - ✅ Rust 1.98.1
@@ -42,25 +42,34 @@ Updated `src-tauri/tauri.conf.json` with:
 - ✅ openssl
 - ✅ pkg-config
 
-**Required (not yet installed via sudo):**
+**Required system packages:**
 ```bash
-sudo dnf install -y \
-  webkit2gtk-4.0-devel \
-  openssl-devel \
-  libxcb-devel \
-  cairo-devel \
-  pango-devel \
-  libfuse-devel \
-  glib2-devel
+sudo apt install -y \
+  libwebkit2gtk-4.1-dev \
+  libssl-dev \
+  libxcb1-dev \
+  libcairo2-dev \
+  libpango1.0-dev \
+  libfuse-dev \
+  libglib2.0-dev \
+  librsvg2-dev
 ```
 
-**Status:** User installing libfuse-devel for AppImage support
+**Notes:**
+- Use **4.1**, not 4.0 — `webkit2gtk-4.0` is deprecated and unavailable on Ubuntu 26.04.
+- `librsvg2-dev` is non-obvious but **required**: `linuxdeploy-plugin-gtk` calls
+  `pkg-config --variable=libdir librsvg-2.0` to locate the SVG pixbuf loader.
+  Ubuntu ships the runtime `librsvg-2.so.2` without the `.pc` file, so without
+  this package the plugin exits 1 and Tauri reports only the generic
+  `failed to bundle project: 'failed to run linuxdeploy'` with no further detail.
+
+**Status:** ✅ AppImage, DEB and RPM all building.
 
 ---
 
 ### Windows (EXE, MSI) ⚠️ Requires Cross-Compilation
 
-**Option A: Cross-compile from Fedora**
+**Option A: Cross-compile from Ubuntu**
 - Install MinGW-w64 toolchain
 - Add Windows targets to Rust: `rustup target add x86_64-pc-windows-gnu`
 - Known issue: Some Tauri plugins may not work with GNU toolchain
@@ -93,11 +102,13 @@ cd src-tauri
 cargo tauri build
 ```
 
-**Build specific target:**
+**Build a single bundle format** (use `--bundles`, *not* `--target` — `--target`
+expects a Rust target triple and will fail with
+`Target appimage does not exist. Please run 'rustup target list'`):
 ```bash
-cargo tauri build -- --target appimage
-cargo tauri build -- --target deb
-cargo tauri build -- --target rpm
+cargo tauri build --bundles appimage
+cargo tauri build --bundles deb
+cargo tauri build --bundles rpm
 ```
 
 **Output location:** `src-tauri/target/release/bundle/`
@@ -112,11 +123,15 @@ cargo tauri build -- --target rpm
 **From Windows (MSVC - Recommended):**
 ```bash
 cd src-tauri
-cargo tauri build -- --target exe
-cargo tauri build -- --target msi
+cargo tauri build --bundles nsis,msi
 ```
 
-**From Fedora (GNU, not recommended):**
+`--target` takes a **Rust target triple**, not a bundle name. Bundle formats come
+from `bundle.targets` in `tauri.conf.json`, or from `--bundles` on the CLI.
+`cargo tauri build --target exe` fails with
+`Target exe does not exist. Please run 'rustup target list'`.
+
+**From Ubuntu (GNU, not recommended):**
 ```bash
 rustup target add x86_64-pc-windows-gnu
 cargo build --target x86_64-pc-windows-gnu --release
@@ -130,7 +145,7 @@ cargo build --target x86_64-pc-windows-gnu --release
 **From macOS:**
 ```bash
 cd src-tauri
-cargo tauri build -- --target dmg
+cargo tauri build --bundles dmg
 ```
 
 **Code signing (if distributing):**
@@ -171,10 +186,11 @@ This:
 ## Next Steps
 
 ### Immediate (Today)
-1. [ ] Complete Linux dependency installation via `sudo dnf install`
-2. [ ] Test Linux build: `cargo tauri build`
-3. [ ] Verify AppImage, DEB, RPM outputs in `src-tauri/target/release/bundle/`
-4. [ ] Test AppImage on Fedora
+1. [x] Complete Linux dependency installation via `sudo apt install`
+2. [x] Test Linux build: `cargo tauri build`
+3. [x] Verify AppImage, DEB, RPM outputs in `src-tauri/target/release/bundle/`
+4. [x] Test AppImage on Ubuntu 26.04 — launches, window opens, backend sidecar
+       binds `127.0.0.1:8787`
 
 ### Short Term
 1. [ ] Set up Windows build environment (VM or native machine)
@@ -228,15 +244,35 @@ jobs:
 
 ## Troubleshooting
 
-### "webkit2gtk-4.0 not found"
+### "webkit2gtk-4.0 not found" / `javascriptcore-rs-sys` build script fails
 ```bash
-sudo dnf install webkit2gtk-4.0-devel
+sudo apt install libwebkit2gtk-4.1-dev
 ```
+4.0 is deprecated on Ubuntu 26.04; 4.1 is the correct package.
 
 ### "libfuse.so.2 not found"
 ```bash
-sudo dnf install libfuse-devel
+sudo apt install libfuse-dev
 ```
+
+### "failed to bundle project: `failed to run linuxdeploy`"
+Tauri discards the linuxdeploy plugin's stderr, so this message appears with no
+cause attached — `RUST_LOG=debug` does not reveal it either. Reproduce the step
+by hand against the already-populated AppDir to see the real error:
+
+```bash
+cd src-tauri/target/release/bundle/appimage
+APPIMAGE_EXTRACT_AND_RUN=1 NO_STRIP=true \
+  ~/.cache/tauri/linuxdeploy-x86_64.AppImage \
+  --appimage-extract-and-run --appdir "Web Dojo.AppDir" --plugin gtk --output appimage
+```
+
+The usual cause on Ubuntu 26.04 is a missing `librsvg-2.0.pc`:
+```
+there is no 'libdir' variable for 'librsvg-2.0' library.
+ERROR: Failed to run plugin: gtk (exit code: 1)
+```
+Fix with `sudo apt install librsvg2-dev`.
 
 ### Frontend not loading in dev mode
 Verify backend is running:
@@ -325,4 +361,4 @@ cargo clean -p app
 
 ---
 
-**Ready for Linux build testing. Next: Complete `sudo dnf install` step and test `cargo tauri build`.**
+**Linux builds verified on Ubuntu 26.04: AppImage, DEB and RPM all produced by `cargo tauri build`.**
