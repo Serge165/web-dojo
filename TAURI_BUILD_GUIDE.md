@@ -17,17 +17,18 @@
 - ✅ tauri.conf.json updated with all targets
 
 ### Build Targets Configuration
+
+**Linux (Fedora) - Builds all three targets:**
 Updated `src-tauri/tauri.conf.json` with:
 ```json
 "targets": [
   "appimage",     // Linux AppImage (self-contained executable)
   "deb",          // Debian/Ubuntu package
-  "rpm",          // RedHat/Fedora/CentOS package
-  "exe",          // Windows executable (needs cross-compilation)
-  "msi",          // Windows installer (needs cross-compilation)
-  "dmg"           // macOS disk image (needs cross-compilation)
+  "rpm"           // RedHat/Fedora/CentOS package
 ]
 ```
+
+**Note:** Windows (exe, msi) and macOS (dmg) targets require native builds on those platforms or separate cross-compilation setup. Use the platform-specific build guides below.
 
 ---
 
