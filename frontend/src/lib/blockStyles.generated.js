@@ -1746,7 +1746,17 @@ export const BLOCK_STYLES_MEDIA_CSS = `@media (max-width: 1024px) { .block-compo
 @media (max-width: 1024px) { .block-zenero-bento-block .utility-5 { grid-template-columns: 1fr !important; } }
 @media (max-width: 767px) { .block-zenero-bento-block .utility-5 { grid-template-columns: 1fr !important; } }
 @media (max-width: 1024px) { .block-zenero-esports-roster-live .utility-4 { grid-template-columns: 1fr !important; } }
-@media (max-width: 767px) { .block-zenero-esports-roster-live .utility-4 { grid-template-columns: 1fr !important; } }`;
+@media (max-width: 767px) { .block-zenero-esports-roster-live .utility-4 { grid-template-columns: 1fr !important; } }
+@media (max-width: 1024px) { .block-social-wall-columns .social-wall { flex-direction: column !important; align-items: center !important; } }
+@media (max-width: 767px) { .block-social-wall-columns .social-wall { flex-direction: column !important; align-items: center !important; overflow-x: visible !important; } }
+@media (max-width: 1024px) { .block-social-wall-columns .col-1, .block-social-wall-columns .col-2, .block-social-wall-columns .col-3 { flex: 0 0 100% !important; max-width: 100% !important; } }
+@media (max-width: 767px) { .block-social-wall-columns .col-1, .block-social-wall-columns .col-2, .block-social-wall-columns .col-3 { flex: 0 0 100% !important; max-width: 100% !important; width: 100% !important; } }
+@media (max-width: 1024px) { .block-components-footer-2 { grid-template-columns: 1fr !important; gap: 20px !important; } }
+@media (max-width: 767px) { .block-components-footer-2 { grid-template-columns: 1fr !important; gap: 16px !important; } }
+@media (max-width: 1024px) { .block-components-gallery-grid-4 { gap: 8px !important; } }
+@media (max-width: 767px) { .block-components-gallery-grid-4 { gap: 6px !important; } }
+@media (max-width: 1024px) { .block-components-gallery-carousel-5, .block-components-gallery-carousel-6, .block-components-gallery-carousel-7, .block-components-gallery-carousel-8, .block-components-gallery-carousel-9, .block-components-gallery-carousel-10 { min-width: 280px !important; height: 240px !important; } }
+@media (max-width: 767px) { .block-components-gallery-carousel-5, .block-components-gallery-carousel-6, .block-components-gallery-carousel-7, .block-components-gallery-carousel-8, .block-components-gallery-carousel-9, .block-components-gallery-carousel-10 { min-width: 240px !important; height: 180px !important; } }`;
 
 export const BLOCK_STYLES_CSS = [
   BLOCK_BASE_CSS,
