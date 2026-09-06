@@ -40,7 +40,12 @@ pub fn run() {
         .expect("failed to create sidecar command")
         .env("DB_BACKEND", "sqlite")
         .env("SQLITE_PATH", sqlite_path.to_string_lossy().to_string())
-        .env("CORS_ORIGINS", "http://tauri.localhost")
+        // The webview's origin differs by platform: Linux and macOS serve the
+        // app from the custom protocol `tauri://localhost`, while Windows and
+        // Android use `http://tauri.localhost`. Allow both rather than
+        // cfg-ing per target — a wrong entry here fails every request as a
+        // CORS preflight rejection, which surfaces only as "Network Error".
+        .env("CORS_ORIGINS", "tauri://localhost,http://tauri.localhost")
         .spawn()
         .expect("failed to spawn backend sidecar");
 
