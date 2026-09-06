@@ -1765,7 +1765,9 @@ export const BLOCK_STYLES_MEDIA_CSS = `@media (max-width: 1024px) { .block-compo
 @media (max-width: 1024px) { .block-components-gallery-hover-2 { grid-template-columns: repeat(2, 1fr) !important; } }
 @media (max-width: 767px) { .block-components-gallery-hover-2 { grid-template-columns: 1fr !important; } }
 @media (max-width: 1024px) { .block-components-gallery-masonry-4 { column-count: 2 !important; } }
-@media (max-width: 767px) { .block-components-gallery-masonry-4 { column-count: 1 !important; } }`;
+@media (max-width: 767px) { .block-components-gallery-masonry-4 { column-count: 1 !important; } }
+[class*="hamburger"], [class*="menu-toggle"], [class*="mobile-menu"] { display: none !important; }
+@media (max-width: 767px) { [class*="hamburger"], [class*="menu-toggle"], [class*="mobile-menu"] { display: block !important; } }`;
 
 export const BLOCK_STYLES_CSS = [
   BLOCK_BASE_CSS,
