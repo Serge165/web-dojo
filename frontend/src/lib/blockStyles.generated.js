@@ -50,7 +50,12 @@
 // handle the merge case, these 7 blocks' CSS should move back under its
 // normal generated output and this note can go.
 
-export const BLOCK_BASE_CSS = `:where(.block) { position: relative; }`;
+export const BLOCK_BASE_CSS = `:where(.block) { position: relative; }
+.block { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6 { text-align: center; }
+.block p, .block-paragraph { text-align: center; }
+@media (max-width: 1024px) { .block { align-items: center; justify-content: center; } .block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6, .block p { text-align: center; } }
+@media (max-width: 767px) { .block { width: 100%; padding-left: 12px; padding-right: 12px; box-sizing: border-box; } .block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6, .block p { text-align: center; } }`;
 
 export const BLOCK_STYLES_BY_CATEGORY = {
   "components": `/* cmp-gallery-grid */
@@ -1752,11 +1757,15 @@ export const BLOCK_STYLES_MEDIA_CSS = `@media (max-width: 1024px) { .block-compo
 @media (max-width: 1024px) { .block-social-wall-columns .col-1, .block-social-wall-columns .col-2, .block-social-wall-columns .col-3 { flex: 0 0 100% !important; max-width: 100% !important; } }
 @media (max-width: 767px) { .block-social-wall-columns .col-1, .block-social-wall-columns .col-2, .block-social-wall-columns .col-3 { flex: 0 0 100% !important; max-width: 100% !important; width: 100% !important; } }
 @media (max-width: 1024px) { .block-components-footer-2 { grid-template-columns: 1fr !important; gap: 20px !important; } }
-@media (max-width: 767px) { .block-components-footer-2 { grid-template-columns: 1fr !important; gap: 16px !important; } }
+@media (max-width: 767px) { .block-components-footer-2 { grid-template-columns: 1fr !important; gap: 16px !important; text-align: center !important; } }
 @media (max-width: 1024px) { .block-components-gallery-grid-4 { gap: 8px !important; } }
 @media (max-width: 767px) { .block-components-gallery-grid-4 { gap: 6px !important; } }
 @media (max-width: 1024px) { .block-components-gallery-carousel-5, .block-components-gallery-carousel-6, .block-components-gallery-carousel-7, .block-components-gallery-carousel-8, .block-components-gallery-carousel-9, .block-components-gallery-carousel-10 { min-width: 280px !important; height: 240px !important; } }
-@media (max-width: 767px) { .block-components-gallery-carousel-5, .block-components-gallery-carousel-6, .block-components-gallery-carousel-7, .block-components-gallery-carousel-8, .block-components-gallery-carousel-9, .block-components-gallery-carousel-10 { min-width: 240px !important; height: 180px !important; } }`;
+@media (max-width: 767px) { .block-components-gallery-carousel-5, .block-components-gallery-carousel-6, .block-components-gallery-carousel-7, .block-components-gallery-carousel-8, .block-components-gallery-carousel-9, .block-components-gallery-carousel-10 { min-width: 240px !important; height: 180px !important; } }
+@media (max-width: 1024px) { .container { text-align: center !important; margin: 0 auto !important; } }
+@media (max-width: 767px) { .container { text-align: center !important; margin: 0 auto !important; width: 100% !important; padding: 0 12px !important; box-sizing: border-box !important; } }
+@media (max-width: 767px) { [class*="flex"] { flex-direction: column !important; align-items: center !important; } }
+@media (max-width: 767px) { [class*="grid"] { grid-auto-columns: 1fr !important; justify-items: center !important; } }`;
 
 export const BLOCK_STYLES_CSS = [
   BLOCK_BASE_CSS,
