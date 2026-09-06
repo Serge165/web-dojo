@@ -51,11 +51,12 @@
 // normal generated output and this note can go.
 
 export const BLOCK_BASE_CSS = `:where(.block) { position: relative; }
-.block { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.block:not([class*="navbar"]):not([class*="nav-"]):not([class*="header"]) { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6 { text-align: center; }
 .block p, .block-paragraph { text-align: center; }
-@media (max-width: 1024px) { .block { align-items: center; justify-content: center; } .block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6, .block p { text-align: center; } }
-@media (max-width: 767px) { .block { width: 100%; padding-left: 12px; padding-right: 12px; box-sizing: border-box; } .block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6, .block p { text-align: center; } }`;
+.block[class*="navbar"], .block[class*="nav-"], .block[class*="header"] { display: block !important; align-items: unset !important; justify-content: unset !important; }
+@media (max-width: 1024px) { .block:not([class*="navbar"]):not([class*="nav-"]):not([class*="header"]) { align-items: center; justify-content: center; } .block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6, .block p { text-align: center; } }
+@media (max-width: 767px) { .block:not([class*="navbar"]):not([class*="nav-"]):not([class*="header"]) { width: 100%; padding-left: 12px; padding-right: 12px; box-sizing: border-box; } .block-heading, .block h1, .block h2, .block h3, .block h4, .block h5, .block h6, .block p { text-align: center; } .block[class*="navbar"], .block[class*="nav-"], .block[class*="header"] { width: 100%; } }`;
 
 export const BLOCK_STYLES_BY_CATEGORY = {
   "components": `/* cmp-gallery-grid */
@@ -1764,8 +1765,9 @@ export const BLOCK_STYLES_MEDIA_CSS = `@media (max-width: 1024px) { .block-compo
 @media (max-width: 767px) { .block-components-gallery-carousel-5, .block-components-gallery-carousel-6, .block-components-gallery-carousel-7, .block-components-gallery-carousel-8, .block-components-gallery-carousel-9, .block-components-gallery-carousel-10 { min-width: 240px !important; height: 180px !important; } }
 @media (max-width: 1024px) { .container { text-align: center !important; margin: 0 auto !important; } }
 @media (max-width: 767px) { .container { text-align: center !important; margin: 0 auto !important; width: 100% !important; padding: 0 12px !important; box-sizing: border-box !important; } }
-@media (max-width: 767px) { [class*="flex"] { flex-direction: column !important; align-items: center !important; } }
-@media (max-width: 767px) { [class*="grid"] { grid-auto-columns: 1fr !important; justify-items: center !important; } }`;
+@media (max-width: 767px) { [class*="flex"]:not([class*="navbar"]):not([class*="nav-"]):not([class*="header"]) { flex-direction: column !important; align-items: center !important; } }
+@media (max-width: 767px) { [class*="grid"]:not([class*="navbar"]):not([class*="nav-"]):not([class*="header"]) { grid-auto-columns: 1fr !important; justify-items: center !important; } }
+@media (max-width: 767px) { [class*="navbar"], [class*="nav-"], [class*="header"] { flex-direction: column !important; align-items: flex-start !important; width: 100% !important; } }`;
 
 export const BLOCK_STYLES_CSS = [
   BLOCK_BASE_CSS,
