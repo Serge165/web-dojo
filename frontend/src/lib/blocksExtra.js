@@ -1,5 +1,6 @@
 // Extra block categories that merge into blocks.js CATEGORIES — a big 2026
 // revamp of headers, navbars, footers and video-background tools.
+import { HELIUM_CATEGORY } from "./heliumBlog";
 const F = "Manrope,system-ui,sans-serif";
 const VID = "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
 const VPOSTER = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=70";
@@ -2761,4 +2762,10 @@ COFFEE</div>
       },
     ],
   },
+  // Helium Blog — Canvas-rendered blog family (classic, dark, minimal, grid,
+  // timeline, cardstack, reader, annotated). Each block carries
+  // data-forge-widget="latest-blog" so it activates the Zenero dashboard gate
+  // (hasZeneroWidget) and draws its posts from the dashboard's Blog tab
+  // (/api/{project_id}/blog_posts) — the Helium ⇄ Zenero tandem.
+  HELIUM_CATEGORY,
 ];
