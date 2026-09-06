@@ -484,8 +484,9 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
 
   const { starters, userTemplates, aesthetics } = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const starters = templates.filter((t) => t.is_starter);
-    const userTemplates = templates.filter((t) => !t.is_starter);
+    const tmpl = Array.isArray(templates) ? templates : [];
+    const starters = tmpl.filter((t) => t.is_starter);
+    const userTemplates = tmpl.filter((t) => !t.is_starter);
     const aesthetics = Array.from(new Set(starters.map((t) => t.aesthetic).filter(Boolean))).sort();
     const filterOne = (t) => {
       const hitAesthetic = !aestheticFilter || t.aesthetic === aestheticFilter;
