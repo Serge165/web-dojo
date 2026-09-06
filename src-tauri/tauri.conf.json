@@ -26,8 +26,12 @@
   "bundle": {
     "active": true,
     "targets": [
+      "appimage",
       "deb",
-      "rpm"
+      "rpm",
+      "exe",
+      "msi",
+      "dmg"
     ],
     "externalBin": [
       "../backend/dist/webdojo-backend"
