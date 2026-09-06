@@ -40,11 +40,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "linux": {
-      "debian": {
-        "depends": ["libwebkit2gtk-4.0-0", "libssl-dev", "libgtk-3-0"]
-      }
-    },
     "android": {
       "debugApplicationIdSuffix": ".debug"
     }
