@@ -12,7 +12,8 @@ export const MenuBar = ({
   onCut, onCopy, onPaste, hasSelection,
   onSearchBlocks, onFindReplace,
   zoom, onZoomIn, onZoomOut, onZoomReset,
-  onHelpTour, onOpenPalette, onOpenThemes,
+  onHelpTour, onOpenPalette, onOpenThemes, onOpenAccount,
+  canExport = true,
 }) => {
   const [openMenu, setOpenMenu] = useState(null);
   const rootRef = useRef(null);
@@ -46,8 +47,17 @@ export const MenuBar = ({
           },
         ] : []),
         { sep: true },
-        { label: "Export standalone .html", onClick: () => downloadStandalone(project) },
-        { label: "Export HTML + CSS (.zip)", onClick: () => downloadZip(project) },
+        // Export is the free tier's paywall: the whole product can be had by
+        // downloading the output, so the click must open billing rather than
+        // merely look disabled.
+        {
+          label: canExport ? "Export standalone .html" : "Export standalone .html 🔒",
+          onClick: canExport ? () => downloadStandalone(project) : onOpenAccount,
+        },
+        {
+          label: canExport ? "Export HTML + CSS (.zip)" : "Export HTML + CSS (.zip) 🔒",
+          onClick: canExport ? () => downloadZip(project) : onOpenAccount,
+        },
       ],
     },
     {
@@ -74,6 +84,11 @@ export const MenuBar = ({
         { label: "Zoom In", onClick: onZoomIn },
         { label: "Zoom Out", onClick: onZoomOut },
         { label: `Reset Zoom (${zoom}%)`, onClick: onZoomReset },
+      ],
+    },
+    {
+      id: "account", label: "Account", items: [
+        { label: "Account & Billing…", onClick: onOpenAccount },
       ],
     },
     {

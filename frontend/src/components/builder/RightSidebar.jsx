@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ColorPicker } from "./ColorPicker";
 import { TokenSelector } from "./TokenSelector";
 import { GradientMixer } from "./GradientMixer";
@@ -16,7 +16,7 @@ import { BlendPanel } from "./BlendPanel";
 import { AnimationGenerator } from "./AnimationGenerator";
 import { ThemeGenerator } from "./ThemeGenerator";
 import { CDNPanel } from "./CDNPanel";
-import { Layers as LayersIcon, ChevronDown, ChevronRight } from "lucide-react";
+import { Layers as LayersIcon, ChevronDown, ChevronRight, Lock } from "lucide-react";
 
 const TABS = [
   { id: "color", label: "Color" },
@@ -65,8 +65,17 @@ export const RightSidebar = ({
   viewport,
   onPatchResponsive,
   onResetResponsive,
+  lockedTabs = [],
+  onUpgrade,
 }) => {
   const [tab, setTab] = useState("color");
+  const isLocked = (id) => lockedTabs.includes(id);
+
+  // A subscription can lapse mid-session while a now-locked tab is open;
+  // without this its controls would stay live until the next reload.
+  useEffect(() => {
+    if (lockedTabs.includes(tab)) setTab("color");
+  }, [lockedTabs, tab]);
   const [layersOpen, setLayersOpen] = useState(true);
   const [lastColor, setLastColor] = useState({ hex: "#2563eb", alpha: 1, rgba: "rgba(37, 99, 235, 1)" });
 
@@ -83,10 +92,13 @@ export const RightSidebar = ({
         {TABS.map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`py-2 ${tab === t.id ? "text-[#F1EDE2] bg-[#242019]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
+            onClick={() => (isLocked(t.id) ? onUpgrade?.() : setTab(t.id))}
+            className={`py-2 flex items-center justify-center gap-1 ${tab === t.id ? "text-[#F1EDE2] bg-[#242019]" : isLocked(t.id) ? "text-[#6B6455] hover:text-[#A79C87]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
             data-testid={`insp-tab-${t.id}`}
-          >{t.label}</button>
+          >
+            {t.label}
+            {isLocked(t.id) && <Lock size={9} data-testid={`insp-tab-${t.id}-lock`} />}
+          </button>
         ))}
       </div>
 

@@ -47,6 +47,8 @@ import { ImportExportModal } from "@/components/builder/ImportExportModal";
 import { SubmissionsModal } from "@/components/builder/SubmissionsModal";
 import { EcommerceDashboardModal } from "@/components/builder/EcommerceDashboardModal";
 import { ZeneroDashboardModal } from "@/components/builder/ZeneroDashboardModal";
+import { AccountModal } from "@/components/builder/AccountModal";
+import { useEntitlements } from "@/lib/entitlements";
 import { featureEnabled } from "@/lib/featureFlags";
 import { saveSnapshot, getSnapshot, enqueue, flushQueue } from "@/lib/localdb";
 
@@ -170,6 +172,43 @@ export default function Builder() {
   const [zeneroOpen, setZeneroOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [themeGalleryOpen, setThemeGalleryOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const entitlements = useEntitlements();
+
+  // Single choke point for publishing: gating the handler covers the TopBar
+  // button, the command palette and any future caller, where gating each
+  // button would leave the next one open.
+  const requestPublish = () => {
+    if (!entitlements.canPublish) {
+      toast.info(
+        entitlements.status === "trialing"
+          ? "Publishing unlocks when your trial converts. Everything else is yours now."
+          : "Publishing requires a subscription.",
+      );
+      return setAccountOpen(true);
+    }
+    setPublishOpen(true);
+  };
+
+  // Stripe returns here after checkout. The subscription is granted by the
+  // webhook, not by this redirect, so this only reports and reopens the panel
+  // to show the resulting state. The query string is stripped so a refresh
+  // does not replay the toast.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get("checkout");
+    if (!checkout) return;
+    window.history.replaceState({}, "", window.location.pathname);
+    if (checkout !== "success") return toast.info("Checkout cancelled.");
+
+    toast.success("Subscription started — your 7-day trial is active.");
+    setAccountOpen(true);
+    // Stripe redirects the browser as soon as payment is taken, which can beat
+    // its own webhook by a second or two. Without this re-check the customer
+    // lands back on a locked editor immediately after paying.
+    const timer = setTimeout(() => entitlements.refresh(), 3000);
+    return () => clearTimeout(timer);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // Restore the saved editor skin (View → 🎨 Themes) on load.
   useEffect(() => { applyEditorTheme(getSavedThemeName()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [zoom, setZoom] = useState(100);
@@ -1596,7 +1635,7 @@ export default function Builder() {
         onOpenTransfer={() => setTransferOpen(true)}
         onSave={save} onSaveAs={saveAs} saveStatus={saveStatus} onOpenLoad={openLoad} onShare={share}
         peers={peers}
-        onPublish={() => setPublishOpen(true)}
+        onPublish={requestPublish}
         onStartTour={() => setTourForce((v) => v + 1)}
         onFind={() => setFindOpen(true)}
         onAssets={() => setAssetsOpen(true)}
@@ -1622,7 +1661,11 @@ export default function Builder() {
         onHelpTour={() => setTourForce((v) => v + 1)}
         onOpenPalette={() => setPaletteOpen(true)}
         onOpenThemes={() => setThemeGalleryOpen(true)}
+        onOpenAccount={() => setAccountOpen(true)}
+        canExport={entitlements.canExport}
       />
+
+      <AccountModal open={accountOpen} onClose={() => { setAccountOpen(false); entitlements.refresh(); }} />
 
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} groups={paletteGroups} />
 
@@ -1799,6 +1842,8 @@ export default function Builder() {
                 data-testid="right-sidebar-collapse"
               ><ChevronRight size={12} /></button>
               <RightSidebar
+                lockedTabs={entitlements.lockedTabs}
+                onUpgrade={() => setAccountOpen(true)}
                 selected={selected}
                 onApplyBackground={applyBackground}
                 onApplyColor={applyColor}
