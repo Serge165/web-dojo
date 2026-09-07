@@ -1,9 +1,12 @@
 /**
  * Self-check for the webhook's entitlement decisions.
- * Run: node netlify/functions/stripe-webhook.test.js
+ * Run: node netlify/stripe-webhook.test.js
  *
  * Not under src/, so CRA's jest never picks it up — it stubs firebase-admin
  * and stripe at the module loader, which jest's own mocking would fight.
+ *
+ * Deliberately one level above functions/: Netlify deploys every .js in that
+ * directory as a function, and a name containing a dot fails the build.
  */
 
 const assert = require('assert');
@@ -52,7 +55,7 @@ Module._load = function (request, parent, isMain) {
   return realLoad.call(this, request, parent, isMain);
 };
 
-const { handler } = require('./stripe-webhook');
+const { handler } = require('./functions/stripe-webhook');
 
 // --- helpers ---------------------------------------------------------------
 
