@@ -3,7 +3,7 @@
  * Read-only; the webhook is the sole writer.
  */
 
-const { db, json, verifyCaller } = require('./_shared');
+const { db, json, verifyCaller } = require('../shared');
 
 const NO_SUBSCRIPTION = {
   hasSubscription: false,

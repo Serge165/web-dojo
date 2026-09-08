@@ -1,6 +1,9 @@
 /**
  * Shared setup for the Stripe subscription functions.
  *
+ * Lives above functions/ on purpose: Netlify publishes every file in that
+ * directory as its own endpoint, and this one has no handler to serve.
+ *
  * Each Netlify function is its own bundle, but a warm container reuses the
  * module between invocations, so initializeApp() must be guarded or the
  * second call throws "The default Firebase app already exists".
@@ -10,10 +13,15 @@ const admin = require('firebase-admin');
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    // Netlify stores the key with literal \n escapes; restore real newlines.
-    privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    // These belong inside credential.cert(). Passed as top-level options they
+    // are ignored, the SDK falls back to application default credentials that
+    // do not exist in a Netlify container, and every call throws.
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      // Netlify stores the key with literal \n escapes; restore real newlines.
+      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    }),
   });
 }
 

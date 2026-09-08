@@ -5,7 +5,7 @@
  * never trust the request body before constructEvent() has verified it.
  */
 
-const { admin, db, stripe, json, tsFromStripe } = require('./_shared');
+const { admin, db, stripe, json, tsFromStripe } = require('../shared');
 
 // Shared with the browser so the recorded entitlements and the gating the UI
 // applies cannot disagree.

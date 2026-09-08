@@ -4,7 +4,7 @@
  * the request — otherwise anyone could open anyone else's billing.
  */
 
-const { db, stripe, json, verifyCaller, SITE_URL } = require('./_shared');
+const { db, stripe, json, verifyCaller, SITE_URL } = require('../shared');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });

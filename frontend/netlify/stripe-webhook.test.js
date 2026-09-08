@@ -35,9 +35,16 @@ function collection(name) {
   };
 }
 
+// Left empty so initializeApp actually runs: an earlier stub pre-filled it,
+// which skipped credential setup and hid a broken initialisation that failed
+// only once deployed.
+let initOptions = null;
+let certArgs = null;
+
 const adminStub = {
-  apps: [{}], // already initialised, so _shared skips initializeApp
-  initializeApp: () => {},
+  apps: [],
+  initializeApp: (options) => { initOptions = options; },
+  credential: { cert: (serviceAccount) => { certArgs = serviceAccount; return { CERT: true }; } },
   firestore: Object.assign(() => ({ collection }), { Timestamp }),
   auth: () => ({ verifyIdToken: async () => ({ uid: 'u1' }) }),
 };
@@ -91,6 +98,19 @@ function userWrite() {
 // --- checks ----------------------------------------------------------------
 
 async function main() {
+  // Credentials must be built with credential.cert(). Passing the service
+  // account fields as top-level initializeApp options leaves the app with no
+  // credential at all, and every function 502s the moment it is deployed.
+  assert.ok(certArgs, 'admin.credential.cert() must be used to build credentials');
+  assert.deepStrictEqual(
+    Object.keys(certArgs).sort(), ['clientEmail', 'privateKey', 'projectId'],
+    'cert() needs exactly projectId, clientEmail and privateKey',
+  );
+  assert.deepStrictEqual(
+    initOptions, { credential: { CERT: true } },
+    'initializeApp must receive the cert() result as `credential`',
+  );
+
   // The recorded entitlements must match the shared policy table, or a future
   // server-side check would grant what the UI withholds.
   await fire('customer.subscription.updated', subscription('trialing'));

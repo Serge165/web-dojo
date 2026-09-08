@@ -3,7 +3,7 @@
  * Called by the frontend when the user picks a plan.
  */
 
-const { db, stripe, json, verifyCaller, SITE_URL, PRICE_IDS, TRIAL_DAYS } = require('./_shared');
+const { db, stripe, json, verifyCaller, SITE_URL, PRICE_IDS, TRIAL_DAYS } = require('../shared');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
