@@ -5,7 +5,7 @@
  * never trust the request body before constructEvent() has verified it.
  */
 
-const { admin, db, stripe, json, tsFromStripe } = require('../shared');
+const { Timestamp, db, stripe, json, tsFromStripe } = require('../shared');
 
 // Shared with the browser so the recorded entitlements and the gating the UI
 // applies cannot disagree.
@@ -110,7 +110,7 @@ async function handleCheckoutComplete(session) {
   await writeSubscription(subscription, {
     userId,
     plan,
-    createdAt: admin.firestore.Timestamp.now(),
+    createdAt: Timestamp.now(),
   });
   await applyEntitlement(userId, subscription);
 
@@ -133,7 +133,7 @@ async function handleSubscriptionCancelled(subscription) {
   const userId = subscription.metadata?.userId;
   await db.collection('stripe_subscriptions').doc(subscription.id).set({
     status: 'canceled',
-    cancelledAt: admin.firestore.Timestamp.now(),
+    cancelledAt: Timestamp.now(),
   }, { merge: true });
 
   if (userId) {
@@ -149,7 +149,7 @@ async function handlePaymentSucceeded(invoice) {
   const subscriptionId = invoiceSubscriptionId(invoice);
   if (!subscriptionId) return;
   await db.collection('stripe_subscriptions').doc(subscriptionId).set({
-    lastPaymentDate: admin.firestore.Timestamp.now(),
+    lastPaymentDate: Timestamp.now(),
     lastPaymentAmount: invoice.total / 100,
   }, { merge: true });
   console.log(`Payment succeeded for subscription: ${subscriptionId}`);
@@ -160,7 +160,7 @@ async function handlePaymentFailed(invoice) {
   if (!subscriptionId) return;
 
   await db.collection('stripe_subscriptions').doc(subscriptionId).set({
-    lastFailedPaymentDate: admin.firestore.Timestamp.now(),
+    lastFailedPaymentDate: Timestamp.now(),
     lastFailedPaymentReason: invoice.last_finalization_error?.message || 'Payment declined',
   }, { merge: true });
 

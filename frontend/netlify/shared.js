@@ -9,14 +9,21 @@
  * second call throws "The default Firebase app already exists".
  */
 
-const admin = require('firebase-admin');
+// firebase-admin 13 removed the namespaced API: on v14 the bare require gives
+// only the modular app surface, so `admin.apps`, `admin.credential`,
+// `admin.firestore` and `admin.auth` are all undefined and reading any of them
+// throws at module load — which Netlify reports as an opaque 502. Every guide
+// written before that release still shows the old form. Import the subpaths.
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
+const { getFirestore, Timestamp } = require('firebase-admin/firestore');
+const { getAuth } = require('firebase-admin/auth');
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    // These belong inside credential.cert(). Passed as top-level options they
-    // are ignored, the SDK falls back to application default credentials that
-    // do not exist in a Netlify container, and every call throws.
-    credential: admin.credential.cert({
+if (!getApps().length) {
+  initializeApp({
+    // The service account fields belong inside cert(). Passed as top-level
+    // options they are ignored, the SDK falls back to application default
+    // credentials that do not exist in a Netlify container, and every call throws.
+    credential: cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       // Netlify stores the key with literal \n escapes; restore real newlines.
@@ -25,7 +32,7 @@ if (!admin.apps.length) {
   });
 }
 
-const db = admin.firestore();
+const db = getFirestore();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Netlify sets URL to the site's primary address on deploy; the fallback keeps
@@ -64,7 +71,7 @@ async function verifyCaller(event) {
   const match = header.match(/^Bearer (.+)$/);
   if (!match) return null;
   try {
-    return await admin.auth().verifyIdToken(match[1]);
+    return await getAuth().verifyIdToken(match[1]);
   } catch (error) {
     console.warn('ID token verification failed:', error.message);
     return null;
@@ -73,7 +80,7 @@ async function verifyCaller(event) {
 
 /** Firestore Timestamp from a Stripe epoch-seconds field. */
 function tsFromStripe(seconds) {
-  return seconds ? admin.firestore.Timestamp.fromMillis(seconds * 1000) : null;
+  return seconds ? Timestamp.fromMillis(seconds * 1000) : null;
 }
 
-module.exports = { admin, db, stripe, json, verifyCaller, tsFromStripe, SITE_URL, PRICE_IDS, TRIAL_DAYS };
+module.exports = { Timestamp, db, stripe, json, verifyCaller, tsFromStripe, SITE_URL, PRICE_IDS, TRIAL_DAYS };

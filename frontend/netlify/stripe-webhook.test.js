@@ -35,19 +35,25 @@ function collection(name) {
   };
 }
 
-// Left empty so initializeApp actually runs: an earlier stub pre-filled it,
-// which skipped credential setup and hid a broken initialisation that failed
-// only once deployed.
+// Stubs the modular firebase-admin subpaths. An earlier version stubbed the
+// namespaced `firebase-admin` root instead, which v14 no longer ships: that
+// handed shared.js an API the real package does not have, so this file passed
+// while every deployed function 502'd on `admin.apps.length`.
+//
+// getApps() returns empty so initializeApp actually runs and the credential
+// path is exercised.
 let initOptions = null;
 let certArgs = null;
 
-const adminStub = {
-  apps: [],
+const appStub = {
+  getApps: () => [],
   initializeApp: (options) => { initOptions = options; },
-  credential: { cert: (serviceAccount) => { certArgs = serviceAccount; return { CERT: true }; } },
-  firestore: Object.assign(() => ({ collection }), { Timestamp }),
-  auth: () => ({ verifyIdToken: async () => ({ uid: 'u1' }) }),
+  cert: (serviceAccount) => { certArgs = serviceAccount; return { CERT: true }; },
 };
+
+const firestoreStub = { getFirestore: () => ({ collection }), Timestamp };
+
+const authStub = { getAuth: () => ({ verifyIdToken: async () => ({ uid: 'u1' }) }) };
 
 let nextEvent = null;
 const stripeStub = () => ({
@@ -57,7 +63,14 @@ const stripeStub = () => ({
 
 const realLoad = Module._load;
 Module._load = function (request, parent, isMain) {
-  if (request === 'firebase-admin') return adminStub;
+  if (request === 'firebase-admin/app') return appStub;
+  if (request === 'firebase-admin/firestore') return firestoreStub;
+  if (request === 'firebase-admin/auth') return authStub;
+  // Loud failure rather than a stub: the namespaced root resolves at require
+  // time but every property off it is undefined on v14.
+  if (request === 'firebase-admin') {
+    throw new Error('firebase-admin v14 has no namespaced API; import the /app, /firestore and /auth subpaths');
+  }
   if (request === 'stripe') return stripeStub;
   return realLoad.call(this, request, parent, isMain);
 };
