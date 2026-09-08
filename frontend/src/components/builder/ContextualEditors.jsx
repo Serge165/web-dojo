@@ -1,4 +1,5 @@
 import React from "react";
+import { escAttr, escText, unescapeHtml } from "@/lib/escapeHtml";
 
 // ============================================================
 // Small string helpers that let us edit a raw HTML fragment via
@@ -57,33 +58,42 @@ export const parseNum = (v, fallback = 0) => {
 };
 
 // Read a specific HTML attribute value from the first tag that has it.
+// Unescapes what setAttr escaped, so editing an already-set value (e.g. a
+// URL containing &) round-trips instead of re-escaping on every keystroke.
 export const readAttr = (html, attr) => {
   const re = new RegExp(`${attr}="([^"]*)"`);
   const m = html && html.match(re);
-  return m ? m[1] : "";
+  return m ? unescapeHtml(m[1]) : "";
 };
 
 // Replace or add an attribute on the first tag of the fragment. If the
 // attribute already exists anywhere, only the first occurrence changes.
+// `value` is escaped, and passed to String.replace as a replacer
+// FUNCTION (not a raw string) — a raw-string second argument to
+// String.replace interprets sequences like $&, $', $1 as replacement
+// patterns rather than literal text, silently corrupting output if the
+// user's value happens to contain one.
 export const setAttr = (html, attr, value) => {
+  const safe = escAttr(value);
   const re = new RegExp(`(<[a-zA-Z][^>]*?\\s)${attr}="[^"]*"`);
-  if (re.test(html)) return html.replace(re, `$1${attr}="${value}"`);
+  if (re.test(html)) return html.replace(re, (_match, prefix) => `${prefix}${attr}="${safe}"`);
   // Inject the attribute right after the opening tag name.
-  return html.replace(/<([a-zA-Z][a-zA-Z0-9]*)/, `<$1 ${attr}="${value}"`);
+  return html.replace(/<([a-zA-Z][a-zA-Z0-9]*)/, (_match, tag) => `<${tag} ${attr}="${safe}"`);
 };
 
 // Replace the inner text between the first matching open/close tag.
 export const setInnerText = (html, tag, text) => {
+  const safe = escText(text);
   const re = new RegExp(`(<${tag}[^>]*>)([\\s\\S]*?)(</${tag}>)`, "i");
   if (!re.test(html)) return html;
-  return html.replace(re, `$1${text}$3`);
+  return html.replace(re, (_match, open, _mid, close) => `${open}${safe}${close}`);
 };
 
 export const readInnerText = (html, tag) => {
   const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i");
   const m = html && html.match(re);
   if (!m) return "";
-  return m[1].replace(/<[^>]+>/g, "").trim();
+  return unescapeHtml(m[1].replace(/<[^>]+>/g, "").trim());
 };
 
 // Rough detection: what kind of element is the user editing?
@@ -112,15 +122,15 @@ export const detectKind = (html) => {
 // UI atoms shared by the editors
 // ============================================================
 
-const rowLabelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
-const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
+const rowLabelCls = "text-[10px] uppercase tracking-wider text-[#948C79] block mb-1";
+const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]";
 const selectCls = inputCls;
-const monoCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-xs font-mono text-white outline-none focus:border-blue-500";
+const monoCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]";
 
 const Slider = ({ value, min, max, step, unit = "", onChange, testId }) => (
   <div className="flex items-center gap-2">
     <input type="range" min={min} max={max} step={step ?? 1} value={value} onChange={(e) => onChange(Number(e.target.value))} className="flex-1" data-testid={`${testId}-slider`} />
-    <span className="w-14 text-right text-[11px] font-mono text-gray-300">{value}{unit}</span>
+    <span className="w-14 text-right text-[11px] font-mono text-[#E4DECE]">{value}{unit}</span>
   </div>
 );
 
@@ -131,7 +141,7 @@ const Row = ({ label, children }) => (
 const ColorRow = ({ label, value, onChange, testId }) => (
   <Row label={label}>
     <div className="flex items-center gap-2">
-      <input type="color" value={/^#[0-9a-f]{6}$/i.test(value) ? value : "#000000"} onChange={(e) => onChange(e.target.value)} className="w-8 h-7 bg-transparent border border-[#2B2B2B] rounded" data-testid={`${testId}-color`} />
+      <input type="color" value={/^#[0-9a-f]{6}$/i.test(value) ? value : "#000000"} onChange={(e) => onChange(e.target.value)} className="w-8 h-7 bg-transparent border border-[#332D22] rounded" data-testid={`${testId}-color`} />
       <input value={value} onChange={(e) => onChange(e.target.value)} className={monoCls + " flex-1"} data-testid={`${testId}-text`} />
     </div>
   </Row>
@@ -156,8 +166,8 @@ const ButtonEditor = ({ html, onReplace }) => {
   const border = readTagStyle(html, "button", "border") || "0";
 
   return (
-    <div className="space-y-3 pt-3 border-t border-[#2B2B2B]" data-testid="button-editor">
-      <div className="text-[10px] uppercase tracking-wider text-blue-400">Button</div>
+    <div className="space-y-3 pt-3 border-t border-[#332D22]" data-testid="button-editor">
+      <div className="text-[10px] uppercase tracking-wider text-[#D9BC55]">Button</div>
       <Row label="Label">
         <input value={label} onChange={(e) => onReplace(setInnerText(html, "button", e.target.value))} className={inputCls} data-testid="btn-label" />
       </Row>
@@ -189,8 +199,8 @@ const ImageEditor = ({ html, onReplace }) => {
   const height = readTagStyle(html, "img", "height") || "auto";
 
   return (
-    <div className="space-y-3 pt-3 border-t border-[#2B2B2B]" data-testid="image-editor">
-      <div className="text-[10px] uppercase tracking-wider text-blue-400">Image</div>
+    <div className="space-y-3 pt-3 border-t border-[#332D22]" data-testid="image-editor">
+      <div className="text-[10px] uppercase tracking-wider text-[#D9BC55]">Image</div>
       <Row label="Source URL">
         <input value={src} onChange={(e) => onReplace(setAttr(html, "src", e.target.value))} className={monoCls} data-testid="img-src" placeholder="https://…/photo.jpg" />
       </Row>
@@ -229,8 +239,8 @@ const FlexContainerEditor = ({ html, onPatch }) => {
   const padding = parseNum(readStyle(html, "padding"), 0);
 
   return (
-    <div className="space-y-3 pt-3 border-t border-[#2B2B2B]" data-testid="flex-editor">
-      <div className="text-[10px] uppercase tracking-wider text-blue-400">Flex container</div>
+    <div className="space-y-3 pt-3 border-t border-[#332D22]" data-testid="flex-editor">
+      <div className="text-[10px] uppercase tracking-wider text-[#D9BC55]">Flex container</div>
       <Row label="Direction">
         <select value={direction} onChange={(e) => onPatch({ "flex-direction": e.target.value })} className={selectCls} data-testid="flex-e-dir">
           {["row","row-reverse","column","column-reverse"].map((v) => <option key={v} value={v}>{v}</option>)}
@@ -272,8 +282,8 @@ const GridContainerEditor = ({ html, onPatch }) => {
   const alignItems = readStyle(html, "align-items") || "stretch";
 
   return (
-    <div className="space-y-3 pt-3 border-t border-[#2B2B2B]" data-testid="grid-editor">
-      <div className="text-[10px] uppercase tracking-wider text-blue-400">Grid container</div>
+    <div className="space-y-3 pt-3 border-t border-[#332D22]" data-testid="grid-editor">
+      <div className="text-[10px] uppercase tracking-wider text-[#D9BC55]">Grid container</div>
       <Row label="Template columns">
         <input value={cols} onChange={(e) => onPatch({ "grid-template-columns": e.target.value })} className={monoCls} data-testid="grid-e-cols" />
       </Row>
@@ -314,8 +324,8 @@ const CardEditor = ({ html, onPatch }) => {
   const bg = readStyle(html, "background") || readStyle(html, "background-color") || "#ffffff";
 
   return (
-    <div className="space-y-3 pt-3 border-t border-[#2B2B2B]" data-testid="card-editor">
-      <div className="text-[10px] uppercase tracking-wider text-blue-400">Container / card</div>
+    <div className="space-y-3 pt-3 border-t border-[#332D22]" data-testid="card-editor">
+      <div className="text-[10px] uppercase tracking-wider text-[#D9BC55]">Container / card</div>
       <ColorRow label="Background" value={bg.startsWith("#") ? bg : "#ffffff"} onChange={(v) => onPatch({ background: v })} testId="card-bg" />
       <Row label={`Padding (${padding}px)`}><Slider value={padding} min={0} max={160} unit="px" testId="card-padding" onChange={(v) => onPatch({ padding: `${v}px` })} /></Row>
       <Row label={`Radius (${radius}px)`}><Slider value={radius} min={0} max={80} unit="px" testId="card-radius" onChange={(v) => onPatch({ "border-radius": `${v}px` })} /></Row>

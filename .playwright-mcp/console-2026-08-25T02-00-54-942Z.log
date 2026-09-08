@@ -1,0 +1,13 @@
+[    1246ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[    9841ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[    9852ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   18731ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   18756ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   18812ms] [ERROR] Blocked script execution in 'about:srcdoc' because the document's frame is sandboxed and the 'allow-scripts' permission is not set. @ about:srcdoc:0
+[   63807ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[   63821ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1457419ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 1457426ms] [WARNING] Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 3363679ms] [ERROR] AxiosError: Network Error
+    at XMLHttpRequest.handleError (http://127.0.0.1:3000/static/js/bundle.js:406742:19) @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[ 3363682ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8001/api/projects/c1832749-d66e-40f5-b9ab-d38edce05b3d:0

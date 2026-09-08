@@ -104,26 +104,26 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
   return (
     <div className="space-y-4" data-testid="divider-panel">
       {/* Preview: two mock sections with the divider between */}
-      <div className="rounded-lg border border-[#2B2B2B] overflow-hidden" style={{ background: "#0d0d0d" }}>
-        <div style={{ background: "#1b1b1b", height: 22 }} />
+      <div className="rounded-lg border border-[#332D22] overflow-hidden" style={{ background: "#15130E" }}>
+        <div style={{ background: "#242019", height: 22 }} />
         <div dangerouslySetInnerHTML={{ __html: buildSvg(shape, color, Math.min(height, 90), flipX, flipY, false) }} />
         <div style={{ background: color, height: 22, opacity: 0.28 }} />
       </div>
 
       {/* Shape grid */}
       <div>
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5">Divider shape</div>
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1.5">Divider shape</div>
         <div className="grid grid-cols-2 gap-1.5">
           {DIVIDERS.map((d) => (
             <button
               key={d.id}
               onClick={() => setShapeId(d.id)}
-              className={`rounded border overflow-hidden ${shapeId === d.id ? "border-blue-500 ring-1 ring-blue-500/40" : "border-[#2B2B2B] hover:border-gray-500"}`}
+              className={`rounded border overflow-hidden ${shapeId === d.id ? "border-[#C9A227] ring-1 ring-[#C9A227]/40" : "border-[#332D22] hover:border-[#948C79]"}`}
               data-testid={`divider-shape-${d.id}`}
               title={d.label}
             >
-              <div className="h-8 bg-[#0D0D0D]" dangerouslySetInnerHTML={{ __html: buildSvg(d, "#64748b", 32, false, false, true) }} />
-              <div className="text-[9px] text-gray-400 py-0.5 bg-[#141414]">{d.label}</div>
+              <div className="h-8 bg-[#15130E]" dangerouslySetInnerHTML={{ __html: buildSvg(d, "#64748b", 32, false, false, true) }} />
+              <div className="text-[9px] text-[#A79C87] py-0.5 bg-[#1C1A15]">{d.label}</div>
             </button>
           ))}
         </div>
@@ -132,29 +132,29 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
       {/* Controls */}
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Color</label>
+          <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Color</label>
           <div className="flex gap-1.5">
-            <input type="color" value={/^#[0-9a-f]{6}$/i.test(color) ? color : "#6366f1"} onChange={(e) => setColor(e.target.value)} className="w-9 h-8 rounded bg-[#0D0D0D] border border-[#2B2B2B]" data-testid="divider-color" />
-            <input value={color} onChange={(e) => setColor(e.target.value)} className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 text-xs font-mono text-white outline-none focus:border-blue-500" data-testid="divider-color-hex" />
+            <input type="color" value={/^#[0-9a-f]{6}$/i.test(color) ? color : "#6366f1"} onChange={(e) => setColor(e.target.value)} className="w-9 h-8 rounded bg-[#15130E] border border-[#332D22]" data-testid="divider-color" />
+            <input value={color} onChange={(e) => setColor(e.target.value)} className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="divider-color-hex" />
           </div>
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Height</label>
+          <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Height</label>
           <div className="flex items-center gap-2">
             <input type="range" min="20" max="220" value={height} onChange={(e) => setHeight(Number(e.target.value))} className="flex-1" data-testid="divider-height" />
-            <span className="text-xs font-mono text-gray-300 w-9 text-right">{height}</span>
+            <span className="text-xs font-mono text-[#E4DECE] w-9 text-right">{height}</span>
           </div>
         </div>
       </div>
 
       <div className="flex gap-2">
-        <button onClick={() => setFlipX((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipX ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-300 hover:text-white"}`} data-testid="divider-flip-x"><FlipHorizontal size={13} /> Flip X</button>
-        <button onClick={() => setFlipY((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipY ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-300 hover:text-white"}`} data-testid="divider-flip-y"><FlipVertical size={13} /> Flip Y</button>
+        <button onClick={() => setFlipX((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipX ? "bg-[#AD8B21] border-[#C9A227] text-[#F1EDE2]" : "border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2]"}`} data-testid="divider-flip-x"><FlipHorizontal size={13} /> Flip X</button>
+        <button onClick={() => setFlipY((v) => !v)} className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border ${flipY ? "bg-[#AD8B21] border-[#C9A227] text-[#F1EDE2]" : "border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2]"}`} data-testid="divider-flip-y"><FlipVertical size={13} /> Flip Y</button>
       </div>
 
       {/* Snap placement */}
       <div className="pt-1">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5">Snap placement</div>
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1.5">Snap placement</div>
         <div className="grid grid-cols-3 gap-1">
           {[
             { id: "above", label: "Above", icon: ArrowUpToLine },
@@ -168,27 +168,27 @@ export const DividerPanel = ({ onAddBlock, elements = [], selectedId }) => {
                 key={id}
                 disabled={disabled}
                 onClick={() => setPlacement(id)}
-                className={`flex flex-col items-center gap-1 py-2 rounded border text-[10px] ${active ? "bg-blue-600 border-blue-500 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"} disabled:opacity-40 disabled:cursor-not-allowed`}
+                className={`flex flex-col items-center gap-1 py-2 rounded border text-[10px] ${active ? "bg-[#AD8B21] border-[#C9A227] text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"} disabled:opacity-40 disabled:cursor-not-allowed`}
                 data-testid={`divider-place-${id}`}
                 title={disabled ? "Select a section first" : `Snap ${label}`}
               ><Icon size={13} /> {label}</button>
             );
           })}
         </div>
-        {!hasSel && <p className="text-[10px] text-gray-500 mt-1">Select a section on the canvas to snap the divider flush above or below it.</p>}
+        {!hasSel && <p className="text-[10px] text-[#948C79] mt-1">Select a section on the canvas to snap the divider flush above or below it.</p>}
       </div>
 
       {/* Auto-match fill */}
       <div>
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5">Auto-match fill</div>
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1.5">Auto-match fill</div>
         <div className="grid grid-cols-2 gap-2">
-          <button onClick={matchSectionColor} disabled={!hasSel} className="flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="divider-match-color" title="Match the selected section's background"><Pipette size={13} /> Selected</button>
-          <button onClick={matchNeighborColor} disabled={!neighborEl} className="flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#2B2B2B] text-gray-300 hover:text-white hover:border-gray-500 disabled:opacity-40 disabled:cursor-not-allowed" data-testid="divider-match-neighbor" title={neighborTitle}><Pipette size={13} /> Far side</button>
+          <button onClick={matchSectionColor} disabled={!hasSel} className="flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2] hover:border-[#948C79] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="divider-match-color" title="Match the selected section's background"><Pipette size={13} /> Selected</button>
+          <button onClick={matchNeighborColor} disabled={!neighborEl} className="flex items-center justify-center gap-1.5 text-xs py-1.5 rounded border border-[#332D22] text-[#E4DECE] hover:text-[#F1EDE2] hover:border-[#948C79] disabled:opacity-40 disabled:cursor-not-allowed" data-testid="divider-match-neighbor" title={neighborTitle}><Pipette size={13} /> Far side</button>
         </div>
       </div>
 
-      <button onClick={insert} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="divider-insert"><Plus size={14} /> Insert divider</button>
-      <p className="text-[10px] text-gray-500">Dividers render edge-to-edge with no gap. Set the fill color to match the neighbouring section, and use Flip Y to sit it at the top of a section.</p>
+      <button onClick={insert} className="w-full flex items-center justify-center gap-1.5 text-xs py-2 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="divider-insert"><Plus size={14} /> Insert divider</button>
+      <p className="text-[10px] text-[#948C79]">Dividers render edge-to-edge with no gap. Set the fill color to match the neighbouring section, and use Flip Y to sit it at the top of a section.</p>
     </div>
   );
 };

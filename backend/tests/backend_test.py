@@ -4,7 +4,12 @@ import requests
 from dotenv import dotenv_values
 
 frontend_env = dotenv_values("/app/frontend/.env")
-BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL") or frontend_env.get("REACT_APP_BACKEND_URL")).rstrip("/")
+BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL") or frontend_env.get("REACT_APP_BACKEND_URL") or "").rstrip("/")
+
+pytestmark = pytest.mark.skipif(
+    not BASE_URL,
+    reason="requires a running backend — set REACT_APP_BACKEND_URL (integration test)",
+)
 API = f"{BASE_URL}/api"
 
 

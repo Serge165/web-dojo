@@ -10,10 +10,10 @@ export const TemplateEditor = ({ open, onClose, template, onChange }) => {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-3xl" data-testid="template-editor">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-3xl" data-testid="template-editor">
         <DialogHeader><DialogTitle>Site-wide template</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <label className="flex items-center gap-2 text-xs text-gray-300">
+          <label className="flex items-center gap-2 text-xs text-[#E4DECE]">
             <input
               type="checkbox"
               checked={!!t.use_template}
@@ -23,8 +23,8 @@ export const TemplateEditor = ({ open, onClose, template, onChange }) => {
             Wrap every page with this template
           </label>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Header HTML</div>
-            <div className="h-40 rounded border border-[#2B2B2B] overflow-hidden">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1">Header HTML</div>
+            <div className="h-40 rounded border border-[#332D22] overflow-hidden">
               <CodeEditor
                 value={t.header_html || ""}
                 onChange={(v) => update({ header_html: v })}
@@ -34,8 +34,8 @@ export const TemplateEditor = ({ open, onClose, template, onChange }) => {
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Footer HTML</div>
-            <div className="h-40 rounded border border-[#2B2B2B] overflow-hidden">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1">Footer HTML</div>
+            <div className="h-40 rounded border border-[#332D22] overflow-hidden">
               <CodeEditor
                 value={t.footer_html || ""}
                 onChange={(v) => update({ footer_html: v })}
@@ -45,7 +45,7 @@ export const TemplateEditor = ({ open, onClose, template, onChange }) => {
             </div>
           </div>
           <div className="flex justify-end pt-1">
-            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="template-close">Done</button>
+            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="template-close">Done</button>
           </div>
         </div>
       </DialogContent>

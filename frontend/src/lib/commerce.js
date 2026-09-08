@@ -1,3 +1,5 @@
+import { escAttr, escText, escJsScript } from "./escapeHtml.js";
+
 // Payment button + ecommerce block builders. Output is portable HTML that runs
 // fully client-side on exported/published static pages.
 
@@ -9,9 +11,9 @@ export const CURRENCY_SYMBOL = { usd: "$", eur: "€", gbp: "£", cad: "C$", aud
 // server-side). Works from any static page — clicking opens Stripe Checkout.
 export const stripeButtonHtml = ({ label, url, price, accent = "#635bff", radius = "10px" }) =>
   `<div data-webdojo-pay="stripe" style="display:inline-block;font-family:system-ui,-apple-system,sans-serif;">
-  <a href="${url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;padding:14px 26px;background:${accent};color:#fff;text-decoration:none;border-radius:${radius};font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(99,91,255,.35);">
+  <a href="${escAttr(url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;padding:14px 26px;background:${escAttr(accent)};color:#fff;text-decoration:none;border-radius:${radius};font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(99,91,255,.35);">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 9.4c0-.6.5-.9 1.3-.9 1.2 0 2.7.4 3.9 1V5.8A10 10 0 0 0 14.8 5C11.8 5 9.8 6.5 9.8 9c0 4 5.4 3.3 5.4 5 0 .6-.6 1-1.5 1-1.3 0-3-.5-4.3-1.3v3.8c1.4.6 2.9.9 4.3.9 3 0 5.2-1.5 5.2-4 0-4.2-5.4-3.4-5.4-5z"/></svg>
-    ${label}${price ? ` · ${price}` : ""}
+    ${escText(label)}${price ? ` · ${escText(price)}` : ""}
   </a>
 </div>`;
 
@@ -22,7 +24,7 @@ export const paypalButtonHtml = ({ clientId, amount, currency = "USD", label = "
   const cur = (currency || "USD").toUpperCase();
   return `<div data-webdojo-pay="paypal" style="max-width:340px;font-family:system-ui,-apple-system,sans-serif;">
   <div id="${id}"></div>
-  <script src="https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${cur}"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=${escAttr(clientId)}&currency=${cur}"></script>
   <script>
     (function(){
       function render(){
@@ -30,7 +32,7 @@ export const paypalButtonHtml = ({ clientId, amount, currency = "USD", label = "
         window.paypal.Buttons({
           style:{layout:'vertical',color:'gold',shape:'pill',label:'paypal'},
           createOrder:function(data,actions){
-            return actions.order.create({purchase_units:[{amount:{value:'${Number(amount).toFixed(2)}',currency_code:'${cur}'},description:${JSON.stringify(label)}}]});
+            return actions.order.create({purchase_units:[{amount:{value:'${Number(amount).toFixed(2)}',currency_code:'${cur}'},description:${escJsScript(label)}}]});
           },
           onApprove:function(data,actions){
             return actions.order.capture().then(function(details){

@@ -6,7 +6,7 @@ import { Server, ShieldCheck, ShieldAlert, Trash2, KeyRound, Unlock, ChevronRigh
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
+const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]";
 const monoCls = inputCls + " font-mono";
 
 const EMPTY = {
@@ -17,14 +17,14 @@ const EMPTY = {
   remote_path: "/public_html",
   protocol: "ftp",
   html_filename: "index.html",
-  css_filename: "styles.css",
+  css_filename: "globals.css",
   include_zip: false,
 };
 
 // Modal that gathers FTP / FTPS / SFTP credentials, supports saving
 // reusable presets (with optional encrypted-password storage), then
 // POSTs to the backend to upload the generated site.
-export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSaved }) => {
+export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSaved, hasDashboardLogin }) => {
   const [form, setForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
@@ -34,11 +34,45 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
   const [presetName, setPresetName] = useState("");
   const [savePassword, setSavePassword] = useState(true);
 
+  // Owner dashboard password gate: the dashboard-login widget's first-use
+  // set-password call is unauthenticated (nothing to steal yet), but once a
+  // project publishes, its id is public and baked into the exported HTML —
+  // so anyone who finds the live site could claim the owner password first.
+  // Prompt the actual owner to claim it before that window opens.
+  const [pwStatus, setPwStatus] = useState(null); // null=unchecked, true=set, false=not set
+  const [ownerPw, setOwnerPw] = useState("");
+  const [settingPw, setSettingPw] = useState(false);
+
   const update = (patch) => setForm((f) => ({ ...f, ...patch }));
 
   useEffect(() => {
-    if (open) refreshPresets();
-  }, [open]);
+    if (!open) return;
+    refreshPresets();
+    setPwStatus(null);
+    if (hasDashboardLogin && projectId) {
+      axios
+        .get(`${API}/dashboard/${projectId}/password-status`)
+        .then((r) => setPwStatus(!!r.data.is_set))
+        .catch(() => setPwStatus(true)); // fail open — don't block publish on a status-check error
+    }
+  }, [open, hasDashboardLogin, projectId]);
+
+  const setOwnerPassword = async () => {
+    if (!ownerPw || ownerPw.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setSettingPw(true);
+    try {
+      await axios.post(`${API}/dashboard/${projectId}/set-password`, { password: ownerPw });
+      setPwStatus(true);
+      toast.success("Owner dashboard password set");
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Could not set the password");
+    } finally {
+      setSettingPw(false);
+    }
+  };
 
   const refreshPresets = async () => {
     try {
@@ -68,7 +102,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
       remote_path: preset.remote_path || "/",
       protocol: preset.protocol || "ftp",
       html_filename: preset.html_filename || "index.html",
-      css_filename: preset.css_filename || "styles.css",
+      css_filename: preset.css_filename || "globals.css",
       include_zip: !!preset.include_zip,
     });
     toast.success(`Loaded preset "${preset.name}"`);
@@ -105,7 +139,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
         remote_path: form.remote_path.trim() || "/",
         protocol: form.protocol,
         html_filename: form.html_filename.trim() || "index.html",
-        css_filename: form.css_filename.trim() || "styles.css",
+        css_filename: form.css_filename.trim() || "globals.css",
         include_zip: form.include_zip,
       };
       if (form.port) payload.port = Number(form.port);
@@ -140,7 +174,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
         remote_path: form.remote_path.trim() || "/",
         protocol: form.protocol,
         html_filename: form.html_filename.trim() || "index.html",
-        css_filename: form.css_filename.trim() || "styles.css",
+        css_filename: form.css_filename.trim() || "globals.css",
         include_zip: form.include_zip,
       };
       if (form.port) payload.port = Number(form.port);
@@ -160,48 +194,76 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-lg max-h-[90vh] overflow-y-auto" data-testid="publish-modal">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-lg max-h-[90vh] overflow-y-auto" data-testid="publish-modal">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Server size={16} /> Publish “{projectName}”</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 text-sm">
           {presets.length > 0 && (
-            <div className="rounded border border-[#2B2B2B] bg-[#0D0D0D] p-2" data-testid="publish-presets-list">
-              <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1.5 px-1">Saved profiles</div>
+            <div className="rounded border border-[#332D22] bg-[#15130E] p-2" data-testid="publish-presets-list">
+              <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1.5 px-1">Saved profiles</div>
               <div className="space-y-1 max-h-[140px] overflow-y-auto">
                 {presets.map((p) => (
                   <div
                     key={p.id}
                     onClick={() => applyPreset(p)}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer group ${selectedPresetId === p.id ? "bg-blue-600/25 border border-blue-500/60" : "hover:bg-[#1F1F1F] border border-transparent"}`}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer group ${selectedPresetId === p.id ? "bg-[#AD8B21]/25 border border-[#C9A227]/60" : "hover:bg-[#242019] border border-transparent"}`}
                     data-testid={`preset-row-${p.id}`}
                   >
-                    {p.has_password ? <KeyRound size={12} className="text-emerald-400 shrink-0" /> : <Unlock size={12} className="text-gray-500 shrink-0" />}
+                    {p.has_password ? <KeyRound size={12} className="text-emerald-400 shrink-0" /> : <Unlock size={12} className="text-[#948C79] shrink-0" />}
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs text-white truncate">{p.name}</div>
-                      <div className="text-[10px] text-gray-500 font-mono truncate">{p.protocol}://{p.username}@{p.host}{p.remote_path}</div>
+                      <div className="text-xs text-[#F1EDE2] truncate">{p.name}</div>
+                      <div className="text-[10px] text-[#948C79] font-mono truncate">{p.protocol}://{p.username}@{p.host}{p.remote_path}</div>
                     </div>
                     <button
                       onClick={(e) => deletePreset(p.id, e)}
-                      className="p-1 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100"
+                      className="p-1 text-[#6B6353] hover:text-red-400 opacity-0 group-hover:opacity-100"
                       data-testid={`preset-del-${p.id}`}
                       title="Delete preset"
                     ><Trash2 size={11} /></button>
-                    <ChevronRight size={12} className="text-gray-600 opacity-0 group-hover:opacity-100" />
+                    <ChevronRight size={12} className="text-[#6B6353] opacity-0 group-hover:opacity-100" />
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-[11px] px-2 py-1.5 rounded border border-[#2B2B2B] bg-[#0D0D0D]">
+          <div className="flex items-center gap-2 text-[11px] px-2 py-1.5 rounded border border-[#332D22] bg-[#15130E]">
             {isSecure ? <ShieldCheck size={12} className="text-emerald-400" /> : <ShieldAlert size={12} className="text-amber-400" />}
-            <span className="text-gray-400">Web Dojo encrypts saved passwords with Fernet on the server. Live upload creds are used once and not logged.</span>
+            <span className="text-[#A79C87]">Web Dojo encrypts saved passwords with Fernet on the server. Live upload creds are used once and not logged.</span>
           </div>
 
+          {hasDashboardLogin && pwStatus === false && (
+            <div className="rounded border border-amber-500/40 bg-amber-500/10 p-2 space-y-2" data-testid="publish-owner-password-gate">
+              <div className="flex items-start gap-2 text-[11px] text-amber-300">
+                <ShieldAlert size={12} className="mt-0.5 shrink-0" />
+                <span>
+                  This project has a dashboard-login widget but no owner password set yet. Once
+                  published, anyone who finds the live site could claim it first — set one now.
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={ownerPw}
+                  onChange={(e) => setOwnerPw(e.target.value)}
+                  className={inputCls}
+                  placeholder="Owner dashboard password (6+ chars)"
+                  data-testid="publish-owner-password-input"
+                />
+                <button
+                  onClick={setOwnerPassword}
+                  disabled={settingPw}
+                  className="text-[11px] px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2] whitespace-nowrap"
+                  data-testid="publish-owner-password-set"
+                >{settingPw ? "Setting…" : "Set password"}</button>
+              </div>
+            </div>
+          )}
+
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Protocol</label>
+            <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Protocol</label>
             <div className="grid grid-cols-3 gap-1.5">
               {[
                 { v: "ftp", l: "FTP" },
@@ -211,7 +273,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
                 <button
                   key={p.v}
                   onClick={() => update({ protocol: p.v })}
-                  className={`text-[11px] py-1.5 rounded border ${form.protocol === p.v ? "border-blue-500 bg-[#111623] text-white" : "border-[#2B2B2B] bg-[#1F1F1F] text-gray-200 hover:bg-[#2B2B2B]"}`}
+                  className={`text-[11px] py-1.5 rounded border ${form.protocol === p.v ? "border-[#C9A227] bg-[#2A2416] text-[#F1EDE2]" : "border-[#332D22] bg-[#242019] text-[#F1EDE2] hover:bg-[#332D22]"}`}
                   data-testid={`publish-protocol-${p.v}`}
                 >{p.l}</button>
               ))}
@@ -220,58 +282,58 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
 
           <div className="grid grid-cols-[1fr_100px] gap-2">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Host</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Host</label>
               <input value={form.host} onChange={(e) => update({ host: e.target.value })} className={inputCls} placeholder="ftp.example.com" data-testid="publish-host" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Port</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Port</label>
               <input value={form.port} onChange={(e) => update({ port: e.target.value })} className={monoCls} placeholder={form.protocol === "sftp" ? "22" : "21"} data-testid="publish-port" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Username</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Username</label>
               <input value={form.username} onChange={(e) => update({ username: e.target.value })} className={inputCls} data-testid="publish-username" autoComplete="off" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Password</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Password</label>
               <input type="password" value={form.password} onChange={(e) => update({ password: e.target.value })} className={inputCls} data-testid="publish-password" autoComplete="new-password" />
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Remote path</label>
+            <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Remote path</label>
             <input value={form.remote_path} onChange={(e) => update({ remote_path: e.target.value })} className={monoCls} placeholder="/public_html" data-testid="publish-path" />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">HTML filename</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">HTML filename</label>
               <input value={form.html_filename} onChange={(e) => update({ html_filename: e.target.value })} className={monoCls} data-testid="publish-html-name" />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">CSS filename</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">CSS filename</label>
               <input value={form.css_filename} onChange={(e) => update({ css_filename: e.target.value })} className={monoCls} data-testid="publish-css-name" />
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-gray-300">
+          <label className="flex items-center gap-2 text-xs text-[#E4DECE]">
             <input type="checkbox" checked={form.include_zip} onChange={(e) => update({ include_zip: e.target.checked })} data-testid="publish-include-zip" />
             Also upload a <span className="font-mono">site.zip</span> archive
           </label>
 
           {/* Save-as-preset */}
-          <div className="rounded border border-[#2B2B2B] bg-[#0D0D0D] p-2">
+          <div className="rounded border border-[#332D22] bg-[#15130E] p-2">
             {!savePreset ? (
               <button
                 onClick={() => { setSavePreset(true); setPresetName(form.host || ""); }}
-                className="w-full text-[11px] py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+                className="w-full text-[11px] py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
                 data-testid="preset-save-toggle"
               >+ Save these settings as a preset</button>
             ) : (
               <div className="space-y-2">
-                <div className="text-[10px] uppercase tracking-wider text-gray-500">New preset</div>
+                <div className="text-[10px] uppercase tracking-wider text-[#948C79]">New preset</div>
                 <input
                   value={presetName}
                   onChange={(e) => setPresetName(e.target.value)}
@@ -279,7 +341,7 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
                   placeholder="e.g. Production · ftp.example.com"
                   data-testid="preset-name"
                 />
-                <label className={`flex items-center gap-2 text-[11px] ${form.password ? "text-gray-300" : "text-gray-600"}`}>
+                <label className={`flex items-center gap-2 text-[11px] ${form.password ? "text-[#E4DECE]" : "text-[#6B6353]"}`}>
                   <input
                     type="checkbox"
                     checked={savePassword && !!form.password}
@@ -293,12 +355,12 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
                 <div className="flex gap-2">
                   <button
                     onClick={saveCurrentAsPreset}
-                    className="flex-1 text-[11px] py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white"
+                    className="flex-1 text-[11px] py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-[#F1EDE2]"
                     data-testid="preset-save-confirm"
                   >Save preset</button>
                   <button
                     onClick={() => { setSavePreset(false); setPresetName(""); }}
-                    className="text-[11px] py-1.5 px-3 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+                    className="text-[11px] py-1.5 px-3 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
                     data-testid="preset-save-cancel"
                   >Cancel</button>
                 </div>
@@ -316,12 +378,13 @@ export const PublishModal = ({ open, onClose, projectId, projectName, onEnsureSa
           )}
 
           <div className="flex justify-end gap-2 pt-1">
-            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]" data-testid="publish-cancel">Close</button>
+            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]" data-testid="publish-cancel">Close</button>
             <button
               onClick={publish}
-              disabled={busy}
-              className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white flex items-center gap-1.5"
+              disabled={busy || (hasDashboardLogin && pwStatus === false)}
+              className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2] flex items-center gap-1.5"
               data-testid="publish-submit"
+              title={hasDashboardLogin && pwStatus === false ? "Set an owner dashboard password first" : undefined}
             >
               {busy ? "Uploading…" : "Publish now"}
             </button>

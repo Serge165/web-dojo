@@ -2,8 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone } from "lucide-react";
+import { Trash2, Sparkles, Bookmark, Search, X, Eye, Monitor, Tablet, Smartphone, Upload, Link2, FolderUp } from "lucide-react";
 import { buildTemplatePreviewHtml } from "@/lib/exportHtml";
+import { scanHtml, inlineLocalStylesheets } from "@/lib/importHtml";
+// Offline mirror of backend/starter_templates.py STARTER_TEMPLATES, generated
+// by backend/_serialize_starters.py. Used as a fetch-failure fallback in
+// refresh() so the picker isn't empty when the backend is down or
+// REACT_APP_BACKEND_URL is unset. Shape is identical to the /api/templates
+// response, so every existing template consumer (preview, load, filters)
+// works against it unchanged.
+import starterTemplatesFallback from "@/data/starterTemplates.json";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -38,34 +46,87 @@ const AESTHETIC_PREVIEWS = {
   "swiss": { bg: "#f4f4f4", fg: "#e5001a" },
   "goblincore": { bg: "radial-gradient(circle at 30% 30%,#3a4a28 0%,#1a2412 70%)", fg: "#c8a848" },
   "dreamcore": { bg: "radial-gradient(ellipse at 30% 30%,#ffd6ec 0%,#f3e8ff 50%,#c9d8f8 100%)", fg: "#8a5aa8" },
+  "esports-mint": { bg: "#07080d", fg: "#15ffb5" },
+  "esports-crimson": { bg: "#0a0607", fg: "#ff2d55" },
+  "esports-cobalt": { bg: "#070a12", fg: "#3d7cff" },
+  "esports-violet": { bg: "#0a0710", fg: "#9d5cff" },
+  "esports-gold": { bg: "#0a0805", fg: "#f2b705" },
+  "esports-ember": { bg: "#0a0704", fg: "#ff6b1a" },
+  "esports-teal": { bg: "#06090a", fg: "#14c9a6" },
+  "esports-arctic": { bg: "#f7f9fb", fg: "#0ea5e9", border: "1px solid #e2e8f0" },
+  "esports-emerald": { bg: "#060a07", fg: "#22c55e" },
+  "esports-sky": { bg: "#06080d", fg: "#38bdf8" },
+  "esports-rose": { bg: "#0a0709", fg: "#fb6f92" },
+  "esports-mono": { bg: "#0a0a0c", fg: "#e7e9ec" },
+  "esports-agnostic": { bg: "#101018", fg: "#22d3ee" },
+};
+
+// Real mini-preview of the template's home page, rendered into a sandboxed
+// iframe scaled down to card size. Iframes are heavy (each boots a full
+// document), so rendering is deferred until the card actually scrolls into
+// view via IntersectionObserver — opening the picker renders only the dozen
+// or so visible cards, not all 57.
+const TemplateThumb = ({ tpl }) => {
+  const [visible, setVisible] = useState(false);
+  const ref = React.useRef(null);
+
+  useEffect(() => {
+    if (!ref.current || typeof IntersectionObserver === "undefined") { setVisible(true); return; }
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { setVisible(true); io.disconnect(); } }),
+      { rootMargin: "200px" }
+    );
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, []);
+
+  const html = useMemo(() => (visible ? buildTemplatePreviewHtml(tpl) : ""), [visible, tpl]);
+
+  return (
+    <div ref={ref} className="h-24 relative overflow-hidden bg-[#242019]">
+      {html ? (
+        <iframe
+          title={`${tpl.name} preview`}
+          srcDoc={html}
+          sandbox="allow-same-origin"
+          scrolling="no"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="absolute top-0 left-0 border-0 origin-top-left pointer-events-none select-none"
+          style={{ width: 900, height: 1200, transform: "scale(0.3)" }}
+          data-testid={`tpl-thumb-iframe-${tpl.id}`}
+        />
+      ) : null}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[#F1EDE2] text-xs font-medium flex items-center gap-1.5"><Eye size={12} /> Preview</span>
+      </div>
+    </div>
+  );
 };
 
 const StarterCard = ({ tpl, onPreview }) => {
-  const preview = AESTHETIC_PREVIEWS[tpl.aesthetic] || { bg: "#1F1F1F", fg: "#ffffff" };
   return (
     <button
       onClick={() => onPreview(tpl)}
-      className="text-left rounded-lg border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60 overflow-hidden transition-colors group relative"
+      className="text-left rounded-lg border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60 overflow-hidden transition-colors group relative"
       data-testid={`tpl-preview-${tpl.id}`}
     >
       <div
         className="h-24 flex items-end p-3 relative"
-        style={{ background: preview.bg, border: preview.border }}
+        style={{ background: AESTHETIC_PREVIEWS[tpl.aesthetic]?.bg || "#242019", border: AESTHETIC_PREVIEWS[tpl.aesthetic]?.border }}
       >
         <span
-          style={{ color: preview.fg }}
+          style={{ color: AESTHETIC_PREVIEWS[tpl.aesthetic]?.fg || "#ffffff" }}
           className="text-[11px] font-semibold uppercase tracking-widest opacity-90"
         >{tpl.aesthetic}</span>
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-white text-xs font-medium flex items-center gap-1.5"><Eye size={12} /> Preview</span>
-        </div>
+        <TemplateThumb tpl={tpl} />
       </div>
       <div className="p-3">
-        <div className="flex items-center gap-1.5 text-sm text-white truncate">
+        <div className="flex items-center gap-1.5 text-sm text-[#F1EDE2] truncate">
           <Sparkles size={11} className="text-amber-400 shrink-0" />
           {tpl.name}
         </div>
-        <div className="text-[11px] text-gray-500 line-clamp-2 mt-1">{tpl.description || "—"}</div>
+        <div className="text-[11px] text-[#948C79] line-clamp-2 mt-1">{tpl.description || "—"}</div>
       </div>
     </button>
   );
@@ -80,21 +141,21 @@ const TemplatePreviewModal = ({ tpl, onClose, onUse }) => {
   const width = viewport === "mobile" ? 390 : viewport === "tablet" ? 820 : 1280;
   return (
     <Dialog open={!!tpl} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-[95vw] w-[95vw] max-h-[92vh] overflow-hidden p-0" data-testid="template-preview-modal">
-        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-[95vw] w-[95vw] max-h-[92vh] overflow-hidden p-0" data-testid="template-preview-modal">
+        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#332D22]">
           <DialogTitle className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-base">
               <Sparkles size={14} className="text-amber-400" />
               {tpl.name}
-              <span className="text-[10px] uppercase tracking-widest text-gray-500 border border-[#2B2B2B] rounded px-1.5 py-0.5">{tpl.aesthetic}</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#948C79] border border-[#332D22] rounded px-1.5 py-0.5">{tpl.aesthetic}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5" data-testid="preview-viewport">
+              <div className="flex items-center bg-[#15130E] border border-[#332D22] rounded-md p-0.5" data-testid="preview-viewport">
                 {[{ id: "desktop", Icon: Monitor }, { id: "tablet", Icon: Tablet }, { id: "mobile", Icon: Smartphone }].map(({ id, Icon }) => (
                   <button
                     key={id}
                     onClick={() => setViewport(id)}
-                    className={`p-1.5 rounded ${viewport === id ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+                    className={`p-1.5 rounded ${viewport === id ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
                     data-testid={`preview-${id}`}
                     title={id}
                   ><Icon size={12} /></button>
@@ -102,22 +163,22 @@ const TemplatePreviewModal = ({ tpl, onClose, onUse }) => {
               </div>
               <button
                 onClick={onClose}
-                className="text-xs px-3 py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+                className="text-xs px-3 py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
                 data-testid="preview-cancel"
               >Close</button>
               <button
                 onClick={() => onUse(tpl)}
-                className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium"
+                className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] font-medium"
                 data-testid="preview-use"
               >Use this template</button>
             </div>
           </DialogTitle>
         </DialogHeader>
-        <div className="flex-1 bg-[#0D0D0D] overflow-auto p-6 flex justify-center items-start" style={{ height: "calc(92vh - 68px)" }}>
+        <div className="flex-1 bg-[#15130E] overflow-auto p-6 flex justify-center items-start" style={{ height: "calc(92vh - 68px)" }}>
           <iframe
             title="template-preview"
             srcDoc={html}
-            className="bg-white shadow-2xl border border-[#2B2B2B] transition-all"
+            className="bg-white shadow-2xl border border-[#332D22] transition-all"
             style={{ width: `${width}px`, minHeight: "600px", height: "100%" }}
             sandbox="allow-same-origin"
             data-testid="template-preview-iframe"
@@ -129,24 +190,267 @@ const TemplatePreviewModal = ({ tpl, onClose, onUse }) => {
 };
 
 const UserTemplateRow = ({ tpl, onUse, onDelete }) => (
-  <div className="p-3 rounded border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60" data-testid={`tpl-row-${tpl.id}`}>
+  <div className="p-3 rounded border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60" data-testid={`tpl-row-${tpl.id}`}>
     <div className="flex items-start gap-2">
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 text-sm text-white truncate">
-          <Bookmark size={11} className="text-blue-400 shrink-0" />
+        <div className="flex items-center gap-1.5 text-sm text-[#F1EDE2] truncate">
+          <Bookmark size={11} className="text-[#D9BC55] shrink-0" />
           {tpl.name}
         </div>
-        <div className="text-[11px] text-gray-500 line-clamp-2">{tpl.description || "—"}</div>
+        <div className="text-[11px] text-[#948C79] line-clamp-2">{tpl.description || "—"}</div>
       </div>
-      <button onClick={() => onDelete(tpl.id)} className="p-1 text-gray-500 hover:text-red-400" data-testid={`tpl-del-${tpl.id}`}><Trash2 size={12} /></button>
+      <button onClick={() => onDelete(tpl.id)} className="p-1 text-[#948C79] hover:text-red-400" data-testid={`tpl-del-${tpl.id}`}><Trash2 size={12} /></button>
     </div>
     <button
       onClick={() => onUse(tpl)}
-      className="mt-2 w-full text-xs py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]"
+      className="mt-2 w-full text-xs py-1 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
       data-testid={`tpl-use-${tpl.id}`}
     >Use template</button>
   </div>
 );
+
+// Turns scanHtml's {headHtml, sections} into the same single-page project
+// shape starter templates already use, so it flows through the exact same
+// preview (buildTemplatePreviewHtml) and save (POST /templates) paths as
+// a hand-authored template — no separate storage/rendering code needed.
+const sectionsToProjectData = (name, headHtml, sections) => ({
+  name,
+  canvas_bg: "#ffffff",
+  fonts: [],
+  head_html: "",
+  files: [],
+  template: { header_html: "", footer_html: "", use_template: false },
+  pages: [{
+    id: "imported-home", name: "Home", slug: "index", status: "draft", seo: {},
+    elements: sections.map((s) => ({ id: s.id, html: s.html })),
+    head_html: headHtml, canvas_bg: "#ffffff", fonts: [],
+  }],
+  active_page_id: "imported-home",
+});
+
+// Multi-page counterpart: a whole donor template folder (index.html,
+// about.html, contact.html, … + a shared styles.css) scanned page-by-page,
+// turned into the SAME multi-page project shape STARTER_TEMPLATES already
+// use — so it flows through the exact same preview/save/load/export paths,
+// globals.css consolidation included, with zero new plumbing.
+const pagesToProjectData = (name, pages) => ({
+  name,
+  canvas_bg: "#ffffff",
+  fonts: [],
+  head_html: "",
+  files: [],
+  template: { header_html: "", footer_html: "", use_template: false },
+  pages: pages.map((p, i) => ({
+    id: `imported-${i}`, name: p.name, slug: p.slug, status: "draft", seo: {},
+    elements: p.sections.map((s) => ({ id: s.id, html: s.html })),
+    head_html: p.headHtml, canvas_bg: "#ffffff", fonts: [],
+  })),
+  active_page_id: "imported-0",
+});
+
+const HTML_EXT_RE = /\.html?$/i;
+const CSS_EXT_RE = /\.css$/i;
+
+// Derives a page name/slug from a donor file's name — index.html/home.html
+// become the site's home page; every other file keeps its own name
+// (about.html -> "About", /^-/contact-us.html -> "Contact Us").
+const filePageMeta = (filename) => {
+  const base = filename.replace(HTML_EXT_RE, "");
+  const isHome = /^(index|home)$/i.test(base);
+  const slug = isHome ? "index" : (base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || base);
+  const name = isHome ? "Home" : base.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return { slug, name, isHome };
+};
+
+const readFileAsText = (file) => new Promise((resolve) => {
+  const r = new FileReader();
+  r.onload = () => resolve(String(r.result || ""));
+  r.readAsText(file);
+});
+
+// Any external site's markup + CSS, converted into Web Dojo's own block
+// model: scanHtml splits top-level markup into elements[] (same shape the
+// canvas/inspector already work with) and consolidates every <style> rule
+// into one data-forge-imported-css block, which the export pipeline
+// (extractForgeCss) routes into globals.css's Components section — so an
+// imported template's styling lands in the right place automatically,
+// the same way a hand-built page's would.
+const ImportTemplatePanel = ({ onClose, onSaved, onLoadTemplate, onModalClose }) => {
+  const [mode, setMode] = useState("paste");
+  const [pasteHtml, setPasteHtml] = useState("");
+  const [url, setUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [scanned, setScanned] = useState(null); // { headHtml, sections, sourceLabel }
+  const [scannedMulti, setScannedMulti] = useState(null); // { pages: [{name, slug, headHtml, sections}], sourceLabel }
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const doScan = async () => {
+    setBusy(true);
+    try {
+      let raw = pasteHtml;
+      let sourceLabel = "Pasted HTML";
+      if (mode === "url") {
+        if (!/^https?:\/\//.test(url.trim())) { toast.error("Enter a valid http(s) URL"); return; }
+        const r = await axios.post(`${API}/import/url`, { url: url.trim() });
+        raw = r.data.html || "";
+        try { sourceLabel = new URL(url.trim()).hostname; } catch { sourceLabel = url.trim(); }
+      }
+      if (!raw.trim()) { toast.error("Nothing to scan"); return; }
+      const { headHtml, sections } = scanHtml(raw);
+      if (sections.length === 0) { toast.error("No importable sections found in that markup"); return; }
+      setScanned({ headHtml, sections, sourceLabel });
+      setScannedMulti(null);
+      setName((n) => n || sourceLabel);
+      toast.success(`Found ${sections.length} section${sections.length === 1 ? "" : "s"}`);
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Import failed");
+    } finally { setBusy(false); }
+  };
+
+  // Whole-template mode: pick every .html + .css file a donor template
+  // folder came with (a ThemeForest-style download, extracted locally) in
+  // one file dialog. Each .html file becomes its own page; sibling .css
+  // files are inlined per-page before scanning so their rules land in that
+  // page's consolidated stylesheet, same as a single-file import.
+  const doScanFiles = async (fileList) => {
+    const list = Array.from(fileList || []);
+    const htmlFiles = list.filter((f) => HTML_EXT_RE.test(f.name));
+    const cssFiles = list.filter((f) => CSS_EXT_RE.test(f.name));
+    if (htmlFiles.length === 0) { toast.error("Select at least one .html file"); return; }
+    setBusy(true);
+    try {
+      const siblingCssByName = {};
+      for (const f of cssFiles) siblingCssByName[f.name] = await readFileAsText(f);
+      const pages = [];
+      for (const f of htmlFiles) {
+        const raw = await readFileAsText(f);
+        const { headHtml, sections } = scanHtml(inlineLocalStylesheets(raw, siblingCssByName));
+        if (sections.length === 0) continue;
+        const { slug, name: pageName } = filePageMeta(f.name);
+        pages.push({ slug, name: pageName, headHtml, sections });
+      }
+      if (pages.length === 0) { toast.error("No importable sections found in those files"); return; }
+      // Exactly one page must be "index" — an index/home-named file wins;
+      // otherwise the first selected file becomes the home page.
+      if (!pages.some((p) => p.slug === "index")) pages[0] = { ...pages[0], slug: "index" };
+      setScannedMulti({ pages, sourceLabel: `${htmlFiles.length} file${htmlFiles.length === 1 ? "" : "s"}` });
+      setScanned(null);
+      setName((n) => n || "Imported Site");
+      toast.success(`Found ${pages.length} page${pages.length === 1 ? "" : "s"}`);
+    } finally { setBusy(false); }
+  };
+
+  const projectData = scannedMulti
+    ? pagesToProjectData(name || "Imported Site", scannedMulti.pages)
+    : scanned
+    ? sectionsToProjectData(name || "Imported Template", scanned.headHtml, scanned.sections)
+    : null;
+  const previewTpl = projectData ? { id: "staged-import", name: name || (scannedMulti ? "Imported Site" : "Imported Template"), description, aesthetic: null, data: projectData } : null;
+
+  const doSave = async () => {
+    if (!name.trim()) { toast.error("Give the template a name"); return; }
+    setBusy(true);
+    try {
+      await axios.post(`${API}/templates`, { name: name.trim(), description: description.trim(), data: projectData });
+      toast.success("Template saved");
+      onSaved();
+    } catch { toast.error("Save failed"); } finally { setBusy(false); }
+  };
+
+  // Loads the scanned import straight into the current project — same
+  // immediate path a built-in starter or a saved template gets via
+  // onLoadTemplate, so an imported template doesn't dead-end at "saved to
+  // your library" and require a second trip to go find and apply it.
+  const doUse = () => {
+    if (!previewTpl) return;
+    setPreviewOpen(false);
+    onLoadTemplate(previewTpl);
+    onModalClose();
+  };
+
+  return (
+    <>
+      <div className="p-3 rounded border border-[#332D22] bg-[#15130E] space-y-3" data-testid="tpl-import-panel">
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Import a template from outside Web Dojo</div>
+          <button onClick={onClose} className="text-[#948C79] hover:text-[#F1EDE2]" data-testid="tpl-import-close"><X size={14} /></button>
+        </div>
+        <p className="text-[11px] text-[#948C79] leading-relaxed">Any page's markup gets split into blocks and its CSS consolidated into one stylesheet that exports to the right place in globals.css, same as a built-in template. Pick a whole template folder to bring in every page it comes with.</p>
+        <div className="grid grid-cols-3 gap-1">
+          <button onClick={() => setMode("paste")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "paste" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-paste"><Upload size={12} /> Paste HTML</button>
+          <button onClick={() => setMode("url")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "url" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-url"><Link2 size={12} /> From URL</button>
+          <button onClick={() => setMode("files")} className={`py-1.5 rounded text-xs flex items-center justify-center gap-1.5 ${mode === "files" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87]"}`} data-testid="tpl-import-mode-files"><FolderUp size={12} /> Whole template</button>
+        </div>
+        {mode === "paste" ? (
+          <textarea
+            value={pasteHtml}
+            onChange={(e) => setPasteHtml(e.target.value)}
+            placeholder="<html>…</html>"
+            rows={4}
+            className="w-full bg-[#1C1A15] border border-[#332D22] rounded p-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+            data-testid="tpl-import-paste"
+          />
+        ) : mode === "url" ? (
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://example.com"
+            className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-2 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+            data-testid="tpl-import-url"
+          />
+        ) : (
+          <label className="w-full flex flex-col items-center justify-center gap-1 py-4 rounded border border-dashed border-[#332D22] text-[#A79C87] text-xs cursor-pointer hover:border-[#C9A227]">
+            <FolderUp size={16} />
+            Select every .html + .css file in the template folder
+            <input
+              type="file"
+              multiple
+              accept=".html,.htm,.css"
+              onChange={(e) => { doScanFiles(e.target.files); e.target.value = ""; }}
+              className="hidden"
+              data-testid="tpl-import-files"
+            />
+          </label>
+        )}
+        {mode !== "files" && (
+          <button onClick={doScan} disabled={busy} className="w-full text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-scan">
+            {busy ? "Scanning…" : "Scan"}
+          </button>
+        )}
+
+        {scannedMulti && (
+          <div className="pt-2 border-t border-[#332D22] space-y-2">
+            <div className="text-[11px] text-[#A79C87]" data-testid="tpl-import-multi-summary">{scannedMulti.pages.length} page{scannedMulti.pages.length === 1 ? "" : "s"} detected from {scannedMulti.sourceLabel} ({scannedMulti.pages.map((p) => p.name).join(", ")})</div>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Project name" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-name" />
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-desc" />
+            <div className="grid grid-cols-3 gap-2">
+              <button onClick={() => setPreviewOpen(true)} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1" data-testid="tpl-import-preview"><Eye size={12} /> Preview</button>
+              <button onClick={doUse} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="tpl-import-use">Use this template</button>
+              <button onClick={doSave} disabled={busy} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-save">{busy ? "Saving…" : "Save as template"}</button>
+            </div>
+          </div>
+        )}
+        {scanned && (
+          <div className="pt-2 border-t border-[#332D22] space-y-2">
+            <div className="text-[11px] text-[#A79C87]">{scanned.sections.length} section{scanned.sections.length === 1 ? "" : "s"} detected from {scanned.sourceLabel}{scanned.headHtml.includes("data-forge-imported-css") ? " · CSS consolidated" : ""}</div>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-name" />
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#1C1A15] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-import-desc" />
+            <div className="grid grid-cols-3 gap-2">
+              <button onClick={() => setPreviewOpen(true)} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1" data-testid="tpl-import-preview"><Eye size={12} /> Preview</button>
+              <button onClick={doUse} className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="tpl-import-use">Use this template</button>
+              <button onClick={doSave} disabled={busy} className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] disabled:opacity-50 text-[#F1EDE2] border border-[#332D22]" data-testid="tpl-import-save">{busy ? "Saving…" : "Save as template"}</button>
+            </div>
+          </div>
+        )}
+      </div>
+      {previewOpen && (
+        <TemplatePreviewModal tpl={previewTpl} onClose={() => setPreviewOpen(false)} onUse={doUse} />
+      )}
+    </>
+  );
+};
 
 // Two-mode modal: save the current project as a starter template, or start a
 // new project from an existing template (including built-in aesthetics).
@@ -158,6 +462,7 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
   const [query, setQuery] = useState("");
   const [aestheticFilter, setAestheticFilter] = useState("");
   const [previewTpl, setPreviewTpl] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   useEffect(() => { if (open) refresh(); }, [open]);
 
@@ -165,13 +470,23 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
     try {
       const r = await axios.get(`${API}/templates`);
       setTemplates(r.data);
-    } catch { toast.error("Failed to load templates"); }
+    } catch {
+      // Backend unreachable — most commonly REACT_APP_BACKEND_URL unset (API
+      // becomes "undefined/api") or the backend process isn't running. Fall
+      // back to the bundled 1:1 mirror of the backend's seeded starters so the
+      // gallery stays usable offline. Only starters ship in the fallback;
+      // user-saved templates require the backend, so they're simply absent
+      // here (and reappear once the backend is reachable again).
+      setTemplates(starterTemplatesFallback);
+      toast.message("Backend offline — showing bundled starter templates");
+    }
   };
 
   const { starters, userTemplates, aesthetics } = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const starters = templates.filter((t) => t.is_starter);
-    const userTemplates = templates.filter((t) => !t.is_starter);
+    const tmpl = Array.isArray(templates) ? templates : [];
+    const starters = tmpl.filter((t) => t.is_starter);
+    const userTemplates = tmpl.filter((t) => !t.is_starter);
     const aesthetics = Array.from(new Set(starters.map((t) => t.aesthetic).filter(Boolean))).sort();
     const filterOne = (t) => {
       const hitAesthetic = !aestheticFilter || t.aesthetic === aestheticFilter;
@@ -213,25 +528,25 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
   return (
     <>
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-3xl max-h-[85vh] overflow-y-auto" data-testid="templates-modal">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-3xl max-h-[85vh] overflow-y-auto" data-testid="templates-modal">
         <DialogHeader><DialogTitle>Project templates</DialogTitle></DialogHeader>
         <div className="space-y-5">
 
           {/* Search + filter */}
           <div className="flex flex-col gap-2">
             <div className="relative">
-              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-[#948C79]" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by name, description or aesthetic…"
-                className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded pl-6 pr-6 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                className="w-full bg-[#15130E] border border-[#332D22] rounded pl-6 pr-6 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                 data-testid="tpl-search"
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[#948C79] hover:text-[#F1EDE2]"
                   data-testid="tpl-search-clear"
                 ><X size={12} /></button>
               )}
@@ -239,14 +554,14 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
             <div className="flex flex-wrap gap-1" data-testid="aesthetic-filter">
               <button
                 onClick={() => setAestheticFilter("")}
-                className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === "" ? "border-blue-500 bg-blue-500/20 text-white" : "border-[#2B2B2B] bg-[#0D0D0D] text-gray-400 hover:border-blue-500/60"}`}
+                className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === "" ? "border-[#C9A227] bg-[#C9A227]/20 text-[#F1EDE2]" : "border-[#332D22] bg-[#15130E] text-[#A79C87] hover:border-[#C9A227]/60"}`}
                 data-testid="aesthetic-all"
               >All · {templates.filter((t) => t.is_starter).length}</button>
               {aesthetics.map((a) => (
                 <button
                   key={a}
                   onClick={() => setAestheticFilter(a === aestheticFilter ? "" : a)}
-                  className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === a ? "border-amber-400 bg-amber-400/15 text-white" : "border-[#2B2B2B] bg-[#0D0D0D] text-gray-400 hover:border-amber-400/60"}`}
+                  className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${aestheticFilter === a ? "border-amber-400 bg-amber-400/15 text-[#F1EDE2]" : "border-[#332D22] bg-[#15130E] text-[#A79C87] hover:border-amber-400/60"}`}
                   data-testid={`aesthetic-${a}`}
                 >{a}</button>
               ))}
@@ -257,8 +572,8 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={13} className="text-amber-400" />
-              <div className="text-[11px] uppercase tracking-widest text-gray-400">Starter gallery · aesthetics</div>
-              <div className="text-[10px] text-gray-600">{starters.length} showing</div>
+              <div className="text-[11px] uppercase tracking-widest text-[#A79C87]">Starter gallery · aesthetics</div>
+              <div className="text-[10px] text-[#6B6353]">{starters.length} showing</div>
             </div>
             <div className="grid grid-cols-3 gap-2" data-testid="starter-gallery">
               {starters.map((t) => (
@@ -266,16 +581,31 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
               ))}
             </div>
             {starters.length === 0 && (
-              <div className="text-[11px] text-gray-500 py-6 text-center border border-dashed border-[#2B2B2B] rounded">No aesthetics match your search.</div>
+              <div className="text-[11px] text-[#948C79] py-6 text-center border border-dashed border-[#332D22] rounded">No aesthetics match your search.</div>
             )}
           </div>
 
           {/* User templates */}
           <div>
-            <div className="text-[11px] uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-2">
-              <Bookmark size={13} className="text-blue-400" /> Your templates
+            <div className="text-[11px] uppercase tracking-widest text-[#A79C87] mb-2 flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2"><Bookmark size={13} className="text-[#D9BC55]" /> Your templates</span>
+              {!importOpen && (
+                <button onClick={() => setImportOpen(true)} className="text-[10px] normal-case tracking-normal px-2 py-1 rounded bg-[#242019] hover:bg-[#332D22] text-[#E4DECE] border border-[#332D22] flex items-center gap-1" data-testid="tpl-import-open">
+                  <Upload size={11} /> Import a template
+                </button>
+              )}
             </div>
-            {userTemplates.length === 0 && <div className="text-[11px] text-gray-500 py-4 text-center border border-dashed border-[#2B2B2B] rounded">No custom templates yet — save your current project below.</div>}
+            {importOpen && (
+              <div className="mb-3">
+                <ImportTemplatePanel
+                  onClose={() => setImportOpen(false)}
+                  onSaved={() => { setImportOpen(false); refresh(); }}
+                  onLoadTemplate={onLoadTemplate}
+                  onModalClose={onClose}
+                />
+              </div>
+            )}
+            {userTemplates.length === 0 && <div className="text-[11px] text-[#948C79] py-4 text-center border border-dashed border-[#332D22] rounded">No custom templates yet — save your current project below.</div>}
             {userTemplates.length > 0 && (
               <div className="grid grid-cols-2 gap-2">
                 {userTemplates.map((t) => (
@@ -291,17 +621,17 @@ export const ProjectTemplatesModal = ({ open, onClose, currentProject, onLoadTem
           </div>
 
           {/* Save current project as template */}
-          <div className="p-3 rounded border border-[#2B2B2B] bg-[#0D0D0D] space-y-2">
-            <div className="text-[10px] uppercase tracking-wider text-gray-500">Save current project as template</div>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500" data-testid="tpl-name" />
-            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500" data-testid="tpl-desc" />
-            <button onClick={saveTemplate} disabled={busy} className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white" data-testid="tpl-save">
+          <div className="p-3 rounded border border-[#332D22] bg-[#15130E] space-y-2">
+            <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Save current project as template</div>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Template name" className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-name" />
+            <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid="tpl-desc" />
+            <button onClick={saveTemplate} disabled={busy} className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:opacity-50 text-[#F1EDE2]" data-testid="tpl-save">
               {busy ? "Saving…" : "Save as template"}
             </button>
           </div>
 
           <div className="flex justify-end">
-            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white" data-testid="tpl-close">Close</button>
+            <button onClick={onClose} className="text-xs px-3 py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]" data-testid="tpl-close">Close</button>
           </div>
         </div>
       </DialogContent>

@@ -1,0 +1,1086 @@
+/* ====================================
+   AVALON GEMS: 14-Gem Theme System
+   ====================================
+
+   PART 1: Oxygene Global Styles
+   (imported first so gem themes can override)
+   ==================================== */
+@import "oxygene-globals.scss";
+
+/* ====================================
+   PART 2: Gem Theme Definitions
+   ====================================
+
+   Dual-function framework: maps gemstone palettes to
+   Web Dojo's --fc-* block-system variables so any
+   gem can skin the entire Oxygene/everlight template.
+
+   Each gem provides:
+   - CSS custom properties (--gem-*-primary, --gem-*-accent, etc.)
+   - Linear gradient (accent stripe for borders/right-accent)
+   - Conic gradient (card/box background)
+   - Text contrast (light or dark)
+   - SCSS mixins for element-level theming
+
+   ====================================
+   1. CORE VARIABLES & MIXINS
+   ==================================== */
+
+$shimmer-duration: 2s;
+$pulse-duration:  3s;
+$sparkle-duration: 1.5s;
+
+$glass-opacity-light:  0.85;
+$glass-opacity-medium: 0.7;
+$glass-opacity-dark:   0.5;
+
+$gem-padding:       20px;
+$gem-border-radius: 8px;
+
+/* ---- Animation keyframes ---- */
+@keyframes gem-pulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.1); }
+}
+@keyframes pulse-spin {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes sparkle-sweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+@keyframes float-up {
+  0%   { bottom: -150px; opacity: 1; }
+  100% { bottom: 100vh; opacity: 0; }
+}
+
+/* ---- Core mixins ---- */
+
+@mixin gem-background($gradient) {
+  background: $gradient;
+  animation: gem-pulse $pulse-duration ease-in-out infinite;
+}
+
+@mixin gem-text-container() {
+  background: rgba(255, 255, 255, $glass-opacity-light);
+  padding: $gem-padding;
+  border-radius: $gem-border-radius;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+@mixin gem-header-shimmer($from, $to) {
+  background: linear-gradient(90deg, $from 0%, $to 50%, $from 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer $shimmer-duration linear infinite;
+}
+
+@mixin gem-sparkle() {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    animation: sparkle-sweep $sparkle-duration infinite;
+  }
+}
+
+/* ---- Parameterized element mixins ---- */
+
+@mixin gem-header($primary-color, $accent-color, $glow-color) {
+  color: $primary-color;
+  background: linear-gradient(135deg, $primary-color 0%, $accent-color 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: all 0.28s ease;
+}
+
+@mixin gem-header-hover($glow-color) {
+  text-shadow: 0 0 20px $glow-color, 0 2px 8px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 0 15px $glow-color);
+}
+
+@mixin gem-paragraph($text-color, $accent-color) {
+  color: $text-color;
+  line-height: 1.6;
+  font-size: 1rem;
+  letter-spacing: 0.015em;
+  transition: color 0.28s ease;
+}
+
+@mixin gem-paragraph-hover($hover-color) {
+  color: $hover-color;
+}
+
+@mixin gem-link($primary-color, $accent-color, $glow-color) {
+  color: $primary-color;
+  text-decoration: none;
+  position: relative;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  transition: all 0.28s ease;
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 0; height: 2px;
+    background: linear-gradient(90deg, $primary-color, $accent-color);
+    transition: width 0.28s ease;
+  }
+  &:hover {
+    color: $accent-color;
+    text-shadow: 0 0 12px $glow-color;
+    &::before { width: 100%; }
+  }
+  &:active { color: $primary-color; }
+}
+
+@mixin gem-button($primary-color, $accent-color, $glow-color, $text-color: #FFFFFF) {
+  background: linear-gradient(135deg, $primary-color 0%, $accent-color 100%);
+  color: $text-color;
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, $primary-color, $accent-color) 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.28s ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px $glow-color;
+    filter: brightness(1.1);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  &:disabled {
+    opacity: 0.5; cursor: not-allowed;
+    transform: none; box-shadow: none;
+  }
+}
+
+@mixin gem-border($primary-color, $accent-color, $width: 2px) {
+  border: $width solid transparent;
+  border-image: linear-gradient(135deg, $primary-color, $accent-color) 1;
+  transition: all 0.28s ease;
+}
+
+@mixin gem-border-hover($glow-color, $width: 2px) {
+  box-shadow: inset 0 0 20px $glow-color, 0 0 15px $glow-color;
+  border-width: $width;
+}
+
+@mixin gem-scrollbar($primary-color, $accent-color, $text-color) {
+  &::-webkit-scrollbar { width: 12px; height: 12px; }
+  &::-webkit-scrollbar-track { background: rgba(19,18,25,0.1); border-radius: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, $primary-color, $accent-color);
+    border-radius: 6px;
+    border: 2px solid rgba(19,18,25,0.1);
+    transition: all 0.28s ease;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, $accent-color, $primary-color);
+    box-shadow: 0 0 15px rgba($accent-color, 0.4);
+  }
+  scrollbar-color: linear-gradient(135deg, $primary-color, $accent-color) rgba(19,18,25,0.1);
+  scrollbar-width: thin;
+}
+
+@mixin gem-element-shimmer($primary-color, $accent-color) {
+  background: linear-gradient(90deg, $primary-color, $accent-color, $primary-color);
+  background-size: 200% 100%;
+  animation: gem-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes gem-shimmer {
+  0%, 100% { background-position: 0% center; }
+  50%      { background-position: 100% center; }
+}
+
+
+/* ====================================
+   2. GEMS — 14 STONE PERMUTATIONS
+   ==================================== */
+
+:root {
+  /* ---- 1. Ruby (Corundum — Red Aluminum Oxide) ---- */
+  --gem-ruby-primary:    #9B111E;
+  --gem-ruby-accent:     #E0115F;
+  --gem-ruby-glow:       rgba(224, 17, 95, 0.5);
+  --gem-ruby-text-dark:  #333333;
+  --gem-ruby-text-light: #FFFFFF;
+  --gem-ruby-gradient:   linear-gradient(135deg, #9B111E 0%, #E0115F 50%, #F280A1 100%);
+  --gem-ruby-card:       conic-gradient(from 180deg at 50% 50%, #9B111E 0deg, #E0115F 90deg, #F280A1 180deg, #9B111E 270deg, #E0115F 360deg);
+
+  /* ---- 2. Sapphire (Corundum — Blue Aluminum Oxide) ---- */
+  --gem-sapphire-primary:    #0F52BA;
+  --gem-sapphire-accent:     #3F8CFF;
+  --gem-sapphire-glow:       rgba(63, 140, 255, 0.5);
+  --gem-sapphire-text-dark:  #333333;
+  --gem-sapphire-text-light: #FFFFFF;
+  --gem-sapphire-gradient:   linear-gradient(135deg, #0F52BA 0%, #3F8CFF 50%, #94B8FF 100%);
+  --gem-sapphire-card:       conic-gradient(from 180deg at 50% 50%, #0F52BA 0deg, #3F8CFF 90deg, #94B8FF 180deg, #0F52BA 270deg, #3F8CFF 360deg);
+
+  /* ---- 3. Emerald (Beryl — Green) ---- */
+  --gem-emerald-primary:    #046307;
+  --gem-emerald-accent:     #1BB835;
+  --gem-emerald-glow:       rgba(27, 184, 53, 0.5);
+  --gem-emerald-text-dark:  #333333;
+  --gem-emerald-text-light: #FFFFFF;
+  --gem-emerald-gradient:   linear-gradient(135deg, #046307 0%, #1BB835 50%, #7CE39A 100%);
+  --gem-emerald-card:       conic-gradient(from 180deg at 50% 50%, #046307 0deg, #1BB835 90deg, #7CE39A 180deg, #046307 270deg, #1BB835 360deg);
+
+  /* ---- 4. Amethyst (Quartz — Purple) ---- */
+  --gem-amethyst-primary:    #5B3E96;
+  --gem-amethyst-accent:     #8A2BE2;
+  --gem-amethyst-glow:       rgba(138, 43, 226, 0.5);
+  --gem-amethyst-text-dark:  #333333;
+  --gem-amethyst-text-light: #FFFFFF;
+  --gem-amethyst-gradient:   linear-gradient(135deg, #5B3E96 0%, #8A2BE2 50%, #C7A0FF 100%);
+  --gem-amethyst-card:       conic-gradient(from 180deg at 50% 50%, #5B3E96 0deg, #8A2BE2 90deg, #C7A0FF 180deg, #5B3E96 270deg, #8A2BE2 360deg);
+
+  /* ---- 5. Topaz (Topaz — Golden Yellow) ---- */
+  --gem-topaz-primary:    #FFC87C;
+  --gem-topaz-accent:     #FFD700;
+  --gem-topaz-glow:       rgba(255, 215, 0, 0.5);
+  --gem-topaz-text-dark:  #111111;
+  --gem-topaz-text-light: #FFFFFF;
+  --gem-topaz-gradient:   linear-gradient(135deg, #FFC87C 0%, #FFD700 50%, #FFECB3 100%);
+  --gem-topaz-card:       conic-gradient(from 180deg at 50% 50%, #FFC87C 0deg, #FFD700 90deg, #FFECB3 180deg, #FFC87C 270deg, #FFD700 360deg);
+
+  /* ---- 6. Onyx (Chalcedony — Black) ---- */
+  --gem-onyx-primary:    #1C1C1C;
+  --gem-onyx-accent:     #434343;
+  --gem-onyx-glow:       rgba(67, 67, 67, 0.5);
+  --gem-onyx-text-dark:  #FFFFFF;
+  --gem-onyx-text-light: #FFFFFF;
+  --gem-onyx-gradient:   linear-gradient(135deg, #1C1C1C 0%, #434343 50%, #6B6B6B 100%);
+  --gem-onyx-card:       conic-gradient(from 180deg at 50% 50%, #1C1C1C 0deg, #434343 90deg, #6B6B6B 180deg, #1C1C1C 270deg, #434343 360deg);
+
+  /* ---- 7. Aquamarine (Beryl — Light Blue-green) ---- */
+  --gem-aquamarine-primary:    #00D4FF;
+  --gem-aquamarine-accent:     #40E0D0;
+  --gem-aquamarine-glow:       rgba(64, 224, 208, 0.5);
+  --gem-aquamarine-text-dark:  #333333;
+  --gem-aquamarine-text-light: #FFFFFF;
+  --gem-aquamarine-gradient:   linear-gradient(135deg, #00D4FF 0%, #40E0D0 50%, #AFEEEE 100%);
+  --gem-aquamarine-card:       conic-gradient(from 180deg at 50% 50%, #00D4FF 0deg, #40E0D0 90deg, #AFEEEE 180deg, #00D4FF 270deg, #40E0D0 360deg);
+
+  /* ---- 8. Morganite (Beryl — Pink-Peach) ---- */
+  --gem-morganite-primary:    #FF69B4;
+  --gem-morganite-accent:     #FFB6C1;
+  --gem-morganite-glow:       rgba(255, 182, 193, 0.5);
+  --gem-morganite-text-dark:  #111111;
+  --gem-morganite-text-light: #FFFFFF;
+  --gem-morganite-gradient:   linear-gradient(135deg, #FF69B4 0%, #FFB6C1 50%, #FFE4E1 100%);
+  --gem-morganite-card:       conic-gradient(from 180deg at 50% 50%, #FF69B4 0deg, #FFB6C1 90deg, #FFE4E1 180deg, #FF69B4 270deg, #FFB6C1 360deg);
+
+  /* ---- 9. Heliodor (Beryl — Golden Yellow) ---- */
+  --gem-heliodor-primary:    #FFD700;
+  --gem-heliodor-accent:     #FFA500;
+  --gem-heliodor-glow:       rgba(255, 165, 0, 0.5);
+  --gem-heliodor-text-dark:  #111111;
+  --gem-heliodor-text-light: #FFFFFF;
+  --gem-heliodor-gradient:   linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFDAB9 100%);
+  --gem-heliodor-card:       conic-gradient(from 180deg at 50% 50%, #FFD700 0deg, #FFA500 90deg, #FFDAB9 180deg, #FFD700 270deg, #FFA500 360deg);
+
+  /* ---- 10. Goshenite (Beryl — Colorless) ---- */
+  --gem-goshenite-primary:    #F5F5F5;
+  --gem-goshenite-accent:     #FFFFFF;
+  --gem-goshenite-glow:       rgba(255, 255, 255, 0.5);
+  --gem-goshenite-text-dark:  #111111;
+  --gem-goshenite-text-light: #FFFFFF;
+  --gem-goshenite-gradient:   linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 50%, #E8E8E8 100%);
+  --gem-goshenite-card:       conic-gradient(from 180deg at 50% 50%, #F5F5F5 0deg, #FFFFFF 90deg, #E8E8E8 180deg, #F5F5F5 270deg, #FFFFFF 360deg);
+
+  /* ---- 11. Bixbite (Beryl — Deep Red) ---- */
+  --gem-bixbite-primary:    #8B0000;
+  --gem-bixbite-accent:     #DC143C;
+  --gem-bixbite-glow:       rgba(220, 20, 60, 0.5);
+  --gem-bixbite-text-dark:  #333333;
+  --gem-bixbite-text-light: #FFFFFF;
+  --gem-bixbite-gradient:   linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #FF6B9D 100%);
+  --gem-bixbite-card:       conic-gradient(from 180deg at 50% 50%, #8B0000 0deg, #DC143C 90deg, #FF6B9D 180deg, #8B0000 270deg, #DC143C 360deg);
+
+  /* ---- 12. Padparadscha (Corundum — Pink-Orange) ---- */
+  --gem-padparadscha-primary:    #FF6F61;
+  --gem-padparadscha-accent:     #FF8A65;
+  --gem-padparadscha-glow:       rgba(255, 138, 101, 0.5);
+  --gem-padparadscha-text-dark:  #333333;
+  --gem-padparadscha-text-light: #FFFFFF;
+  --gem-padparadscha-gradient:   linear-gradient(135deg, #FF6F61 0%, #FF8A65 50%, #FFAB91 100%);
+  --gem-padparadscha-card:       conic-gradient(from 180deg at 50% 50%, #FF6F61 0deg, #FF8A65 90deg, #FFAB91 180deg, #FF6F61 270deg, #FF8A65 360deg);
+
+  /* ---- 13. Star Ruby (Corundum — Deep Red with Asterism) ---- */
+  --gem-star-ruby-primary:    #7B0000;
+  --gem-star-ruby-accent:     #C41E3A;
+  --gem-star-ruby-glow:       rgba(196, 30, 58, 0.5);
+  --gem-star-ruby-text-dark:  #333333;
+  --gem-star-ruby-text-light: #FFFFFF;
+  --gem-star-ruby-gradient:   linear-gradient(135deg, #7B0000 0%, #C41E3A 50%, #E63946 100%);
+  --gem-star-ruby-card:       conic-gradient(from 180deg at 50% 50%, #7B0000 0deg, #C41E3A 90deg, #E63946 180deg, #7B0000 270deg, #C41E3A 360deg);
+
+  /* ---- 14. Color-Change Corundum (Corundum — Green/Red Shift) ---- */
+  --gem-color-change-primary:    #2D6A4F;
+  --gem-color-change-accent:     #A7C957;
+  --gem-color-change-glow:       rgba(167, 201, 87, 0.5);
+  --gem-color-change-text-dark:  #333333;
+  --gem-color-change-text-light: #FFFFFF;
+  --gem-color-change-gradient:   linear-gradient(135deg, #2D6A4F 0%, #A7C957 50%, #D62828 100%);
+  --gem-color-change-card:       conic-gradient(from 180deg at 50% 50%, #2D6A4F 0deg, #A7C957 90deg, #D62828 180deg, #2D6A4F 270deg, #A7C957 360deg);
+
+  /* ---- Special: Indigo / Lapis Lazuli ---- */
+  --gem-indigo-primary:    #4B0082;
+  --gem-indigo-accent:     #8A2BE2;
+  --gem-indigo-glow:       rgba(138, 43, 226, 0.5);
+  --gem-indigo-text-dark:  #333333;
+  --gem-indigo-text-light: #FFFFFF;
+  --gem-indigo-gradient:   linear-gradient(135deg, #4B0082 0%, #8A2BE2 50%, #9370DB 100%);
+  --gem-indigo-card:       conic-gradient(from 180deg at 50% 50%, #4B0082 0deg, #8A2BE2 90deg, #9370DB 180deg, #4B0082 270deg, #8A2BE2 360deg);
+
+  /* Glassmorphic foundation */
+  --glass-bg:         rgba(255,255,255,0.14);
+  --glass-blur:       blur(18px);
+  --glass-glow:       rgba(138,43,226,0.35);
+
+  /* Text contrast tokens */
+  --gem-card-text-light:  #F8F9FF;
+  --gem-card-text-dark:   #111111;
+}
+
+
+/* ====================================
+   3. BACKGROUND / GRADIENT CLASSES
+   Maps each gem to Web Dojo --fc-* variables
+   ==================================== */
+
+/* ---- Ruby ---- */
+.gem-gradient-ruby   { background: var(--gem-ruby-gradient); }
+.gem-border-ruby     { --gem-accent-gradient: var(--gem-ruby-gradient); }
+.gem-card-ruby       { background: var(--gem-ruby-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-ruby-theme {
+  --fc-primary: var(--gem-ruby-primary);
+  --fc-accent:  var(--gem-ruby-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-ruby-text-light);
+  --fc-border:  rgba(155,17,30,0.3);
+  --fc-bg:      #0a0a0d;
+  --fc-surface: rgba(155,17,30,0.08);
+  --glass-bg:   rgba(155,17,30,0.08);
+  --glass-border: rgba(155,17,30,0.2);
+}
+
+/* ---- Sapphire ---- */
+.gem-gradient-sapphire  { background: var(--gem-sapphire-gradient); }
+.gem-border-sapphire    { --gem-accent-gradient: var(--gem-sapphire-gradient); }
+.gem-card-sapphire      { background: var(--gem-sapphire-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-sapphire-theme {
+  --fc-primary: var(--gem-sapphire-primary);
+  --fc-accent:  var(--gem-sapphire-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-sapphire-text-light);
+  --fc-border:  rgba(15,82,186,0.3);
+  --fc-bg:      #0a0a1a;
+  --fc-surface: rgba(15,82,186,0.08);
+  --glass-bg:   rgba(15,82,186,0.08);
+  --glass-border: rgba(15,82,186,0.2);
+}
+
+/* ---- Emerald ---- */
+.gem-gradient-emerald  { background: var(--gem-emerald-gradient); }
+.gem-border-emerald    { --gem-accent-gradient: var(--gem-emerald-gradient); }
+.gem-card-emerald      { background: var(--gem-emerald-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-emerald-theme {
+  --fc-primary: var(--gem-emerald-primary);
+  --fc-accent:  var(--gem-emerald-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-emerald-text-light);
+  --fc-border:  rgba(4,99,7,0.3);
+  --fc-bg:      #0a0d0a;
+  --fc-surface: rgba(4,99,7,0.08);
+  --glass-bg:   rgba(4,99,7,0.08);
+  --glass-border: rgba(4,99,7,0.2);
+}
+
+/* ---- Amethyst ---- */
+.gem-gradient-amethyst  { background: var(--gem-amethyst-gradient); }
+.gem-border-amethyst    { --gem-accent-gradient: var(--gem-amethyst-gradient); }
+.gem-card-amethyst      { background: var(--gem-amethyst-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-amethyst-theme {
+  --fc-primary: var(--gem-amethyst-primary);
+  --fc-accent:  var(--gem-amethyst-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-amethyst-text-light);
+  --fc-border:  rgba(91,62,150,0.3);
+  --fc-bg:      #0f0a1a;
+  --fc-surface: rgba(91,62,150,0.08);
+  --glass-bg:   rgba(91,62,150,0.08);
+  --glass-border: rgba(91,62,150,0.2);
+}
+
+/* ---- Topaz (dark text on light gem) ---- */
+.gem-gradient-topaz  { background: var(--gem-topaz-gradient); }
+.gem-border-topaz    { --gem-accent-gradient: var(--gem-topaz-gradient); }
+.gem-card-topaz      { background: var(--gem-topaz-card); --gem-card-text: var(--gem-card-text-dark); }
+.gem-topaz-theme {
+  --fc-primary: var(--gem-topaz-primary);
+  --fc-accent:  var(--gem-topaz-accent);
+  --fc-text:    var(--gem-card-text-dark);
+  --fc-muted:   var(--gem-topaz-text-dark);
+  --fc-border:  rgba(255,200,124,0.4);
+  --fc-bg:      #1a1208;
+  --fc-surface: rgba(255,200,124,0.12);
+  --glass-bg:   rgba(255,200,124,0.1);
+  --glass-border: rgba(255,200,124,0.3);
+}
+
+/* ---- Onyx ---- */
+.gem-gradient-onyx  { background: var(--gem-onyx-gradient); }
+.gem-border-onyx    { --gem-accent-gradient: var(--gem-onyx-gradient); }
+.gem-card-onyx      { background: var(--gem-onyx-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-onyx-theme {
+  --fc-primary: var(--gem-onyx-primary);
+  --fc-accent:  var(--gem-onyx-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-onyx-text-light);
+  --fc-border:  rgba(28,28,28,0.3);
+  --fc-bg:      #0a0a0a;
+  --fc-surface: rgba(28,28,28,0.08);
+  --glass-bg:   rgba(28,28,28,0.08);
+  --glass-border: rgba(28,28,28,0.2);
+}
+
+/* ---- Aquamarine ---- */
+.gem-gradient-aquamarine  { background: var(--gem-aquamarine-gradient); }
+.gem-border-aquamarine    { --gem-accent-gradient: var(--gem-aquamarine-gradient); }
+.gem-card-aquamarine      { background: var(--gem-aquamarine-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-aquamarine-theme {
+  --fc-primary: var(--gem-aquamarine-primary);
+  --fc-accent:  var(--gem-aquamarine-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-aquamarine-text-light);
+  --fc-border:  rgba(0,212,255,0.3);
+  --fc-bg:      #0a1a1f;
+  --fc-surface: rgba(0,212,255,0.08);
+  --glass-bg:   rgba(0,212,255,0.08);
+  --glass-border: rgba(0,212,255,0.2);
+}
+
+/* ---- Morganite ---- */
+.gem-gradient-morganite  { background: var(--gem-morganite-gradient); }
+.gem-border-morganite    { --gem-accent-gradient: var(--gem-morganite-gradient); }
+.gem-card-morganite      { background: var(--gem-morganite-card); --gem-card-text: var(--gem-card-text-dark); }
+.gem-morganite-theme {
+  --fc-primary: var(--gem-morganite-primary);
+  --fc-accent:  var(--gem-morganite-accent);
+  --fc-text:    var(--gem-card-text-dark);
+  --fc-muted:   var(--gem-morganite-text-dark);
+  --fc-border:  rgba(255,105,180,0.4);
+  --fc-bg:      #1a0a12;
+  --fc-surface: rgba(255,105,180,0.12);
+  --glass-bg:   rgba(255,105,180,0.1);
+  --glass-border: rgba(255,105,180,0.3);
+}
+
+/* ---- Heliodor ---- */
+.gem-gradient-heliodor  { background: var(--gem-heliodor-gradient); }
+.gem-border-heliodor    { --gem-accent-gradient: var(--gem-heliodor-gradient); }
+.gem-card-heliodor      { background: var(--gem-heliodor-card); --gem-card-text: var(--gem-card-text-dark); }
+.gem-heliodor-theme {
+  --fc-primary: var(--gem-heliodor-primary);
+  --fc-accent:  var(--gem-heliodor-accent);
+  --fc-text:    var(--gem-card-text-dark);
+  --fc-muted:   var(--gem-heliodor-text-dark);
+  --fc-border:  rgba(255,215,0,0.4);
+  --fc-bg:      #1a1508;
+  --fc-surface: rgba(255,215,0,0.12);
+  --glass-bg:   rgba(255,215,0,0.1);
+  --glass-border: rgba(255,215,0,0.3);
+}
+
+/* ---- Goshenite ---- */
+.gem-gradient-goshenite  { background: var(--gem-goshenite-gradient); }
+.gem-border-goshenite    { --gem-accent-gradient: var(--gem-goshenite-gradient); }
+.gem-card-goshenite      { background: var(--gem-goshenite-card); --gem-card-text: var(--gem-card-text-dark); }
+.gem-goshenite-theme {
+  --fc-primary: var(--gem-goshenite-primary);
+  --fc-accent:  var(--gem-goshenite-accent);
+  --fc-text:    var(--gem-card-text-dark);
+  --fc-muted:   #333333;
+  --fc-border:  rgba(245,245,245,0.4);
+  --fc-bg:      #0a0a0a;
+  --fc-surface: rgba(245,245,245,0.08);
+  --glass-bg:   rgba(245,245,245,0.05);
+  --glass-border: rgba(245,245,245,0.3);
+}
+
+/* ---- Bixbite ---- */
+.gem-gradient-bixbite  { background: var(--gem-bixbite-gradient); }
+.gem-border-bixbite    { --gem-accent-gradient: var(--gem-bixbite-gradient); }
+.gem-card-bixbite      { background: var(--gem-bixbite-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-bixbite-theme {
+  --fc-primary: var(--gem-bixbite-primary);
+  --fc-accent:  var(--gem-bixbite-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-bixbite-text-light);
+  --fc-border:  rgba(139,0,0,0.3);
+  --fc-bg:      #0a0a0d;
+  --fc-surface: rgba(139,0,0,0.08);
+  --glass-bg:   rgba(139,0,0,0.08);
+  --glass-border: rgba(139,0,0,0.2);
+}
+
+/* ---- Padparadscha ---- */
+.gem-gradient-padparadscha  { background: var(--gem-padparadscha-gradient); }
+.gem-border-padparadscha    { --gem-accent-gradient: var(--gem-padparadscha-gradient); }
+.gem-card-padparadscha      { background: var(--gem-padparadscha-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-padparadscha-theme {
+  --fc-primary: var(--gem-padparadscha-primary);
+  --fc-accent:  var(--gem-padparadscha-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-padparadscha-text-light);
+  --fc-border:  rgba(255,111,97,0.3);
+  --fc-bg:      #1a0d08;
+  --fc-surface: rgba(255,111,97,0.08);
+  --glass-bg:   rgba(255,111,97,0.08);
+  --glass-border: rgba(255,111,97,0.2);
+}
+
+/* ---- Star Ruby ---- */
+.gem-gradient-star-ruby  { background: var(--gem-star-ruby-gradient); }
+.gem-border-star-ruby    { --gem-accent-gradient: var(--gem-star-ruby-gradient); }
+.gem-card-star-ruby      { background: var(--gem-star-ruby-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-star-ruby-theme {
+  --fc-primary: var(--gem-star-ruby-primary);
+  --fc-accent:  var(--gem-star-ruby-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-star-ruby-text-light);
+  --fc-border:  rgba(123,0,0,0.3);
+  --fc-bg:      #0a0a0d;
+  --fc-surface: rgba(123,0,0,0.08);
+  --glass-bg:   rgba(123,0,0,0.08);
+  --glass-border: rgba(123,0,0,0.2);
+}
+
+/* ---- Color-Change Corundum ---- */
+.gem-gradient-color-change  { background: var(--gem-color-change-gradient); }
+.gem-border-color-change    { --gem-accent-gradient: var(--gem-color-change-gradient); }
+.gem-card-color-change      { background: var(--gem-color-change-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-color-change-theme {
+  --fc-primary: var(--gem-color-change-primary);
+  --fc-accent:  var(--gem-color-change-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-color-change-text-light);
+  --fc-border:  rgba(45,106,79,0.3);
+  --fc-bg:      #0a120d;
+  --fc-surface: rgba(45,106,79,0.08);
+  --glass-bg:   rgba(45,106,79,0.08);
+  --glass-border: rgba(45,106,79,0.2);
+}
+
+/* ---- Indigo / Lapis Lazuli ---- */
+.gem-gradient-indigo  { background: var(--gem-indigo-gradient); }
+.gem-border-indigo    { --gem-accent-gradient: var(--gem-indigo-gradient); }
+.gem-card-indigo      { background: var(--gem-indigo-card); --gem-card-text: var(--gem-card-text-light); }
+.gem-indigo-theme {
+  --fc-primary: var(--gem-indigo-primary);
+  --fc-accent:  var(--gem-indigo-accent);
+  --fc-text:    var(--gem-card-text-light);
+  --fc-muted:   var(--gem-indigo-text-light);
+  --fc-border:  rgba(75,0,130,0.3);
+  --fc-bg:      #0a0a1a;
+  --fc-surface: rgba(75,0,130,0.08);
+  --glass-bg:   rgba(75,0,130,0.08);
+  --glass-border: rgba(75,0,130,0.2);
+}
+
+
+/* ====================================
+   4. RIGHT-BORDER ACCENT SYSTEM
+   ==================================== */
+.gem-right-accent {
+  position: relative;
+  overflow: hidden;
+}
+.gem-right-accent::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 0.85rem;
+  height: 100%;
+  background: var(--gem-accent-gradient, transparent);
+  border-radius: 0 1.25rem 1.25rem 0;
+  pointer-events: none;
+}
+
+/* ====================================
+   5. GLASSMORPHIC PANEL (Oxygen theme)
+   ==================================== */
+.glass-panel {
+  background: var(--glass-bg, rgba(255,255,255,0.14));
+  backdrop-filter: var(--glass-blur, blur(18px));
+  -webkit-backdrop-filter: var(--glass-blur, blur(18px));
+  box-shadow: 0 0 35px var(--glass-glow, rgba(138,43,226,0.35));
+}
+
+/* ====================================
+   6. ELEMENT-LEVEL THEMES
+   Each gem has .gem-{name} class for:
+   h1-h6 (header), p (paragraph), a (link),
+   button/.btn/.cta (button), .border (border),
+   .gem-{name}-scroll (scrollbar)
+   ==================================== */
+
+/* ---- Ruby elements ---- */
+h1.gem-ruby, h2.gem-ruby, h3.gem-ruby {
+  @include gem-header(var(--gem-ruby-primary), var(--gem-ruby-accent), var(--gem-ruby-glow));
+  &:hover { @include gem-header-hover(var(--gem-ruby-glow)); }
+}
+p.gem-ruby {
+  @include gem-paragraph(var(--gem-ruby-text-dark), var(--gem-ruby-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-ruby-primary)); }
+}
+a.gem-ruby {
+  @include gem-link(var(--gem-ruby-primary), var(--gem-ruby-accent), var(--gem-ruby-glow));
+}
+button.gem-ruby, .btn.gem-ruby, .cta.gem-ruby {
+  @include gem-button(var(--gem-ruby-primary), var(--gem-ruby-accent), var(--gem-ruby-glow));
+}
+.border.gem-ruby {
+  @include gem-border(var(--gem-ruby-primary), var(--gem-ruby-accent));
+  &:hover { @include gem-border-hover(var(--gem-ruby-glow)); }
+}
+.gem-ruby-scroll {
+  @include gem-scrollbar(var(--gem-ruby-primary), var(--gem-ruby-accent), #FFFFFF);
+}
+
+/* ---- Sapphire elements ---- */
+h1.gem-sapphire, h2.gem-sapphire, h3.gem-sapphire {
+  @include gem-header(var(--gem-sapphire-primary), var(--gem-sapphire-accent), var(--gem-sapphire-glow));
+  &:hover { @include gem-header-hover(var(--gem-sapphire-glow)); }
+}
+p.gem-sapphire {
+  @include gem-paragraph(var(--gem-sapphire-text-dark), var(--gem-sapphire-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-sapphire-primary)); }
+}
+a.gem-sapphire {
+  @include gem-link(var(--gem-sapphire-primary), var(--gem-sapphire-accent), var(--gem-sapphire-glow));
+}
+button.gem-sapphire, .btn.gem-sapphire, .cta.gem-sapphire {
+  @include gem-button(var(--gem-sapphire-primary), var(--gem-sapphire-accent), var(--gem-sapphire-glow));
+}
+.border.gem-sapphire {
+  @include gem-border(var(--gem-sapphire-primary), var(--gem-sapphire-accent));
+  &:hover { @include gem-border-hover(var(--gem-sapphire-glow)); }
+}
+.gem-sapphire-scroll {
+  @include gem-scrollbar(var(--gem-sapphire-primary), var(--gem-sapphire-accent), #FFFFFF);
+}
+
+/* ---- Emerald elements ---- */
+h1.gem-emerald, h2.gem-emerald, h3.gem-emerald {
+  @include gem-header(var(--gem-emerald-primary), var(--gem-emerald-accent), var(--gem-emerald-glow));
+  &:hover { @include gem-header-hover(var(--gem-emerald-glow)); }
+}
+p.gem-emerald {
+  @include gem-paragraph(var(--gem-emerald-text-dark), var(--gem-emerald-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-emerald-primary)); }
+}
+a.gem-emerald {
+  @include gem-link(var(--gem-emerald-primary), var(--gem-emerald-accent), var(--gem-emerald-glow));
+}
+button.gem-emerald, .btn.gem-emerald, .cta.gem-emerald {
+  @include gem-button(var(--gem-emerald-primary), var(--gem-emerald-accent), var(--gem-emerald-glow));
+}
+.border.gem-emerald {
+  @include gem-border(var(--gem-emerald-primary), var(--gem-emerald-accent));
+  &:hover { @include gem-border-hover(var(--gem-emerald-glow)); }
+}
+.gem-emerald-scroll {
+  @include gem-scrollbar(var(--gem-emerald-primary), var(--gem-emerald-accent), #FFFFFF);
+}
+
+/* ---- Onyx elements ---- */
+h1.gem-onyx, h2.gem-onyx, h3.gem-onyx {
+  @include gem-header(var(--gem-onyx-primary), var(--gem-onyx-accent), var(--gem-onyx-glow));
+  &:hover { @include gem-header-hover(var(--gem-onyx-glow)); }
+}
+p.gem-onyx {
+  @include gem-paragraph(#333333, var(--gem-onyx-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-onyx-primary)); }
+}
+a.gem-onyx {
+  @include gem-link(var(--gem-onyx-primary), var(--gem-onyx-accent), var(--gem-onyx-glow));
+}
+button.gem-onyx, .btn.gem-onyx, .cta.gem-onyx {
+  @include gem-button(var(--gem-onyx-primary), var(--gem-onyx-accent), var(--gem-onyx-glow));
+}
+.border.gem-onyx {
+  @include gem-border(var(--gem-onyx-primary), var(--gem-onyx-accent));
+  &:hover { @include gem-border-hover(var(--gem-onyx-glow)); }
+}
+.gem-onyx-scroll {
+  @include gem-scrollbar(var(--gem-onyx-primary), var(--gem-onyx-accent), #FFFFFF);
+}
+
+
+/* ---- Amethyst elements ---- */
+h1.gem-amethyst, h2.gem-amethyst, h3.gem-amethyst {
+  @include gem-header(var(--gem-amethyst-primary), var(--gem-amethyst-accent), var(--gem-amethyst-glow));
+  &:hover { @include gem-header-hover(var(--gem-amethyst-glow)); }
+}
+p.gem-amethyst {
+  @include gem-paragraph(var(--gem-amethyst-text-dark), var(--gem-amethyst-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-amethyst-primary)); }
+}
+a.gem-amethyst {
+  @include gem-link(var(--gem-amethyst-primary), var(--gem-amethyst-accent), var(--gem-amethyst-glow));
+}
+button.gem-amethyst, .btn.gem-amethyst, .cta.gem-amethyst {
+  @include gem-button(var(--gem-amethyst-primary), var(--gem-amethyst-accent), var(--gem-amethyst-glow));
+}
+.border.gem-amethyst {
+  @include gem-border(var(--gem-amethyst-primary), var(--gem-amethyst-accent));
+  &:hover { @include gem-border-hover(var(--gem-amethyst-glow)); }
+}
+.gem-amethyst-scroll {
+  @include gem-scrollbar(var(--gem-amethyst-primary), var(--gem-amethyst-accent), #FFFFFF);
+}
+
+/* ---- Topaz elements (dark text on light gem) ---- */
+h1.gem-topaz, h2.gem-topaz, h3.gem-topaz {
+  @include gem-header(var(--gem-topaz-primary), var(--gem-topaz-accent), var(--gem-topaz-glow));
+  &:hover { @include gem-header-hover(var(--gem-topaz-glow)); }
+}
+p.gem-topaz {
+  @include gem-paragraph(var(--gem-topaz-text-dark), var(--gem-topaz-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-topaz-primary)); }
+}
+a.gem-topaz {
+  @include gem-link(var(--gem-topaz-primary), var(--gem-topaz-accent), var(--gem-topaz-glow));
+}
+button.gem-topaz, .btn.gem-topaz, .cta.gem-topaz {
+  @include gem-button(var(--gem-topaz-primary), var(--gem-topaz-accent), var(--gem-topaz-glow), #111111);
+}
+.border.gem-topaz {
+  @include gem-border(var(--gem-topaz-primary), var(--gem-topaz-accent));
+  &:hover { @include gem-border-hover(var(--gem-topaz-glow)); }
+}
+.gem-topaz-scroll {
+  @include gem-scrollbar(var(--gem-topaz-primary), var(--gem-topaz-accent), #111111);
+}
+
+/* ---- Aquamarine elements ---- */
+h1.gem-aquamarine, h2.gem-aquamarine, h3.gem-aquamarine {
+  @include gem-header(var(--gem-aquamarine-primary), var(--gem-aquamarine-accent), var(--gem-aquamarine-glow));
+  &:hover { @include gem-header-hover(var(--gem-aquamarine-glow)); }
+}
+p.gem-aquamarine {
+  @include gem-paragraph(var(--gem-aquamarine-text-dark), var(--gem-aquamarine-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-aquamarine-primary)); }
+}
+a.gem-aquamarine {
+  @include gem-link(var(--gem-aquamarine-primary), var(--gem-aquamarine-accent), var(--gem-aquamarine-glow));
+}
+button.gem-aquamarine, .btn.gem-aquamarine, .cta.gem-aquamarine {
+  @include gem-button(var(--gem-aquamarine-primary), var(--gem-aquamarine-accent), var(--gem-aquamarine-glow));
+}
+.border.gem-aquamarine {
+  @include gem-border(var(--gem-aquamarine-primary), var(--gem-aquamarine-accent));
+  &:hover { @include gem-border-hover(var(--gem-aquamarine-glow)); }
+}
+.gem-aquamarine-scroll {
+  @include gem-scrollbar(var(--gem-aquamarine-primary), var(--gem-aquamarine-accent), #FFFFFF);
+}
+
+/* ---- Morganite elements ---- */
+h1.gem-morganite, h2.gem-morganite, h3.gem-morganite {
+  @include gem-header(var(--gem-morganite-primary), var(--gem-morganite-accent), var(--gem-morganite-glow));
+  &:hover { @include gem-header-hover(var(--gem-morganite-glow)); }
+}
+p.gem-morganite {
+  @include gem-paragraph(var(--gem-morganite-text-dark), var(--gem-morganite-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-morganite-primary)); }
+}
+a.gem-morganite {
+  @include gem-link(var(--gem-morganite-primary), var(--gem-morganite-accent), var(--gem-morganite-glow));
+}
+button.gem-morganite, .btn.gem-morganite, .cta.gem-morganite {
+  @include gem-button(var(--gem-morganite-primary), var(--gem-morganite-accent), var(--gem-morganite-glow), #111111);
+}
+.border.gem-morganite {
+  @include gem-border(var(--gem-morganite-primary), var(--gem-morganite-accent));
+  &:hover { @include gem-border-hover(var(--gem-morganite-glow)); }
+}
+.gem-morganite-scroll {
+  @include gem-scrollbar(var(--gem-morganite-primary), var(--gem-morganite-accent), #111111);
+}
+
+/* ---- Heliodor elements ---- */
+h1.gem-heliodor, h2.gem-heliodor, h3.gem-heliodor {
+  @include gem-header(var(--gem-heliodor-primary), var(--gem-heliodor-accent), var(--gem-heliodor-glow));
+  &:hover { @include gem-header-hover(var(--gem-heliodor-glow)); }
+}
+p.gem-heliodor {
+  @include gem-paragraph(var(--gem-heliodor-text-dark), var(--gem-heliodor-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-heliodor-primary)); }
+}
+a.gem-heliodor {
+  @include gem-link(var(--gem-heliodor-primary), var(--gem-heliodor-accent), var(--gem-heliodor-glow));
+}
+button.gem-heliodor, .btn.gem-heliodor, .cta.gem-heliodor {
+  @include gem-button(var(--gem-heliodor-primary), var(--gem-heliodor-accent), var(--gem-heliodor-glow), #111111);
+}
+.border.gem-heliodor {
+  @include gem-border(var(--gem-heliodor-primary), var(--gem-heliodor-accent));
+  &:hover { @include gem-border-hover(var(--gem-heliodor-glow)); }
+}
+.gem-heliodor-scroll {
+  @include gem-scrollbar(var(--gem-heliodor-primary), var(--gem-heliodor-accent), #111111);
+}
+
+
+/* ---- Goshenite elements ---- */
+h1.gem-goshenite, h2.gem-goshenite, h3.gem-goshenite {
+  @include gem-header(var(--gem-goshenite-primary), var(--gem-goshenite-accent), var(--gem-goshenite-glow));
+  &:hover { @include gem-header-hover(var(--gem-goshenite-glow)); }
+}
+p.gem-goshenite {
+  @include gem-paragraph(var(--gem-goshenite-text-dark), var(--gem-goshenite-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-goshenite-primary)); }
+}
+a.gem-goshenite {
+  @include gem-link(var(--gem-goshenite-primary), var(--gem-goshenite-accent), var(--gem-goshenite-glow));
+}
+button.gem-goshenite, .btn.gem-goshenite, .cta.gem-goshenite {
+  @include gem-button(var(--gem-goshenite-primary), var(--gem-goshenite-accent), var(--gem-goshenite-glow), #111111);
+}
+.border.gem-goshenite {
+  @include gem-border(var(--gem-goshenite-primary), var(--gem-goshenite-accent));
+  &:hover { @include gem-border-hover(var(--gem-goshenite-glow)); }
+}
+.gem-goshenite-scroll {
+  @include gem-scrollbar(var(--gem-goshenite-primary), var(--gem-goshenite-accent), #111111);
+}
+
+/* ---- Bixbite elements ---- */
+h1.gem-bixbite, h2.gem-bixbite, h3.gem-bixbite {
+  @include gem-header(var(--gem-bixbite-primary), var(--gem-bixbite-accent), var(--gem-bixbite-glow));
+  &:hover { @include gem-header-hover(var(--gem-bixbite-glow)); }
+}
+p.gem-bixbite {
+  @include gem-paragraph(var(--gem-bixbite-text-dark), var(--gem-bixbite-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-bixbite-primary)); }
+}
+a.gem-bixbite {
+  @include gem-link(var(--gem-bixbite-primary), var(--gem-bixbite-accent), var(--gem-bixbite-glow));
+}
+button.gem-bixbite, .btn.gem-bixbite, .cta.gem-bixbite {
+  @include gem-button(var(--gem-bixbite-primary), var(--gem-bixbite-accent), var(--gem-bixbite-glow));
+}
+.border.gem-bixbite {
+  @include gem-border(var(--gem-bixbite-primary), var(--gem-bixbite-accent));
+  &:hover { @include gem-border-hover(var(--gem-bixbite-glow)); }
+}
+.gem-bixbite-scroll {
+  @include gem-scrollbar(var(--gem-bixbite-primary), var(--gem-bixbite-accent), #FFFFFF);
+}
+
+/* ---- Padparadscha elements ---- */
+h1.gem-padparadscha, h2.gem-padparadscha, h3.gem-padparadscha {
+  @include gem-header(var(--gem-padparadscha-primary), var(--gem-padparadscha-accent), var(--gem-padparadscha-glow));
+  &:hover { @include gem-header-hover(var(--gem-padparadscha-glow)); }
+}
+p.gem-padparadscha {
+  @include gem-paragraph(var(--gem-padparadscha-text-dark), var(--gem-padparadscha-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-padparadscha-primary)); }
+}
+a.gem-padparadscha {
+  @include gem-link(var(--gem-padparadscha-primary), var(--gem-padparadscha-accent), var(--gem-padparadscha-glow));
+}
+button.gem-padparadscha, .btn.gem-padparadscha, .cta.gem-padparadscha {
+  @include gem-button(var(--gem-padparadscha-primary), var(--gem-padparadscha-accent), var(--gem-padparadscha-glow));
+}
+.border.gem-padparadscha {
+  @include gem-border(var(--gem-padparadscha-primary), var(--gem-padparadscha-accent));
+  &:hover { @include gem-border-hover(var(--gem-padparadscha-glow)); }
+}
+.gem-padparadscha-scroll {
+  @include gem-scrollbar(var(--gem-padparadscha-primary), var(--gem-padparadscha-accent), #FFFFFF);
+}
+
+/* ---- Star Ruby elements ---- */
+h1.gem-star-ruby, h2.gem-star-ruby, h3.gem-star-ruby {
+  @include gem-header(var(--gem-star-ruby-primary), var(--gem-star-ruby-accent), var(--gem-star-ruby-glow));
+  &:hover { @include gem-header-hover(var(--gem-star-ruby-glow)); }
+}
+p.gem-star-ruby {
+  @include gem-paragraph(var(--gem-star-ruby-text-dark), var(--gem-star-ruby-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-star-ruby-primary)); }
+}
+a.gem-star-ruby {
+  @include gem-link(var(--gem-star-ruby-primary), var(--gem-star-ruby-accent), var(--gem-star-ruby-glow));
+}
+button.gem-star-ruby, .btn.gem-star-ruby, .cta.gem-star-ruby {
+  @include gem-button(var(--gem-star-ruby-primary), var(--gem-star-ruby-accent), var(--gem-star-ruby-glow));
+}
+.border.gem-star-ruby {
+  @include gem-border(var(--gem-star-ruby-primary), var(--gem-star-ruby-accent));
+  &:hover { @include gem-border-hover(var(--gem-star-ruby-glow)); }
+}
+.gem-star-ruby-scroll {
+  @include gem-scrollbar(var(--gem-star-ruby-primary), var(--gem-star-ruby-accent), #FFFFFF);
+}
+
+/* ---- Color-Change Corundum elements ---- */
+h1.gem-color-change, h2.gem-color-change, h3.gem-color-change {
+  @include gem-header(var(--gem-color-change-primary), var(--gem-color-change-accent), var(--gem-color-change-glow));
+  &:hover { @include gem-header-hover(var(--gem-color-change-glow)); }
+}
+p.gem-color-change {
+  @include gem-paragraph(var(--gem-color-change-text-dark), var(--gem-color-change-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-color-change-primary)); }
+}
+a.gem-color-change {
+  @include gem-link(var(--gem-color-change-primary), var(--gem-color-change-accent), var(--gem-color-change-glow));
+}
+button.gem-color-change, .btn.gem-color-change, .cta.gem-color-change {
+  @include gem-button(var(--gem-color-change-primary), var(--gem-color-change-accent), var(--gem-color-change-glow));
+}
+.border.gem-color-change {
+  @include gem-border(var(--gem-color-change-primary), var(--gem-color-change-accent));
+  &:hover { @include gem-border-hover(var(--gem-color-change-glow)); }
+}
+.gem-color-change-scroll {
+  @include gem-scrollbar(var(--gem-color-change-primary), var(--gem-color-change-accent), #FFFFFF);
+}
+
+/* ---- Indigo elements ---- */
+h1.gem-indigo, h2.gem-indigo, h3.gem-indigo {
+  @include gem-header(var(--gem-indigo-primary), var(--gem-indigo-accent), var(--gem-indigo-glow));
+  &:hover { @include gem-header-hover(var(--gem-indigo-glow)); }
+}
+p.gem-indigo {
+  @include gem-paragraph(var(--gem-indigo-text-dark), var(--gem-indigo-primary));
+  &:hover { @include gem-paragraph-hover(var(--gem-indigo-primary)); }
+}
+a.gem-indigo {
+  @include gem-link(var(--gem-indigo-primary), var(--gem-indigo-accent), var(--gem-indigo-glow));
+}
+button.gem-indigo, .btn.gem-indigo, .cta.gem-indigo {
+  @include gem-button(var(--gem-indigo-primary), var(--gem-indigo-accent), var(--gem-indigo-glow));
+}
+.border.gem-indigo {
+  @include gem-border(var(--gem-indigo-primary), var(--gem-indigo-accent));
+  &:hover { @include gem-border-hover(var(--gem-indigo-glow)); }
+}
+.gem-indigo-scroll {
+  @include gem-scrollbar(var(--gem-indigo-primary), var(--gem-indigo-accent), #FFFFFF);
+}
+
+
+/* ====================================
+   7. SHIMMER ON HEADERS (Part 7 — animation integration)
+   ==================================== */
+h1.gem-ruby.shimmer         { @include gem-element-shimmer(var(--gem-ruby-primary), var(--gem-ruby-accent)); }
+h1.gem-sapphire.shimmer     { @include gem-element-shimmer(var(--gem-sapphire-primary), var(--gem-sapphire-accent)); }
+h1.gem-emerald.shimmer      { @include gem-element-shimmer(var(--gem-emerald-primary), var(--gem-emerald-accent)); }
+h1.gem-amethyst.shimmer     { @include gem-element-shimmer(var(--gem-amethyst-primary), var(--gem-amethyst-accent)); }
+h1.gem-topaz.shimmer        { @include gem-element-shimmer(var(--gem-topaz-primary), var(--gem-topaz-accent)); }
+h1.gem-onyx.shimmer         { @include gem-element-shimmer(var(--gem-onyx-primary), var(--gem-onyx-accent)); }
+h1.gem-aquamarine.shimmer   { @include gem-element-shimmer(var(--gem-aquamarine-primary), var(--gem-aquamarine-accent)); }
+h1.gem-morganite.shimmer    { @include gem-element-shimmer(var(--gem-morganite-primary), var(--gem-morganite-accent)); }
+h1.gem-heliodor.shimmer     { @include gem-element-shimmer(var(--gem-heliodor-primary), var(--gem-heliodor-accent)); }
+h1.gem-goshenite.shimmer    { @include gem-element-shimmer(var(--gem-goshenite-primary), var(--gem-goshenite-accent)); }
+h1.gem-bixbite.shimmer      { @include gem-element-shimmer(var(--gem-bixbite-primary), var(--gem-bixbite-accent)); }
+h1.gem-padparadscha.shimmer { @include gem-element-shimmer(var(--gem-padparadscha-primary), var(--gem-padparadscha-accent)); }
+h1.gem-star-ruby.shimmer    { @include gem-element-shimmer(var(--gem-star-ruby-primary), var(--gem-star-ruby-accent)); }
+h1.gem-color-change.shimmer { @include gem-element-shimmer(var(--gem-color-change-primary), var(--gem-color-change-accent)); }
+h1.gem-indigo.shimmer       { @include gem-element-shimmer(var(--gem-indigo-primary), var(--gem-indigo-accent)); }
+
+/* ====================================
+   8. DASHBOARD VARIANTS (14 gems)
+   ==================================== */
+$dashes: (
+  ruby:           (var(--gem-ruby-gradient), var(--gem-ruby-primary), var(--gem-ruby-glow)),
+  sapphire:       (var(--gem-sapphire-gradient), var(--gem-sapphire-primary), var(--gem-sapphire-glow)),
+  emerald:        (var(--gem-emerald-gradient), var(--gem-emerald-primary), var(--gem-emerald-glow)),
+  amethyst:       (var(--gem-amethyst-gradient), var(--gem-amethyst-primary), var(--gem-amethyst-glow)),
+  topaz:          (var(--gem-topaz-gradient), var(--gem-topaz-primary), var(--gem-topaz-glow)),
+  onyx:           (var(--gem-onyx-gradient), var(--gem-onyx-primary), var(--gem-onyx-glow)),
+  aquamarine:     (var(--gem-aquamarine-gradient), var(--gem-aquamarine-primary), var(--gem-aquamarine-glow)),
+  morganite:      (var(--gem-morganite-gradient), var(--gem-morganite-primary), var(--gem-morganite-glow)),
+  heliodor:       (var(--gem-heliodor-gradient), var(--gem-heliodor-primary), var(--gem-heliodor-glow)),
+  goshenite:      (var(--gem-goshenite-gradient), var(--gem-goshenite-primary), var(--gem-goshenite-glow)),
+  bixbite:        (var(--gem-bixbite-gradient), var(--gem-bixbite-primary), var(--gem-bixbite-glow)),
+  padparadscha:   (var(--gem-padparadscha-gradient), var(--gem-padparadscha-primary), var(--gem-padparadscha-glow)),
+  star-ruby:      (var(--gem-star-ruby-gradient), var(--gem-star-ruby-primary), var(--gem-star-ruby-glow)),
+  color-change:   (var(--gem-color-change-gradient), var(--gem-color-change-primary), var(--gem-color-change-glow)),
+  indigo:         (var(--gem-indigo-gradient), var(--gem-indigo-primary), var(--gem-indigo-glow)),
+);
+
+@each $name, $vals in $dashes {
+  $grad: nth($vals, 1);
+  $primary: nth($vals, 2);
+  $glow: nth($vals, 3);
+
+  .dashboard-#{$name} .dashboard-menu {
+    background: $grad;
+    animation: gem-pulse $pulse-duration ease-in-out infinite;
+  }
+  .dashboard-#{$name} .dashboard-menu .menu-item {
+    padding: $gem-padding;
+    transition: all 0.3s ease;
+  }
+  .dashboard-#{$name} .dashboard-menu .menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(4px);
+  }
+  .dashboard-#{$name} .dashboard-menu .bubble-effect::before {
+    content: '';
+    position: absolute;
+    width: 0; height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    animation: bubble-pop 0.6s ease-out forwards;
+  }
+}
+
+@keyframes bubble-pop {
+  0%   { width: 0; height: 0; opacity: 0.8; transform: translate(-50%, -50%); }
+  100% { width: 200px; height: 200px; opacity: 0; transform: translate(-50%, -50%); }
+}
+
+/* ====================================
+   9. GEMS AS WEB DOJO THEMES
+   Each .gem-{name}-theme class overrides
+   --fc-* variables when applied to <body>
+   or any container.
+   ==================================== */
+
+/* Example usage:
+   <body class="gem-ruby-theme gem-ruby-scroll">
+   or
+   <div class="gem-sapphire-theme">
+*/
+
+/* ====================================
+   END OF AVALON GEMS
+   ==================================== */

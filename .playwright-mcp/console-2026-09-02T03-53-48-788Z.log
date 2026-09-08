@@ -1,0 +1,428 @@
+[    1563ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[    2653ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/components:0
+[    2657ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/components:0
+[    4867ms] [ERROR] Save error: Network Error @ https://assets.emergent.sh/scripts/emergent-main.js:55
+[    4868ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/projects:0
+[ 1202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1262256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1322256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1382256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1562256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1622256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1682256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1802256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1862256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1922256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 1982256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2042256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2102256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2162256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2222256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2282256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2402256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2522256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2642256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2702256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2762256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2882257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 2942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3002256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3122256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3242256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3302257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3362256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3482256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3602257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3722256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3782256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3842257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3902256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 3962257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4142257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4322257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4562257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4862257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4922257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 4982257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5102257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5162256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5222257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5402257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5642257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5702257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5762257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5882257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 5942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6002257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6122257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6242257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6302257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6362257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6482257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6602257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6722257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6782257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6842256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6902257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 6962257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7142257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7322256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7562257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7862256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7922256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 7982256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8102257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8162257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8222257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8402256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8642257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8702257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8762257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8882256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 8942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9002257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9122257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9242257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9302256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9362257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9482257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9602257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9722257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9782257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9842256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9902257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[ 9962256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10142258ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10322257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10562257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10862257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10922257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[10982257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11102257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11162257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11222257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11402257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11642257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11702257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11762257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11882257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[11942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12002257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12122257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12242257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12302257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12362257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12482256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12602257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12722257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12782257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12842257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12902257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[12962256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13142257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13322257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13562257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13862256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13922257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[13982257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14102257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14162257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14222256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14402257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14642257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14702257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14762257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14882257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[14942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15002257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15122257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15242257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15302257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15362257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15482257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15602257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15722257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15782257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15842257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15902257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[15962257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16142257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16322257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16562257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16862257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16922257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[16982257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17102257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17162257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17222257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17402256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17642257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17702257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17762258ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17882257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[17942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18002257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18122257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18242257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18302257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18362257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18482257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18602257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18722257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18782257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18842257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18902257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[18962257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19142257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19322257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19562257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19862257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19922257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[19982257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20102257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20162257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20222257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20402257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20642257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20702257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20762257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20882257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[20942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21002257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21122257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21242257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21302257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21362257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21482257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21602256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21722257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21782257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21842257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21902257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[21962257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22142257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22202256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22322257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22502257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22562257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22862257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22922257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[22982257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23102257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23162257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23222257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23402257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23582257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23642257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23702257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23762257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23822257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23882257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[23942257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24002257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24062257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24122257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24182257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24242257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24302258ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24362257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24422257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24482258ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24542257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24602257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24662257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24722257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24782257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24842257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24902257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[24962257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25022257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25082257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25142258ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25202257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25262257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25322257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25382257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25442257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25502256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25562256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25622257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25682257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25742257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25802257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25862257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25922257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[25982257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26042257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26102256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26162257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26222257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26282257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26342257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26402256ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26462257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0
+[26522257ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8787/api/client-logs:0

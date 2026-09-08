@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronDown, ChevronRight, FileText, Folder, FolderPlus, FilePlus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Folder, FolderPlus, FilePlus, Trash2, Pencil } from "lucide-react";
 
 export function TreeNode(props) {
   const node = props.node;
@@ -8,27 +8,28 @@ export function TreeNode(props) {
   const onToggle = props.onToggle;
   const onAddUnder = props.onAddUnder;
   const onRemove = props.onRemove;
-  const onRename = props.onRename;
+  const onRequestRename = props.onRequestRename;
   const onFileClick = props.onFileClick;
   const onInsertHtml = props.onInsertHtml;
+  const onInsertAllHtml = props.onInsertAllHtml;
 
   if (node.type === "folder") {
     const open = expanded[node.path] ?? depth === 0;
     return (
       <div>
         <div
-          className="flex items-center gap-1 pr-1 py-0.5 rounded hover:bg-[#1F1F1F] text-[12px] text-gray-200 group"
+          className="flex items-center gap-1 pr-1 py-0.5 rounded hover:bg-[#242019] text-[12px] text-[#F1EDE2] group"
           style={{ paddingLeft: 4 + depth * 10 }}
           data-testid={`tree-folder-${node.path || "root"}`}
         >
-          <button onClick={() => onToggle(node.path)} className="p-0.5 text-gray-400">
+          <button onClick={() => onToggle(node.path)} className="p-0.5 text-[#A79C87]">
             {open ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
           </button>
-          <Folder size={12} className="text-blue-400" />
+          <Folder size={12} className="text-[#D9BC55]" />
           <span className="flex-1 truncate">{node.name || "project"}</span>
           <button
             onClick={() => onAddUnder(node.path || "", "file")}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-white"
+            className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-[#F1EDE2]"
             title="New file"
             data-testid={`tree-add-file-${node.path || "root"}`}
           >
@@ -36,16 +37,26 @@ export function TreeNode(props) {
           </button>
           <button
             onClick={() => onAddUnder(node.path || "", "folder")}
-            className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-white"
+            className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-[#F1EDE2]"
             title="New folder"
             data-testid={`tree-add-folder-${node.path || "root"}`}
           >
             <FolderPlus size={11} />
           </button>
+          {onInsertAllHtml && node.path ? (
+            <button
+              onClick={() => onInsertAllHtml(node.path)}
+              className="text-[10px] text-emerald-400 hover:text-emerald-300 px-1 font-medium"
+              title="Import all .html files in this folder as blocks + pages"
+              data-testid={`tree-insert-all-${node.path}`}
+            >
+              📥 import all
+            </button>
+          ) : null}
           {node.path ? (
             <button
               onClick={() => onRemove(node.path)}
-              className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-400"
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-red-400"
               title="Delete folder"
               data-testid={`tree-del-${node.path}`}
             >
@@ -62,7 +73,7 @@ export function TreeNode(props) {
             onToggle: onToggle,
             onAddUnder: onAddUnder,
             onRemove: onRemove,
-            onRename: onRename,
+            onRequestRename: onRequestRename,
             onFileClick: onFileClick,
             onInsertHtml: onInsertHtml,
           })
@@ -72,30 +83,38 @@ export function TreeNode(props) {
   }
 
   const isHtml = /\.html?$/i.test(node.path);
+  const isImage = !!node.isImage;
   const onDragStart = (e) => {
     if (isHtml) {
       e.dataTransfer.setData("text/html-block", node.content || "");
       e.dataTransfer.effectAllowed = "copy";
     }
   };
-  const onDbl = () => {
-    const nn = prompt("Rename file", node.path.split("/").pop());
-    if (nn) onRename(node.path, node.path.replace(/[^/]+$/, nn));
-  };
+  const onDbl = () => onRequestRename(node.path);
 
   return (
     <div
       draggable={isHtml}
       onDragStart={onDragStart}
-      className="flex items-center gap-1 py-0.5 pr-1 rounded hover:bg-[#1F1F1F] text-[12px] text-gray-200 group"
+      className="flex items-center gap-1 py-0.5 pr-1 rounded hover:bg-[#242019] text-[12px] text-[#F1EDE2] group"
       style={{ paddingLeft: 4 + depth * 10 }}
       data-testid={`tree-file-${node.path}`}
     >
       <span className="w-3" />
-      <FileText size={12} className={isHtml ? "text-emerald-400" : "text-gray-400"} />
+      {isImage ? (
+        <img src={node.content} alt="" style={{ width: 12, height: 12, objectFit: "cover", borderRadius: 2 }} />
+      ) : (
+        <FileText size={12} className={isHtml ? "text-emerald-400" : "text-[#A79C87]"} />
+      )}
       <button
-        onDoubleClick={onDbl}
-        onClick={() => onFileClick && onFileClick(node)}
+        // Images skip the code editor entirely — dumping a data: URI's
+        // raw base64 into Monaco isn't useful; the thumbnail above is
+        // the preview. Rename used to be bound to onDoubleClick here too,
+        // but a double-click fires two `click` events before the
+        // `dblclick`, so it always opened the file editor first and the
+        // rename dialog never got a chance to show — moved to its own
+        // button instead of racing two handlers on one element.
+        onClick={() => !isImage && onFileClick && onFileClick(node)}
         className="flex-1 truncate text-left"
       >
         {node.name}
@@ -103,7 +122,7 @@ export function TreeNode(props) {
       {isHtml ? (
         <button
           onClick={() => onInsertHtml && onInsertHtml(node.content || "")}
-          className="opacity-0 group-hover:opacity-100 text-[10px] text-blue-400 hover:text-blue-300 px-1"
+          className="opacity-0 group-hover:opacity-100 text-[10px] text-[#D9BC55] hover:text-blue-300 px-1"
           title="Insert into canvas"
           data-testid={`tree-insert-${node.path}`}
         >
@@ -111,8 +130,16 @@ export function TreeNode(props) {
         </button>
       ) : null}
       <button
+        onClick={onDbl}
+        className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-[#F1EDE2]"
+        title="Rename"
+        data-testid={`tree-rename-${node.path}`}
+      >
+        <Pencil size={11} />
+      </button>
+      <button
         onClick={() => onRemove(node.path)}
-        className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-400"
+        className="opacity-0 group-hover:opacity-100 p-0.5 text-[#A79C87] hover:text-red-400"
         title="Delete"
         data-testid={`tree-del-${node.path}`}
       >

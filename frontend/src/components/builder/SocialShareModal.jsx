@@ -4,8 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Share2, Sun, Moon } from "lucide-react";
 import { PLATFORMS, SHAPES, STYLES, HOVERS, buildSocialHtml } from "@/lib/social";
 
-const labelCls = "text-[10px] uppercase tracking-wider text-gray-500 block mb-1";
-const inputCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500";
+const labelCls = "text-[10px] uppercase tracking-wider text-[#948C79] block mb-1";
+const inputCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-indigo-500";
 const DEFAULT_SHARE = ["x", "facebook", "linkedin", "whatsapp", "email"];
 const DEFAULT_FOLLOW = ["instagram", "x", "youtube", "tiktok", "linkedin"];
 
@@ -52,25 +52,25 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#141414] border border-[#2B2B2B] text-white max-w-5xl w-[94vw] max-h-[92vh] overflow-hidden p-0" data-testid="social-builder-modal">
-        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#2B2B2B]">
+      <DialogContent className="bg-[#1C1A15] border border-[#332D22] text-[#F1EDE2] max-w-5xl w-[94vw] max-h-[92vh] overflow-hidden p-0" data-testid="social-builder-modal">
+        <DialogHeader className="px-5 pt-4 pb-3 border-b border-[#332D22]">
           <DialogTitle className="flex items-center gap-2 text-base"><Share2 size={16} className="text-sky-400" /> Social buttons</DialogTitle>
           <DialogDescription className="sr-only">Build a share bar or profile-link bar with custom shape, style and hover animations.</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-[340px_1fr] max-h-[calc(92vh-58px)]">
           {/* Controls */}
-          <div className="border-r border-[#2B2B2B] overflow-y-auto p-4 space-y-4">
+          <div className="border-r border-[#332D22] overflow-y-auto p-4 space-y-4">
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => switchMode("share")} className={`py-2 rounded text-xs font-medium border ${mode === "share" ? "bg-sky-600 border-sky-500 text-white" : "border-[#2B2B2B] text-gray-300"}`} data-testid="social-mode-share">Share this page</button>
-              <button onClick={() => switchMode("follow")} className={`py-2 rounded text-xs font-medium border ${mode === "follow" ? "bg-sky-600 border-sky-500 text-white" : "border-[#2B2B2B] text-gray-300"}`} data-testid="social-mode-follow">Link to profiles</button>
+              <button onClick={() => switchMode("share")} className={`py-2 rounded text-xs font-medium border ${mode === "share" ? "bg-sky-600 border-sky-500 text-[#F1EDE2]" : "border-[#332D22] text-[#E4DECE]"}`} data-testid="social-mode-share">Share this page</button>
+              <button onClick={() => switchMode("follow")} className={`py-2 rounded text-xs font-medium border ${mode === "follow" ? "bg-sky-600 border-sky-500 text-[#F1EDE2]" : "border-[#332D22] text-[#E4DECE]"}`} data-testid="social-mode-follow">Link to profiles</button>
             </div>
 
             <div>
               <label className={labelCls}>Platforms · {ids.length}</label>
               <div className="grid grid-cols-2 gap-1.5">
                 {available.map((p) => (
-                  <button key={p.id} onClick={() => toggle(p.id)} className={`flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px] border ${ids.includes(p.id) ? "bg-[#1F1F1F] border-sky-500/60 text-white" : "border-[#2B2B2B] text-gray-400 hover:text-gray-200"}`} data-testid={`social-plat-${p.id}`}>
+                  <button key={p.id} onClick={() => toggle(p.id)} className={`flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px] border ${ids.includes(p.id) ? "bg-[#242019] border-sky-500/60 text-[#F1EDE2]" : "border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2]"}`} data-testid={`social-plat-${p.id}`}>
                     <span style={{ width: 10, height: 10, borderRadius: 3, background: p.color, flex: "none" }} />
                     {p.name}
                   </button>
@@ -85,7 +85,7 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
                   const p = PLATFORMS.find((x) => x.id === id);
                   return (
                     <div key={id} className="flex items-center gap-2">
-                      <span className="text-[11px] text-gray-400 w-16 truncate">{p?.name}</span>
+                      <span className="text-[11px] text-[#A79C87] w-16 truncate">{p?.name}</span>
                       <input value={urls[id] || ""} onChange={(e) => setUrls((u) => ({ ...u, [id]: e.target.value }))} placeholder={p?.placeholder} className={inputCls + " flex-1 font-mono"} data-testid={`social-url-${id}`} />
                     </div>
                   );
@@ -96,7 +96,7 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
             {mode === "share" && (
               <div className="grid grid-cols-1 gap-2">
                 <div>
-                  <label className={labelCls}>Share URL <span className="text-gray-600 normal-case">(blank = current page)</span></label>
+                  <label className={labelCls}>Share URL <span className="text-[#6B6353] normal-case">(blank = current page)</span></label>
                   <input value={shareUrl} onChange={(e) => setShareUrl(e.target.value)} placeholder="https://mysite.com/page" className={inputCls + " font-mono"} data-testid="social-share-url" />
                 </div>
                 <div>
@@ -106,7 +106,7 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#2B2B2B]">
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#332D22]">
               <div>
                 <label className={labelCls}>Shape</label>
                 <select value={shape} onChange={(e) => setShape(e.target.value)} className={inputCls} data-testid="social-shape">{SHAPES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
@@ -135,18 +135,18 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
                 <label className={labelCls}>Gap · {gap}px</label>
                 <input type="range" min="0" max="28" value={gap} onChange={(e) => setGap(e.target.value)} className="w-full" data-testid="social-gap" />
               </div>
-              <label className="flex items-center gap-2 text-xs text-gray-300 self-end pb-1">
+              <label className="flex items-center gap-2 text-xs text-[#E4DECE] self-end pb-1">
                 <input type="checkbox" checked={labels} onChange={(e) => setLabels(e.target.checked)} data-testid="social-labels" /> Show labels
               </label>
               {style === "mono" && (
                 <>
                   <div>
                     <label className={labelCls}>Icon color</label>
-                    <input type="color" value={monoColor} onChange={(e) => setMonoColor(e.target.value)} className="w-full h-8 rounded bg-transparent border border-[#2B2B2B]" data-testid="social-mono-color" />
+                    <input type="color" value={monoColor} onChange={(e) => setMonoColor(e.target.value)} className="w-full h-8 rounded bg-transparent border border-[#332D22]" data-testid="social-mono-color" />
                   </div>
                   <div>
                     <label className={labelCls}>Button bg</label>
-                    <input type="color" value={monoBg} onChange={(e) => setMonoBg(e.target.value)} className="w-full h-8 rounded bg-transparent border border-[#2B2B2B]" data-testid="social-mono-bg" />
+                    <input type="color" value={monoBg} onChange={(e) => setMonoBg(e.target.value)} className="w-full h-8 rounded bg-transparent border border-[#332D22]" data-testid="social-mono-bg" />
                   </div>
                 </>
               )}
@@ -155,11 +155,11 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
 
           {/* Preview */}
           <div className="flex flex-col overflow-hidden">
-            <div className="px-4 py-2 border-b border-[#2B2B2B] bg-[#141414] flex justify-between items-center">
-              <div className="text-[11px] uppercase tracking-widest text-gray-400">Live preview</div>
+            <div className="px-4 py-2 border-b border-[#332D22] bg-[#1C1A15] flex justify-between items-center">
+              <div className="text-[11px] uppercase tracking-widest text-[#A79C87]">Live preview</div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setPreviewDark((v) => !v)} className="text-gray-400 hover:text-white p-1" title="Toggle preview background" data-testid="social-preview-bg">{previewDark ? <Sun size={14} /> : <Moon size={14} />}</button>
-                <button onClick={insert} className="text-xs px-3 py-1.5 rounded bg-sky-600 hover:bg-sky-500 text-white font-medium" data-testid="social-insert">Insert onto canvas</button>
+                <button onClick={() => setPreviewDark((v) => !v)} className="text-[#A79C87] hover:text-[#F1EDE2] p-1" title="Toggle preview background" data-testid="social-preview-bg">{previewDark ? <Sun size={14} /> : <Moon size={14} />}</button>
+                <button onClick={insert} className="text-xs px-3 py-1.5 rounded bg-sky-600 hover:bg-sky-500 text-[#F1EDE2] font-medium" data-testid="social-insert">Insert onto canvas</button>
               </div>
             </div>
             <iframe
@@ -167,7 +167,7 @@ export const SocialShareModal = ({ open, onClose, onInsert }) => {
               key={previewDark ? "d" : "l"}
               srcDoc={`<!doctype html><html><head><meta charset="utf-8" /><style>body{margin:0;padding:48px 24px;background:${bg};display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 96px);}</style></head><body>${html}</body></html>`}
               className="flex-1 w-full border-0"
-              sandbox="allow-scripts allow-same-origin"
+              sandbox="allow-scripts"
               data-testid="social-preview-iframe"
             />
           </div>

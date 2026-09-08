@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ColorPicker } from "./ColorPicker";
+import { TokenSelector } from "./TokenSelector";
 import { GradientMixer } from "./GradientMixer";
+import { PatternPanel } from "./PatternPanel";
+import { SvgBackgroundPanel } from "./SvgBackgroundPanel";
 import { StyleInspector } from "./StyleInspector";
+import { ResponsivePanel } from "./ResponsivePanel";
+import { VariantPanel } from "./VariantPanel";
 import { LayersPanel } from "./LayersPanel";
 import { ShapePanel } from "./ShapePanel";
 import { DividerPanel } from "./DividerPanel";
@@ -11,12 +16,17 @@ import { BlendPanel } from "./BlendPanel";
 import { AnimationGenerator } from "./AnimationGenerator";
 import { ThemeGenerator } from "./ThemeGenerator";
 import { CDNPanel } from "./CDNPanel";
-import { Layers as LayersIcon, ChevronDown, ChevronRight } from "lucide-react";
+import { Layers as LayersIcon, ChevronDown, ChevronRight, Lock } from "lucide-react";
 
 const TABS = [
   { id: "color", label: "Color" },
+  { id: "tokens", label: "Tokens" },
   { id: "gradient", label: "Gradient" },
+  { id: "pattern", label: "Pattern" },
+  { id: "svgbg", label: "SVG BG" },
   { id: "style", label: "Style" },
+  { id: "responsive", label: "Responsive" },
+  { id: "variants", label: "Variants" },
   { id: "shape", label: "Shape" },
   { id: "bg", label: "BG" },
   { id: "blend", label: "Blend" },
@@ -49,62 +59,135 @@ export const RightSidebar = ({
   onToggleVisible,
   onSetZIndex,
   onApplyStyleToIds,
+  onApplyAnimationToIds,
+  onApplyToken,
+  onCreateToken,
+  viewport,
+  onPatchResponsive,
+  onResetResponsive,
+  lockedTabs = [],
+  onUpgrade,
 }) => {
   const [tab, setTab] = useState("color");
+  const isLocked = (id) => lockedTabs.includes(id);
+
+  // A subscription can lapse mid-session while a now-locked tab is open;
+  // without this its controls would stay live until the next reload.
+  useEffect(() => {
+    if (lockedTabs.includes(tab)) setTab("color");
+  }, [lockedTabs, tab]);
   const [layersOpen, setLayersOpen] = useState(true);
+  const [lastColor, setLastColor] = useState({ hex: "#2563eb", alpha: 1, rgba: "rgba(37, 99, 235, 1)" });
 
   return (
-    <aside className="w-80 flex-none border-l border-[#2B2B2B] bg-[#141414] flex flex-col overflow-hidden" data-testid="right-sidebar">
-      <div className="px-3 py-2.5 border-b border-[#2B2B2B] flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500">Inspector</div>
-        <div className="text-[10px] font-mono text-gray-500 truncate max-w-[160px]">
+    <aside className="w-80 flex-none border-l border-[#332D22] bg-[#1C1A15] flex flex-col overflow-hidden" data-testid="right-sidebar">
+      <div className="px-3 py-2.5 border-b border-[#332D22] flex items-center justify-between">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79]">Inspector</div>
+        <div className="text-[10px] font-mono text-[#948C79] truncate max-w-[160px]">
           {selected ? selected.id : "no selection"}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 border-b border-[#2B2B2B] text-[11px]">
+      <div className="grid grid-cols-4 border-b border-[#332D22] text-[11px]">
         {TABS.map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`py-2 ${tab === t.id ? "text-white bg-[#1F1F1F]" : "text-gray-400 hover:text-gray-200"}`}
+            onClick={() => (isLocked(t.id) ? onUpgrade?.() : setTab(t.id))}
+            className={`py-2 flex items-center justify-center gap-1 ${tab === t.id ? "text-[#F1EDE2] bg-[#242019]" : isLocked(t.id) ? "text-[#6B6455] hover:text-[#A79C87]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
             data-testid={`insp-tab-${t.id}`}
-          >{t.label}</button>
+          >
+            {t.label}
+            {isLocked(t.id) && <Lock size={9} data-testid={`insp-tab-${t.id}-lock`} />}
+          </button>
         ))}
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
         {tab === "color" && (
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {!selected && (
+              <div className="pb-4 border-b border-[#332D22]">
+                <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-2">Canvas Background</label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={canvasBg}
+                    onChange={(e) => onCanvasBg && onCanvasBg(e.target.value)}
+                    className="w-12 h-10 rounded cursor-pointer"
+                    data-testid="canvas-bg-color-input"
+                  />
+                  <div className="flex-1">
+                    <div className="text-xs text-[#E4DECE] font-mono">{canvasBg}</div>
+                    <div
+                      className="w-full h-6 rounded mt-1 border border-[#332D22]"
+                      style={{ background: canvasBg }}
+                      data-testid="canvas-bg-preview"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={() => onCanvasBg && onCanvasBg('#ffffff')}
+                  className="text-xs mt-2 py-1 px-2 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]"
+                  data-testid="canvas-bg-reset-btn"
+                >Reset to white</button>
+              </div>
+            )}
+
             <ColorPicker
-              value="#2563eb"
-              alpha={1}
-              onChange={({ hex, alpha, rgba }) => { setLastColor({ hex, alpha, rgba }); }}
+              value={lastColor.hex}
+              alpha={lastColor.alpha}
+              onChange={({ hex, alpha, rgba }) => setLastColor({ hex, alpha, rgba })}
             />
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#2B2B2B]">
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#332D22]">
               <button
                 disabled={!selected}
-                onClick={() => onApplyBackground(_lastColor.rgba)}
-                className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={() => onApplyBackground(lastColor.rgba)}
+                className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2] disabled:opacity-40 disabled:cursor-not-allowed"
                 data-testid="apply-bg-btn"
               >Apply background</button>
               <button
                 disabled={!selected}
-                onClick={() => onApplyColor(_lastColor.rgba)}
-                className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] disabled:opacity-40 disabled:cursor-not-allowed"
+                onClick={() => onApplyColor(lastColor.rgba)}
+                className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] disabled:opacity-40 disabled:cursor-not-allowed"
                 data-testid="apply-color-btn"
               >Apply text color</button>
             </div>
-            {!selected && <div className="text-[11px] text-gray-500">Select an element on the canvas to apply.</div>}
+            {selected && <div className="text-[11px] text-[#948C79]">Element color editing active.</div>}
           </div>
+        )}
+
+        {tab === "tokens" && (
+          <TokenSelector
+            headHtml={headHtml}
+            elements={elements}
+            selected={selected}
+            onApplyToken={onApplyToken}
+            onCreateToken={onCreateToken}
+          />
         )}
 
         {tab === "gradient" && (
           <GradientMixer onApply={(g) => selected && onApplyBackground(g)} />
         )}
 
+        {tab === "pattern" && (
+          <PatternPanel onApply={(g) => selected && onApplyBackground(g)} />
+        )}
+
+        {tab === "svgbg" && (
+          <SvgBackgroundPanel onApply={(g) => selected && onApplyBackground(g)} />
+        )}
+
         {tab === "style" && (
           <StyleInspector selected={selected} onPatch={onPatchStyle} onReplaceHtml={onReplaceHtml} />
+        )}
+
+        {tab === "responsive" && (
+          <ResponsivePanel selected={selected} viewport={viewport} onPatch={onPatchResponsive} onReset={onResetResponsive} />
+        )}
+
+        {tab === "variants" && (
+          <VariantPanel selected={selected} onReplaceHtml={onReplaceHtml} />
         )}
 
         {tab === "bg" && (
@@ -149,33 +232,33 @@ export const RightSidebar = ({
         {tab === "page" && (
           <div className="space-y-3">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Canvas background</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Canvas background</label>
               <div className="flex gap-2 items-center">
                 <input
                   type="color"
                   value={/^#[0-9a-f]{6}$/i.test(canvasBg || "") ? canvasBg : "#ffffff"}
                   onChange={(e) => onCanvasBg(e.target.value)}
-                  className="w-10 h-8 bg-transparent border border-[#2B2B2B] rounded"
+                  className="w-10 h-8 bg-transparent border border-[#332D22] rounded"
                   data-testid="canvas-bg-color"
                 />
                 <input
                   value={canvasBg || "#ffffff"}
                   onChange={(e) => onCanvasBg(e.target.value)}
-                  className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500"
+                  className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
                   data-testid="canvas-bg-input"
                 />
               </div>
             </div>
-            <p className="text-[11px] text-gray-500">Applies to the exported &lt;body&gt; background. You can also paste a CSS gradient string.</p>
+            <p className="text-[11px] text-[#948C79]">Applies to the exported &lt;body&gt; background. You can also paste a CSS gradient string.</p>
           </div>
         )}
       </div>
 
       {/* Docked Layers palette (GIMP/Photoshop-style) — always available */}
-      <div className="flex-none border-t border-[#2B2B2B] flex flex-col" data-testid="layers-dock" style={{ maxHeight: "42%" }}>
+      <div className="flex-none border-t border-[#332D22] flex flex-col" data-testid="layers-dock" style={{ maxHeight: "42%" }}>
         <button
           onClick={() => setLayersOpen((o) => !o)}
-          className="flex items-center justify-between px-3 py-2 text-[10px] uppercase tracking-wider text-gray-400 hover:text-gray-200 flex-none"
+          className="flex items-center justify-between px-3 py-2 text-[10px] uppercase tracking-wider text-[#A79C87] hover:text-[#F1EDE2] flex-none"
           data-testid="layers-dock-toggle"
         >
           <span className="flex items-center gap-1.5"><LayersIcon size={12} /> Layers · {elements.length}</span>
@@ -192,6 +275,7 @@ export const RightSidebar = ({
               onToggleVisible={onToggleVisible}
               onSetZIndex={onSetZIndex}
               onApplyStyleToIds={onApplyStyleToIds}
+              onApplyAnimationToIds={onApplyAnimationToIds}
               hideHeader
             />
           </div>
@@ -200,6 +284,3 @@ export const RightSidebar = ({
     </aside>
   );
 };
-
-let _lastColor = { hex: "#2563eb", alpha: 1, rgba: "rgba(37, 99, 235, 1)" };
-const setLastColor = (c) => { _lastColor = c; };

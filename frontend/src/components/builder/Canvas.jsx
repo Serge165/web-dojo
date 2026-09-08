@@ -1,16 +1,40 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Trash2, ArrowUp, ArrowDown, Copy, Pencil, Save } from "lucide-react";
 import { InlineToolbar } from "./InlineToolbar";
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/context-menu";
+import { RESPONSIVE_CSS_BODY } from "@/lib/responsiveCss.js";
+import { BLOCK_STYLES_CSS } from "@/lib/blockStyles.generated.js";
+import { OXYGENE_CSS } from "@/lib/oxygeneStyles.js";
+import { AVALON_GEMS_CSS } from "@/lib/avalonGemsStyles.js";
 
 const VIEWPORT_WIDTHS = { desktop: 1200, tablet: 820, mobile: 390 };
 
 export const Canvas = ({
   elements, selectedId, onSelect, onDrop, onDelete, onMove, onDuplicate,
-  onEditHtml, onSaveComponent, canvasBg, headHtml, viewport = "desktop",
+  onEditHtml, onSaveComponent, canvasBg, headHtml, viewport = "desktop", zoom = 100,
+  sameBlockHighlight = [],
 }) => {
   const dropRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const editingRef = useRef(null);
+
+  // RESPONSIVE_CSS is otherwise only injected at export/publish/Preview
+  // time (exportHtml.js, server.py) — the live Design canvas never saw it,
+  // so the tablet/mobile viewport toggle never actually collapsed grids or
+  // stacked flex rows here even after the @container fix above. It's
+  // project-independent, so this runs once and stays for the component's
+  // lifetime rather than re-running per headHtml change.
+  // Phase 4b Task 3: BLOCK_STYLES_CSS is the static per-block CSS extracted
+  // from the 105 author-time-classed block templates (blockStyles.generated.js)
+  // — same "static, project-independent, mount once" story as RESPONSIVE_CSS_BODY
+  // above, so it's folded into the same <style> tag/effect rather than a
+  // second one.
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = RESPONSIVE_CSS_BODY + "\n" + BLOCK_STYLES_CSS + "\n" + OXYGENE_CSS + "\n" + AVALON_GEMS_CSS;
+    document.head.appendChild(style);
+    return () => style.parentNode && style.parentNode.removeChild(style);
+  }, []);
 
   useEffect(() => {
     if (!headHtml) return;
@@ -38,15 +62,21 @@ export const Canvas = ({
   const w = VIEWPORT_WIDTHS[viewport] || VIEWPORT_WIDTHS.desktop;
 
   return (
-    <div className="flex-1 bg-[#050505] overflow-auto" data-testid="canvas-area">
-      <div className="mx-auto my-6 transition-all duration-200" style={{ width: `min(${w}px, 96%)` }}>
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 px-1 pb-1 flex items-center justify-between">
+    <div className="flex-1 bg-[#15130E] dojo-grid overflow-auto" data-testid="canvas-area">
+      {/* container-type: inline-size makes this div itself the
+          containment context for @container rules injected via
+          headHtml (see responsiveCss.js) — without it, the grid-collapse
+          and flex-stack rules never fire in Design mode, since this
+          isn't an iframe and @media only sees the real browser window,
+          not this div's toggled width. */}
+      <div className="my-6 transition-all duration-200" style={{ width: `min(${w}px, 100%)`, zoom: `${zoom}%`, containerType: "inline-size" }}>
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] px-1 pb-1 flex items-center justify-between">
           <span>Preview · {elements.length} block{elements.length === 1 ? "" : "s"} · {viewport}</span>
           <span className="font-mono">{w} × auto</span>
         </div>
         <div
           ref={dropRef}
-          className="min-h-[600px] border border-[#2B2B2B] shadow-2xl"
+          className="min-h-[600px] border border-[#332D22] shadow-2xl"
           style={{ background: canvasBg }}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, elements.length)}
@@ -54,7 +84,7 @@ export const Canvas = ({
         >
           {elements.length === 0 && (
             <div className="p-16 text-center text-sm">
-              <div className="inline-block px-4 py-3 border border-dashed border-gray-300 rounded-md bg-white/40" style={{ color: "#334155" }}>
+              <div className="inline-block px-4 py-3 border border-dashed border-[#C9A227]/40 rounded-md bg-white/60" style={{ color: "#3A3424" }}>
                 Drag blocks here from the left library, or double-click any block.
               </div>
             </div>
@@ -63,35 +93,57 @@ export const Canvas = ({
           {elements.map((el, i) => (
             <React.Fragment key={el.id}>
               <DropSlot onDrop={(e) => handleDrop(e, i)} onDragOver={handleDragOver} index={i} />
-              <div
-                data-testid={`canvas-el-${el.id}`}
-                data-forge-el-id={el.id}
-                className={`relative group ${selectedId === el.id ? "outline outline-2 outline-blue-500" : ""}`}
-                style={{ zIndex: el.zIndex || undefined, display: el.hidden ? "none" : undefined }}
-                onClick={(e) => { e.stopPropagation(); onSelect(el.id); }}
-              >
-                {editingId === el.id ? (
+              <ContextMenu>
+                <ContextMenuTrigger asChild>
                   <div
-                    ref={editingRef}
-                    contentEditable
-                    suppressContentEditableWarning
-                    onBlur={(e) => { onEditHtml(el.id, e.currentTarget.innerHTML); setEditingId(null); }}
-                    dangerouslySetInnerHTML={{ __html: el.html }}
-                    className="focus:outline-none"
-                    data-testid={`inline-editor-${el.id}`}
-                  />
-                ) : (
-                  <div dangerouslySetInnerHTML={{ __html: el.html }} />
-                )}
-                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
-                  <IconBtn testId={`el-edit-${el.id}`} title="Edit text inline" onClick={(e) => { e.stopPropagation(); setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}><Pencil size={12} /></IconBtn>
-                  <IconBtn testId={`el-save-${el.id}`} title="Save as component" onClick={(e) => { e.stopPropagation(); onSaveComponent && onSaveComponent(el); }}><Save size={12} /></IconBtn>
-                  <IconBtn testId={`el-up-${el.id}`} title="Move up" onClick={(e) => { e.stopPropagation(); onMove(el.id, -1); }}><ArrowUp size={12} /></IconBtn>
-                  <IconBtn testId={`el-down-${el.id}`} title="Move down" onClick={(e) => { e.stopPropagation(); onMove(el.id, 1); }}><ArrowDown size={12} /></IconBtn>
-                  <IconBtn testId={`el-dup-${el.id}`} title="Duplicate" onClick={(e) => { e.stopPropagation(); onDuplicate(el.id); }}><Copy size={12} /></IconBtn>
-                  <IconBtn testId={`el-del-${el.id}`} title="Delete" danger onClick={(e) => { e.stopPropagation(); onDelete(el.id); }}><Trash2 size={12} /></IconBtn>
-                </div>
-              </div>
+                    data-testid={`canvas-el-${el.id}`}
+                    // Not data-forge-el-id: that attribute is now baked
+                    // directly into el.html's own root tag (see
+                    // Builder.jsx's addAttrToFirstTag/patchResponsiveStyle)
+                    // so [data-forge-el-id="..."] selectors match the same
+                    // element here, in Preview, and in real exports —
+                    // putting it on this wrapper too would double-match
+                    // it in the canvas alone.
+                    className={`relative group ${selectedId === el.id ? "outline outline-2 outline-[#C9A227]" : ""} ${sameBlockHighlight.includes(el.id) ? "outline outline-2 outline-indigo-400 outline-dashed" : ""}`}
+                    data-wd-highlight={sameBlockHighlight.includes(el.id) ? "on" : undefined}
+                    style={{ zIndex: el.zIndex || undefined, display: el.hidden ? "none" : undefined }}
+                    onClick={(e) => { e.stopPropagation(); onSelect(el.id); }}
+                    onContextMenu={() => onSelect(el.id)}
+                  >
+                    {editingId === el.id ? (
+                      <div
+                        ref={editingRef}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => { onEditHtml(el.id, e.currentTarget.innerHTML); setEditingId(null); }}
+                        dangerouslySetInnerHTML={{ __html: el.html }}
+                        className="focus:outline-none"
+                        data-testid={`inline-editor-${el.id}`}
+                      />
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: el.html }} />
+                    )}
+                    <div className={`absolute top-1 right-1 transition-opacity flex gap-1 z-10 ${selectedId === el.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                      <IconBtn testId={`el-edit-${el.id}`} title="Edit text inline" onClick={(e) => { e.stopPropagation(); setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}><Pencil size={12} /></IconBtn>
+                      <IconBtn testId={`el-save-${el.id}`} title="Save as component" onClick={(e) => { e.stopPropagation(); onSaveComponent && onSaveComponent(el); }}><Save size={12} /></IconBtn>
+                      <IconBtn testId={`el-up-${el.id}`} title="Move up" onClick={(e) => { e.stopPropagation(); onMove(el.id, -1); }}><ArrowUp size={12} /></IconBtn>
+                      <IconBtn testId={`el-down-${el.id}`} title="Move down" onClick={(e) => { e.stopPropagation(); onMove(el.id, 1); }}><ArrowDown size={12} /></IconBtn>
+                      <IconBtn testId={`el-dup-${el.id}`} title="Duplicate" onClick={(e) => { e.stopPropagation(); onDuplicate(el.id); }}><Copy size={12} /></IconBtn>
+                      <IconBtn testId={`el-del-${el.id}`} title="Delete" danger onClick={(e) => { e.stopPropagation(); onDelete(el.id); }}><Trash2 size={12} /></IconBtn>
+                    </div>
+                  </div>
+                </ContextMenuTrigger>
+                <ContextMenuContent className="bg-[#1C1A15] border-[#332D22] text-[#F1EDE2]" data-testid={`el-ctxmenu-${el.id}`}>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-edit-${el.id}`} onSelect={() => { setEditingId(el.id); setTimeout(() => editingRef.current?.focus(), 0); }}>Edit text inline</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-save-${el.id}`} onSelect={() => onSaveComponent && onSaveComponent(el)}>Save as component</ContextMenuItem>
+                  <ContextMenuSeparator className="bg-[#332D22]" />
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-up-${el.id}`} onSelect={() => onMove(el.id, -1)}>Move up</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-down-${el.id}`} onSelect={() => onMove(el.id, 1)}>Move down</ContextMenuItem>
+                  <ContextMenuItem className="text-xs focus:bg-[#242019] focus:text-[#F1EDE2]" data-testid={`ctx-dup-${el.id}`} onSelect={() => onDuplicate(el.id)}>Duplicate</ContextMenuItem>
+                  <ContextMenuSeparator className="bg-[#332D22]" />
+                  <ContextMenuItem className="text-xs text-red-400 focus:bg-[#242019] focus:text-red-400" data-testid={`ctx-del-${el.id}`} onSelect={() => onDelete(el.id)}>Delete</ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             </React.Fragment>
           ))}
           <DropSlot onDrop={(e) => handleDrop(e, elements.length)} onDragOver={handleDragOver} index={elements.length} tail />
@@ -107,7 +159,7 @@ const IconBtn = ({ children, onClick, title, danger, testId }) => (
     onClick={onClick}
     title={title}
     data-testid={testId}
-    className={`w-6 h-6 flex items-center justify-center rounded border border-[#2B2B2B] bg-[#141414]/95 text-gray-200 hover:${danger ? "text-red-400" : "text-white"} hover:bg-[#1F1F1F]`}
+    className={`w-6 h-6 flex items-center justify-center rounded border border-[#332D22] bg-[#1C1A15]/95 text-[#F1EDE2] hover:${danger ? "text-red-400" : "text-[#F1EDE2]"} hover:bg-[#242019]`}
   >{children}</button>
 );
 
@@ -118,7 +170,7 @@ const DropSlot = ({ onDrop, onDragOver, index, tail }) => {
       onDragOver={(e) => { onDragOver(e); setHover(true); }}
       onDragLeave={() => setHover(false)}
       onDrop={(e) => { setHover(false); onDrop(e); }}
-      className={`transition-all ${hover ? "h-8 bg-blue-500/20" : tail ? "h-4" : "h-1"}`}
+      className={`transition-all ${hover ? "h-8 bg-[#C9A227]/20" : tail ? "h-4" : "h-1"}`}
       data-testid={`drop-slot-${index}`}
     />
   );

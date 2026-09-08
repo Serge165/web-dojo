@@ -69,7 +69,7 @@ const FlexBuilder = ({ onInsert, onWrap, hasSelection, actionMode }) => {
       <button
         onClick={doAction}
         disabled={!canAct}
-        className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:bg-[#1F1F1F] disabled:text-gray-500 disabled:cursor-not-allowed text-white flex items-center justify-center gap-1"
+        className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:bg-[#242019] disabled:text-[#948C79] disabled:cursor-not-allowed text-[#F1EDE2] flex items-center justify-center gap-1"
         data-testid="flex-insert"
       >
         <Plus size={12} /> {isWrap ? "Wrap selection with flex" : "Insert flex container"}
@@ -160,7 +160,7 @@ const GridBuilder = ({ onInsert, onWrap, hasSelection, actionMode }) => {
             <button
               onClick={doAction}
               disabled={!canAct}
-              className="w-full text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 disabled:bg-[#1F1F1F] disabled:text-gray-500 disabled:cursor-not-allowed text-white flex items-center justify-center gap-1"
+              className="w-full text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] disabled:bg-[#242019] disabled:text-[#948C79] disabled:cursor-not-allowed text-[#F1EDE2] flex items-center justify-center gap-1"
               data-testid="grid-insert"
             >
               <Plus size={12} /> {isWrap ? "Wrap selection with grid" : "Insert grid container"}
@@ -174,11 +174,11 @@ const GridBuilder = ({ onInsert, onWrap, hasSelection, actionMode }) => {
 };
 
 // ============================== SHARED ==============================
-const selectCls = "w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500";
+const selectCls = "w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]";
 
 const Row = ({ label, children }) => (
   <div>
-    <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">{label}</label>
+    <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">{label}</label>
     {children}
   </div>
 );
@@ -191,7 +191,7 @@ const NumberRow = ({ label, value, onChange, min, max, testId, unit }) => (
         type="number"
         value={value}
         onChange={(e) => onChange(Number(e.target.value) || 0)}
-        className="w-14 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-1 text-xs font-mono text-white outline-none focus:border-blue-500"
+        className="w-14 bg-[#15130E] border border-[#332D22] rounded px-1.5 py-1 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
         data-testid={`${testId}-input`}
       />
     </div>
@@ -204,7 +204,7 @@ const SegButtons = ({ value, onChange, options, testPrefix }) => (
       <button
         key={o.v}
         onClick={() => onChange(o.v)}
-        className={`text-[10px] py-1 rounded border ${value === o.v ? "border-blue-500 bg-[#111623] text-white" : "border-[#2B2B2B] bg-[#1F1F1F] text-gray-300 hover:bg-[#2B2B2B]"}`}
+        className={`text-[10px] py-1 rounded border ${value === o.v ? "border-[#C9A227] bg-[#2A2416] text-[#F1EDE2]" : "border-[#332D22] bg-[#242019] text-[#E4DECE] hover:bg-[#332D22]"}`}
         data-testid={`${testPrefix}-${o.v}`}
       >{o.l}</button>
     ))}
@@ -214,8 +214,8 @@ const SegButtons = ({ value, onChange, options, testPrefix }) => (
 const TrackList = ({ title, tracks, onUpdate, onAdd, onRemove, testPrefix }) => (
   <div>
     <div className="flex items-center justify-between mb-1">
-      <label className="text-[10px] uppercase tracking-wider text-gray-500">{title} · {tracks.length}</label>
-      <button onClick={onAdd} className="p-1 rounded hover:bg-[#1F1F1F] text-gray-400 hover:text-white" title={`Add ${title.toLowerCase()}`} data-testid={`${testPrefix}-add`}><Plus size={11} /></button>
+      <label className="text-[10px] uppercase tracking-wider text-[#948C79]">{title} · {tracks.length}</label>
+      <button onClick={onAdd} className="p-1 rounded hover:bg-[#242019] text-[#A79C87] hover:text-[#F1EDE2]" title={`Add ${title.toLowerCase()}`} data-testid={`${testPrefix}-add`}><Plus size={11} /></button>
     </div>
     <div className="space-y-1">
       {tracks.map((t, i) => (
@@ -225,13 +225,13 @@ const TrackList = ({ title, tracks, onUpdate, onAdd, onRemove, testPrefix }) => 
             value={t.unit === "auto" ? "" : t.value}
             disabled={t.unit === "auto"}
             onChange={(e) => onUpdate(i, { value: Number(e.target.value) || 0 })}
-            className="w-14 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1.5 py-1 text-[11px] font-mono text-white outline-none focus:border-blue-500 disabled:opacity-40"
+            className="w-14 bg-[#15130E] border border-[#332D22] rounded px-1.5 py-1 text-[11px] font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227] disabled:opacity-40"
             data-testid={`${testPrefix}-${i}-value`}
           />
-          <select value={t.unit} onChange={(e) => onUpdate(i, { unit: e.target.value })} className="flex-1 bg-[#0D0D0D] border border-[#2B2B2B] rounded px-1 py-1 text-[11px] text-white outline-none focus:border-blue-500" data-testid={`${testPrefix}-${i}-unit`}>
+          <select value={t.unit} onChange={(e) => onUpdate(i, { unit: e.target.value })} className="flex-1 bg-[#15130E] border border-[#332D22] rounded px-1 py-1 text-[11px] text-[#F1EDE2] outline-none focus:border-[#C9A227]" data-testid={`${testPrefix}-${i}-unit`}>
             {["fr","px","%","rem","em","auto","minmax","min-content","max-content"].map((u) => <option key={u} value={u}>{u}</option>)}
           </select>
-          <button onClick={() => onRemove(i)} className="p-1 rounded hover:bg-[#1F1F1F] text-gray-400 hover:text-red-400" title="Remove" data-testid={`${testPrefix}-${i}-remove`}><Trash2 size={11} /></button>
+          <button onClick={() => onRemove(i)} className="p-1 rounded hover:bg-[#242019] text-[#A79C87] hover:text-red-400" title="Remove" data-testid={`${testPrefix}-${i}-remove`}><Trash2 size={11} /></button>
         </div>
       ))}
     </div>
@@ -239,13 +239,13 @@ const TrackList = ({ title, tracks, onUpdate, onAdd, onRemove, testPrefix }) => 
 );
 
 const PresetBtn = ({ children, onClick, testId }) => (
-  <button onClick={onClick} className="text-[11px] py-1.5 rounded border border-[#2B2B2B] bg-[#1F1F1F] text-gray-200 hover:bg-[#2B2B2B]" data-testid={testId}>{children}</button>
+  <button onClick={onClick} className="text-[11px] py-1.5 rounded border border-[#332D22] bg-[#242019] text-[#F1EDE2] hover:bg-[#332D22]" data-testid={testId}>{children}</button>
 );
 
 const PreviewBox = ({ html }) => (
   <div>
-    <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Preview</label>
-    <div className="rounded border border-[#2B2B2B] bg-white overflow-hidden" style={{ height: 140 }}>
+    <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Preview</label>
+    <div className="rounded border border-[#332D22] bg-white overflow-hidden" style={{ height: 140 }}>
       <iframe
         title="layout preview"
         sandbox=""
@@ -261,9 +261,9 @@ const CopyRow = ({ css }) => {
   const copy = () => { navigator.clipboard.writeText(css); setOk(true); setTimeout(() => setOk(false), 900); };
   return (
     <div>
-      <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">CSS</label>
-      <pre className="text-[10px] font-mono text-gray-300 whitespace-pre-wrap bg-[#0D0D0D] border border-[#2B2B2B] rounded p-2 max-h-24 overflow-auto">{css}</pre>
-      <button onClick={copy} className="mt-1 w-full text-[11px] py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B]">{ok ? "Copied ✓" : "Copy CSS"}</button>
+      <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">CSS</label>
+      <pre className="text-[10px] font-mono text-[#E4DECE] whitespace-pre-wrap bg-[#15130E] border border-[#332D22] rounded p-2 max-h-24 overflow-auto">{css}</pre>
+      <button onClick={copy} className="mt-1 w-full text-[11px] py-1 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22]">{ok ? "Copied ✓" : "Copy CSS"}</button>
     </div>
   );
 };
@@ -277,24 +277,24 @@ export const LayoutBuilder = ({ onAddBlock, onWrapSelection, hasSelection }) => 
       <div className="grid grid-cols-2 gap-1.5">
         <button
           onClick={() => setMode("grid")}
-          className={`text-xs py-1.5 rounded border flex items-center justify-center gap-1 ${mode === "grid" ? "border-blue-500 bg-[#111623] text-white" : "border-[#2B2B2B] bg-[#1F1F1F] text-gray-200 hover:bg-[#2B2B2B]"}`}
+          className={`text-xs py-1.5 rounded border flex items-center justify-center gap-1 ${mode === "grid" ? "border-[#C9A227] bg-[#2A2416] text-[#F1EDE2]" : "border-[#332D22] bg-[#242019] text-[#F1EDE2] hover:bg-[#332D22]"}`}
           data-testid="layout-mode-grid"
         ><LayoutGrid size={12} /> Grid</button>
         <button
           onClick={() => setMode("flex")}
-          className={`text-xs py-1.5 rounded border flex items-center justify-center gap-1 ${mode === "flex" ? "border-blue-500 bg-[#111623] text-white" : "border-[#2B2B2B] bg-[#1F1F1F] text-gray-200 hover:bg-[#2B2B2B]"}`}
+          className={`text-xs py-1.5 rounded border flex items-center justify-center gap-1 ${mode === "flex" ? "border-[#C9A227] bg-[#2A2416] text-[#F1EDE2]" : "border-[#332D22] bg-[#242019] text-[#F1EDE2] hover:bg-[#332D22]"}`}
           data-testid="layout-mode-flex"
         ><Columns size={12} /> Flexbox</button>
       </div>
-      <div className="flex bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5 text-[11px]" data-testid="layout-action-toggle">
+      <div className="flex bg-[#15130E] border border-[#332D22] rounded-md p-0.5 text-[11px]" data-testid="layout-action-toggle">
         <button
           onClick={() => setActionMode("insert")}
-          className={`flex-1 py-1 rounded ${actionMode === "insert" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+          className={`flex-1 py-1 rounded ${actionMode === "insert" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
           data-testid="layout-action-insert"
         >Insert new</button>
         <button
           onClick={() => setActionMode("wrap")}
-          className={`flex-1 py-1 rounded ${actionMode === "wrap" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+          className={`flex-1 py-1 rounded ${actionMode === "wrap" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
           data-testid="layout-action-wrap"
         >Wrap selection</button>
       </div>

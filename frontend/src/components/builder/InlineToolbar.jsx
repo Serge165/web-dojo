@@ -44,7 +44,7 @@ export const InlineToolbar = ({ targetRef }) => {
   return (
     <div
       ref={barRef}
-      className="fixed z-50 flex items-center gap-0.5 p-1 rounded-md border border-[#2B2B2B] bg-[#141414] shadow-xl"
+      className="fixed z-50 flex items-center gap-0.5 p-1 rounded-md border border-[#332D22] bg-[#1C1A15] shadow-xl"
       style={{ top: pos.top, left: pos.left }}
       onMouseDown={(e) => e.preventDefault()} // don't blur the editable target
       data-testid="inline-toolbar"
@@ -52,11 +52,11 @@ export const InlineToolbar = ({ targetRef }) => {
       <TBtn onClick={() => exec("bold")} testId="rt-bold" title="Bold (Cmd+B)"><Bold size={13} /></TBtn>
       <TBtn onClick={() => exec("italic")} testId="rt-italic" title="Italic (Cmd+I)"><Italic size={13} /></TBtn>
       <TBtn onClick={() => exec("underline")} testId="rt-underline" title="Underline (Cmd+U)"><Underline size={13} /></TBtn>
-      <span className="w-px h-4 bg-[#2B2B2B] mx-0.5" />
+      <span className="w-px h-4 bg-[#332D22] mx-0.5" />
       <TBtn onClick={() => changeHeading("H1")} testId="rt-h1" title="Heading 1"><Heading1 size={13} /></TBtn>
       <TBtn onClick={() => changeHeading("H2")} testId="rt-h2" title="Heading 2"><Heading2 size={13} /></TBtn>
       <TBtn onClick={() => changeHeading("P")} testId="rt-p" title="Paragraph"><span className="text-[11px] font-semibold">P</span></TBtn>
-      <span className="w-px h-4 bg-[#2B2B2B] mx-0.5" />
+      <span className="w-px h-4 bg-[#332D22] mx-0.5" />
       <TBtn onClick={addLink} testId="rt-link" title="Insert link"><LinkIcon size={13} /></TBtn>
       <TBtn onClick={() => exec("removeFormat")} testId="rt-clear" title="Clear formatting"><RemoveFormatting size={13} /></TBtn>
     </div>
@@ -69,6 +69,6 @@ const TBtn = ({ children, onClick, title, testId }) => (
     onClick={onClick}
     title={title}
     data-testid={testId}
-    className="w-7 h-7 flex items-center justify-center rounded hover:bg-[#1F1F1F] text-gray-200"
+    className="w-7 h-7 flex items-center justify-center rounded hover:bg-[#242019] text-[#F1EDE2]"
   >{children}</button>
 );

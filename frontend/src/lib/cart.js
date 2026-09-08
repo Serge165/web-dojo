@@ -1,3 +1,5 @@
+import { escAttr, escText } from "./escapeHtml.js";
+
 // Client-side shopping cart runtime for EXPORTED static sites.
 // - Cart lives in localStorage; a floating button + slide-out drawer show it.
 // - Stripe checkout hands off to Web Dojo's hosted backend (baked below), which
@@ -8,13 +10,13 @@
 const BACKEND = process.env.REACT_APP_BACKEND_URL || "";
 
 export const buildAddToCartButton = ({ id, name, amount, currency = "usd", image = "", label = "Add to cart", accent = "#4f46e5", radius = "10px" }) =>
-  `<button type="button" data-wd-add data-wd-id="${id || name}" data-wd-name="${name}" data-wd-price="${Number(amount) || 0}" data-wd-cur="${currency}" data-wd-img="${image}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border:none;border-radius:${radius};background:${accent};color:#fff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">
+  `<button type="button" data-wd-add data-wd-id="${escAttr(id || name)}" data-wd-name="${escAttr(name)}" data-wd-price="${Number(amount) || 0}" data-wd-cur="${currency}" data-wd-img="${escAttr(image)}" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border:none;border-radius:${radius};background:${accent};color:#fff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-  ${label}
+  ${escText(label)}
 </button>`;
 
 // currency + accent + optional paypalClientId configure the whole store.
-export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", paypalClientId = "" } = {}) => {
+export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", paypalClientId = "", projectId = "" } = {}) => {
   const cfg = JSON.stringify({ api: BACKEND, accent, currency: (currency || "usd").toLowerCase(), paypal: paypalClientId || "" });
   return `<div data-webdojo-cart>
 <style>
@@ -107,7 +109,7 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     if(!items.length) return;
     var origin=(location.origin&&location.origin!=="null")?(location.origin+location.pathname):"";
     var btn=$("wdc-checkout"); btn.disabled=true; btn.textContent="Redirecting…";
-    fetch(CFG.api+"/api/commerce/checkout-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:items, origin_url:origin})})
+    fetch(CFG.api+"/api/commerce/checkout-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:items, origin_url:origin, project_id: "${projectId}"})})
       .then(function(r){ return r.json(); })
       .then(function(d){ if(d && d.url){ location.href=d.url; } else { alert((d&&d.detail)||"Could not start checkout"); btn.disabled=false; btn.textContent="Checkout with Stripe"; } })
       .catch(function(){ alert("Checkout failed — please try again."); btn.disabled=false; btn.textContent="Checkout with Stripe"; });
@@ -130,7 +132,7 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
     window.paypal.Buttons({
       style:{layout:"horizontal",color:"gold",shape:"pill",height:40,tagline:false},
       createOrder:function(data,actions){ return actions.order.create({purchase_units:[{amount:{value:total().toFixed(2),currency_code:CFG.currency.toUpperCase()}}]}); },
-      onApprove:function(data,actions){ return actions.order.capture().then(function(){ WDCart.clear(); alert("Payment complete — thank you!"); }); }
+      onApprove:function(data,actions){ return actions.order.capture().then(function(){ fetch(CFG.api+"/api/commerce/paypal/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_id: "${projectId}", order_id:data.orderID})}).then(function(){ WDCart.clear(); alert("Payment complete — thank you!"); }).catch(function(){ alert("Your payment went through, but we couldn't confirm it just now. Please contact us with your PayPal order ID: "+data.orderID); }); }); }
     }).render("#wdc-paypal");
   }
   document.addEventListener("click", function(e){
@@ -145,6 +147,43 @@ export const buildCartRuntimeHtml = ({ accent = "#4f46e5", currency = "usd", pay
   });
   render();
   try{ if(/[?&]wd_checkout=success/.test(location.search)){ WDCart.clear(); var _t=document.createElement("div"); _t.setAttribute("data-wd-thanks",""); _t.style.cssText="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100001;background:#0f172a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);font-family:system-ui,sans-serif;font-size:14px;"; _t.textContent="\\u2713 Thank you! Your order is confirmed."; document.body.appendChild(_t); setTimeout(function(){_t.style.transition="opacity .5s";_t.style.opacity="0";setTimeout(function(){_t.remove();},600);},6000); } }catch(e){}
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var sessionId = params.get("session_id");
+    if (!sessionId) return;
+    // Strip the capability token out of the visible URL before the merchant's
+    // own analytics scripts get a chance to log the full location.
+    try { history.replaceState(null, "", window.location.pathname); } catch (e) {}
+    var tries = 0;
+    function showReceipt(html) {
+      var box = document.createElement("div");
+      box.style.cssText = "max-width:480px;margin:60px auto;padding:32px;border:1px solid #e2e8f0;border-radius:12px;font-family:system-ui,sans-serif;";
+      box.innerHTML = html;
+      document.body.insertBefore(box, document.body.firstChild);
+    }
+    function poll() {
+      fetch(CFG.api + "/api/commerce/receipt/" + encodeURIComponent(sessionId)).then(function (r) { return r.json(); }).then(function (order) {
+        if (order.status === "processing" && tries < 5) {
+          tries++;
+          setTimeout(poll, 2000);
+          return;
+        }
+        if (order.status === "processing") {
+          showReceipt("<h2>Thanks for your order</h2><p>Your payment was received. This receipt will update shortly — refresh in a moment.</p>");
+        } else {
+          var items = (order.line_items || []).map(function (li) {
+            return "<li>" + li.name + " × " + li.quantity + "</li>";
+          }).join("");
+          showReceipt("<h2>Order confirmed</h2><p>Thanks, " + (order.customer_name || "") + "!</p><ul>" + items + "</ul>" +
+            "<p><b>Total: " + (order.amount_total / 100).toFixed(2) + " " + (order.currency || "").toUpperCase() + "</b></p>" +
+            "<button onclick=\\"window.print()\\">Print / Save as PDF</button>");
+        }
+      }).catch(function () {
+        showReceipt("<h2>Thanks for your order</h2><p>Your payment went through, but we couldn't load your receipt right now. Please refresh, or check your email for confirmation.</p>");
+      });
+    }
+    poll();
+  })();
 })();
 </script>
 </div>`;

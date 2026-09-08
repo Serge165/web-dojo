@@ -1,0 +1,1031 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - banner:
+          - generic:
+            - generic:
+              - generic: ◤
+              - generic: Web Dojo
+            - textbox:
+              - /placeholder: Untitled project
+              - text: Untitled
+            - generic:
+              - button
+              - button [disabled]
+          - generic:
+            - generic:
+              - button
+              - button
+              - button
+          - generic:
+            - button: Import
+            - button: Export
+            - button: Share
+            - button: Publish
+            - generic:
+              - button
+              - button
+              - button
+              - button
+              - button
+              - button
+            - generic: Saved
+            - button: Save
+            - button: Open
+            - button
+        - generic:
+          - generic:
+            - button: File
+          - generic:
+            - button: Edit
+          - generic:
+            - button: Find
+          - generic:
+            - button: View
+          - generic:
+            - button: Help
+        - generic:
+          - generic:
+            - generic: Home
+            - combobox
+          - button: Page
+          - button: SEO
+          - button: Template
+        - generic:
+          - generic:
+            - button: Design
+            - button: Code
+            - button: Split View
+            - button: Outline
+            - button: Preview
+        - generic:
+          - generic:
+            - complementary:
+              - generic:
+                - button: Edit
+                - button: Library
+                - button: Layout
+                - button: Forms
+                - button: Shop
+                - button: Files
+                - button: Snips
+                - button: Saved
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - textbox:
+                        - /placeholder: Search components…
+                  - generic:
+                    - button:
+                      - generic: Navigation
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Navbars
+                          - generic: · 7
+                      - generic:
+                        - generic: Simple Navbar
+                        - generic: Dark Navbar
+                        - generic: Centered Logo Nav
+                        - generic: Mega-menu Nav
+                        - generic: E-commerce Nav + Search
+                        - generic: Transparent Overlay Nav
+                        - generic: App Pill-tabs Nav
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Headers
+                          - generic: · 5
+                      - generic:
+                        - generic: Announcement + Header
+                        - generic: Header + Dropdown
+                        - generic: Minimal Serif Header
+                        - generic: Dark Header + CTA
+                        - generic: Header + Search + Icons
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Footers
+                          - generic: · 7
+                      - generic:
+                        - generic: Minimal Footer
+                        - generic: Newsletter Footer
+                        - generic: Social Footer
+                        - generic: 4-column Light Footer
+                        - generic: Contact Footer
+                        - generic: App Download Footer
+                        - generic: Mega 5-column Footer
+                  - generic:
+                    - button:
+                      - generic: Hero
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Heroes
+                          - generic: · 2
+                      - generic:
+                        - generic: Centered Hero
+                        - generic: Split Hero
+                  - generic:
+                    - button:
+                      - generic: Parallax
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Parallax
+                          - generic: · 5
+                      - generic:
+                        - generic: Parallax Hero · Full Bleed
+                        - generic: Parallax Hero · Split Content
+                        - generic: Parallax Section · Big Quote
+                        - generic: Parallax Section · Stats Band
+                        - generic: Parallax Section · CTA Banner
+                  - generic:
+                    - button:
+                      - generic: Content
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Components
+                          - generic: · 13
+                      - generic:
+                        - generic: Gallery · 3-col Grid
+                        - generic: Gallery · Masonry
+                        - generic: Gallery · Scroll Carousel
+                        - generic: Gallery · Hover Zoom
+                        - generic: Gallery · Polaroid Stack
+                        - generic: Gallery · Featured + Thumbs
+                        - generic: Large Header
+                        - generic: Glass Navbar
+                        - generic: Animated Hero
+                        - generic: Animated Marquee
+                        - generic: Testimonial
+                        - generic: Pricing (3-col)
+                        - generic: Footer
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Text
+                          - generic: · 5
+                      - generic:
+                        - generic: Heading 1
+                        - generic: Heading 2
+                        - generic: Paragraph
+                        - generic: Text Input
+                        - generic: Textarea
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Toolbox
+                          - generic: · 6
+                      - generic:
+                        - generic: Button
+                        - generic: Image
+                        - generic: Divider
+                        - generic: Spacer
+                        - generic: Avatar
+                        - generic: Badge
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Containers
+                          - generic: · 3
+                      - generic:
+                        - generic: Container
+                        - generic: 2 Columns
+                        - generic: 3 Columns
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Testimonials
+                          - generic: · 1
+                      - generic: Testimonial · Carousel
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: FAQ
+                          - generic: · 1
+                      - generic: FAQ · Accordion
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Comments
+                          - generic: · 1
+                      - generic: Comment Thread
+                  - generic:
+                    - button:
+                      - generic: Features
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Sections
+                          - generic: · 2
+                      - generic:
+                        - generic: Feature Grid
+                        - generic: CTA Banner
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Services
+                          - generic: · 1
+                      - generic: Services · Icon Grid
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Pricing
+                          - generic: · 1
+                      - generic: Pricing · Monthly/Yearly Toggle
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Team
+                          - generic: · 1
+                      - generic: Team · Member Cards
+                  - generic:
+                    - button:
+                      - generic: Forms
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Newsletter
+                          - generic: · 1
+                      - generic: Newsletter · Signup + Validation
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Contact
+                          - generic: · 1
+                      - generic: Contact Form · reCAPTCHA
+                  - generic:
+                    - button:
+                      - generic: Media
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Video BG
+                          - generic: · 3
+                      - generic:
+                        - generic: Hero · Video Background
+                        - generic: Section · Video + Text
+                        - generic: Video Banner Strip
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Portfolio
+                          - generic: · 1
+                      - generic: Portfolio · Filterable Gallery
+                  - generic:
+                    - button:
+                      - generic: Layouts
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Layout
+                          - generic: · 1
+                      - generic: Bento Grid
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Timelines
+                          - generic: · 5
+                      - generic:
+                        - generic: Vertical Timeline
+                        - generic: Alternating Timeline
+                        - generic: Horizontal Timeline
+                        - generic: Card Timeline
+                        - generic: Numbered Steps
+                  - generic:
+                    - button:
+                      - generic: Dashboard
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Zenero Content
+                          - generic: · 10
+                      - generic:
+                        - generic: Latest Updates
+                        - generic: Gallery Grid
+                        - generic: Latest from Blog
+                        - generic: Portfolio Timeline
+                        - generic: Testimonials from Comments
+                        - generic: Timeline
+                        - generic: Features Bento
+                        - generic: Esports · Roster (live)
+                        - generic: Esports · Fixtures (live)
+                        - generic: Esports · Org Stats (live)
+                  - generic:
+                    - button:
+                      - generic: Esports
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Esports
+                          - generic: · 6
+                      - generic:
+                        - generic: Esports · Team Roster
+                        - generic: Esports · Tournament Bracket
+                        - generic: Esports · Stream Schedule
+                        - generic: Esports · Player Stat Cards
+                        - generic: Esports · Leaderboard
+                        - generic: Esports · Organization Hub
+                  - generic:
+                    - button:
+                      - generic: Creator
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Creator
+                          - generic: · 1
+                      - generic: Creator · Subscription Tiers
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Social
+                          - generic: · 1
+                      - generic: Social Media Wall (Multi-Column)
+                  - generic:
+                    - button:
+                      - generic: Moldy Oldies
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Moldy Oldies
+                          - generic: · 21
+                      - generic:
+                        - generic: Retro · Hit Counter
+                        - generic: Retro · Sign My Guestbook
+                        - generic: Retro · Webring Navigator
+                        - generic: Retro · 88×31 Button Row
+                        - generic: Retro · Top 8 Friends
+                        - generic: Retro · eProps & Blogroll
+                        - generic: Retro · Under Construction
+                        - generic: Retro · Rainbow Glitter Divider
+                        - generic: Retro · Now Playing Bar
+                        - generic: Retro · Browser Badges
+                        - generic: Retro · Web 2.0 Glossy Badge
+                        - generic: Retro · Buddy List
+                        - generic: Retro · Shout Box
+                        - generic: Retro · Cursor Sparkle Trail
+                        - generic: Retro · MIDI Player
+                        - generic: Retro · AIM Away Message
+                        - generic: Retro · Poll Widget
+                        - generic: Retro · Pet Adoption Badge
+                        - generic: Retro · Forum Header
+                        - generic: Retro · Forum Post
+                        - generic: Retro · Forum Reply Box
+                  - generic:
+                    - generic: Cards
+                    - generic:
+                      - generic:
+                        - generic: Count
+                        - spinbutton: "3"
+                      - button: Insert card row
+                  - generic:
+                    - generic: Social buttons
+                    - generic:
+                      - button: Open social builder
+                      - paragraph: Share bar or profile links — pick platforms, shape, style & hover animation.
+                  - generic:
+                    - generic: Live stream / community
+                    - generic:
+                      - button: Add Twitch / YouTube / Discord embed
+                      - paragraph: Real, working embeds — no API keys needed.
+                  - generic:
+                    - generic: Fonts
+                    - generic:
+                      - generic:
+                        - generic: Web-safe
+                        - combobox
+                      - generic:
+                        - generic: Google Font
+                        - generic:
+                          - textbox:
+                            - /placeholder: e.g. Inter
+                            - text: Inter
+                          - button: Add
+                - generic: Hover a block to preview it here
+            - button
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Preview · 0 block s · desktop
+                    - generic: 1200 × auto
+                  - generic: Drag blocks here from the left library, or double-click any block.
+          - generic:
+            - button
+            - complementary:
+              - generic:
+                - generic: Inspector
+                - generic: no selection
+              - generic:
+                - button: Color
+                - button: Tokens
+                - button: Gradient
+                - button: Pattern
+                - button: SVG BG
+                - button: Style
+                - button: Responsive
+                - button: Variants
+                - button: Shape
+                - button: BG
+                - button: Blend
+                - button: Divider
+                - button: Motion
+                - button: Text FX
+                - button: Theme
+                - button: CDN
+                - button: Page
+              - generic:
+                - generic:
+                  - generic:
+                    - button
+                    - generic:
+                      - generic: Hue
+                      - slider: "221"
+                    - generic:
+                      - generic: Alpha
+                      - slider: "100"
+                    - generic:
+                      - generic:
+                        - generic: Hex
+                        - textbox: "#2563eb"
+                    - generic:
+                      - generic:
+                        - generic: R
+                        - spinbutton: "37"
+                      - generic:
+                        - generic: G
+                        - spinbutton: "99"
+                      - generic:
+                        - generic: B
+                        - spinbutton: "235"
+                    - generic:
+                      - generic:
+                        - generic: H
+                        - spinbutton: "221"
+                      - generic:
+                        - generic: S
+                        - spinbutton: "83"
+                      - generic:
+                        - generic: L
+                        - spinbutton: "53"
+                  - generic:
+                    - button [disabled]: Apply background
+                    - button [disabled]: Apply text color
+                  - generic: Select an element on the canvas to apply.
+              - generic:
+                - button:
+                  - generic: Layers · 0
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 0 layers
+                      - button: Effects
+                    - generic: No layers yet — drop a block on the canvas.
+        - contentinfo:
+          - generic:
+            - generic: Home
+            - generic: 0 block s
+            - generic: design
+            - generic: desktop
+          - generic:
+            - generic: 100 %
+            - generic: Saved
+      - region "Notifications alt+T"
+  - dialog:
+    - generic:
+      - heading [level=2]: Project templates
+    - generic:
+      - generic:
+        - generic:
+          - textbox:
+            - /placeholder: Search by name, description or aesthetic…
+        - generic:
+          - button: All · 57
+          - button: art-nouveau
+          - button: barbiecore
+          - button: bauhaus
+          - button: blog
+          - button: bloomcore
+          - button: blueprint
+          - button: brutalism
+          - button: cassette-futurism
+          - button: corp-memphis
+          - button: cottagecore
+          - button: cyberpunk
+          - button: dark-academia
+          - button: diffused-worlds
+          - button: dreamcore
+          - button: editorial-warm
+          - button: esports-agnostic
+          - button: esports-arctic
+          - button: esports-cobalt
+          - button: esports-crimson
+          - button: esports-ember
+          - button: esports-emerald
+          - button: esports-gold
+          - button: esports-mint
+          - button: esports-mono
+          - button: esports-rose
+          - button: esports-sky
+          - button: esports-teal
+          - button: esports-violet
+          - button: forum-throwback
+          - button: frutiger-aero
+          - button: geocities-homepage
+          - button: goblincore
+          - button: grunge-zine
+          - button: kidcore
+          - button: livejournal-throwback
+          - button: memphis
+          - button: modern-agency-editorial
+          - button: modern-agency-grid
+          - button: modern-portfolio-creative
+          - button: modern-portfolio-minimal
+          - button: modern-restaurant-bistro
+          - button: modern-saas-bold
+          - button: modern-saas-minimal
+          - button: modern-service-business
+          - button: modern-shop-grid
+          - button: modern-shop-product
+          - button: myspace-throwback
+          - button: neubrutalism
+          - button: newspaper
+          - button: retro-futurism
+          - button: scandi-minimal
+          - button: solar-punk
+          - button: swiss
+          - button: vaporwave
+          - button: win95
+          - button: xanga-throwback
+          - button: y2k
+      - generic:
+        - generic:
+          - generic: Starter gallery · aesthetics
+          - generic: 57 showing
+        - generic:
+          - button:
+            - generic:
+              - generic: esports-agnostic
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Color Agnostic
+              - generic: HUD-style esports org site. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: esports-mono
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Mono Ops
+              - generic: HUD-style esports org site, monochrome — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-rose
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Rose Frag
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-sky
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Sky Static
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-emerald
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Emerald Line
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-arctic
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Arctic White
+              - generic: HUD-style esports org site, light mode — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-teal
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Teal Frequency
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-ember
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Ember Orange
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-gold
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Gold Standard
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-violet
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Violet Wave
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-cobalt
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Cobalt Surge
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-crimson
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Crimson Protocol
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: esports-mint
+              - generic: Preview
+            - generic:
+              - generic: Esports Org — Mint Circuit
+              - generic: HUD-style esports org site — live badge, roster, fixtures, shop.
+          - button:
+            - generic:
+              - generic: forum-throwback
+              - generic: Preview
+            - generic:
+              - generic: Web Forum Throwback
+              - generic: A classic phpBB/vBulletin-style forum thread — per-post user rail, quote/edit icons, and a working reply box.
+          - button:
+            - generic:
+              - generic: geocities-homepage
+              - generic: Preview
+            - generic:
+              - generic: GeoCities Personal Homepage
+              - generic: Maximalist late-90s chaos — tiled starfield, scrolling marquee, hit counter, and a guestbook. The loud cousin of the journal throwbacks.
+          - button:
+            - generic:
+              - generic: myspace-throwback
+              - generic: Preview
+            - generic:
+              - generic: MySpace Throwback
+              - generic: A faithful mid-2000s MySpace-style profile — Top 8, autoplay music banner, About Me box, and working comments.
+          - button:
+            - generic:
+              - generic: modern-service-business
+              - generic: Preview
+            - generic:
+              - generic: Service Business
+              - generic: Split hero with a schedule preview, services list with price and duration. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-restaurant-bistro
+              - generic: Preview
+            - generic:
+              - generic: Restaurant — Modern Bistro
+              - generic: Split hero and menu with a textured accent panel, plus a reservation CTA. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-portfolio-creative
+              - generic: Preview
+            - generic:
+              - generic: Portfolio — Creative Grid
+              - generic: Image-forward masonry portfolio for photographers, illustrators, and visual designers. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-portfolio-minimal
+              - generic: Preview
+            - generic:
+              - generic: Portfolio — Minimal Personal
+              - generic: A quiet, centered personal site — name, role, selected work. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-shop-grid
+              - generic: Preview
+            - generic:
+              - generic: E-commerce — Shop Grid
+              - generic: Catalog-style storefront with a masonry product grid. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-shop-product
+              - generic: Preview
+            - generic:
+              - generic: E-commerce — Single Product
+              - generic: "Product-focused landing page: split hero, an asymmetric spec list, and a clear buy CTA. Colors bind to whatever theme is applied."
+          - button:
+            - generic:
+              - generic: modern-agency-editorial
+              - generic: Preview
+            - generic:
+              - generic: Agency — Editorial
+              - generic: Big type, numbered services, a text-forward alternative to a project grid. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-agency-grid
+              - generic: Preview
+            - generic:
+              - generic: Agency — Grid
+              - generic: Portfolio-forward studio site with a project grid. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-saas-bold
+              - generic: Preview
+            - generic:
+              - generic: SaaS — Bold
+              - generic: Asymmetric split hero, a stat rail, and a numbered case for switching. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: modern-saas-minimal
+              - generic: Preview
+            - generic:
+              - generic: SaaS — Minimal
+              - generic: Asymmetric split hero with a layered panel mockup, one clear call to action. Colors bind to whatever theme is applied.
+          - button:
+            - generic:
+              - generic: dreamcore
+              - generic: Preview
+            - generic:
+              - generic: Dreamcore
+              - generic: Hazy pastels, floating orbs, unresolved nostalgia — the internet as a half-remembered dream.
+          - button:
+            - generic:
+              - generic: livejournal-throwback
+              - generic: Preview
+            - generic:
+              - generic: LiveJournal Throwback
+              - generic: A faithful LiveJournal-style journal — userpics, current mood/music, tags, and working comments.
+          - button:
+            - generic:
+              - generic: xanga-throwback
+              - generic: Preview
+            - generic:
+              - generic: Xanga Throwback
+              - generic: A faithful 2000s Xanga-style journal — mood icons, eProps, a music widget, and working comments.
+          - button:
+            - generic:
+              - generic: blog
+              - generic: Preview
+            - generic:
+              - generic: Blog
+              - generic: A clean, readable editorial blog — featured post, recent posts, and working comments.
+          - button:
+            - generic:
+              - generic: goblincore
+              - generic: Preview
+            - generic:
+              - generic: Goblincore
+              - generic: Mossy earth, mushrooms, shiny things — feral cottagecore.
+          - button:
+            - generic:
+              - generic: swiss
+              - generic: Preview
+            - generic:
+              - generic: Swiss Modernism
+              - generic: Helvetica-ish, red accents, strict grid — 1957 shows up on time.
+          - button:
+            - generic:
+              - generic: art-nouveau
+              - generic: Preview
+            - generic:
+              - generic: Art Nouveau
+              - generic: Organic curves, gold & emerald, Mucha-inspired botanic lines.
+          - button:
+            - generic:
+              - generic: grunge-zine
+              - generic: Preview
+            - generic:
+              - generic: Grunge Zine
+              - generic: Photocopy black + red, cutouts, torn edges, mixed serif/sans chaos.
+          - button:
+            - generic:
+              - generic: win95
+              - generic: Preview
+            - generic:
+              - generic: Windows 95
+              - generic: System font, gray title bars, drop-shadow buttons — early-desktop nostalgia.
+          - button:
+            - generic:
+              - generic: barbiecore
+              - generic: Preview
+            - generic:
+              - generic: Barbiecore
+              - generic: Hot pink everything, gloss, unapologetic maximal cute.
+          - button:
+            - generic:
+              - generic: newspaper
+              - generic: Preview
+            - generic:
+              - generic: Newspaper Editorial
+              - generic: Broadsheet columns, drop caps, Playfair headlines — a very old-fashioned homepage.
+          - button:
+            - generic:
+              - generic: cassette-futurism
+              - generic: Preview
+            - generic:
+              - generic: Cassette Futurism
+              - generic: 1970s tape-deck sci-fi — beige plastic, amber LEDs, chunky bevels.
+          - button:
+            - generic:
+              - generic: diffused-worlds
+              - generic: Preview
+            - generic:
+              - generic: Diffused Worlds
+              - generic: Soft blur, dreamy pastels, atmospheric — 2026 counter to hard-edged UI.
+          - button:
+            - generic:
+              - generic: editorial-warm
+              - generic: Preview
+            - generic:
+              - generic: Editorial Warm
+              - generic: Cream backgrounds, custom serifs, warm counter-aesthetic to techno-futurism.
+          - button:
+            - generic:
+              - generic: blueprint
+              - generic: Preview
+            - generic:
+              - generic: Blueprint
+              - generic: Cyan grid on navy — engineering drawings, over-explained.
+          - button:
+            - generic:
+              - generic: kidcore
+              - generic: Preview
+            - generic:
+              - generic: Kidcore Scrapbook
+              - generic: Crayons, doodles, primary colours — 2026's anti-AI-slop antidote.
+          - button:
+            - generic:
+              - generic: corp-memphis
+              - generic: Preview
+            - generic:
+              - generic: Corp Memphis
+              - generic: Flat illustration vibe — mint, purple, oversized limbs everywhere.
+          - button:
+            - generic:
+              - generic: neubrutalism
+              - generic: Preview
+            - generic:
+              - generic: Neubrutalism
+              - generic: Flat blocks, thick borders, hard shadows — 2020s remix of brutalism.
+          - button:
+            - generic:
+              - generic: bloomcore
+              - generic: Preview
+            - generic:
+              - generic: Bloomcore
+              - generic: Floral pastels, handwritten headlines, everything in bloom.
+          - button:
+            - generic:
+              - generic: retro-futurism
+              - generic: Preview
+            - generic:
+              - generic: Retro-Futurism
+              - generic: 1970s space-station optimism — orange, brown, cream, tomorrow.
+          - button:
+            - generic:
+              - generic: memphis
+              - generic: Preview
+            - generic:
+              - generic: Memphis Group
+              - generic: Squiggles, terrazzo, and 1985 having far too much fun.
+          - button:
+            - generic:
+              - generic: scandi-minimal
+              - generic: Preview
+            - generic:
+              - generic: Scandi Minimal
+              - generic: Whitespace as luxury. Two tones. One good serif.
+          - button:
+            - generic:
+              - generic: bauhaus
+              - generic: Preview
+            - generic:
+              - generic: Bauhaus
+              - generic: Primary colours and pure geometry — 1919 shows up early.
+          - button:
+            - generic:
+              - generic: brutalism
+              - generic: Preview
+            - generic:
+              - generic: Web Brutalism
+              - generic: Loud, bare, deliberately ugly, and impossible to ignore.
+          - button:
+            - generic:
+              - generic: cyberpunk
+              - generic: Preview
+            - generic:
+              - generic: Cyberpunk
+              - generic: Neon skylines, black terminals, hot pink alerts, moody rain.
+          - button:
+            - generic:
+              - generic: vaporwave
+              - generic: Preview
+            - generic:
+              - generic: Vaporwave
+              - generic: Sunset gradient, roman busts, mall music, aesthetic™.
+          - button:
+            - generic:
+              - generic: y2k
+              - generic: Preview
+            - generic:
+              - generic: Y2K Chrome
+              - generic: Bubblegum pink, chrome, low-poly stars, sparkly clip-art energy.
+          - button:
+            - generic:
+              - generic: cottagecore
+              - generic: Preview
+            - generic:
+              - generic: Cottagecore
+              - generic: Sourdough, embroidery, kettle on the stove, sun through gingham.
+          - button:
+            - generic:
+              - generic: solar-punk
+              - generic: Preview
+            - generic:
+              - generic: Solar Punk
+              - generic: Hopeful ecotopia — mossy greens, sunlit gold, living tech.
+          - button:
+            - generic:
+              - generic: dark-academia
+              - generic: Preview
+            - generic:
+              - generic: Dark Academia
+              - generic: Candlelit libraries, oxblood leather, and Latin quotations.
+          - button:
+            - generic:
+              - generic: frutiger-aero
+              - generic: Preview
+            - generic:
+              - generic: Frutiger Aero
+              - generic: Glossy, aqua, back-of-a-Windows-Vista-box optimism.
+      - generic:
+        - generic:
+          - generic: Your templates
+          - button: Import a template
+        - generic: No custom templates yet — save your current project below.
+      - generic:
+        - generic: Save current project as template
+        - textbox:
+          - /placeholder: Template name
+        - textbox:
+          - /placeholder: Short description
+        - button: Save as template
+      - generic:
+        - button: Close
+    - button:
+      - generic: Close
+  - dialog [ref=f4e2097]:
+    - heading "SaaS — Minimal modern-saas-minimal Close Use this template" [level=2] [ref=f4e2099]:
+      - generic [ref=f4e2100]:
+        - text: SaaS — Minimal
+        - generic [ref=f4e2103]: modern-saas-minimal
+      - generic [ref=f4e2104]:
+        - generic [ref=f4e2105]:
+          - button "desktop" [active] [ref=f4e2106] [cursor=pointer]
+          - button "tablet" [ref=f4e2109] [cursor=pointer]
+          - button "mobile" [ref=f4e2112] [cursor=pointer]
+        - button "Close" [ref=f4e2115] [cursor=pointer]
+        - button "Use this template" [ref=f4e2116] [cursor=pointer]
+    - iframe [ref=f4e2118]:
+      - generic [ref=f5e1]:
+        - banner [ref=f5e2]:
+          - link "Fieldnote" [ref=f5e3] [cursor=pointer]:
+            - /url: index.html
+          - navigation [ref=f5e4]:
+            - link "Pricing" [ref=f5e5] [cursor=pointer]:
+              - /url: pricing.html
+            - link "About" [ref=f5e6] [cursor=pointer]:
+              - /url: about.html
+            - link "Start free" [ref=f5e7] [cursor=pointer]:
+              - /url: "#"
+        - generic [ref=f5e10]:
+          - generic [ref=f5e11]: Now in open beta
+          - heading "Software that gets out of your way." [level=1] [ref=f5e12]
+          - paragraph [ref=f5e13]: One tool for the whole team, none of the setup tax. Start free, upgrade when it actually pays for itself.
+          - generic [ref=f5e14]:
+            - link "Start free" [ref=f5e15] [cursor=pointer]:
+              - /url: "#"
+            - link "See pricing" [ref=f5e16] [cursor=pointer]:
+              - /url: pricing.html
+        - generic [ref=f5e21]:
+          - generic [ref=f5e22]:
+            - heading "Built around the workflow your team already has" [level=3] [ref=f5e24]
+            - paragraph [ref=f5e25]: Not the one we wish they had. Connect your tools, keep the habits, skip the retraining.
+          - generic [ref=f5e26]:
+            - generic [ref=f5e27]:
+              - heading "Set up in minutes" [level=3] [ref=f5e28]
+              - paragraph [ref=f5e29]: No consultant, no onboarding call.
+            - generic [ref=f5e30]:
+              - heading "Usage-based pricing" [level=3] [ref=f5e31]
+              - paragraph [ref=f5e32]: Same rate whether it is 3 people or 300.
+        - contentinfo [ref=f5e33]: © 2026 Fieldnote — built by a small team that ships
+    - button "Close" [ref=f4e2119] [cursor=pointer]

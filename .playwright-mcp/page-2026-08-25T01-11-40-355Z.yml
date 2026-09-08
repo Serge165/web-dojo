@@ -1,0 +1,547 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - banner:
+          - generic:
+            - generic:
+              - generic: ◤
+              - generic: Web Dojo
+            - textbox:
+              - /placeholder: Untitled project
+              - text: Untitled
+            - generic:
+              - button
+              - button [disabled]
+          - generic:
+            - generic:
+              - button
+              - button
+              - button
+          - generic:
+            - button: Import
+            - button: Export
+            - button: Share
+            - button: Publish
+            - generic:
+              - button
+              - button
+              - button
+              - button
+              - button
+              - button
+              - button
+            - generic: Saved
+            - button: Save
+            - button: Open
+            - button
+        - generic:
+          - generic:
+            - button: File
+          - generic:
+            - button: Edit
+          - generic:
+            - button: Find
+          - generic:
+            - button: View
+          - generic:
+            - button: Help
+        - generic:
+          - generic:
+            - generic: Home
+            - combobox
+          - button: Page
+          - button: SEO
+          - button: Template
+        - generic:
+          - generic:
+            - button: Design
+            - button: Code
+            - button: Split View
+            - button: Outline
+            - button: Preview
+        - generic:
+          - generic:
+            - complementary:
+              - generic:
+                - button: Edit
+                - button: Library
+                - button: Layout
+                - button: Forms
+                - button: Shop
+                - button: Files
+                - button: Snips
+                - button: Saved
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - textbox:
+                        - /placeholder: Search components…
+                  - generic:
+                    - button:
+                      - generic: Navigation
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Navbars
+                          - generic: · 7
+                      - generic:
+                        - generic: Simple Navbar
+                        - generic: Dark Navbar
+                        - generic: Centered Logo Nav
+                        - generic: Mega-menu Nav
+                        - generic: E-commerce Nav + Search
+                        - generic: Transparent Overlay Nav
+                        - generic: App Pill-tabs Nav
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Headers
+                          - generic: · 5
+                      - generic:
+                        - generic: Announcement + Header
+                        - generic: Header + Dropdown
+                        - generic: Minimal Serif Header
+                        - generic: Dark Header + CTA
+                        - generic: Header + Search + Icons
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Footers
+                          - generic: · 7
+                      - generic:
+                        - generic: Minimal Footer
+                        - generic: Newsletter Footer
+                        - generic: Social Footer
+                        - generic: 4-column Light Footer
+                        - generic: Contact Footer
+                        - generic: App Download Footer
+                        - generic: Mega 5-column Footer
+                  - generic:
+                    - button:
+                      - generic: Hero
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Heroes
+                          - generic: · 2
+                      - generic:
+                        - generic: Centered Hero
+                        - generic: Split Hero
+                  - generic:
+                    - button:
+                      - generic: Parallax
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Parallax
+                          - generic: · 5
+                      - generic:
+                        - generic: Parallax Hero · Full Bleed
+                        - generic: Parallax Hero · Split Content
+                        - generic: Parallax Section · Big Quote
+                        - generic: Parallax Section · Stats Band
+                        - generic: Parallax Section · CTA Banner
+                  - generic:
+                    - button:
+                      - generic: Content
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Components
+                          - generic: · 13
+                      - generic:
+                        - generic: Gallery · 3-col Grid
+                        - generic: Gallery · Masonry
+                        - generic: Gallery · Scroll Carousel
+                        - generic: Gallery · Hover Zoom
+                        - generic: Gallery · Polaroid Stack
+                        - generic: Gallery · Featured + Thumbs
+                        - generic: Large Header
+                        - generic: Glass Navbar
+                        - generic: Animated Hero
+                        - generic: Animated Marquee
+                        - generic: Testimonial
+                        - generic: Pricing (3-col)
+                        - generic: Footer
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Text
+                          - generic: · 5
+                      - generic:
+                        - generic: Heading 1
+                        - generic: Heading 2
+                        - generic: Paragraph
+                        - generic: Text Input
+                        - generic: Textarea
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Toolbox
+                          - generic: · 6
+                      - generic:
+                        - generic: Button
+                        - generic: Image
+                        - generic: Divider
+                        - generic: Spacer
+                        - generic: Avatar
+                        - generic: Badge
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Containers
+                          - generic: · 3
+                      - generic:
+                        - generic: Container
+                        - generic: 2 Columns
+                        - generic: 3 Columns
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Testimonials
+                          - generic: · 1
+                      - generic: Testimonial · Carousel
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: FAQ
+                          - generic: · 1
+                      - generic: FAQ · Accordion
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Comments
+                          - generic: · 1
+                      - generic: Comment Thread
+                  - generic:
+                    - button:
+                      - generic: Features
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Sections
+                          - generic: · 2
+                      - generic:
+                        - generic: Feature Grid
+                        - generic: CTA Banner
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Services
+                          - generic: · 1
+                      - generic: Services · Icon Grid
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Pricing
+                          - generic: · 1
+                      - generic: Pricing · Monthly/Yearly Toggle
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Team
+                          - generic: · 1
+                      - generic: Team · Member Cards
+                  - generic:
+                    - button:
+                      - generic: Forms
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Newsletter
+                          - generic: · 1
+                      - generic: Newsletter · Signup + Validation
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Contact
+                          - generic: · 1
+                      - generic: Contact Form · reCAPTCHA
+                  - generic:
+                    - button:
+                      - generic: Media
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Video BG
+                          - generic: · 3
+                      - generic:
+                        - generic: Hero · Video Background
+                        - generic: Section · Video + Text
+                        - generic: Video Banner Strip
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Portfolio
+                          - generic: · 1
+                      - generic: Portfolio · Filterable Gallery
+                  - generic:
+                    - button:
+                      - generic: Layouts
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Layout
+                          - generic: · 1
+                      - generic: Bento Grid
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Timelines
+                          - generic: · 5
+                      - generic:
+                        - generic: Vertical Timeline
+                        - generic: Alternating Timeline
+                        - generic: Horizontal Timeline
+                        - generic: Card Timeline
+                        - generic: Numbered Steps
+                  - generic:
+                    - button:
+                      - generic: Dashboard
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Zenero Content
+                          - generic: · 10
+                      - generic:
+                        - generic: Latest Updates
+                        - generic: Gallery Grid
+                        - generic: Latest from Blog
+                        - generic: Portfolio Timeline
+                        - generic: Testimonials from Comments
+                        - generic: Timeline
+                        - generic: Features Bento
+                        - generic: Esports · Roster (live)
+                        - generic: Esports · Fixtures (live)
+                        - generic: Esports · Org Stats (live)
+                  - generic:
+                    - button:
+                      - generic: Esports
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Esports
+                          - generic: · 6
+                      - generic:
+                        - generic: Esports · Team Roster
+                        - generic: Esports · Tournament Bracket
+                        - generic: Esports · Stream Schedule
+                        - generic: Esports · Player Stat Cards
+                        - generic: Esports · Leaderboard
+                        - generic: Esports · Organization Hub
+                  - generic:
+                    - button:
+                      - generic: Creator
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Creator
+                          - generic: · 1
+                      - generic: Creator · Subscription Tiers
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Social
+                          - generic: · 1
+                      - generic: Social Media Wall (Multi-Column)
+                  - generic:
+                    - button:
+                      - generic: Moldy Oldies
+                    - generic:
+                      - button:
+                        - generic:
+                          - text: Moldy Oldies
+                          - generic: · 21
+                      - generic:
+                        - generic: Retro · Hit Counter
+                        - generic: Retro · Sign My Guestbook
+                        - generic: Retro · Webring Navigator
+                        - generic: Retro · 88×31 Button Row
+                        - generic: Retro · Top 8 Friends
+                        - generic: Retro · eProps & Blogroll
+                        - generic: Retro · Under Construction
+                        - generic: Retro · Rainbow Glitter Divider
+                        - generic: Retro · Now Playing Bar
+                        - generic: Retro · Browser Badges
+                        - generic: Retro · Web 2.0 Glossy Badge
+                        - generic: Retro · Buddy List
+                        - generic: Retro · Shout Box
+                        - generic: Retro · Cursor Sparkle Trail
+                        - generic: Retro · MIDI Player
+                        - generic: Retro · AIM Away Message
+                        - generic: Retro · Poll Widget
+                        - generic: Retro · Pet Adoption Badge
+                        - generic: Retro · Forum Header
+                        - generic: Retro · Forum Post
+                        - generic: Retro · Forum Reply Box
+                  - generic:
+                    - generic: Cards
+                    - generic:
+                      - generic:
+                        - generic: Count
+                        - spinbutton: "3"
+                      - button: Insert card row
+                  - generic:
+                    - generic: Social buttons
+                    - generic:
+                      - button: Open social builder
+                      - paragraph: Share bar or profile links — pick platforms, shape, style & hover animation.
+                  - generic:
+                    - generic: Live stream / community
+                    - generic:
+                      - button: Add Twitch / YouTube / Discord embed
+                      - paragraph: Real, working embeds — no API keys needed.
+                  - generic:
+                    - generic: Fonts
+                    - generic:
+                      - generic:
+                        - generic: Web-safe
+                        - combobox
+                      - generic:
+                        - generic: Google Font
+                        - generic:
+                          - textbox:
+                            - /placeholder: e.g. Inter
+                            - text: Inter
+                          - button: Add
+                - generic:
+                  - generic:
+                    - generic: Preview
+                    - iframe [ref=e1580]:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - heading "Roster" [level=2]
+                            - generic:
+                              - generic:
+                                - generic: Add players in the Zenero dashboard
+                                - generic: No roster yet
+            - button
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Preview · 1 block · desktop
+                    - generic: 1200 × auto
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - heading [level=2]: Roster
+                            - generic:
+                              - generic:
+                                - generic: Add players in the Zenero dashboard
+                                - generic: No roster yet
+                      - generic:
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+                        - button
+          - generic:
+            - button
+            - complementary:
+              - generic:
+                - generic: Inspector
+                - generic: el_3b8ed1dm
+              - generic:
+                - button: Color
+                - button: Tokens
+                - button: Gradient
+                - button: Pattern
+                - button: SVG BG
+                - button: Style
+                - button: Responsive
+                - button: Variants
+                - button: Shape
+                - button: BG
+                - button: Blend
+                - button: Divider
+                - button: Motion
+                - button: Text FX
+                - button: Theme
+                - button: CDN
+                - button: Page
+              - generic:
+                - generic:
+                  - generic:
+                    - button
+                    - generic:
+                      - generic: Hue
+                      - slider: "221"
+                    - generic:
+                      - generic: Alpha
+                      - slider: "100"
+                    - generic:
+                      - generic:
+                        - generic: Hex
+                        - textbox: "#2563eb"
+                    - generic:
+                      - generic:
+                        - generic: R
+                        - spinbutton: "37"
+                      - generic:
+                        - generic: G
+                        - spinbutton: "99"
+                      - generic:
+                        - generic: B
+                        - spinbutton: "235"
+                    - generic:
+                      - generic:
+                        - generic: H
+                        - spinbutton: "221"
+                      - generic:
+                        - generic: S
+                        - spinbutton: "83"
+                      - generic:
+                        - generic: L
+                        - spinbutton: "53"
+                  - generic:
+                    - button: Apply background
+                    - button: Apply text color
+              - generic:
+                - button:
+                  - generic: Layers · 1
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: 1 layers
+                      - button: Effects
+                    - generic:
+                      - generic: "Check all:"
+                      - button [disabled]: Effected
+                      - button: All · 1
+                    - generic:
+                      - generic:
+                        - checkbox
+                        - button
+                        - button: section · Roster
+                        - spinbutton: "0"
+                        - button
+                        - button
+                        - button
+        - contentinfo:
+          - generic:
+            - generic: Home
+            - generic: 1 block
+            - generic: design
+            - generic: desktop
+          - generic:
+            - generic: 100 %
+            - generic: Saved
+      - region "Notifications alt+T"
+  - dialog [ref=e1994]:
+    - heading "Zenero content dashboard" [level=2] [ref=e1995]
+    - generic [ref=e1996]:
+      - heading "Zenero Content Dashboard" [level=2] [ref=e1997]
+      - generic [ref=e1998]:
+        - generic [ref=e1999]:
+          - generic [ref=e2000]: Dashboard password
+          - textbox "Enter dashboard password" [active] [ref=e2001]
+        - button "Unlock" [ref=e2002] [cursor=pointer]
+    - button "Close" [ref=e2003] [cursor=pointer]

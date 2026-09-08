@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { THEMES, themeHeadHtml, buildCustomThemeHead } from "@/lib/themes";
+import { GEM_THEMES, GEM_SWATCHES, gemThemeHeadHtml } from "@/lib/themeCompiler";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,6 +59,7 @@ const MiniThemePreview = ({ t }) => {
 export const ThemeGenerator = ({ onApplyTheme }) => {
   const [tab, setTab] = useState("presets");
   const [preview, setPreview] = useState(null);
+  const [allPages, setAllPages] = useState(true);
   const [custom, setCustom] = useState({
     primary: "#2563eb",
     accent: "#f59e0b",
@@ -73,25 +75,40 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
 
   return (
     <div className="space-y-3" data-testid="theme-generator">
-      <div className="flex bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-0.5 text-xs">
+      <div className="flex bg-[#15130E] border border-[#332D22] rounded-md p-0.5 text-xs">
         <button
           onClick={() => setTab("presets")}
-          className={`flex-1 py-1 rounded ${tab === "presets" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+          className={`flex-1 py-1 rounded ${tab === "presets" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
           data-testid="theme-tab-presets"
         >Aesthetics</button>
         <button
           onClick={() => setTab("custom")}
-          className={`flex-1 py-1 rounded ${tab === "custom" ? "bg-[#1F1F1F] text-white" : "text-gray-400 hover:text-gray-200"}`}
+          className={`flex-1 py-1 rounded ${tab === "custom" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
           data-testid="theme-tab-custom"
         >Custom</button>
+        <button
+          onClick={() => setTab("gems")}
+          className={`flex-1 py-1 rounded ${tab === "gems" ? "bg-[#242019] text-[#F1EDE2]" : "text-[#A79C87] hover:text-[#F1EDE2]"}`}
+          data-testid="theme-tab-gems"
+        >Gems</button>
       </div>
+
+      <label className="flex items-center gap-2 text-[11px] text-[#A79C87] select-none px-0.5" data-testid="theme-scope-toggle">
+        <input
+          type="checkbox"
+          checked={allPages}
+          onChange={(e) => setAllPages(e.target.checked)}
+          className="accent-[#AD8B21] w-3.5 h-3.5"
+        />
+        Apply to all pages
+      </label>
 
       {tab === "presets" && (
         <div className="grid grid-cols-1 gap-2">
           {THEMES.map((t) => (
             <button
               key={t.id}
-              onClick={() => { onApplyTheme({ headHtml: themeHeadHtml(t), canvasBg: t.canvas_bg, googleFont: t.google_font }); toast.success(`Applied ${t.name}`); }}
+              onClick={() => { onApplyTheme({ headHtml: themeHeadHtml(t), canvasBg: t.canvas_bg, googleFont: t.google_font, allPages }); toast.success(allPages ? `Applied ${t.name} to all pages` : `Applied ${t.name}`); }}
               onMouseEnter={(e) => {
                 ensureFont(t.google_font);
                 const r = e.currentTarget.getBoundingClientRect();
@@ -100,17 +117,17 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
                 setPreview({ t, top, left });
               }}
               onMouseLeave={() => setPreview(null)}
-              className="flex items-center gap-3 p-2 rounded border border-[#2B2B2B] bg-[#0D0D0D] hover:border-blue-500/60 text-left"
+              className="flex items-center gap-3 p-2 rounded border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60 text-left"
               data-testid={`theme-preset-${t.id}`}
             >
               <div className="flex -space-x-1">
                 {t.swatch.map((c, i) => (
-                  <div key={i} className="w-6 h-6 rounded-full border-2 border-[#141414]" style={{ background: c }} />
+                  <div key={i} className="w-6 h-6 rounded-full border-2 border-[#1C1A15]" style={{ background: c }} />
                 ))}
               </div>
               <div className="flex-1">
-                <div className="text-xs text-white">{t.name}</div>
-                <div className="text-[10px] text-gray-500 font-mono truncate">{t.google_font} · {t.font.split(",")[0].replace(/['"]/g, "")}</div>
+                <div className="text-xs text-[#F1EDE2]">{t.name}</div>
+                <div className="text-[10px] text-[#948C79] font-mono truncate">{t.google_font} · {t.font.split(",")[0].replace(/['"]/g, "")}</div>
               </div>
             </button>
           ))}
@@ -128,43 +145,64 @@ export const ThemeGenerator = ({ onApplyTheme }) => {
             { key: "border", label: "Border" },
           ].map((row) => (
             <div key={row.key} className="grid grid-cols-[80px_36px_1fr] gap-2 items-center">
-              <label className="text-[10px] uppercase tracking-wider text-gray-500">{row.label}</label>
+              <label className="text-[10px] uppercase tracking-wider text-[#948C79]">{row.label}</label>
               <input
                 type="color"
                 value={custom[row.key]}
                 onChange={(e) => setCustom((c) => ({ ...c, [row.key]: e.target.value }))}
-                className="w-9 h-7 bg-transparent border border-[#2B2B2B] rounded"
+                className="w-9 h-7 bg-transparent border border-[#332D22] rounded"
                 data-testid={`theme-custom-${row.key}`}
               />
               <input
                 value={custom[row.key]}
                 onChange={(e) => setCustom((c) => ({ ...c, [row.key]: e.target.value }))}
-                className="bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1 text-[11px] font-mono text-white outline-none focus:border-blue-500"
+                className="bg-[#15130E] border border-[#332D22] rounded px-2 py-1 text-[11px] font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
               />
             </div>
           ))}
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">Google font family</label>
+            <label className="text-[10px] uppercase tracking-wider text-[#948C79] block mb-1">Google font family</label>
             <input
               value={custom.googleFont}
               onChange={(e) => setCustom((c) => ({ ...c, googleFont: e.target.value, font: `'${e.target.value}', ui-sans-serif, sans-serif` }))}
-              className="w-full bg-[#0D0D0D] border border-[#2B2B2B] rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+              className="w-full bg-[#15130E] border border-[#332D22] rounded px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
               data-testid="theme-custom-font"
             />
           </div>
-          <pre className="text-[10px] font-mono text-gray-300 whitespace-pre-wrap bg-[#0D0D0D] border border-[#2B2B2B] rounded p-2 max-h-40 overflow-auto" data-testid="theme-custom-css">{customCss}</pre>
+          <pre className="text-[10px] font-mono text-[#E4DECE] whitespace-pre-wrap bg-[#15130E] border border-[#332D22] rounded p-2 max-h-40 overflow-auto" data-testid="theme-custom-css">{customCss}</pre>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => { navigator.clipboard.writeText(customCss); toast.success("Theme CSS copied"); }}
-              className="text-xs py-1.5 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] flex items-center justify-center gap-1"
+              className="text-xs py-1.5 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1"
               data-testid="theme-custom-copy"
             ><Copy size={12} /> Copy CSS</button>
             <button
-              onClick={() => { onApplyTheme({ headHtml: customCss, canvasBg: custom.bg, googleFont: custom.googleFont }); toast.success("Theme applied"); }}
-              className="text-xs py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white"
+              onClick={() => { onApplyTheme({ headHtml: customCss, canvasBg: custom.bg, googleFont: custom.googleFont, allPages }); toast.success(allPages ? "Theme applied to all pages" : "Theme applied"); }}
+              className="text-xs py-1.5 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]"
               data-testid="theme-custom-apply"
             >Apply theme</button>
           </div>
+        </div>
+      )}
+
+      {tab === "gems" && (
+        <div className="grid grid-cols-1 gap-2" data-testid="theme-gems">
+          {GEM_THEMES.map((gem) => (
+            <button
+              key={gem}
+              onClick={() => { onApplyTheme({ headHtml: gemThemeHeadHtml(gem), allPages }); toast.success(allPages ? `Applied ${gem} to all pages` : `Applied ${gem}`); }}
+              className="flex items-center gap-3 p-2 rounded border border-[#332D22] bg-[#15130E] hover:border-[#C9A227]/60 text-left"
+              data-testid={`theme-gem-${gem}`}
+            >
+              <div className="flex -space-x-1">
+                {GEM_SWATCHES[gem].map((c, i) => (
+                  <div key={i} className="w-6 h-6 rounded-full border-2 border-[#1C1A15]" style={{ background: c }} />
+                ))}
+              </div>
+              <div className="flex-1 text-xs text-[#F1EDE2] capitalize">{gem}</div>
+            </button>
+          ))}
+          <p className="text-[10px] text-[#948C79] px-0.5">Avalon GEMS — animated gradient backgrounds with shimmering headline text.</p>
         </div>
       )}
 

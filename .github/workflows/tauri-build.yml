@@ -1,0 +1,59 @@
+name: Tauri Desktop Build
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux system deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf build-essential curl wget file libdbus-1-dev pkg-config
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend deps and build sidecar
+        shell: bash
+        run: |
+          cd backend
+          pip install -r requirements.txt pyinstaller
+          pyinstaller --name webdojo-backend --onefile --distpath dist --workpath build/pyinstaller pyinstaller_entry.py
+          # Tauri's externalBin convention requires the binary suffixed
+          # with the target triple (and .exe on Windows) — PyInstaller
+          # itself has no notion of this, so rename/copy after building.
+          TRIPLE=$(rustc -vV | grep host | cut -d' ' -f2)
+          EXT=""
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then EXT=".exe"; fi
+          cp "dist/webdojo-backend${EXT}" "dist/webdojo-backend-${TRIPLE}${EXT}"
+
+      - name: Install frontend deps
+        run: cd frontend && npm install --legacy-peer-deps
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: src-tauri
+          tagName: ${{ github.ref_name }}
+          releaseName: "Web Dojo ${{ github.ref_name }}"
+          releaseDraft: true
+          prerelease: false

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ColorPicker } from "./ColorPicker";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
+import { GRADIENT_PRESETS, GRADIENT_PRESET_CATEGORIES } from "@/lib/gradientPresets";
 
 const defaultStops = [
   { color: "#2563eb", alpha: 1, position: 0 },
@@ -51,16 +52,39 @@ export const GradientMixer = ({ onApply }) => {
   return (
     <div className="space-y-3" data-testid="gradient-mixer">
       <div
-        className="w-full h-20 rounded-md border border-[#2B2B2B]"
+        className="w-full h-20 rounded-md border border-[#332D22]"
         style={{ background: gradient }}
         data-testid="gradient-preview"
       />
+
+      <select
+        value=""
+        onChange={(e) => {
+          const preset = GRADIENT_PRESETS.find((p) => p.id === e.target.value);
+          if (!preset) return;
+          setType(preset.type);
+          setAngle(preset.angle);
+          setStops(preset.stops.map((st) => ({ ...st })));
+          setEditing(0);
+        }}
+        className="w-full bg-[#242019] border border-[#332D22] rounded-md px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
+        data-testid="gradient-preset-select"
+      >
+        <option value="">Start from a preset…</option>
+        {GRADIENT_PRESET_CATEGORIES.map((cat) => (
+          <optgroup key={cat} label={cat}>
+            {GRADIENT_PRESETS.filter((p) => p.category === cat).map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
 
       <div className="grid grid-cols-2 gap-2">
         <select
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="bg-[#0D0D0D] border border-[#2B2B2B] rounded-md px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+          className="bg-[#15130E] border border-[#332D22] rounded-md px-2 py-1.5 text-xs text-[#F1EDE2] outline-none focus:border-[#C9A227]"
           data-testid="gradient-type-select"
         >
           <option value="linear">Linear</option>
@@ -73,7 +97,7 @@ export const GradientMixer = ({ onApply }) => {
             min={0}
             max={360}
             onChange={(e) => setAngle(Number(e.target.value))}
-            className="bg-[#0D0D0D] border border-[#2B2B2B] rounded-md px-2 py-1.5 text-xs font-mono text-white outline-none focus:border-blue-500"
+            className="bg-[#15130E] border border-[#332D22] rounded-md px-2 py-1.5 text-xs font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
             data-testid="gradient-angle-input"
           />
         )}
@@ -83,26 +107,26 @@ export const GradientMixer = ({ onApply }) => {
         {stops.map((s, i) => (
           <div
             key={i}
-            className={`flex items-center gap-2 p-1.5 rounded-md border ${editing === i ? "border-blue-500" : "border-[#2B2B2B]"} bg-[#0D0D0D] cursor-pointer`}
+            className={`flex items-center gap-2 p-1.5 rounded-md border ${editing === i ? "border-[#C9A227]" : "border-[#332D22]"} bg-[#15130E] cursor-pointer`}
             onClick={() => setEditing(i)}
             data-testid={`gradient-stop-${i}`}
           >
-            <div className="w-5 h-5 rounded border border-[#2B2B2B]" style={{ background: hexAlphaToRgba(s.color, s.alpha) }} />
+            <div className="w-5 h-5 rounded border border-[#332D22]" style={{ background: hexAlphaToRgba(s.color, s.alpha) }} />
             <input
               type="number"
               min={0}
               max={100}
               value={s.position}
               onChange={(e) => updateStop(i, { position: Number(e.target.value) })}
-              className="w-14 bg-transparent border border-[#2B2B2B] rounded px-1 py-0.5 text-[11px] font-mono text-white outline-none focus:border-blue-500"
+              className="w-14 bg-transparent border border-[#332D22] rounded px-1 py-0.5 text-[11px] font-mono text-[#F1EDE2] outline-none focus:border-[#C9A227]"
               onClick={(e) => e.stopPropagation()}
             />
-            <span className="text-[10px] text-gray-500">%</span>
-            <span className="ml-auto text-[11px] font-mono text-gray-400">{s.color}</span>
+            <span className="text-[10px] text-[#948C79]">%</span>
+            <span className="ml-auto text-[11px] font-mono text-[#A79C87]">{s.color}</span>
             {stops.length > 2 && (
               <button
                 onClick={(e) => { e.stopPropagation(); removeStop(i); }}
-                className="text-[11px] text-gray-500 hover:text-red-400 px-1"
+                className="text-[11px] text-[#948C79] hover:text-red-400 px-1"
                 data-testid={`gradient-remove-stop-${i}`}
               >×</button>
             )}
@@ -110,13 +134,13 @@ export const GradientMixer = ({ onApply }) => {
         ))}
         <button
           onClick={addStop}
-          className="w-full text-xs py-1.5 rounded-md border border-dashed border-[#2B2B2B] text-gray-400 hover:text-white hover:border-gray-500"
+          className="w-full text-xs py-1.5 rounded-md border border-dashed border-[#332D22] text-[#A79C87] hover:text-[#F1EDE2] hover:border-[#948C79]"
           data-testid="gradient-add-stop"
         >+ Add stop</button>
       </div>
 
-      <div className="pt-2 border-t border-[#2B2B2B]">
-        <div className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Editing stop #{editing + 1}</div>
+      <div className="pt-2 border-t border-[#332D22]">
+        <div className="text-[10px] uppercase tracking-wider text-[#948C79] mb-1">Editing stop #{editing + 1}</div>
         <ColorPicker
           value={stops[editing].color}
           alpha={stops[editing].alpha}
@@ -124,21 +148,21 @@ export const GradientMixer = ({ onApply }) => {
         />
       </div>
 
-      <div className="pt-3 border-t border-[#2B2B2B] space-y-2">
-        <div className="bg-[#0D0D0D] border border-[#2B2B2B] rounded-md p-2 text-[11px] font-mono text-gray-300 break-all" data-testid="gradient-css">
+      <div className="pt-3 border-t border-[#332D22] space-y-2">
+        <div className="bg-[#15130E] border border-[#332D22] rounded-md p-2 text-[11px] font-mono text-[#E4DECE] break-all" data-testid="gradient-css">
           {gradient}
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={copy}
-            className="text-xs py-1.5 rounded-md bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 border border-[#2B2B2B] flex items-center justify-center gap-1"
+            className="text-xs py-1.5 rounded-md bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] border border-[#332D22] flex items-center justify-center gap-1"
             data-testid="gradient-copy-btn"
           >
             <Copy size={12} /> Copy CSS
           </button>
           <button
             onClick={() => onApply && onApply(gradient)}
-            className="text-xs py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white"
+            className="text-xs py-1.5 rounded-md bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]"
             data-testid="gradient-apply-btn"
           >Apply to selection</button>
         </div>

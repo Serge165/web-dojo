@@ -1,0 +1,484 @@
+- generic [active] [ref=f12e1]:
+  - generic [ref=f12e3]:
+    - generic [ref=f12e4]:
+      - banner [ref=f12e5]:
+        - generic [ref=f12e6]:
+          - generic [ref=f12e7]:
+            - generic [ref=f12e8]: ◤
+            - generic [ref=f12e9]: Web Dojo
+          - textbox "Untitled project" [ref=f12e11]: Untitled
+          - generic [ref=f12e13]:
+            - button "Undo (Cmd+Z)" [ref=f12e14] [cursor=pointer]
+            - button "Redo (Cmd+Shift+Z)" [disabled] [ref=f12e18]
+        - generic [ref=f12e23]:
+          - button "desktop" [ref=f12e24] [cursor=pointer]
+          - button "tablet" [ref=f12e27] [cursor=pointer]
+          - button "mobile" [ref=f12e30] [cursor=pointer]
+        - generic [ref=f12e33]:
+          - button "Import" [ref=f12e34] [cursor=pointer]
+          - button "Export" [ref=f12e38] [cursor=pointer]
+          - button "Share" [ref=f12e44] [cursor=pointer]
+          - button "Publish" [ref=f12e48] [cursor=pointer]
+          - generic [ref=f12e53]:
+            - button "Find & Replace (Cmd+F)" [ref=f12e54] [cursor=pointer]
+            - button "Design tokens (colors/fonts/spacing)" [ref=f12e58] [cursor=pointer]
+            - button "Analytics" [ref=f12e65] [cursor=pointer]
+            - button "Project templates" [ref=f12e68] [cursor=pointer]
+            - button "Form submissions inbox" [ref=f12e73] [cursor=pointer]
+            - button "E-commerce dashboard (orders, customers, analytics, insights)" [ref=f12e77] [cursor=pointer]
+          - generic [ref=f12e84]: Unsaved changes
+          - button "Save" [ref=f12e85] [cursor=pointer]
+          - button "Open" [ref=f12e90] [cursor=pointer]
+          - button "Restart onboarding tour" [ref=f12e93] [cursor=pointer]
+      - generic [ref=f12e97]:
+        - button "File" [ref=f12e99] [cursor=pointer]
+        - button "Edit" [ref=f12e101] [cursor=pointer]
+        - button "Find" [ref=f12e103] [cursor=pointer]
+        - button "View" [ref=f12e105] [cursor=pointer]
+        - button "Help" [ref=f12e107] [cursor=pointer]
+      - generic [ref=f12e108]:
+        - generic [ref=f12e109] [cursor=pointer]:
+          - generic "Draft" [ref=f12e110]
+          - generic "Double-click to rename" [ref=f12e111]: Home
+          - combobox "Workflow status" [ref=f12e112]:
+            - option "Draft" [selected]
+            - option "Review"
+            - option "Published"
+        - button "Page" [ref=f12e113] [cursor=pointer]
+        - button "SEO" [ref=f12e115] [cursor=pointer]
+        - button "Template" [ref=f12e119] [cursor=pointer]
+      - generic [ref=f12e123]:
+        - button "Design" [ref=f12e124] [cursor=pointer]
+        - button "Code" [ref=f12e127] [cursor=pointer]
+        - button "Split View" [ref=f12e132] [cursor=pointer]
+        - button "Outline" [ref=f12e135] [cursor=pointer]
+        - button "Preview" [ref=f12e139] [cursor=pointer]
+      - generic [ref=f12e143]:
+        - generic [ref=f12e144]:
+          - complementary [ref=f12e145]:
+            - generic [ref=f12e146]:
+              - button "Edit" [ref=f12e147] [cursor=pointer]
+              - button "Library" [ref=f12e148] [cursor=pointer]
+              - button "Layout" [ref=f12e149] [cursor=pointer]
+              - button "Forms" [ref=f12e150] [cursor=pointer]
+              - button "Shop" [ref=f12e151] [cursor=pointer]
+              - button "Files" [ref=f12e152] [cursor=pointer]
+              - button "Snips" [ref=f12e153] [cursor=pointer]
+              - button "Saved" [ref=f12e154] [cursor=pointer]
+            - generic [ref=f12e155]:
+              - generic [ref=f12e156]:
+                - textbox "Search components…" [ref=f12e162]
+                - generic [ref=f12e163]:
+                  - button "Navigation" [ref=f12e164] [cursor=pointer]
+                  - generic [ref=f12e168]:
+                    - button "Navbars · 7" [ref=f12e169] [cursor=pointer]:
+                      - generic [ref=f12e170]:
+                        - text: Navbars
+                        - generic [ref=f12e171]: · 7
+                    - generic [ref=f12e174]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e175]: Simple Navbar
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e178]: Dark Navbar
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e181]: Centered Logo Nav
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e184]: Mega-menu Nav
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e187]: E-commerce Nav + Search
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e190]: Transparent Overlay Nav
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e193]: App Pill-tabs Nav
+                  - generic [ref=f12e196]:
+                    - button "Headers · 5" [ref=f12e197] [cursor=pointer]:
+                      - generic [ref=f12e198]:
+                        - text: Headers
+                        - generic [ref=f12e199]: · 5
+                    - generic [ref=f12e202]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e203]: Announcement + Header
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e206]: Header + Dropdown
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e209]: Minimal Serif Header
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e212]: Dark Header + CTA
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e215]: Header + Search + Icons
+                  - generic [ref=f12e218]:
+                    - button "Footers · 7" [ref=f12e219] [cursor=pointer]:
+                      - generic [ref=f12e220]:
+                        - text: Footers
+                        - generic [ref=f12e221]: · 7
+                    - generic [ref=f12e224]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e225]: Minimal Footer
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e228]: Newsletter Footer
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e231]: Social Footer
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e234]: 4-column Light Footer
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e237]: Contact Footer
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e240]: App Download Footer
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e243]: Mega 5-column Footer
+                - generic [ref=f12e246]:
+                  - button "Hero" [ref=f12e247] [cursor=pointer]
+                  - generic [ref=f12e251]:
+                    - button "Heroes · 2" [ref=f12e252] [cursor=pointer]:
+                      - generic [ref=f12e253]:
+                        - text: Heroes
+                        - generic [ref=f12e254]: · 2
+                    - generic [ref=f12e257]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e258]: Centered Hero
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e261]: Split Hero
+                - generic [ref=f12e264]:
+                  - button "Parallax" [ref=f12e265] [cursor=pointer]
+                  - generic [ref=f12e269]:
+                    - button "Parallax · 5" [ref=f12e270] [cursor=pointer]:
+                      - generic [ref=f12e271]:
+                        - text: Parallax
+                        - generic [ref=f12e272]: · 5
+                    - generic [ref=f12e275]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e276]: Parallax Hero · Full Bleed
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e279]: Parallax Hero · Split Content
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e282]: Parallax Section · Big Quote
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e285]: Parallax Section · Stats Band
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e288]: Parallax Section · CTA Banner
+                - generic [ref=f12e291]:
+                  - button "Content" [ref=f12e292] [cursor=pointer]
+                  - generic [ref=f12e296]:
+                    - button "Components · 13" [ref=f12e297] [cursor=pointer]:
+                      - generic [ref=f12e298]:
+                        - text: Components
+                        - generic [ref=f12e299]: · 13
+                    - generic [ref=f12e302]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e303]: Gallery · 3-col Grid
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e306]: Gallery · Masonry
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e309]: Gallery · Scroll Carousel
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e312]: Gallery · Hover Zoom
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e315]: Gallery · Polaroid Stack
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e318]: Gallery · Featured + Thumbs
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e321]: Large Header
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e324]: Glass Navbar
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e327]: Animated Hero
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e330]: Animated Marquee
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e333]: Testimonial
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e336]: Pricing (3-col)
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e339]: Footer
+                  - generic [ref=f12e342]:
+                    - button "Text · 5" [ref=f12e343] [cursor=pointer]:
+                      - generic [ref=f12e344]:
+                        - text: Text
+                        - generic [ref=f12e345]: · 5
+                    - generic [ref=f12e348]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e349]: Heading 1
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e352]: Heading 2
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e355]: Paragraph
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e358]: Text Input
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e361]: Textarea
+                  - generic [ref=f12e364]:
+                    - button "Toolbox · 6" [ref=f12e365] [cursor=pointer]:
+                      - generic [ref=f12e366]:
+                        - text: Toolbox
+                        - generic [ref=f12e367]: · 6
+                    - generic [ref=f12e370]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e371]: Button
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e374]: Image
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e377]: Divider
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e380]: Spacer
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e383]: Avatar
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e386]: Badge
+                  - generic [ref=f12e389]:
+                    - button "Containers · 3" [ref=f12e390] [cursor=pointer]:
+                      - generic [ref=f12e391]:
+                        - text: Containers
+                        - generic [ref=f12e392]: · 3
+                    - generic [ref=f12e395]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e396]: Container
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e399]: 2 Columns
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e402]: 3 Columns
+                  - generic [ref=f12e405]:
+                    - button "Testimonials · 1" [ref=f12e406] [cursor=pointer]:
+                      - generic [ref=f12e407]:
+                        - text: Testimonials
+                        - generic [ref=f12e408]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e412]: Testimonial · Carousel
+                  - generic [ref=f12e415]:
+                    - button "FAQ · 1" [ref=f12e416] [cursor=pointer]:
+                      - generic [ref=f12e417]:
+                        - text: FAQ
+                        - generic [ref=f12e418]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e422]: FAQ · Accordion
+                  - generic [ref=f12e425]:
+                    - button "Comments · 1" [ref=f12e426] [cursor=pointer]:
+                      - generic [ref=f12e427]:
+                        - text: Comments
+                        - generic [ref=f12e428]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e432]: Comment Thread
+                - generic [ref=f12e435]:
+                  - button "Features" [ref=f12e436] [cursor=pointer]
+                  - generic [ref=f12e440]:
+                    - button "Sections · 2" [ref=f12e441] [cursor=pointer]:
+                      - generic [ref=f12e442]:
+                        - text: Sections
+                        - generic [ref=f12e443]: · 2
+                    - generic [ref=f12e446]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e447]: Feature Grid
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e450]: CTA Banner
+                  - generic [ref=f12e453]:
+                    - button "Services · 1" [ref=f12e454] [cursor=pointer]:
+                      - generic [ref=f12e455]:
+                        - text: Services
+                        - generic [ref=f12e456]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e460]: Services · Icon Grid
+                  - generic [ref=f12e463]:
+                    - button "Pricing · 1" [ref=f12e464] [cursor=pointer]:
+                      - generic [ref=f12e465]:
+                        - text: Pricing
+                        - generic [ref=f12e466]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e470]: Pricing · Monthly/Yearly Toggle
+                  - generic [ref=f12e473]:
+                    - button "Team · 1" [ref=f12e474] [cursor=pointer]:
+                      - generic [ref=f12e475]:
+                        - text: Team
+                        - generic [ref=f12e476]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e480]: Team · Member Cards
+                - generic [ref=f12e483]:
+                  - button "Forms" [ref=f12e484] [cursor=pointer]
+                  - generic [ref=f12e488]:
+                    - button "Newsletter · 1" [ref=f12e489] [cursor=pointer]:
+                      - generic [ref=f12e490]:
+                        - text: Newsletter
+                        - generic [ref=f12e491]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e495]: Newsletter · Signup + Validation
+                  - generic [ref=f12e498]:
+                    - button "Contact · 1" [ref=f12e499] [cursor=pointer]:
+                      - generic [ref=f12e500]:
+                        - text: Contact
+                        - generic [ref=f12e501]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e505]: Contact Form · reCAPTCHA
+                - generic [ref=f12e508]:
+                  - button "Media" [ref=f12e509] [cursor=pointer]
+                  - generic [ref=f12e513]:
+                    - button "Video BG · 3" [ref=f12e514] [cursor=pointer]:
+                      - generic [ref=f12e515]:
+                        - text: Video BG
+                        - generic [ref=f12e516]: · 3
+                    - generic [ref=f12e519]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e520]: Hero · Video Background
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e523]: Section · Video + Text
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e526]: Video Banner Strip
+                  - generic [ref=f12e529]:
+                    - button "Portfolio · 1" [ref=f12e530] [cursor=pointer]:
+                      - generic [ref=f12e531]:
+                        - text: Portfolio
+                        - generic [ref=f12e532]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e536]: Portfolio · Filterable Gallery
+                - generic [ref=f12e539]:
+                  - button "Layouts" [ref=f12e540] [cursor=pointer]
+                  - generic [ref=f12e544]:
+                    - button "Layout · 1" [ref=f12e545] [cursor=pointer]:
+                      - generic [ref=f12e546]:
+                        - text: Layout
+                        - generic [ref=f12e547]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e551]: Bento Grid
+                  - generic [ref=f12e554]:
+                    - button "Timelines · 5" [ref=f12e555] [cursor=pointer]:
+                      - generic [ref=f12e556]:
+                        - text: Timelines
+                        - generic [ref=f12e557]: · 5
+                    - generic [ref=f12e560]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e561]: Vertical Timeline
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e564]: Alternating Timeline
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e567]: Horizontal Timeline
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e570]: Card Timeline
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e573]: Numbered Steps
+                - generic [ref=f12e576]:
+                  - button "Dashboard" [ref=f12e577] [cursor=pointer]
+                  - generic [ref=f12e581]:
+                    - button "Zenero Content · 10" [ref=f12e582] [cursor=pointer]:
+                      - generic [ref=f12e583]:
+                        - text: Zenero Content
+                        - generic [ref=f12e584]: · 10
+                    - generic [ref=f12e587]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e588]: Latest Updates
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e591]: Gallery Grid
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e594]: Latest from Blog
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e597]: Portfolio Timeline
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e600]: Testimonials from Comments
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e603]: Timeline
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e606]: Features Bento
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e609]: Esports · Roster (live)
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e612]: Esports · Fixtures (live)
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e615]: Esports · Org Stats (live)
+                - generic [ref=f12e618]:
+                  - button "Esports" [ref=f12e619] [cursor=pointer]
+                  - generic [ref=f12e623]:
+                    - button "Esports · 6" [ref=f12e624] [cursor=pointer]:
+                      - generic [ref=f12e625]:
+                        - text: Esports
+                        - generic [ref=f12e626]: · 6
+                    - generic [ref=f12e629]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e630]: Esports · Team Roster
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e633]: Esports · Tournament Bracket
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e636]: Esports · Stream Schedule
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e639]: Esports · Player Stat Cards
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e642]: Esports · Leaderboard
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e645]: Esports · Organization Hub
+                - generic [ref=f12e648]:
+                  - button "Creator" [ref=f12e649] [cursor=pointer]
+                  - generic [ref=f12e653]:
+                    - button "Creator · 1" [ref=f12e654] [cursor=pointer]:
+                      - generic [ref=f12e655]:
+                        - text: Creator
+                        - generic [ref=f12e656]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e660]: Creator · Subscription Tiers
+                  - generic [ref=f12e663]:
+                    - button "Social · 1" [ref=f12e664] [cursor=pointer]:
+                      - generic [ref=f12e665]:
+                        - text: Social
+                        - generic [ref=f12e666]: · 1
+                    - generic "Drag to canvas or double-click to insert" [ref=f12e670]: Social Media Wall (Multi-Column)
+                - generic [ref=f12e673]:
+                  - button "Moldy Oldies" [ref=f12e674] [cursor=pointer]
+                  - generic [ref=f12e678]:
+                    - button "Moldy Oldies · 21" [ref=f12e679] [cursor=pointer]:
+                      - generic [ref=f12e680]:
+                        - text: Moldy Oldies
+                        - generic [ref=f12e681]: · 21
+                    - generic [ref=f12e684]:
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e685]: Retro · Hit Counter
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e688]: Retro · Sign My Guestbook
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e691]: Retro · Webring Navigator
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e694]: Retro · 88×31 Button Row
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e697]: Retro · Top 8 Friends
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e700]: Retro · eProps & Blogroll
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e703]: Retro · Under Construction
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e706]: Retro · Rainbow Glitter Divider
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e709]: Retro · Now Playing Bar
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e712]: Retro · Browser Badges
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e715]: Retro · Web 2.0 Glossy Badge
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e718]: Retro · Buddy List
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e721]: Retro · Shout Box
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e724]: Retro · Cursor Sparkle Trail
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e727]: Retro · MIDI Player
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e730]: Retro · AIM Away Message
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e733]: Retro · Poll Widget
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e736]: Retro · Pet Adoption Badge
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e739]: Retro · Forum Header
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e742]: Retro · Forum Post
+                      - generic "Drag to canvas or double-click to insert" [ref=f12e745]: Retro · Forum Reply Box
+                - generic [ref=f12e748]:
+                  - generic [ref=f12e749]: Cards
+                  - generic [ref=f12e750]:
+                    - generic [ref=f12e751]:
+                      - generic [ref=f12e752]: Count
+                      - spinbutton [ref=f12e753]: "3"
+                    - button "Insert card row" [ref=f12e754] [cursor=pointer]
+                - generic [ref=f12e756]:
+                  - generic [ref=f12e757]: Social buttons
+                  - generic [ref=f12e764]:
+                    - button "Open social builder" [ref=f12e765] [cursor=pointer]
+                    - paragraph [ref=f12e772]: Share bar or profile links — pick platforms, shape, style & hover animation.
+                - generic [ref=f12e773]:
+                  - generic [ref=f12e774]: Live stream / community
+                  - generic [ref=f12e781]:
+                    - button "Add Twitch / YouTube / Discord embed" [ref=f12e782] [cursor=pointer]
+                    - paragraph [ref=f12e789]: Real, working embeds — no API keys needed.
+                - generic [ref=f12e790]:
+                  - generic [ref=f12e791]: Fonts
+                  - generic [ref=f12e794]:
+                    - generic [ref=f12e795]:
+                      - generic [ref=f12e796]: Web-safe
+                      - combobox [ref=f12e797]:
+                        - option "Choose…" [disabled] [selected]
+                        - option "Manrope"
+                        - option "system-ui"
+                        - option "Arial"
+                        - option "Georgia"
+                        - option "'Courier New'"
+                        - option "'Trebuchet MS'"
+                        - option "Verdana"
+                        - option "Tahoma"
+                    - generic [ref=f12e798]:
+                      - generic [ref=f12e799]: Google Font
+                      - generic [ref=f12e800]:
+                        - textbox "e.g. Inter" [ref=f12e801]: Inter
+                        - button "Add" [ref=f12e802] [cursor=pointer]
+              - generic [ref=f12e803]: Hover a block to preview it here
+          - button "Collapse library" [ref=f12e805] [cursor=pointer]
+        - generic [ref=f12e811]:
+          - generic [ref=f12e812]:
+            - generic [ref=f12e813]: Preview · 0 block s · desktop
+            - generic [ref=f12e814]: 1200 × auto
+          - generic [ref=f12e815]: Drag blocks here from the left library, or double-click any block.
+        - generic [ref=f12e819]:
+          - button "Collapse inspector" [ref=f12e820] [cursor=pointer]
+          - complementary [ref=f12e823]:
+            - generic [ref=f12e824]:
+              - generic [ref=f12e825]: Inspector
+              - generic [ref=f12e826]: no selection
+            - generic [ref=f12e827]:
+              - button "Color" [ref=f12e828] [cursor=pointer]
+              - button "Tokens" [ref=f12e829] [cursor=pointer]
+              - button "Gradient" [ref=f12e830] [cursor=pointer]
+              - button "Pattern" [ref=f12e831] [cursor=pointer]
+              - button "SVG BG" [ref=f12e832] [cursor=pointer]
+              - button "Style" [ref=f12e833] [cursor=pointer]
+              - button "Responsive" [ref=f12e834] [cursor=pointer]
+              - button "Variants" [ref=f12e835] [cursor=pointer]
+              - button "Shape" [ref=f12e836] [cursor=pointer]
+              - button "BG" [ref=f12e837] [cursor=pointer]
+              - button "Blend" [ref=f12e838] [cursor=pointer]
+              - button "Divider" [ref=f12e839] [cursor=pointer]
+              - button "Motion" [ref=f12e840] [cursor=pointer]
+              - button "Text FX" [ref=f12e841] [cursor=pointer]
+              - button "Theme" [ref=f12e842] [cursor=pointer]
+              - button "CDN" [ref=f12e843] [cursor=pointer]
+              - button "Page" [ref=f12e844] [cursor=pointer]
+            - generic [ref=f12e846]:
+              - generic [ref=f12e847]:
+                - button [ref=f12e848]
+                - generic [ref=f12e851]:
+                  - generic [ref=f12e852]: Hue
+                  - slider [ref=f12e853]: "221"
+                - generic [ref=f12e854]:
+                  - generic [ref=f12e855]: Alpha
+                  - slider [ref=f12e856]: "100"
+                - generic [ref=f12e858]:
+                  - generic [ref=f12e859]: Hex
+                  - textbox [ref=f12e860]: "#2563eb"
+                - generic [ref=f12e863]:
+                  - generic [ref=f12e864]:
+                    - generic [ref=f12e865]: R
+                    - spinbutton [ref=f12e866]: "37"
+                  - generic [ref=f12e867]:
+                    - generic [ref=f12e868]: G
+                    - spinbutton [ref=f12e869]: "99"
+                  - generic [ref=f12e870]:
+                    - generic [ref=f12e871]: B
+                    - spinbutton [ref=f12e872]: "235"
+                - generic [ref=f12e873]:
+                  - generic [ref=f12e874]:
+                    - generic [ref=f12e875]: H
+                    - spinbutton [ref=f12e876]: "221"
+                  - generic [ref=f12e877]:
+                    - generic [ref=f12e878]: S
+                    - spinbutton [ref=f12e879]: "83"
+                  - generic [ref=f12e880]:
+                    - generic [ref=f12e881]: L
+                    - spinbutton [ref=f12e882]: "53"
+              - generic [ref=f12e883]:
+                - button "Apply background" [disabled] [ref=f12e884]
+                - button "Apply text color" [disabled] [ref=f12e885]
+              - generic [ref=f12e886]: Select an element on the canvas to apply.
+            - generic [ref=f12e887]:
+              - button "Layers · 0" [ref=f12e888] [cursor=pointer]
+              - generic [ref=f12e897]:
+                - generic [ref=f12e898]:
+                  - generic [ref=f12e899]: 0 layers
+                  - button "Effects" [ref=f12e900] [cursor=pointer]
+                - generic [ref=f12e903]: No layers yet — drop a block on the canvas.
+      - contentinfo [ref=f12e905]:
+        - generic [ref=f12e906]:
+          - generic [ref=f12e907]: Home
+          - generic [ref=f12e908]: 0 block s
+          - generic [ref=f12e909]: design
+          - generic [ref=f12e910]: desktop
+        - generic [ref=f12e911]:
+          - generic [ref=f12e912]: 100 %
+          - generic [ref=f12e913]: Unsaved changes
+    - region "Notifications alt+T"
+  - iframe [ref=f12e914]:
+    - generic [ref=f13e2]:
+      - generic [ref=f13e3]: "Compiled with problems:"
+      - button "Dismiss" [ref=f13e4] [cursor=pointer]: ×
+      - generic [ref=f13e6]:
+        - generic [ref=f13e7] [cursor=pointer]: ERROR in ./src/themes/index.js 162:6-34
+        - generic [ref=f13e8]: "Module not found: Error: Can't resolve './themeValidation' in '/run/media/januszeal/Data/Downloads/web-dojo-main/frontend/src/themes'"

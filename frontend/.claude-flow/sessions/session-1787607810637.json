@@ -1,0 +1,15 @@
+{
+  "id": "session-1787607810637",
+  "startedAt": "2026-08-24T21:43:30.637Z",
+  "cwd": "/run/media/januszeal/Data/Downloads/web-dojo-main/frontend",
+  "context": {},
+  "metrics": {
+    "edits": 44,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "restoredAt": "2026-08-29T21:49:44.940Z",
+  "endedAt": "2026-08-29T21:51:56.239Z",
+  "duration": 432505602
+}

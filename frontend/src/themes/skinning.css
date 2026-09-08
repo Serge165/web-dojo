@@ -1,0 +1,93 @@
+/* ============================================================
+   Web Dojo FULL-UI SKINNING LAYER
+   ------------------------------------------------------------
+   The builder chrome uses a hardcoded "Dark" Tailwind palette via
+   arbitrary-value classes (bg-[#1C1A21], text-[#F1EDE2], …). Those
+   classes are remapped here to --wd-* CSS custom properties set by
+   src/themes/index.js applyTheme(), so selecting a theme repaints the
+   ENTIRE interface — left/right sidebars, the inspector, menu bar,
+   top/status bars, canvas chrome, modals and dropdowns — not just the
+   top bar.
+
+   We match each class with an attribute selector ([class~="…"]) so we
+   avoid CSS identifier-escaping for `[`, `]` and `#`, and mix nothing
+   via !important: this file is imported AFTER Tailwind utilities (from
+   src/App.js, after src/App.css and src/index.css), so equal-specificity
+   rules here win in source order. Tailwind still controls layout/size;
+   we only repaint colour.
+
+   Tokens (see src/themes/chrome.js):
+     --wd-primary ----------- accent / primary buttons
+     --wd-secondary ---------- muted brand bar
+     --wd-background --------- deepest app background
+     --wd-surface ------------ raised surfaces / hover fills
+     --wd-panel -------------- sidebar + menu-bar fills
+     --wd-well --------------- app shell bg, inputs, code wells
+     --wd-text / -dim / -secondary / -muted / -faint
+     --wd-border ------------- hairlines & borders
+     --wd-gold / -gold-border eye / publish accents
+     --wd-primary-surface ---- hover tint on primary-adjacent surfaces
+   ============================================================ */
+
+/* ---- Entire app shell & body skin ---- */
+html, body {
+  background: var(--wd-well, #15130E);
+  color: var(--wd-text, #F1EDE2);
+}
+body *::-webkit-scrollbar-track { background: transparent; }
+body *::-webkit-scrollbar-thumb { background: var(--wd-border, #332D22); }
+
+/* ---- Backgrounds (fills) ---- */
+[class~="bg-[#1C1A15]"], [class~="bg-[#1a1a1a]"] { background-color: var(--wd-panel, #1C1A15); }
+[class~="bg-[#15130E]"], [class~="bg-[#14120E]"],
+[class~="bg-[#050505]"], [class~="bg-[#0e0e10]"] { background-color: var(--wd-well, #15130E); }
+[class~="bg-[#242019]"] { background-color: var(--wd-surface, #242019); }
+[class~="bg-[#332D22]"] { background-color: var(--wd-border, #332D22); }
+[class~="bg-[#2A2416]"] { background-color: var(--wd-primary-surface, #2A2416); }
+[class~="bg-[#C9A227]"], [class~="bg-[#AD8B21]"], [class~="bg-[#D9BC55]"],
+[class~="bg-[#E8C34A]"], [class~="bg-[#f2b705]"] { background-color: var(--wd-primary, #C9A227); }
+
+/* ---- Hover fills ---- */
+[class~="hover:bg-[#242019]"]:hover { background-color: var(--wd-border, #332D22); }
+[class~="hover:bg-[#332D22]"]:hover { background-color: var(--wd-primary-surface, #3b3624); }
+[class~="hover:bg-[#C9A227]"]:hover, [class~="hover:bg-[#AD8B21]"]:hover,
+[class~="hover:bg-[#2A2416]"]:hover { background-color: var(--wd-primary, #C9A227); }
+
+/* ---- Text ---- */
+[class~="text-[#F1EDE2]"] { color: var(--wd-text, #F1EDE2); }
+[class~="text-[#E4DECE]"] { color: var(--wd-text-dim, #E4DECE); }
+[class~="text-[#A79C87]"] { color: var(--wd-text-secondary, #A79C87); }
+[class~="text-[#948C79]"] { color: var(--wd-text-muted, #948C79); }
+[class~="text-[#6B6353]"], [class~="text-[#6B6455]"] { color: var(--wd-text-faint, #6B6353); }
+[class~="text-[#C9A227]"], [class~="text-[#D9BC55]"], [class~="text-[#E8C34A]"],
+[class~="text-[#E8A33A]"], [class~="text-[#f2b705]"] { color: var(--wd-gold, #E8C34A); }
+[class~="text-[#15130E]"], [class~="text-[#14120E]"] { color: var(--wd-well, #15130E); }
+
+/* ---- Text hover ---- */
+[class~="hover:text-[#F1EDE2]"]:hover, [class~="hover:text-[#E4DECE]"]:hover,
+[class~="hover:text-[#C9A227]"]:hover { color: var(--wd-text, #F1EDE2); }
+
+/* ---- Borders & rings ---- */
+[class~="border-[#332D22]"] { border-color: var(--wd-border, #332D22); }
+[class~="border-[#242019]"] { border-color: var(--wd-surface, #242019); }
+[class~="border-[#1C1A15]"] { border-color: var(--wd-panel, #1C1A15); }
+[class~="border-[#C9A227]"] { border-color: var(--wd-primary, #C9A227); }
+[class~="border-[#4A3F1E]"] { border-color: var(--wd-gold-border, #4A3F1E); }
+[class~="border-[#948C79]"] { border-color: var(--wd-text-muted, #948C79); }
+[class~="border-l-[#D9BC55]"], [class~="border-t-[#D9BC55]"],
+[class~="border-l-[#C9A227]"] { border-color: var(--wd-gold, #E8C34A); }
+
+/* Border hover */
+[class~="hover:border-[#332D22]"]:hover { border-color: var(--wd-border, #332D22); }
+[class~="hover:border-[#C9A227]"]:hover, [class~="hover:border-[#C9A227]/50"]:hover {
+  border-color: var(--wd-primary, #C9A227);
+}
+[class~="hover:border-[#4A3F1E]"]:hover { border-color: var(--wd-gold-border, #4A3F1E); }
+
+/* Focus rings / outlines */
+[class~="ring-[#C9A227]"] { --tw-ring-color: var(--wd-primary, #C9A227); }
+[class~="outline-[#C9A227]"] { outline-color: var(--wd-primary, #C9A227); }
+[class~="focus:border-[#C9A227]"]:focus { border-color: var(--wd-primary, #C9A227); }
+
+/* Brand/social accent fills stay untouched (Twitch, Discord, PayPal, error
+   red) — we deliberately do NOT map bg-[#6441a5]/[#5865F2]/[#0070ba]/[#ff0000]. */

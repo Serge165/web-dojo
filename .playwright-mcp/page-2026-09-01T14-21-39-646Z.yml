@@ -1,0 +1,18 @@
+- generic [active] [ref=e1]:
+  - heading "video-hero" [level=2] [ref=e2]
+  - generic [ref=e6]:
+    - heading "Motion tells your story" [level=1] [ref=e7]
+    - paragraph [ref=e8]: A cinematic hero with a looping background video. Muted, auto-playing, mobile-friendly.
+    - link "Watch the film" [ref=e9] [cursor=pointer]:
+      - /url: "#"
+  - heading "video-banner" [level=2] [ref=e10]
+  - generic [ref=e14]:
+    - heading "Adventure awaits" [level=2] [ref=e15]
+    - paragraph [ref=e16]: A compact full-bleed video banner for section breaks.
+  - heading "video-section" [level=2] [ref=e17]
+  - generic [ref=e22]:
+    - generic [ref=e23]: See it in action
+    - heading "Built to move" [level=2] [ref=e24]
+    - paragraph [ref=e25]: Pair looping product footage with crisp copy. The video autoplays muted and loops seamlessly on every device.
+    - link "Learn more" [ref=e26] [cursor=pointer]:
+      - /url: "#"

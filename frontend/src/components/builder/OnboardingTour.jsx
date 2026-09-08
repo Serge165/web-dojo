@@ -79,7 +79,7 @@ const Spotlight = ({ selector }) => {
         left: rect.left,
         width: rect.width,
         height: rect.height,
-        boxShadow: "0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 2px #3b82f6, 0 0 40px rgba(59,130,246,0.6)",
+        boxShadow: "0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 2px #C9A227, 0 0 40px rgba(201,162,39,0.6)",
       }}
     />
   );
@@ -104,26 +104,26 @@ const Popover = ({ step, index, total, onNext, onBack, onSkip }) => {
 
   return (
     <div
-      className="absolute w-[320px] rounded-lg border border-[#2B2B2B] bg-[#141414] shadow-2xl p-4 text-sm text-gray-100"
+      className="absolute w-[320px] rounded-lg border border-[#332D22] bg-[#1C1A15] shadow-2xl p-4 text-sm text-[#F1EDE2]"
       style={pos}
       data-testid="tour-popover"
     >
       <div className="flex items-center justify-between mb-1.5">
-        <div className="text-[10px] uppercase tracking-wider text-blue-400">Tour · {index + 1} / {total}</div>
-        <button onClick={onSkip} className="text-[11px] text-gray-400 hover:text-white" data-testid="tour-skip">Skip</button>
+        <div className="text-[10px] uppercase tracking-wider text-[#D9BC55]">Tour · {index + 1} / {total}</div>
+        <button onClick={onSkip} className="text-[11px] text-[#A79C87] hover:text-[#F1EDE2]" data-testid="tour-skip">Skip</button>
       </div>
       <div className="text-base font-semibold mb-1">{step.title}</div>
-      <p className="text-xs text-gray-400 leading-relaxed">{step.body}</p>
+      <p className="text-xs text-[#A79C87] leading-relaxed">{step.body}</p>
       <div className="flex items-center justify-between mt-3">
         <button
           onClick={onBack}
           disabled={index === 0}
-          className="text-xs px-2.5 py-1 rounded bg-[#1F1F1F] hover:bg-[#2B2B2B] text-gray-200 disabled:opacity-30"
+          className="text-xs px-2.5 py-1 rounded bg-[#242019] hover:bg-[#332D22] text-[#F1EDE2] disabled:opacity-30"
           data-testid="tour-back"
         >Back</button>
         <button
           onClick={onNext}
-          className="text-xs px-3 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white"
+          className="text-xs px-3 py-1 rounded bg-[#AD8B21] hover:bg-[#C9A227] text-[#F1EDE2]"
           data-testid="tour-next"
         >{index === total - 1 ? "Finish" : "Next"}</button>
       </div>
